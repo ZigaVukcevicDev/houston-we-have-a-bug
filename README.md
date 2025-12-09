@@ -6,9 +6,7 @@ A Chrome extension for quick bug capture with annotation and context.
 
 - 📘 **TypeScript** - Fully typed extension code
 - 🎨 **SCSS** - Advanced styling with variables and nesting
-- 📦 **Modern build setup** - Automated compilation
-- 🔄 **Message passing** - Communication between components
-- 💾 **Chrome storage** - Persistent data storage
+- 📦 **Modern build setup** - Automated compilation with Prettier formatting
 
 ## Project structure
 
@@ -17,10 +15,12 @@ A Chrome extension for quick bug capture with annotation and context.
 │   ├── popup.html        # Popup UI
 │   ├── popup.ts          # Popup script (TypeScript)
 │   ├── background.ts     # Service worker (TypeScript)
-│   ├── content.ts        # Content script (TypeScript)
 │   ├── images/           # Extension icons and images
-│   └── styles/
-│       └── popup.scss    # Popup styles (SCSS)
+│   ├── styles/
+│   │   └── popup.scss    # Popup styles (SCSS)
+│   └── utils/
+│       ├── get-chrome-version.ts
+│       └── get-os.ts
 ├── manifest.json         # Extension configuration
 ├── tsconfig.json         # TypeScript configuration
 ├── package.json          # Dependencies and scripts
