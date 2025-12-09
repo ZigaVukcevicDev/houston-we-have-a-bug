@@ -6,7 +6,7 @@
 2. [x] Date and time - When the bug was captured
 3. [ ] Page title - Document title
 4. [ ] Device pixel ratio - For retina/scaling issues
-5. [ ] Screen resolution - Full screen size (not just viewport)
+5. [x] Display resolution - Full screen size (not just viewport)
 
 ## Medium value
 
