@@ -3,13 +3,13 @@
   "version": "0.0.1",
   "description": "A Chrome extension for quick bug capture with annotation and context.",
   "scripts": {
-    "build": "tsc && sass src/styles:styles",
-    "watch": "concurrently \"tsc --watch\" \"sass --watch src/styles:styles\"",
-    "clean": "rm -rf dist styles"
+    "build": "tsc --outDir dist && sass src/styles:dist/styles && cp src/popup.html manifest.json dist/ && cp -r src/images dist/",
+    "dev": "npm run build && concurrently \"tsc --watch --outDir dist\" \"sass --watch src/styles:dist/styles\" \"chokidar 'src/popup.html' 'manifest.json' 'src/images/**' -c 'cp src/popup.html manifest.json dist/ && cp -r src/images dist/'\""
   },
   "devDependencies": {
     "@types/chrome": "^0.0.260",
     "@types/node": "^20.10.0",
+    "chokidar-cli": "^3.0.0",
     "concurrently": "^8.2.2",
     "sass": "^1.69.5",
     "typescript": "^5.3.3"
