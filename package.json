@@ -5,13 +5,15 @@
   "scripts": {
     "build": "tsc --outDir dist && sass src/styles:dist/styles && cp src/popup.html manifest.json dist/ && cp -r src/images dist/",
     "dev": "npm run build && concurrently \"tsc --watch --outDir dist\" \"sass --watch src/styles:dist/styles\" \"chokidar 'src/popup.html' 'manifest.json' 'src/images/**' -c 'npm run copy-files'\"",
-    "copy-files": "cp src/popup.html manifest.json dist/ && cp -r src/images dist/"
+    "copy-files": "cp src/popup.html manifest.json dist/ && cp -r src/images dist/",
+    "format": "prettier --write \"src/**/*.ts\""
   },
   "devDependencies": {
     "@types/chrome": "^0.0.260",
     "@types/node": "^20.10.0",
     "chokidar-cli": "^3.0.0",
     "concurrently": "^8.2.2",
+    "prettier": "^3.7.4",
     "sass": "^1.69.5",
     "typescript": "^5.3.3"
   }
