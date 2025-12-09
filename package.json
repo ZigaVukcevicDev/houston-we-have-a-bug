@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "description": "A Chrome extension for quick bug capture with annotation and context.",
   "scripts": {
-    "build": "tsc --outDir dist && sass src/styles:dist/styles && cp src/popup.html manifest.json dist/ && cp -r src/images dist/",
-    "dev": "npm run build && concurrently \"tsc --watch --outDir dist\" \"sass --watch src/styles:dist/styles\" \"chokidar 'src/popup.html' 'manifest.json' 'src/images/**' -c 'npm run copy-files'\"",
+    "build": "esbuild src/popup.ts src/background.ts --bundle --outdir=dist --format=iife && sass src/styles:dist/styles && npm run copy-files",
+    "dev": "npm run build && concurrently \"esbuild src/popup.ts src/background.ts --bundle --outdir=dist --format=iife --watch\" \"sass --watch src/styles:dist/styles\" \"chokidar 'src/popup.html' 'manifest.json' 'src/images/**' -c 'npm run copy-files'\"",
     "copy-files": "cp src/popup.html manifest.json dist/ && cp -r src/images dist/",
     "format": "prettier --write \"src/**/*.ts\""
   },
@@ -13,6 +13,7 @@
     "@types/node": "^20.10.0",
     "chokidar-cli": "^3.0.0",
     "concurrently": "^8.2.2",
+    "esbuild": "^0.27.1",
     "prettier": "^3.7.4",
     "sass": "^1.69.5",
     "typescript": "^5.3.3"
