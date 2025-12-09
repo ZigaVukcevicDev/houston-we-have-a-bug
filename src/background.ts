@@ -5,7 +5,7 @@ interface MessageRequest extends Record<string, any> {
 }
 
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("Extension installed");
+  console.log('Extension installed');
   chrome.storage.local.set({ count: 0 });
 });
 
@@ -15,9 +15,9 @@ chrome.runtime.onMessage.addListener(
     sender: chrome.runtime.MessageSender,
     sendResponse: (response: any) => void
   ) => {
-    if (request.type === "ACTION") {
+    if (request.type === 'ACTION') {
       // Update counter in storage
-      chrome.storage.local.get(["count"], (result: any) => {
+      chrome.storage.local.get(['count'], (result: any) => {
         const newCount = (result.count || 0) + 1;
         chrome.storage.local.set({ count: newCount });
         sendResponse({ success: true, count: newCount });
@@ -33,8 +33,8 @@ chrome.tabs.onUpdated.addListener(
     changeInfo: chrome.tabs.TabChangeInfo,
     tab: chrome.tabs.Tab
   ) => {
-    if (changeInfo.status === "complete") {
-      console.log("Page loaded:", tab.url);
+    if (changeInfo.status === 'complete') {
+      console.log('Page loaded:', tab.url);
     }
   }
 );
