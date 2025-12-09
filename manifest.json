@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Houston, we have a bug",
+  "version": "0.0.1",
+  "description": "A Chrome extension for quick bug capture with annotation and context.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["dist/content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "My Extension"
+  },
+  "background": {
+    "service_worker": "dist/background.js"
+  },
+  "icons": {
+    "16": "images/icon-16.png",
+    "48": "images/icon-48.png",
+    "128": "images/icon-128.png"
+  }
+}
