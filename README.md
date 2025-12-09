@@ -14,12 +14,13 @@ A Chrome extension for quick bug capture with annotation and context.
 
 ```
 ├── src/
+│   ├── popup.html        # Popup UI
 │   ├── popup.ts          # Popup script (TypeScript)
 │   ├── background.ts     # Service worker (TypeScript)
 │   ├── content.ts        # Content script (TypeScript)
+│   ├── images/           # Extension icons and images
 │   └── styles/
 │       └── popup.scss    # Popup styles (SCSS)
-├── popup.html            # Popup UI
 ├── manifest.json         # Extension configuration
 ├── tsconfig.json         # TypeScript configuration
 ├── package.json          # Dependencies and scripts
@@ -46,7 +47,7 @@ This compiles TypeScript to JavaScript and SCSS to CSS.
 
 1. Open Chrome and go to `chrome://extensions/`
 2. Enable **Developer mode** (top right)
-3. Click **Load unpacked** and select this folder
+3. Click **Load unpacked** and select `dist` folder
 4. The extension will appear in your Chrome toolbar
 
 ### 4. Development mode
@@ -54,7 +55,7 @@ This compiles TypeScript to JavaScript and SCSS to CSS.
 For continuous development with auto-compilation:
 
 ```bash
-npm run watch
+npm run dev
 ```
 
-This watches for changes and automatically rebuilds TypeScript and SCSS.
+This builds once, then watches for changes and automatically rebuilds TypeScript, SCSS, and copies static files.
