@@ -1,4 +1,4 @@
-# Houston, we have a problem
+# Houston, we have a bug
 
 A Chrome extension for quick bug capture with annotation and context.
 
