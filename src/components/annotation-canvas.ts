@@ -1,5 +1,6 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
+import styles from '../styles/annotation-canvas.scss';
 
 interface TextAnnotation {
   x: number;
@@ -11,25 +12,7 @@ interface TextAnnotation {
 
 @customElement('annotation-canvas')
 export class AnnotationCanvas extends LitElement {
-  static styles = css`
-    :host {
-      display: block;
-      flex: 1;
-      overflow: auto;
-      background: #e0e0e0;
-      border-radius: 4px;
-      padding: 8px;
-      max-height: 400px;
-    }
-
-    canvas {
-      display: block;
-      max-width: 100%;
-      height: auto;
-      cursor: text;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    }
-  `;
+  static styles = unsafeCSS(styles);
 
   @property({ type: String })
   dataUrl: string = '';

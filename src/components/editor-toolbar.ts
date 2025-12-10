@@ -1,75 +1,10 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import styles from '../styles/editor-toolbar.scss';
 
 @customElement('editor-toolbar')
 export class EditorToolbar extends LitElement {
-  static styles = css`
-    :host {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      margin-bottom: 12px;
-      padding: 8px;
-      background: white;
-      border-radius: 4px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .tool-btn {
-      width: 36px;
-      height: 36px;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 16px;
-      border-radius: 4px;
-      background: #4285f4;
-      color: white;
-      border: none;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    .tool-btn:hover {
-      background: #357ae8;
-    }
-
-    input[type='color'] {
-      width: 36px;
-      height: 36px;
-      padding: 2px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      cursor: pointer;
-      background: white;
-    }
-
-    input[type='color']::-webkit-color-swatch-wrapper {
-      padding: 2px;
-    }
-
-    input[type='color']::-webkit-color-swatch {
-      border: none;
-      border-radius: 2px;
-    }
-
-    select {
-      height: 36px;
-      padding: 0 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      background: white;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    select:focus {
-      outline: none;
-      border-color: #4285f4;
-    }
-  `;
+  static styles = unsafeCSS(styles);
 
   @property({ type: String })
   color: string = '#ff0000';

@@ -1,0 +1,41 @@
+@use '../styles/variables' as *;
+@use '../styles/mixins' as *;
+
+:host {
+  display: flex;
+  gap: $spacing-sm;
+  align-items: center;
+  margin-bottom: $spacing-md;
+  padding: $spacing-sm;
+  background: $bg-white;
+  border-radius: $border-radius;
+  box-shadow: $shadow-sm;
+}
+
+.tool-btn {
+  @include button-base;
+  @include button-icon;
+}
+
+input[type='color'] {
+  width: 36px;
+  height: 36px;
+  padding: 2px;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  cursor: pointer;
+  background: $bg-white;
+
+  &::-webkit-color-swatch-wrapper {
+    padding: 2px;
+  }
+
+  &::-webkit-color-swatch {
+    border: none;
+    border-radius: 2px;
+  }
+}
+
+select {
+  @include input-base;
+}

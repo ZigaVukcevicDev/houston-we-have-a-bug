@@ -1,0 +1,19 @@
+@use '../styles/variables' as *;
+
+:host {
+  display: block;
+  flex: 1;
+  overflow: auto;
+  background: $bg-canvas;
+  border-radius: $border-radius;
+  padding: $spacing-sm;
+  max-height: 400px;
+}
+
+canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  cursor: text;
+  box-shadow: $shadow-md;
+}

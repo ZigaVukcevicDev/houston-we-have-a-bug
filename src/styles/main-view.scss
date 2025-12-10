@@ -1,0 +1,32 @@
+@use '../styles/variables' as *;
+@use '../styles/mixins' as *;
+
+:host {
+  display: block;
+  padding: $spacing-lg;
+}
+
+h1 {
+  font-size: $font-size-xl;
+  margin: 0 0 $spacing-lg 0;
+  color: $text-primary;
+}
+
+h2 {
+  font-size: $font-size-base;
+  margin: $spacing-lg 0 $spacing-sm 0;
+  color: $text-primary;
+}
+
+button {
+  @include button-base;
+  width: 100%;
+  margin: 5px 0;
+}
+
+.info-item {
+  margin-top: $spacing-md;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  word-break: break-all;
+}

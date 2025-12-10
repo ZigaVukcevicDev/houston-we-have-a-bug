@@ -1,81 +1,13 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import './editor-toolbar';
 import './annotation-canvas';
 import type { AnnotationCanvas } from './annotation-canvas';
+import styles from '../styles/screenshot-editor.scss';
 
 @customElement('screenshot-editor')
 export class ScreenshotEditor extends LitElement {
-  static styles = css`
-    :host {
-      display: flex;
-      flex-direction: column;
-      padding: 16px;
-      max-height: 600px;
-      overflow: hidden;
-    }
-
-    .editor-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .editor-header h2 {
-      font-size: 16px;
-      color: #333;
-      margin: 0;
-    }
-
-    .close-btn {
-      width: auto;
-      padding: 4px 10px;
-      font-size: 20px;
-      line-height: 1;
-      background: transparent;
-      color: #666;
-      border: none;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-
-    .close-btn:hover {
-      background: rgba(0, 0, 0, 0.1);
-      color: #333;
-    }
-
-    .editor-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .editor-actions button {
-      flex: 1;
-      padding: 10px 16px;
-      background: #4285f4;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    .editor-actions button:hover {
-      background: #357ae8;
-    }
-
-    .secondary-btn {
-      background: #757575 !important;
-    }
-
-    .secondary-btn:hover {
-      background: #616161 !important;
-    }
-  `;
+  static styles = unsafeCSS(styles);
 
   @property({ type: String })
   dataUrl: string = '';

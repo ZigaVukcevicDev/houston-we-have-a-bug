@@ -1,25 +1,14 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import './components/main-view';
 import './components/screenshot-editor';
+import styles from './styles/app.scss';
 
 type View = 'main' | 'editor';
 
 @customElement('houston-we-have-a-bug')
 export class HoustonWeHaveABug extends LitElement {
-  static styles = css`
-    :host {
-      display: block;
-      width: 300px;
-      font-family:
-        -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f5f5f5;
-    }
-
-    :host(.editor-view) {
-      width: 500px;
-    }
-  `;
+  static styles = unsafeCSS(styles);
 
   @state()
   private currentView: View = 'main';

@@ -1,0 +1,55 @@
+@use '../styles/variables' as *;
+@use '../styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-lg;
+  max-height: 600px;
+  overflow: hidden;
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+
+  h2 {
+    font-size: $font-size-lg;
+    color: $text-primary;
+    margin: 0;
+  }
+}
+
+.close-btn {
+  width: auto;
+  padding: $spacing-xs 10px;
+  font-size: 20px;
+  line-height: 1;
+  background: transparent;
+  color: $text-secondary;
+  border: none;
+  cursor: pointer;
+  border-radius: $border-radius;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: $text-primary;
+  }
+}
+
+.editor-actions {
+  display: flex;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
+
+  button {
+    @include button-base;
+    flex: 1;
+  }
+
+  .secondary-btn {
+    @include button-secondary;
+  }
+}

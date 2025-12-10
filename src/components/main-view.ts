@@ -1,4 +1,4 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { getChromeVersion } from '../utils/get-chrome-version';
 import { getDateAndTime } from '../utils/get-date-and-time';
@@ -6,6 +6,7 @@ import { getDevicePixelRatio } from '../utils/get-device-pixel-ratio';
 import { getDisplayResolution } from '../utils/get-display-resolution';
 import { getOS } from '../utils/get-os';
 import { getVisibleArea } from '../utils/get-visible-area';
+import styles from '../styles/main-view.scss';
 
 interface SystemInfo {
   dateAndTime: string;
@@ -19,58 +20,7 @@ interface SystemInfo {
 
 @customElement('main-view')
 export class MainView extends LitElement {
-  static styles = css`
-    :host {
-      display: block;
-      padding: 16px;
-    }
-
-    h1 {
-      font-size: 18px;
-      margin: 0 0 16px 0;
-      color: #333;
-    }
-
-    h2 {
-      font-size: 14px;
-      margin: 16px 0 8px 0;
-      color: #333;
-    }
-
-    button {
-      width: 100%;
-      padding: 10px 16px;
-      background: #4285f4;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.3s;
-      margin: 5px 0;
-    }
-
-    button:hover {
-      background: #357ae8;
-    }
-
-    button:active {
-      background: #2d5bc7;
-    }
-
-    button:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
-
-    .info-item {
-      margin-top: 12px;
-      font-size: 12px;
-      color: #666;
-      word-break: break-all;
-    }
-  `;
+  static styles = unsafeCSS(styles);
 
   @state()
   private systemInfo: SystemInfo | null = null;

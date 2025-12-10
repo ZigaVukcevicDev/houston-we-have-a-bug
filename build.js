@@ -1,4 +1,5 @@
 const esbuild = require('esbuild');
+const { sassPlugin } = require('esbuild-sass-plugin');
 
 const isWatch = process.argv.includes('--watch');
 
@@ -8,6 +9,11 @@ const buildOptions = {
   outfile: 'dist/popup.js',
   format: 'iife',
   logLevel: 'info',
+  plugins: [
+    sassPlugin({
+      type: 'css-text',
+    }),
+  ],
 };
 
 if (isWatch) {

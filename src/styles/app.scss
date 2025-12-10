@@ -1,0 +1,12 @@
+@use '../styles/variables' as *;
+
+:host {
+  display: block;
+  width: 300px;
+  font-family: $font-family;
+  background: $bg-light;
+}
+
+:host(.editor-view) {
+  width: 500px;
+}
