@@ -10,8 +10,8 @@ interface TextAnnotation {
   fontSize: number;
 }
 
-@customElement('annotation-canvas')
-export class AnnotationCanvas extends LitElement {
+@customElement('hb-annotation-canvas')
+export class HBAnnotationCanvas extends LitElement {
   static styles = unsafeCSS(styles);
 
   @property({ type: String })
@@ -211,6 +211,6 @@ export class AnnotationCanvas extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'annotation-canvas': AnnotationCanvas;
+    'hb-annotation-canvas': HBAnnotationCanvas;
   }
 }

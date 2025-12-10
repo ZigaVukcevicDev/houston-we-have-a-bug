@@ -2,7 +2,7 @@ import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import '../../components/hb-toolbar/hb-toolbar';
 import '../../components/hb-annotation-canvas/hb-annotation-canvas';
-import type { AnnotationCanvas } from '../../components/annotation-canvas/annotation-canvas';
+import type { HBAnnotationCanvas } from '../../components/hb-annotation-canvas/hb-annotation-canvas';
 import styles from './hb-annotation.scss';
 
 @customElement('hb-annotation')
@@ -69,11 +69,11 @@ export class HBAnnotation extends LitElement {
       </div>
 
       <div class="canvas-container">
-        <annotation-canvas
+        <hb-annotation-canvas
           .dataUrl=${this.dataUrl}
           .color=${this.color}
           .fontSize=${this.fontSize}
-        ></annotation-canvas>
+        ></hb-annotation-canvas>
       </div>
     `;
   }
@@ -89,14 +89,14 @@ export class HBAnnotation extends LitElement {
   private _handleClear() {
     const canvas = this.shadowRoot?.querySelector(
       'hb-annotation-canvas'
-    ) as AnnotationCanvas;
+    ) as HBAnnotationCanvas;
     canvas?.clearAnnotations();
   }
 
   private _handleDownload() {
     const canvas = this.shadowRoot?.querySelector(
       'hb-annotation-canvas'
-    ) as AnnotationCanvas;
+    ) as HBAnnotationCanvas;
     const now = new Date();
     const date = now.toISOString().slice(0, 10);
     const time = now.toTimeString().slice(0, 8).replace(/:/g, '-');
