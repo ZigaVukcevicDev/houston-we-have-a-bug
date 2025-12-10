@@ -7,9 +7,8 @@
   align-items: center;
   margin-bottom: $spacing-md;
   padding: $spacing-sm;
-  background: $bg-white;
+  background: $bg-secondary;
   border-radius: $border-radius;
-  box-shadow: $shadow-sm;
 }
 
 .tool-btn {
@@ -24,7 +23,7 @@ input[type='color'] {
   border: 1px solid $border-color;
   border-radius: $border-radius;
   cursor: pointer;
-  background: $bg-white;
+  background: $bg-header;
 
   &::-webkit-color-swatch-wrapper {
     padding: 2px;

@@ -1,0 +1,79 @@
+@use 'sass:color';
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-family: $font-family;
+  background: $bg-dark;
+  color: $text-primary;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md $spacing-lg;
+  background: $bg-header;
+  border-bottom: 1px solid $border-color;
+}
+
+h1 {
+  font-size: $font-size-lg;
+  font-weight: 600;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: $spacing-sm;
+
+  button {
+    @include button-base;
+  }
+
+  .secondary-btn {
+    background: $bg-secondary;
+    color: $text-primary;
+
+    &:hover {
+      background: color.adjust($bg-secondary, $lightness: 10%);
+    }
+  }
+}
+
+.toolbar-container {
+  padding: $spacing-sm $spacing-lg;
+  background: $bg-header;
+  border-bottom: 1px solid $border-color;
+}
+
+.canvas-container {
+  flex: 1;
+  overflow: auto;
+  padding: $spacing-lg;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+annotation-canvas {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.no-screenshot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: $text-secondary;
+
+  p {
+    margin-top: $spacing-md;
+    font-size: $font-size-base;
+  }
+}

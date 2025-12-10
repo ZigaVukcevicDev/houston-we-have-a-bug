@@ -1,28 +1,31 @@
 // Colors
-$primary-color: #4285f4;
-$primary-hover: #357ae8;
-$primary-active: #2d5bc7;
+$primary-color: #e94560;
+$primary-hover: #d63d56;
+$primary-active: #c7354d;
 
-$secondary-color: #757575;
-$secondary-hover: #616161;
+$secondary-color: #0f3460;
+$secondary-hover: #1a4a7a;
 
-$text-primary: #333;
-$text-secondary: #666;
+$text-primary: #e5e5e5;
+$text-secondary: #888;
 
-$bg-light: #f5f5f5;
-$bg-white: #fff;
-$bg-canvas: #e0e0e0;
+$bg-dark: #1a1a2e;
+$bg-header: #16213e;
+$bg-secondary: #0f3460;
+$bg-canvas: #2a2a4e;
 
-$border-color: #ddd;
+$border-color: #0f3460;
 
 // Spacing
 $spacing-xs: 4px;
 $spacing-sm: 8px;
 $spacing-md: 12px;
 $spacing-lg: 16px;
+$spacing-xl: 24px;
 
 // Border radius
 $border-radius: 4px;
+$border-radius-md: 6px;
 
 // Transitions
 $transition-speed: 0.3s;
@@ -35,5 +38,5 @@ $font-size-lg: 16px;
 $font-size-xl: 18px;
 
 // Shadows
-$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-$shadow-md: 0 2px 8px rgba(0, 0, 0, 0.2);
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+$shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);

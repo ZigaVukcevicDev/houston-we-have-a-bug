@@ -118,13 +118,10 @@ export class MainView extends LitElement {
         format: 'png',
       });
 
-      this.dispatchEvent(
-        new CustomEvent('capture-screenshot', {
-          detail: dataUrl,
-          bubbles: true,
-          composed: true,
-        })
-      );
+      // Store screenshot in background service worker and open editor in new tab
+      await chrome.runtime.sendMessage({ type: 'STORE_SCREENSHOT', dataUrl });
+      chrome.tabs.create({ url: chrome.runtime.getURL('editor.html') });
+      window.close(); // Close the popup
     } catch (error) {
       console.error('Failed to capture screenshot:', error);
     }

@@ -4,8 +4,8 @@
   "description": "A Chrome extension for quick bug capture with annotation and context.",
   "scripts": {
     "build": "node build.js && npm run copy-files",
-    "dev": "npm run build && concurrently \"node build.js --watch\" \"chokidar 'src/popup.html' 'manifest.json' 'src/images/**' -c 'npm run copy-files'\"",
-    "copy-files": "cp src/popup.html manifest.json dist/ && cp -r src/images dist/",
+    "dev": "npm run build && concurrently \"node build.js --watch\" \"chokidar 'src/popup.html' 'src/editor.html' 'manifest.json' 'src/images/**' -c 'npm run copy-files'\"",
+    "copy-files": "cp src/popup.html src/editor.html manifest.json dist/ && cp -r src/images dist/",
     "format": "prettier --write \"src/**/*.ts\""
   },
   "devDependencies": {
