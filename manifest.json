@@ -3,7 +3,7 @@
   "name": "Houston, we have a bug",
   "version": "0.0.1",
   "description": "A Chrome extension for quick bug capture with annotation and context.",
-  "permissions": ["activeTab", "scripting"],
+  "permissions": ["activeTab", "tabs", "scripting"],
   "background": {
     "service_worker": "background.js"
   },
