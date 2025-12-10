@@ -37,7 +37,7 @@ export class HBPopup extends LitElement {
           ${this.isLoading ? 'Gathering...' : 'Gather system info'}
         </button>
 
-        <button @click=${this._captureScreenshot}>Capture screenshot</button>
+        <button @click=${this._annotateScreenshot}>Annotate screenshot</button>
 
         ${this.systemInfo
           ? html`
@@ -107,7 +107,7 @@ export class HBPopup extends LitElement {
     await navigator.clipboard.writeText(text);
   }
 
-  private async _captureScreenshot() {
+  private async _annotateScreenshot() {
     try {
       const [tab] = await chrome.tabs.query({
         active: true,

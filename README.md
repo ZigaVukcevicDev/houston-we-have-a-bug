@@ -16,21 +16,24 @@ A Chrome extension for quick bug capture with annotation and context.
 ```
 ├── src/
 │   ├── app.ts                    # Main Lit app component
-│   ├── main.ts                   # Entry point
-│   ├── popup.html                # Popup UI
+│   ├── entrypoints/
+│   │   ├── popup.html            # Popup HTML entry
+│   │   ├── popup.ts              # Popup TS entry
+│   │   ├── tab.html              # Annotation tab HTML entry
+│   │   └── tab.ts                # Annotation tab TS entry
 │   ├── components/
-│   │   ├── main-view/            # System info view
-│   │   │   ├── main-view.ts
-│   │   │   └── main-view.scss
-│   │   ├── screenshot-editor/    # Screenshot annotation editor
-│   │   │   ├── screenshot-editor.ts
-│   │   │   └── screenshot-editor.scss
-│   │   ├── editor-toolbar/       # Annotation toolbar
-│   │   │   ├── editor-toolbar.ts
-│   │   │   └── editor-toolbar.scss
-│   │   └── annotation-canvas/    # Canvas for annotations
-│   │       ├── annotation-canvas.ts
-│   │       └── annotation-canvas.scss
+│   │   ├── hb-popup/             # Popup component
+│   │   │   ├── hb-popup.ts
+│   │   │   └── hb-popup.scss
+│   │   ├── hb-annotation/        # Annotation editor component
+│   │   │   ├── hb-annotation.ts
+│   │   │   └── hb-annotation.scss
+│   │   ├── hb-toolbar/           # Annotation toolbar
+│   │   │   ├── hb-toolbar.ts
+│   │   │   └── hb-toolbar.scss
+│   │   └── hb-canvas/            # Canvas for annotations
+│   │       ├── hb-canvas.ts
+│   │       └── hb-canvas.scss
 │   ├── styles/
 │   │   ├── _variables.scss       # Shared design tokens
 │   │   ├── _mixins.scss          # Reusable style mixins
@@ -76,3 +79,46 @@ npm run dev
 ```
 
 This builds once, then watches for changes and automatically rebuilds.
+
+## Usage
+
+### Popup
+
+The extension popup displays system info and a screenshot button. It uses the `<hb-popup>` component, which is rendered by the app shell `<houston-we-have-a-bug>`.
+
+**popup.html**
+
+```html
+<houston-we-have-a-bug></houston-we-have-a-bug>
+```
+
+**popup.ts**
+
+```ts
+import '../app';
+// The app shell renders <hb-popup>
+```
+
+### Annotation Tab
+
+When a screenshot is taken, a new tab opens with the `<hb-annotation>` component for annotation.
+
+**tab.html**
+
+```html
+<hb-annotation></hb-annotation>
+```
+
+**tab.ts**
+
+```ts
+import '../components/hb-annotation/hb-annotation';
+```
+
+### Custom Elements
+
+- `<houston-we-have-a-bug>`: App shell (popup root)
+- `<hb-popup>`: Popup UI (system info, screenshot)
+- `<hb-annotation>`: Annotation editor (tab)
+- `<hb-toolbar>`: Toolbar for annotation tools
+- `<hb-canvas>`: Canvas for drawing annotations
