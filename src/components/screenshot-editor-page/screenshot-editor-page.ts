@@ -50,7 +50,7 @@ export class ScreenshotEditorPage extends LitElement {
 
     return html`
       <div class="header">
-        <h1>Annotate Screenshot</h1>
+        <h1>Annotate screenshot</h1>
         <div class="header-actions">
           <button class="secondary-btn" @click=${this._handleClear}>
             Clear Annotations
