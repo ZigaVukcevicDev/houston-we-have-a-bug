@@ -70,11 +70,10 @@ export class ScreenshotEditor extends LitElement {
     const canvas = this.shadowRoot?.querySelector(
       'annotation-canvas'
     ) as AnnotationCanvas;
-    const timestamp = new Date()
-      .toISOString()
-      .replace(/[:.]/g, '-')
-      .slice(0, 19);
-    canvas?.download(`bug-${timestamp}.jpg`);
+    const now = new Date();
+    const date = now.toISOString().slice(0, 10);
+    const time = now.toTimeString().slice(0, 8).replace(/:/g, '-');
+    canvas?.download(`bug ${date} at ${time}.jpg`);
   }
 }
 
