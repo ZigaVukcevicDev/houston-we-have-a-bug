@@ -8,7 +8,7 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_popup": "popup.html",
+    "default_popup": "entrypoints/popup.html",
     "default_title": "Houston, we have a bug"
   },
   "icons": {
@@ -22,7 +22,7 @@
       "matches": ["<all_urls>"]
     },
     {
-      "resources": ["annotation.html"],
+      "resources": ["entrypoints/tab.html"],
       "matches": ["<all_urls>"]
     }
   ]

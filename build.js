@@ -10,7 +10,7 @@ const sharedPlugins = [
 ];
 
 const popupOptions = {
-  entryPoints: ['src/main.ts'],
+  entryPoints: ['src/entrypoints/popup.ts'],
   bundle: true,
   outfile: 'dist/popup.js',
   format: 'iife',
@@ -18,10 +18,10 @@ const popupOptions = {
   plugins: sharedPlugins,
 };
 
-const annotationOptions = {
-  entryPoints: ['src/annotation.ts'],
+const tabOptions = {
+  entryPoints: ['src/entrypoints/tab.ts'],
   bundle: true,
-  outfile: 'dist/annotation.js',
+  outfile: 'dist/tab.js',
   format: 'iife',
   logLevel: 'info',
   plugins: sharedPlugins,
@@ -38,18 +38,18 @@ const backgroundOptions = {
 if (isWatch) {
   Promise.all([
     esbuild.context(popupOptions),
-    esbuild.context(annotationOptions),
+    esbuild.context(tabOptions),
     esbuild.context(backgroundOptions),
-  ]).then(([popupCtx, annotationCtx, bgCtx]) => {
+  ]).then(([popupCtx, tabCtx, bgCtx]) => {
     popupCtx.watch();
-    annotationCtx.watch();
+    tabCtx.watch();
     bgCtx.watch();
     console.log('Watching for changes...');
   });
 } else {
   Promise.all([
     esbuild.build(popupOptions),
-    esbuild.build(annotationOptions),
+    esbuild.build(tabOptions),
     esbuild.build(backgroundOptions),
   ]).catch(() => process.exit(1));
 }

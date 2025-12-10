@@ -1,3 +1,3 @@
-import './pages/annotation/annotation';
+import '../components/annotation/annotation';
 
 // The editor page is automatically mounted via the custom element in editor.html
