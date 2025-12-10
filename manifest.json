@@ -20,6 +20,10 @@
     {
       "resources": ["images/*"],
       "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["annotation.html"],
+      "matches": ["<all_urls>"]
     }
   ]
 }

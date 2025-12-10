@@ -1,12 +1,12 @@
 import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import '../toolbar/toolbar';
-import '../annotation-canvas/annotation-canvas';
-import type { AnnotationCanvas } from '../annotation-canvas/annotation-canvas';
-import styles from './screenshot-editor-page.scss';
+import '../../components/toolbar/toolbar';
+import '../../components/annotation-canvas/annotation-canvas';
+import type { AnnotationCanvas } from '../../components/annotation-canvas/annotation-canvas';
+import styles from './annotation.scss';
 
-@customElement('screenshot-editor-page')
-export class ScreenshotEditorPage extends LitElement {
+@customElement('annotation')
+export class Annotation extends LitElement {
   static styles = unsafeCSS(styles);
 
   @state()
@@ -106,6 +106,6 @@ export class ScreenshotEditorPage extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'screenshot-editor-page': ScreenshotEditorPage;
+    annotation: Annotation;
   }
 }
