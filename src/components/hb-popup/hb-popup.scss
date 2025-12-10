@@ -3,11 +3,18 @@
 
 :host {
   display: block;
-  width: 100%;
-  padding: $spacing-lg;
+  min-width: 240px;
+  max-width: 100vw;
+  box-sizing: border-box;
   font-family: $font-family;
   background: $bg-dark;
   color: $text-primary;
+  padding: $spacing-lg;
+}
+
+.popup-content {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 h1 {

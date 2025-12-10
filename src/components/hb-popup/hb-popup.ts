@@ -30,36 +30,38 @@ export class HBPopup extends LitElement {
 
   render() {
     return html`
-      <h1>Houston, we have a bug</h1>
+      <div class="popup-content">
+        <h1>Houston, we have a bug</h1>
 
-      <button @click=${this._gatherSystemInfo} ?disabled=${this.isLoading}>
-        ${this.isLoading ? 'Gathering...' : 'Gather system info'}
-      </button>
+        <button @click=${this._gatherSystemInfo} ?disabled=${this.isLoading}>
+          ${this.isLoading ? 'Gathering...' : 'Gather system info'}
+        </button>
 
-      <button @click=${this._captureScreenshot}>Capture screenshot</button>
+        <button @click=${this._captureScreenshot}>Capture screenshot</button>
 
-      ${this.systemInfo
-        ? html`
-            <h2>System info</h2>
-            <p class="info-item">
-              Date and time: ${this.systemInfo.dateAndTime}
-            </p>
-            <p class="info-item">URL: ${this.systemInfo.url}</p>
-            <p class="info-item">
-              Visible area: ${this.systemInfo.visibleArea}
-            </p>
-            <p class="info-item">
-              Display resolution: ${this.systemInfo.displayResolution}
-            </p>
-            <p class="info-item">
-              Device pixel ratio: ${this.systemInfo.devicePixelRatio}
-            </p>
-            <p class="info-item">Browser: ${this.systemInfo.browser}</p>
-            <p class="info-item">Operating system: ${this.systemInfo.os}</p>
+        ${this.systemInfo
+          ? html`
+              <h2>System info</h2>
+              <p class="info-item">
+                Date and time: ${this.systemInfo.dateAndTime}
+              </p>
+              <p class="info-item">URL: ${this.systemInfo.url}</p>
+              <p class="info-item">
+                Visible area: ${this.systemInfo.visibleArea}
+              </p>
+              <p class="info-item">
+                Display resolution: ${this.systemInfo.displayResolution}
+              </p>
+              <p class="info-item">
+                Device pixel ratio: ${this.systemInfo.devicePixelRatio}
+              </p>
+              <p class="info-item">Browser: ${this.systemInfo.browser}</p>
+              <p class="info-item">Operating system: ${this.systemInfo.os}</p>
 
-            <button @click=${this._copyToClipboard}>Copy to clipboard</button>
-          `
-        : null}
+              <button @click=${this._copyToClipboard}>Copy to clipboard</button>
+            `
+          : null}
+      </div>
     `;
   }
 
