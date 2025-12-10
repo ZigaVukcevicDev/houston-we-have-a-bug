@@ -1,6 +1,6 @@
 import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import styles from './hb-annotation-canvas.scss';
+import styles from './hb-canvas.scss';
 
 interface TextAnnotation {
   x: number;
@@ -10,8 +10,8 @@ interface TextAnnotation {
   fontSize: number;
 }
 
-@customElement('hb-annotation-canvas')
-export class HBAnnotationCanvas extends LitElement {
+@customElement('hb-canvas')
+export class HBCanvas extends LitElement {
   static styles = unsafeCSS(styles);
 
   @property({ type: String })
@@ -211,6 +211,6 @@ export class HBAnnotationCanvas extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'hb-annotation-canvas': HBAnnotationCanvas;
+    'hb-canvas': HBCanvas;
   }
 }

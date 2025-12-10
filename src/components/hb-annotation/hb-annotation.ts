@@ -1,8 +1,8 @@
 import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import '../../components/hb-toolbar/hb-toolbar';
-import '../../components/hb-annotation-canvas/hb-annotation-canvas';
-import type { HBAnnotationCanvas } from '../../components/hb-annotation-canvas/hb-annotation-canvas';
+import '../../components/hb-canvas/hb-canvas';
+import type { HBCanvas } from '../../components/hb-canvas/hb-canvas';
 import styles from './hb-annotation.scss';
 
 @customElement('hb-annotation')
@@ -69,11 +69,11 @@ export class HBAnnotation extends LitElement {
       </div>
 
       <div class="canvas-container">
-        <hb-annotation-canvas
+        <hb-canvas
           .dataUrl=${this.dataUrl}
           .color=${this.color}
           .fontSize=${this.fontSize}
-        ></hb-annotation-canvas>
+        ></hb-canvas>
       </div>
     `;
   }
@@ -87,16 +87,12 @@ export class HBAnnotation extends LitElement {
   }
 
   private _handleClear() {
-    const canvas = this.shadowRoot?.querySelector(
-      'hb-annotation-canvas'
-    ) as HBAnnotationCanvas;
+    const canvas = this.shadowRoot?.querySelector('hb-canvas') as HBCanvas;
     canvas?.clearAnnotations();
   }
 
   private _handleDownload() {
-    const canvas = this.shadowRoot?.querySelector(
-      'hb-annotation-canvas'
-    ) as HBAnnotationCanvas;
+    const canvas = this.shadowRoot?.querySelector('hb-canvas') as HBCanvas;
     const now = new Date();
     const date = now.toISOString().slice(0, 10);
     const time = now.toTimeString().slice(0, 8).replace(/:/g, '-');
