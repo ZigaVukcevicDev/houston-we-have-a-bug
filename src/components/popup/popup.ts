@@ -6,7 +6,7 @@ import { getDevicePixelRatio } from '../../utils/get-device-pixel-ratio';
 import { getDisplayResolution } from '../../utils/get-display-resolution';
 import { getOS } from '../../utils/get-os';
 import { getVisibleArea } from '../../utils/get-visible-area';
-import styles from './main-view.scss';
+import styles from './popup.scss';
 
 interface SystemInfo {
   dateAndTime: string;
@@ -18,8 +18,8 @@ interface SystemInfo {
   os: string;
 }
 
-@customElement('main-view')
-export class MainView extends LitElement {
+@customElement('popup')
+export class Popup extends LitElement {
   static styles = unsafeCSS(styles);
 
   @state()
@@ -130,6 +130,6 @@ export class MainView extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'main-view': MainView;
+    popup: Popup;
   }
 }

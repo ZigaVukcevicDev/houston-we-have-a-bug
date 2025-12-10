@@ -3,7 +3,11 @@
 
 :host {
   display: block;
+  width: 100%;
   padding: $spacing-lg;
+  font-family: $font-family;
+  background: $bg-dark;
+  color: $text-primary;
 }
 
 h1 {
