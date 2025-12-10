@@ -200,10 +200,12 @@ export class AnnotationCanvas extends LitElement {
     this._redraw();
   }
 
-  public download(filename: string = 'screenshot.png') {
-    const dataUrl = this.canvas.toDataURL('image/png');
+  public download(filename: string = 'screenshot.jpg', quality: number = 0.85) {
+    // Use JPEG with quality compression for smaller file sizes
+    // Quality 0.85 provides good balance between size and quality
+    const dataUrl = this.canvas.toDataURL('image/jpeg', quality);
     const link = document.createElement('a');
-    link.download = filename;
+    link.download = filename.replace(/\.png$/i, '.jpg');
     link.href = dataUrl;
     link.click();
   }

@@ -74,7 +74,7 @@ export class ScreenshotEditor extends LitElement {
       .toISOString()
       .replace(/[:.]/g, '-')
       .slice(0, 19);
-    canvas?.download(`bug-screenshot-${timestamp}.png`);
+    canvas?.download(`bug-${timestamp}.jpg`);
   }
 }
 
