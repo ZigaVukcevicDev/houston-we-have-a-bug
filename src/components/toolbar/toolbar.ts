@@ -1,9 +1,9 @@
 import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import styles from './editor-toolbar.scss';
+import styles from './toolbar.scss';
 
-@customElement('editor-toolbar')
-export class EditorToolbar extends LitElement {
+@customElement('toolbar')
+export class Toolbar extends LitElement {
   static styles = unsafeCSS(styles);
 
   @property({ type: String })
@@ -62,6 +62,6 @@ export class EditorToolbar extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'editor-toolbar': EditorToolbar;
+    toolbar: Toolbar;
   }
 }

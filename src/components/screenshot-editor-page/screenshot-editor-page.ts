@@ -1,6 +1,6 @@
 import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import '../editor-toolbar/editor-toolbar';
+import '../toolbar/toolbar';
 import '../annotation-canvas/annotation-canvas';
 import type { AnnotationCanvas } from '../annotation-canvas/annotation-canvas';
 import styles from './screenshot-editor-page.scss';
@@ -60,12 +60,12 @@ export class ScreenshotEditorPage extends LitElement {
       </div>
 
       <div class="toolbar-container">
-        <editor-toolbar
+        <toolbar
           .color=${this.color}
           .fontSize=${this.fontSize}
           @color-change=${this._handleColorChange}
           @font-size-change=${this._handleFontSizeChange}
-        ></editor-toolbar>
+        ></toolbar>
       </div>
 
       <div class="canvas-container">
