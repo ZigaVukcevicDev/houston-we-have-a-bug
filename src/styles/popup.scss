@@ -43,6 +43,8 @@ button {
   font-weight: 500;
   cursor: pointer;
   transition: background $transition-speed;
+  margin-top: 10px;
+  margin-bottom: 10px;
 
   &:hover {
     background: $primary-hover;
