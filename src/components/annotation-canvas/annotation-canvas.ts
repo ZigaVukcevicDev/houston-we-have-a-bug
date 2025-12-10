@@ -83,19 +83,7 @@ export class AnnotationCanvas extends LitElement {
       this.ctx.fillStyle = annotation.color;
       this.ctx.textBaseline = 'middle';
 
-      // Draw text shadow for better visibility
-      this.ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-      this.ctx.shadowBlur = 3;
-      this.ctx.shadowOffsetX = 1;
-      this.ctx.shadowOffsetY = 1;
-
       this.ctx.fillText(annotation.text, annotation.x, annotation.y);
-
-      // Reset shadow
-      this.ctx.shadowColor = 'transparent';
-      this.ctx.shadowBlur = 0;
-      this.ctx.shadowOffsetX = 0;
-      this.ctx.shadowOffsetY = 0;
     });
   }
 
