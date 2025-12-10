@@ -7,9 +7,12 @@
     <link rel="stylesheet" href="styles/popup.css" />
   </head>
   <body>
-    <div class="container">
+    <div class="container" data-js="main-view">
       <h1>Houston, we have a bug</h1>
       <button data-js="gather-system-info-button">Gather system info</button>
+      <button data-js="capture-screenshot-button">Capture screenshot</button>
+
+      <!-- System info -->
       <h2 data-js="system-info-heading" hidden>System info</h2>
       <p class="info-item" data-js="date-and-time"></p>
       <p class="info-item" data-js="url"></p>
@@ -18,8 +21,49 @@
       <p class="info-item" data-js="device-pixel-ratio"></p>
       <p class="info-item" data-js="browser"></p>
       <p class="info-item" data-js="os"></p>
+      <!-- / System info -->
       <button data-js="copy-button" hidden>Copy to clipboard</button>
     </div>
+
+    <!-- Screenshot editor -->
+    <div class="screenshot-editor" data-js="screenshot-editor" hidden>
+      <div class="editor-header">
+        <h2>Annotate screenshot</h2>
+        <button class="close-btn" data-js="close-editor">×</button>
+      </div>
+      <div class="editor-toolbar">
+        <button
+          class="tool-btn active"
+          data-js="tool-text"
+          data-tool="text"
+          title="Add text"
+        >
+          T
+        </button>
+        <input
+          type="color"
+          data-js="text-color"
+          value="#ff0000"
+          title="Text color"
+        />
+        <select data-js="font-size" title="Font size">
+          <option value="14">14px</option>
+          <option value="18">18px</option>
+          <option value="24" selected>24px</option>
+          <option value="32">32px</option>
+          <option value="48">48px</option>
+        </select>
+      </div>
+      <div class="canvas-container" data-js="canvas-container">
+        <canvas data-js="screenshot-canvas"></canvas>
+      </div>
+      <div class="editor-actions">
+        <button class="secondary-btn" data-js="clear-annotations">Clear</button>
+        <button data-js="download-screenshot">Download</button>
+      </div>
+    </div>
+    <!-- / Screenshot editor -->
+
     <script src="popup.js"></script>
   </body>
 </html>

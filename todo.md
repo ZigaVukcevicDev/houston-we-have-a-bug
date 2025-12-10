@@ -10,6 +10,7 @@
 
 ## Medium value
 
+- [ ] Localization
 - [ ] Cookies enabled - Privacy/functionality issues
 - [ ] Language - Browser locale
 - [ ] Timezone - For time-related bugs
