@@ -5,8 +5,8 @@ import './components/screenshot-editor';
 
 type View = 'main' | 'editor';
 
-@customElement('bug-app')
-export class BugApp extends LitElement {
+@customElement('houston-we-have-a-bug')
+export class HoustonWeHaveABug extends LitElement {
   static styles = css`
     :host {
       display: block;
@@ -55,6 +55,6 @@ export class BugApp extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'bug-app': BugApp;
+    'houston-we-have-a-bug': HoustonWeHaveABug;
   }
 }
