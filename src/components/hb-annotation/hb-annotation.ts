@@ -1,12 +1,12 @@
 import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import '../../components/bug-toolbar/bug-toolbar';
-import '../../components/annotation-canvas/annotation-canvas';
+import '../../components/hb-toolbar/hb-toolbar';
+import '../../components/hb-annotation-canvas/hb-annotation-canvas';
 import type { AnnotationCanvas } from '../../components/annotation-canvas/annotation-canvas';
-import styles from './annotation.scss';
+import styles from './hb-annotation.scss';
 
-@customElement('annotation')
-export class Annotation extends LitElement {
+@customElement('hb-annotation')
+export class HBAnnotation extends LitElement {
   static styles = unsafeCSS(styles);
 
   @state()
@@ -60,12 +60,12 @@ export class Annotation extends LitElement {
       </div>
 
       <div class="toolbar-container">
-        <bug-toolbar
+        <hb-toolbar
           .color=${this.color}
           .fontSize=${this.fontSize}
           @color-change=${this._handleColorChange}
           @font-size-change=${this._handleFontSizeChange}
-        ></bug-toolbar>
+        ></hb-toolbar>
       </div>
 
       <div class="canvas-container">
@@ -88,14 +88,14 @@ export class Annotation extends LitElement {
 
   private _handleClear() {
     const canvas = this.shadowRoot?.querySelector(
-      'annotation-canvas'
+      'hb-annotation-canvas'
     ) as AnnotationCanvas;
     canvas?.clearAnnotations();
   }
 
   private _handleDownload() {
     const canvas = this.shadowRoot?.querySelector(
-      'annotation-canvas'
+      'hb-annotation-canvas'
     ) as AnnotationCanvas;
     const now = new Date();
     const date = now.toISOString().slice(0, 10);
@@ -106,6 +106,6 @@ export class Annotation extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    annotation: Annotation;
+    'hb-annotation': HBAnnotation;
   }
 }

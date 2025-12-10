@@ -6,7 +6,7 @@ import { getDevicePixelRatio } from '../../utils/get-device-pixel-ratio';
 import { getDisplayResolution } from '../../utils/get-display-resolution';
 import { getOS } from '../../utils/get-os';
 import { getVisibleArea } from '../../utils/get-visible-area';
-import styles from './popup.scss';
+import styles from './hb-popup.scss';
 
 interface SystemInfo {
   dateAndTime: string;
@@ -18,8 +18,8 @@ interface SystemInfo {
   os: string;
 }
 
-@customElement('popup')
-export class Popup extends LitElement {
+@customElement('hb-popup')
+export class HBPopup extends LitElement {
   static styles = unsafeCSS(styles);
 
   @state()
@@ -120,7 +120,7 @@ export class Popup extends LitElement {
 
       // Store screenshot in background service worker and open editor in new tab
       await chrome.runtime.sendMessage({ type: 'STORE_SCREENSHOT', dataUrl });
-      chrome.tabs.create({ url: chrome.runtime.getURL('editor.html') });
+      chrome.tabs.create({ url: chrome.runtime.getURL('tab.html') });
       window.close(); // Close the popup
     } catch (error) {
       console.error('Failed to capture screenshot:', error);
@@ -130,6 +130,6 @@ export class Popup extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    popup: Popup;
+    'hb-popup': HBPopup;
   }
 }

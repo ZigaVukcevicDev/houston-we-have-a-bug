@@ -1,6 +1,6 @@
 import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, property, state, query } from 'lit/decorators.js';
-import styles from './annotation-canvas.scss';
+import styles from './hb-annotation-canvas.scss';
 
 interface TextAnnotation {
   x: number;

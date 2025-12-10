@@ -1,14 +1,14 @@
 import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import styles from './styles/app.scss';
-import './components/popup/popup';
+import './components/hb-popup/hb-popup';
 
 @customElement('houston-we-have-a-bug')
 export class HoustonWeHaveABug extends LitElement {
   static styles = unsafeCSS(styles);
 
   render() {
-    return html`<popup></popup>`;
+    return html`<hb-popup></hb-popup>`;
   }
 }
 
