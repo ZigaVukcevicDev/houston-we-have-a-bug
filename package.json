@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "description": "A Chrome extension for quick bug capture with annotation and context.",
   "scripts": {
-    "build": "esbuild src/popup.ts --bundle --outdir=dist --format=iife && sass src/styles:dist/styles && npm run copy-files",
-    "dev": "npm run build && concurrently \"esbuild src/popup.ts --bundle --outdir=dist --format=iife --watch\" \"sass --watch src/styles:dist/styles\" \"chokidar 'src/popup.html' 'manifest.json' 'src/images/**' -c 'npm run copy-files'\"",
+    "build": "node build.js && npm run copy-files",
+    "dev": "npm run build && concurrently \"node build.js --watch\" \"chokidar 'src/popup.html' 'manifest.json' 'src/images/**' -c 'npm run copy-files'\"",
     "copy-files": "cp src/popup.html manifest.json dist/ && cp -r src/images dist/",
     "format": "prettier --write \"src/**/*.ts\""
   },
@@ -15,7 +15,9 @@
     "concurrently": "^8.2.2",
     "esbuild": "^0.27.1",
     "prettier": "^3.7.4",
-    "sass": "^1.69.5",
     "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "lit": "^3.1.0"
   }
 }
