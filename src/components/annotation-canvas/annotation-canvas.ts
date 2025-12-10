@@ -55,8 +55,18 @@ export class AnnotationCanvas extends LitElement {
     const img = new Image();
     img.onload = () => {
       this.originalImage = img;
+
+      // Account for device pixel ratio (Retina displays)
+      const dpr = window.devicePixelRatio || 1;
+
+      // Set canvas internal resolution to full image size
       this.canvas.width = img.width;
       this.canvas.height = img.height;
+
+      // Set canvas display size to account for DPR
+      this.canvas.style.width = `${img.width / dpr}px`;
+      this.canvas.style.height = `${img.height / dpr}px`;
+
       this._redraw();
     };
     img.src = this.dataUrl;

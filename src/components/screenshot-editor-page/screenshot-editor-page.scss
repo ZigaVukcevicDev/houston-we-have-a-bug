@@ -60,8 +60,7 @@ h1 {
 }
 
 annotation-canvas {
-  max-width: 100%;
-  max-height: 100%;
+  flex-shrink: 0;
 }
 
 .no-screenshot {
