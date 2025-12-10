@@ -18,7 +18,7 @@ const elements = {
 };
 
 document
-  .querySelector('[data-js="gather-info-button"]')
+  .querySelector('[data-js="gather-system-info-button"]')
   ?.addEventListener('click', async () => {
     const [tab] = await chrome.tabs.query({
       active: true,
