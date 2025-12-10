@@ -1,12 +1,12 @@
 import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import { getChromeVersion } from '../utils/get-chrome-version';
-import { getDateAndTime } from '../utils/get-date-and-time';
-import { getDevicePixelRatio } from '../utils/get-device-pixel-ratio';
-import { getDisplayResolution } from '../utils/get-display-resolution';
-import { getOS } from '../utils/get-os';
-import { getVisibleArea } from '../utils/get-visible-area';
-import styles from '../styles/main-view.scss';
+import { getChromeVersion } from '../../utils/get-chrome-version';
+import { getDateAndTime } from '../../utils/get-date-and-time';
+import { getDevicePixelRatio } from '../../utils/get-device-pixel-ratio';
+import { getDisplayResolution } from '../../utils/get-display-resolution';
+import { getOS } from '../../utils/get-os';
+import { getVisibleArea } from '../../utils/get-visible-area';
+import styles from './main-view.scss';
 
 interface SystemInfo {
   dateAndTime: string;

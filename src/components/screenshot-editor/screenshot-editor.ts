@@ -1,9 +1,9 @@
 import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import './editor-toolbar';
-import './annotation-canvas';
-import type { AnnotationCanvas } from './annotation-canvas';
-import styles from '../styles/screenshot-editor.scss';
+import '../editor-toolbar/editor-toolbar';
+import '../annotation-canvas/annotation-canvas';
+import type { AnnotationCanvas } from '../annotation-canvas/annotation-canvas';
+import styles from './screenshot-editor.scss';
 
 @customElement('screenshot-editor')
 export class ScreenshotEditor extends LitElement {

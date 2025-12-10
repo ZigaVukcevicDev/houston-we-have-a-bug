@@ -1,6 +1,6 @@
 import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import styles from '../styles/editor-toolbar.scss';
+import styles from './editor-toolbar.scss';
 
 @customElement('editor-toolbar')
 export class EditorToolbar extends LitElement {

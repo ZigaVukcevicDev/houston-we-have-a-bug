@@ -1,7 +1,7 @@
 import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import './components/main-view';
-import './components/screenshot-editor';
+import './components/main-view/main-view';
+import './components/screenshot-editor/screenshot-editor';
 import styles from './styles/app.scss';
 
 type View = 'main' | 'editor';
