@@ -23,21 +23,15 @@ A Chrome extension for quick bug capture with annotation and context.
 │   │   └── tab.ts                # Annotation tab TS entry
 │   ├── components/
 │   │   ├── hb-popup/             # Popup component
-│   │   │   ├── hb-popup.ts
-│   │   │   └── hb-popup.scss
 │   │   ├── hb-annotation/        # Annotation editor component
-│   │   │   ├── hb-annotation.ts
-│   │   │   └── hb-annotation.scss
 │   │   ├── hb-toolbar/           # Annotation toolbar
-│   │   │   ├── hb-toolbar.ts
-│   │   │   └── hb-toolbar.scss
 │   │   └── hb-canvas/            # Canvas for annotations
-│   │       ├── hb-canvas.ts
-│   │       └── hb-canvas.scss
 │   ├── styles/
 │   │   ├── _variables.scss       # Shared design tokens
 │   │   ├── _mixins.scss          # Reusable style mixins
-│   │   └── app.scss              # App-level styles
+│   │   ├── app.scss              # App-level styles
+│   │   └── fonts.css             # Global font-face declarations
+│   ├── fonts/                    # Custom font files (e.g. Geom-Regular.ttf)
 │   ├── utils/                    # Utility functions
 │   └── types/                    # TypeScript declarations
 ├── manifest.json                 # Extension configuration
