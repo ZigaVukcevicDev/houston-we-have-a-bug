@@ -5,7 +5,7 @@
   "scripts": {
     "build": "node build.js && npm run copy-files",
     "dev": "npm run build && concurrently \"node build.js --watch\" \"chokidar 'src/popup.html' 'src/editor.html' 'manifest.json' 'src/images/**' -c 'npm run copy-files'\"",
-    "copy-files": "cp src/entrypoints/popup.html src/entrypoints/tab.html manifest.json dist/ && cp -r src/images dist/",
+    "copy-files": "cp src/entrypoints/popup.html src/entrypoints/tab.html manifest.json dist/ && cp -r src/images dist/ && cp -r src/fonts dist/ && mkdir -p dist/styles && cp src/styles/fonts.css dist/styles/fonts.css",
     "format": "prettier --write \"src/**/*.ts\""
   },
   "devDependencies": {

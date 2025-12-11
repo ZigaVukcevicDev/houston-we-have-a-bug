@@ -22,6 +22,10 @@
       "matches": ["<all_urls>"]
     },
     {
+      "resources": ["fonts/*"],
+      "matches": ["<all_urls>"]
+    },
+    {
       "resources": ["entrypoints/tab.html"],
       "matches": ["<all_urls>"]
     }

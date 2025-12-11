@@ -31,7 +31,10 @@ export class HBPopup extends LitElement {
   render() {
     return html`
       <div class="popup-content">
-        <h1>Houston, we have a bug</h1>
+        <div class="logo-with-heading">
+          <img src="../images/rocket.svg" alt="Rocket" />
+          <h1>Houston, we have a bug</h1>
+        </div>
 
         <button @click=${this._gatherSystemInfo} ?disabled=${this.isLoading}>
           ${this.isLoading ? 'Gathering...' : 'Gather system info'}
