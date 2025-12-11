@@ -1,5 +1,11 @@
 # Contributing Guidelines
 
+## Clean Refactoring
+
+When refactoring, renaming, or moving files, **always remove any leftovers** (unused code, duplicate styles, obsolete files, or outdated references). The codebase should never contain remnants from previous implementations or migrations.
+
+This keeps the project clean, maintainable, and easy to understand for everyone.
+
 ## Source of Truth
 
 **Never edit the `dist/` folder directly.**  
