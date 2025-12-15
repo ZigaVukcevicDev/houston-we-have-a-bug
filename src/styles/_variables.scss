@@ -1,27 +1,15 @@
 // Colors
-$primary-color: #e94560;
-$primary-hover: #d63d56;
-$primary-active: #c7354d;
-
-$secondary-color: #0f3460;
-$secondary-hover: #1a4a7a;
-
-$text-primary: #000000;
-$text-secondary: #888;
-
-$bg-yellow: #f1c24a;
-$bg-header: #16213e;
-$bg-secondary: #0f3460;
-$bg-canvas: #2a2a4e;
-
-$border-color: #0f3460;
+$color-white: #ffffff;
+$color-black: #000000;
+$color-yellow: #fac021;
+$color-red-400: #e74c3c;
+$color-red-500: #bd2d1e;
 
 // Spacing
-$spacing-xs: 4px;
-$spacing-sm: 8px;
-$spacing-md: 12px;
-$spacing-lg: 16px;
-$spacing-xl: 24px;
+$spacing-sm: 4px;
+$spacing-md: 8px;
+$spacing-lg: 12px;
+// $spacing-xl: 16px;
 
 // Border radius
 $border-radius: 4px;
@@ -31,7 +19,7 @@ $border-radius-md: 6px;
 $transition-speed: 0.3s;
 
 // Typography
-$font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+// $font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 $font-size-sm: 12px;
 $font-size-base: 14px;
 $font-size-lg: 16px;

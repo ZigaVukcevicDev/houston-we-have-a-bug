@@ -3,11 +3,11 @@
 
 :host {
   display: flex;
-  gap: $spacing-sm;
+  // gap: $spacing-sm;
   align-items: center;
-  margin-bottom: $spacing-md;
-  padding: $spacing-sm;
-  background: $bg-secondary;
+  // margin-bottom: $spacing-md;
+  // padding: $spacing-sm;
+  // background: $bg-secondary;
   border-radius: $border-radius;
 }
 
@@ -20,10 +20,10 @@ input[type='color'] {
   width: 36px;
   height: 36px;
   padding: 2px;
-  border: 1px solid $border-color;
+  // border: 1px solid $border-color;
   border-radius: $border-radius;
   cursor: pointer;
-  background: $bg-header;
+  // background: $bg-header;
 
   &::-webkit-color-swatch-wrapper {
     padding: 2px;

@@ -1,0 +1,50 @@
+@use 'variables' as *;
+
+button {
+  &.action-button {
+    cursor: pointer;
+    display: block;
+    border: none;
+    font-size: 14px;
+    padding: $spacing-md $spacing-lg;
+    border-radius: 12px;
+    line-height: 1;
+    min-height: 36px;
+
+    &.primary {
+      color: $color-white;
+      background-color: $color-black;
+      padding-top: $spacing-sm;
+
+      img {
+        display: inline-block;
+        margin-right: calc($spacing-sm - 2px);
+        transform: translateY(3px);
+      }
+
+      &:hover {
+        background-color: $color-red-500;
+      }
+
+      &:active {
+        background-color: $color-red-400;
+      }
+    }
+
+    &.secondary {
+      color: $color-black;
+      background-color: transparent;
+      border: 1px solid $color-black;
+
+      &:hover {
+        color: $color-red-500;
+        border-color: $color-red-500;
+      }
+
+      &:active {
+        color: $color-red-400;
+        border-color: $color-red-400;
+      }
+    }
+  }
+}
