@@ -36,11 +36,15 @@ export class HBPopup extends LitElement {
           <h1>Houston, we have a bug</h1>
         </div>
 
-        <button @click=${this._gatherSystemInfo} ?disabled=${this.isLoading}>
-          ${this.isLoading ? 'Gathering...' : 'Gather system info'}
+        <button
+          class="action-button primary"
+          @click=${this._annotateScreenshot}
+        >
+          <img src="../images/pencil.svg" alt="pencil" />
+          Annotate screenshot
         </button>
 
-        <button @click=${this._annotateScreenshot}>Annotate screenshot</button>
+        <button @click=${this._gatherSystemInfo}>Gather system info</button>
 
         ${this.systemInfo
           ? html`
