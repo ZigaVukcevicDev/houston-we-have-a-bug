@@ -12,7 +12,7 @@
   min-width: 240px;
   max-width: 100vw;
   box-sizing: border-box;
-  background: $color-yellow;
+  background: $color-yellow-500;
   color: $color-black;
   padding: $spacing-lg;
 }
@@ -47,8 +47,37 @@ h2 {
   font-size: $font-size-base;
 }
 
-.info-item {
-  margin-top: $spacing-md;
+.environment-details {
   font-size: $font-size-sm;
-  word-break: break-all;
+  width: 100%;
+  border-collapse: collapse;
+
+  tr {
+    &:nth-child(even) {
+      background: $color-yellow-400;
+    }
+
+    &:nth-child(odd) {
+      background: $color-yellow-300;
+    }
+
+    th,
+    td {
+      text-align: left;
+    }
+
+    th {
+      width: 150px;
+      padding: $spacing-sm $spacing-md $spacing-sm 0;
+      background-color: red;
+
+      img {
+        display: inline-block;
+      }
+    }
+
+    td {
+      padding: $spacing-sm $spacing-md;
+    }
+  }
 }
