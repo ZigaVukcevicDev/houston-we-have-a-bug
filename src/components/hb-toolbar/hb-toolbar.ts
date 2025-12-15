@@ -3,7 +3,7 @@ import { customElement, property } from 'lit/decorators.js';
 import styles from './hb-toolbar.scss';
 
 @customElement('hb-toolbar')
-export class BugToolbar extends LitElement {
+export class HBToolbar extends LitElement {
   static styles = unsafeCSS(styles);
 
   @property({ type: String })
@@ -31,8 +31,8 @@ export class BugToolbar extends LitElement {
         title="Font size"
       >
         ${this.fontSizes.map(
-          (size) => html`<option value=${size}>${size}px</option>`
-        )}
+      (size) => html`<option value=${size}>${size}px</option>`
+    )}
       </select>
     `;
   }
@@ -62,6 +62,6 @@ export class BugToolbar extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'hb-toolbar': BugToolbar;
+    'hb-toolbar': HBToolbar;
   }
 }

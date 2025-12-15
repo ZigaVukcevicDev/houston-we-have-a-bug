@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "A Chrome extension for quick bug capture with annotation and context.",
   "scripts": {
-    "build": "rm -rf dist && mkdir -p dist && node build.js && npm run copy-files",
+    "build": "node build.js",
     "prebuild": "rm -rf dist && mkdir -p dist",
     "postbuild": "npm run copy-files",
     "dev": "npm run build && concurrently \"node build.js --watch\" \"chokidar 'src/**/*.scss' 'src/**/*.html' 'src/**/*.ts' 'manifest.json' 'src/images/**' 'src/fonts/**' -c 'npm run copy-files'\"",

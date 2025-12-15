@@ -3,7 +3,11 @@
   "name": "Houston, we have a bug",
   "version": "0.0.1",
   "description": "A Chrome extension for quick bug capture with annotation and context.",
-  "permissions": ["activeTab", "tabs", "scripting"],
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "scripting"
+  ],
   "background": {
     "service_worker": "background.js"
   },
@@ -18,16 +22,28 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["images/*"],
-      "matches": ["<all_urls>"]
+      "resources": [
+        "images/*"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     },
     {
-      "resources": ["fonts/*"],
-      "matches": ["<all_urls>"]
+      "resources": [
+        "fonts/*"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     },
     {
-      "resources": ["entrypoints/tab.html"],
-      "matches": ["<all_urls>"]
+      "resources": [
+        "tab.html"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ]
 }
