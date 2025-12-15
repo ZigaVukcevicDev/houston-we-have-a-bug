@@ -31,8 +31,8 @@ export class HBToolbar extends LitElement {
         title="Font size"
       >
         ${this.fontSizes.map(
-      (size) => html`<option value=${size}>${size}px</option>`
-    )}
+          (size) => html`<option value=${size}>${size}px</option>`
+        )}
       </select>
     `;
   }

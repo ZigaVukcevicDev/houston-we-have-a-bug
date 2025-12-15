@@ -40,7 +40,7 @@ export class HBPopup extends LitElement {
         </button>
 
         ${this.environmentDetails
-        ? html`
+          ? html`
               <h2>Environment details</h2>
               <table class="environment-details">
                 <tbody>
@@ -88,7 +88,7 @@ export class HBPopup extends LitElement {
               </table>
               <button @click=${this._copyToClipboard}>Copy to clipboard</button>
             `
-        : null}
+          : null}
       </div>
     `;
   }
