@@ -31,7 +31,7 @@ A Chrome extension for quick bug capture with annotation and context.
 │   │   ├── _mixins.scss          # Reusable style mixins
 │   │   ├── app.scss              # App-level styles
 │   │   └── fonts.css             # Global font-face declarations
-│   ├── fonts/                    # Custom font files (e.g. Geom-Regular.ttf)
+│   ├── fonts/                    # Custom font files
 │   ├── utils/                    # Utility functions
 │   └── types/                    # TypeScript declarations
 ├── manifest.json                 # Extension configuration
