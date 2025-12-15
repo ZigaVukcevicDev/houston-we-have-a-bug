@@ -6,17 +6,8 @@ import { getDevicePixelRatio } from '../../utils/get-device-pixel-ratio';
 import { getDisplayResolution } from '../../utils/get-display-resolution';
 import { getOS } from '../../utils/get-os';
 import { getVisibleArea } from '../../utils/get-visible-area';
+import type { EnvironmentDetails } from '../../types/environment-details';
 import styles from './hb-popup.scss';
-
-interface EnvironmentDetails {
-  dateAndTime: string;
-  url: string;
-  visibleArea: string;
-  displayResolution: string;
-  devicePixelRatio: string;
-  browser: string;
-  os: string;
-}
 
 @customElement('hb-popup')
 export class HBPopup extends LitElement {
@@ -49,7 +40,7 @@ export class HBPopup extends LitElement {
         </button>
 
         ${this.environmentDetails
-          ? html`
+        ? html`
               <h2>Environment details</h2>
               <table class="environment-details">
                 <tbody>
@@ -97,7 +88,7 @@ export class HBPopup extends LitElement {
               </table>
               <button @click=${this._copyToClipboard}>Copy to clipboard</button>
             `
-          : null}
+        : null}
       </div>
     `;
   }
