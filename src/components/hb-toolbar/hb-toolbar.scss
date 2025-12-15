@@ -3,27 +3,18 @@
 
 :host {
   display: flex;
-  // gap: $spacing-sm;
   align-items: center;
-  // margin-bottom: $spacing-md;
-  // padding: $spacing-sm;
-  // background: $bg-secondary;
-  border-radius: $border-radius;
 }
 
 .tool-btn {
-  @include button-base;
-  @include button-icon;
+  // TODO: remove if not used
 }
 
 input[type='color'] {
   width: 36px;
   height: 36px;
   padding: 2px;
-  // border: 1px solid $border-color;
-  border-radius: $border-radius;
   cursor: pointer;
-  // background: $bg-header;
 
   &::-webkit-color-swatch-wrapper {
     padding: 2px;
@@ -33,8 +24,4 @@ input[type='color'] {
     border: none;
     border-radius: 2px;
   }
-}
-
-select {
-  @include input-base;
 }
