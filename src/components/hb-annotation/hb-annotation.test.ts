@@ -1,0 +1,167 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { HBAnnotation } from './hb-annotation';
+
+// Mock chrome.runtime API
+const mockChrome = {
+    runtime: {
+        sendMessage: vi.fn(),
+    },
+};
+
+globalThis.chrome = mockChrome as any;
+
+describe('HBAnnotation', () => {
+    let annotation: HBAnnotation;
+
+    beforeEach(() => {
+        annotation = new HBAnnotation();
+        vi.clearAllMocks();
+    });
+
+    it('should have default color property', () => {
+        expect(annotation['color']).toBe('#ff0000');
+    });
+
+    it('should have default fontSize property', () => {
+        expect(annotation['fontSize']).toBe(24);
+    });
+
+    it('should have empty dataUrl initially', () => {
+        expect(annotation['dataUrl']).toBe('');
+    });
+
+    describe('_loadScreenshotFromStorage', () => {
+        it('should load screenshot from storage', async () => {
+            const mockDataUrl = 'data:image/png;base64,mock';
+            mockChrome.runtime.sendMessage.mockResolvedValue({
+                dataUrl: mockDataUrl,
+            });
+
+            await annotation['_loadScreenshotFromStorage']();
+
+            expect(mockChrome.runtime.sendMessage).toHaveBeenCalledWith({
+                type: 'GET_SCREENSHOT',
+            });
+            expect(annotation['dataUrl']).toBe(mockDataUrl);
+        });
+
+        it('should handle missing dataUrl in response', async () => {
+            mockChrome.runtime.sendMessage.mockResolvedValue({});
+
+            await annotation['_loadScreenshotFromStorage']();
+
+            expect(annotation['dataUrl']).toBe('');
+        });
+
+        it('should handle errors gracefully', async () => {
+            mockChrome.runtime.sendMessage.mockRejectedValue(
+                new Error('Failed to load screenshot')
+            );
+
+            await annotation['_loadScreenshotFromStorage']();
+
+            expect(annotation['dataUrl']).toBe('');
+        });
+    });
+
+    describe('_handleColorChange', () => {
+        it('should update color from event detail', () => {
+            const event = new CustomEvent<string>('color-change', {
+                detail: '#00ff00',
+            });
+
+            annotation['_handleColorChange'](event);
+
+            expect(annotation['color']).toBe('#00ff00');
+        });
+    });
+
+    describe('_handleFontSizeChange', () => {
+        it('should update fontSize from event detail', () => {
+            const event = new CustomEvent<number>('font-size-change', {
+                detail: 32,
+            });
+
+            annotation['_handleFontSizeChange'](event);
+
+            expect(annotation['fontSize']).toBe(32);
+        });
+    });
+
+    describe('_handleClear', () => {
+        it('should call clearAnnotations on canvas element', () => {
+            const mockCanvas = {
+                clearAnnotations: vi.fn(),
+            };
+
+            const mockShadowRoot = {
+                querySelector: vi.fn().mockReturnValue(mockCanvas),
+            };
+
+            Object.defineProperty(annotation, 'shadowRoot', {
+                value: mockShadowRoot,
+                writable: true,
+            });
+
+            annotation['_handleClear']();
+
+            expect(mockShadowRoot.querySelector).toHaveBeenCalledWith('hb-canvas');
+            expect(mockCanvas.clearAnnotations).toHaveBeenCalled();
+        });
+
+        it('should handle missing canvas element', () => {
+            const mockShadowRoot = {
+                querySelector: vi.fn().mockReturnValue(null),
+            };
+
+            Object.defineProperty(annotation, 'shadowRoot', {
+                value: mockShadowRoot,
+                writable: true,
+            });
+
+            expect(() => annotation['_handleClear']()).not.toThrow();
+        });
+    });
+
+    describe('_handleDownload', () => {
+        it('should call download on canvas element with formatted filename', () => {
+            const mockCanvas = {
+                download: vi.fn(),
+            };
+
+            const mockShadowRoot = {
+                querySelector: vi.fn().mockReturnValue(mockCanvas),
+            };
+
+            Object.defineProperty(annotation, 'shadowRoot', {
+                value: mockShadowRoot,
+                writable: true,
+            });
+
+            // Mock Date to get predictable filename
+            const mockDate = new Date('2025-12-15T21:00:00Z');
+            vi.spyOn(globalThis, 'Date').mockImplementation(() => mockDate as any);
+
+            annotation['_handleDownload']();
+
+            expect(mockCanvas.download).toHaveBeenCalledWith(
+                expect.stringMatching(
+                    /^bug \d{4}-\d{2}-\d{2} at \d{2}-\d{2}-\d{2}\.jpg$/
+                )
+            );
+        });
+
+        it('should handle missing canvas element', () => {
+            const mockShadowRoot = {
+                querySelector: vi.fn().mockReturnValue(null),
+            };
+
+            Object.defineProperty(annotation, 'shadowRoot', {
+                value: mockShadowRoot,
+                writable: true,
+            });
+
+            expect(() => annotation['_handleDownload']()).not.toThrow();
+        });
+    });
+});
