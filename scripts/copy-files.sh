@@ -1,7 +1,5 @@
 #!/bin/sh
 set -e
-rm -rf dist
-mkdir -p dist
 cp src/entrypoints/popup.html src/entrypoints/tab.html manifest.json dist/
 cp -r src/images dist/
 cp -r src/fonts dist/
