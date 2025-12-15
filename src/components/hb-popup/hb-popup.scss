@@ -2,12 +2,16 @@
 @use '../../styles/mixins' as *;
 @use '../../styles/buttons';
 
+:host,
+:host * {
+  font-family: 'Inter', sans-serif;
+}
+
 :host {
   display: block;
   min-width: 240px;
   max-width: 100vw;
   box-sizing: border-box;
-  font-family: 'Inter';
   background: $color-yellow;
   color: $color-black;
   padding: $spacing-lg;

@@ -2,6 +2,11 @@
 @use '../../styles/mixins' as *;
 @use '../../styles/buttons';
 
+:host,
+:host * {
+  font-family: 'Inter', sans-serif;
+}
+
 :host {
   display: flex;
   flex-direction: column;
