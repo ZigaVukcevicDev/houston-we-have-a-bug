@@ -8,18 +8,23 @@
     "postbuild": "npm run copy-files",
     "dev": "npm run build && concurrently \"node build.js --watch\" \"chokidar 'src/**/*.scss' 'src/**/*.html' 'src/**/*.ts' 'manifest.json' 'src/images/**' 'src/fonts/**' -c 'npm run copy-files'\"",
     "copy-files": "./scripts/copy-files.sh",
-    "format": "prettier --write \"src/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.260",
     "@types/node": "^20.10.0",
+    "@vitest/ui": "^4.0.15",
     "chokidar-cli": "^3.0.0",
     "concurrently": "^8.2.2",
     "esbuild": "^0.27.1",
     "esbuild-sass-plugin": "^3.3.0",
     "prettier": "^3.7.4",
     "sass": "^1.69.5",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vitest": "^4.0.15"
   },
   "dependencies": {
     "lit": "^3.1.0"
