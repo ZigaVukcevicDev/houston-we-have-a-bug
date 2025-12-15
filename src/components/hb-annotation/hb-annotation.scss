@@ -1,14 +1,11 @@
-@use 'sass:color';
 @use '../../styles/variables' as *;
 @use '../../styles/mixins' as *;
+@use '../../styles/buttons';
 
 :host {
   display: flex;
   flex-direction: column;
   height: 100%;
-  font-family: $font-family;
-  background: $bg-yellow;
-  color: $text-primary;
 }
 
 .header {
@@ -16,8 +13,7 @@
   justify-content: space-between;
   align-items: center;
   padding: $spacing-md $spacing-lg;
-  background: $bg-header;
-  border-bottom: 1px solid $border-color;
+  background-color: $color-yellow;
 }
 
 h1 {
@@ -28,26 +24,10 @@ h1 {
 
 .header-actions {
   display: flex;
-  gap: $spacing-sm;
-
-  button {
-    @include button-base;
-  }
-
-  .secondary-btn {
-    background: $bg-secondary;
-    color: $text-primary;
-
-    &:hover {
-      background: color.adjust($bg-secondary, $lightness: 10%);
-    }
-  }
 }
 
 .toolbar-container {
-  padding: $spacing-sm $spacing-lg;
-  background: $bg-header;
-  border-bottom: 1px solid $border-color;
+  // TODO: remove class if not being used
 }
 
 .canvas-container {
@@ -69,7 +49,6 @@ hb-canvas {
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: $text-secondary;
 
   p {
     margin-top: $spacing-md;

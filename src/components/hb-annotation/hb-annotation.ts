@@ -50,12 +50,14 @@ export class HBAnnotation extends LitElement {
 
     return html`
       <div class="header">
-        <h1>Annotate screenshot</h1>
         <div class="header-actions">
-          <button class="secondary-btn" @click=${this._handleClear}>
+          <button class="action-button secondary" @click=${this._handleClear}>
             Clear annotations
           </button>
-          <button @click=${this._handleDownload}>Download</button>
+          <button class="action-button primary" @click=${this._handleDownload}>
+            <img src="../images/download.svg" alt="download" />
+            Download
+          </button>
         </div>
       </div>
 
