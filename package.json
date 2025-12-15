@@ -3,9 +3,11 @@
   "version": "0.0.1",
   "description": "A Chrome extension for quick bug capture with annotation and context.",
   "scripts": {
-    "build": "node build.js && npm run copy-files",
-    "dev": "npm run build && concurrently \"node build.js --watch\" \"chokidar 'src/popup.html' 'src/editor.html' 'manifest.json' 'src/images/**' -c 'npm run copy-files'\"",
-    "copy-files": "cp src/entrypoints/popup.html src/entrypoints/tab.html manifest.json dist/ && cp -r src/images dist/ && cp -r src/fonts dist/ && mkdir -p dist/styles && cp src/styles/fonts.css dist/styles/fonts.css",
+    "build": "rm -rf dist && mkdir -p dist && node build.js && npm run copy-files",
+    "prebuild": "rm -rf dist && mkdir -p dist",
+    "postbuild": "npm run copy-files",
+    "dev": "npm run build && concurrently \"node build.js --watch\" \"chokidar 'src/**/*.scss' 'src/**/*.html' 'src/**/*.ts' 'manifest.json' 'src/images/**' 'src/fonts/**' -c 'npm run copy-files'\"",
+    "copy-files": "./scripts/copy-files.sh",
     "format": "prettier --write \"src/**/*.ts\""
   },
   "devDependencies": {
