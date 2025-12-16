@@ -6,6 +6,16 @@ When refactoring, renaming, or moving files, **always remove any leftovers** (un
 
 This keeps the project clean, maintainable, and easy to understand for everyone.
 
+## Testing Requirements
+
+**Always add or modify tests when functionality changes.**
+- New features must include unit tests.
+- Bug fixes must include a regression test.
+- Refactoring should maintain or improve test coverage.
+- All tests must pass before merging.
+
+---
+
 ## Source of Truth
 
 **Never edit the `dist/` folder directly.**  
@@ -16,9 +26,10 @@ All changes must be made in the `src/` or other source folders. The `dist/` fold
 ## Workflow
 
 1. **Edit source files only.**
-2. **Build:** Run `npm run build` to generate the latest output in `dist/`.
-3. **Commit:** Only commit changes from source files. Do **not** commit or manually edit files in `dist/`.
-4. **Documentation:** Whenever you make a change to the codebase, check if the `README.md` needs to be updated to reflect your changes.
+2. **Test:** Run `npm test` to ensure all tests pass and no regressions were introduced.
+3. **Build:** Run `npm run build` to generate the latest output in `dist/`.
+4. **Commit:** Only commit changes from source files. Do **not** commit or manually edit files in `dist/`.
+5. **Documentation:** Whenever you make a change to the codebase, check if the `README.md` needs to be updated to reflect your changes.
 
 ---
 
