@@ -138,9 +138,13 @@ export class HBPopup extends LitElement {
     const text = [
       `Date and time: ${this.environmentDetails.dateAndTime}`,
       `URL: ${this.environmentDetails.url}`,
+      ``,
+      `Display`,
       `Visible area: ${this.environmentDetails.visibleArea}`,
       `Display resolution: ${this.environmentDetails.displayResolution}`,
       `Device pixel ratio: ${this.environmentDetails.devicePixelRatio}`,
+      ``,
+      `System`,
       `Browser: ${this.environmentDetails.browser}`,
       `Operating system: ${this.environmentDetails.os}`,
     ].join('\n');
