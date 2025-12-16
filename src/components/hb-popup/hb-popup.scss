@@ -1,6 +1,6 @@
 @use '../../styles/variables' as *;
-@use '../../styles/mixins' as *;
 @use '../../styles/buttons';
+@use '../../styles/spacing';
 
 :host,
 :host * {
@@ -44,6 +44,10 @@
 
   h2 {
     font-size: $font-size-base;
+  }
+
+  .action-button.tertiary {
+    margin-left: $spacing-md;
   }
 
   .environment-details {

@@ -35,7 +35,8 @@ export class HBPopup extends LitElement {
           Annotate screenshot
         </button>
 
-        <button @click=${this._gatherEnvironmentDetails}>
+        <button class="action-button tertiary mb-md" @click=${this._gatherEnvironmentDetails}>
+          <img src="../images/info.svg" alt="info" />
           Gather environment details
         </button>
 
