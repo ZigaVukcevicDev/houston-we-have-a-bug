@@ -54,6 +54,7 @@ describe('HBAnnotation', () => {
         });
 
         it('should handle errors gracefully', async () => {
+            const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
             mockChrome.runtime.sendMessage.mockRejectedValue(
                 new Error('Failed to load screenshot')
             );
@@ -61,6 +62,11 @@ describe('HBAnnotation', () => {
             await annotation['_loadScreenshotFromStorage']();
 
             expect(annotation['dataUrl']).toBe('');
+            expect(consoleSpy).toHaveBeenCalledWith(
+                'Failed to load screenshot:',
+                expect.any(Error)
+            );
+            consoleSpy.mockRestore();
         });
     });
 
@@ -139,8 +145,8 @@ describe('HBAnnotation', () => {
             });
 
             // Mock Date to get predictable filename
-            const mockDate = new Date('2025-12-15T21:00:00Z');
-            vi.spyOn(globalThis, 'Date').mockImplementation(() => mockDate as any);
+            vi.useFakeTimers();
+            vi.setSystemTime(new Date('2025-12-15T21:00:00Z'));
 
             annotation['_handleDownload']();
 

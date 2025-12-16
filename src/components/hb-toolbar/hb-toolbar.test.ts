@@ -46,6 +46,9 @@ describe('HBToolbar', () => {
     }) as EventListener);
 
     const mockSelect = document.createElement('select');
+    const option = document.createElement('option');
+    option.value = '32';
+    mockSelect.appendChild(option);
     mockSelect.value = '32';
 
     const event = new Event('change');

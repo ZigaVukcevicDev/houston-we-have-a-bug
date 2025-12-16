@@ -17,10 +17,11 @@ const mockChrome = {
 globalThis.chrome = mockChrome as any;
 
 // Mock navigator.clipboard
-Object.assign(navigator, {
-  clipboard: {
+Object.defineProperty(navigator, 'clipboard', {
+  value: {
     writeText: vi.fn(),
   },
+  writable: true,
 });
 
 // Mock window.close
@@ -55,11 +56,17 @@ describe('HBPopup', () => {
     });
 
     it('should handle errors gracefully', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
       mockChrome.tabs.query.mockRejectedValue(new Error('Tab query failed'));
 
       await popup['_gatherEnvironmentDetails']();
 
       expect(popup['environmentDetails']).toBeNull();
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Failed to gather system info:',
+        expect.any(Error)
+      );
+      consoleSpy.mockRestore();
     });
 
     it('should not gather details if no tab URL or ID', async () => {
@@ -130,6 +137,7 @@ describe('HBPopup', () => {
     });
 
     it('should handle errors gracefully', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
       mockChrome.tabs.query.mockRejectedValue(
         new Error('Screenshot capture failed')
       );
@@ -137,6 +145,11 @@ describe('HBPopup', () => {
       await popup['_annotateScreenshot']();
 
       expect(mockChrome.tabs.captureVisibleTab).not.toHaveBeenCalled();
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Failed to capture screenshot:',
+        expect.any(Error)
+      );
+      consoleSpy.mockRestore();
     });
 
     it('should not capture if no tab ID or window ID', async () => {
