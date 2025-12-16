@@ -55,25 +55,53 @@ button {
       border-radius: 0;
       padding-left: 0;
       padding-right: 0;
-      padding-bottom: 2px;
+      padding-bottom: 3px;
       min-height: 22px;
 
       img {
         display: inline-block;
-        margin-right: calc($spacing-sm - 2px);
+        margin-right: 0;
         transform: translateY(3px);
+
+        &.icon-hover,
+        &.icon-active {
+          display: none;
+        }
       }
 
       &:hover {
         color: $color-red-500;
         border-color: $color-red-500;
+
+        img {
+
+          &.icon-default,
+          &.icon-active {
+            display: none;
+          }
+
+          &.icon-hover {
+            display: inline-block;
+          }
+        }
       }
 
       &:active {
         color: $color-red-400;
         border-color: $color-red-400;
+
+        img {
+
+          &.icon-default,
+          &.icon-hover {
+            display: none;
+          }
+
+          &.icon-active {
+            display: inline-block;
+          }
+        }
       }
     }
-
   }
 }

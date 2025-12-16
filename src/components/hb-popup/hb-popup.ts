@@ -16,9 +16,6 @@ export class HBPopup extends LitElement {
   @state()
   private environmentDetails: EnvironmentDetails | null = null;
 
-  @state()
-  private isLoading = false;
-
   render() {
     return html`
       <div class="popup">
@@ -27,22 +24,26 @@ export class HBPopup extends LitElement {
           <h1>Houston, we have a bug</h1>
         </div>
 
-        <button
-          class="action-button primary"
-          @click=${this._annotateScreenshot}
-        >
-          <img src="../images/pencil.svg" alt="pencil" />
-          Annotate screenshot
-        </button>
+        <div class="ml-lg">
+          <button
+            class="action-button primary"
+            @click=${this._annotateScreenshot}
+          >
+            <img src="../images/pencil.svg" alt="pencil" />
+            Annotate screenshot
+          </button>
 
-        <button class="action-button tertiary mb-md" @click=${this._gatherEnvironmentDetails}>
-          <img src="../images/info.svg" alt="info" />
-          Gather environment details
-        </button>
+          <button class="action-button tertiary mb-md" @click=${this._gatherEnvironmentDetails}>
+            <img src="../images/info.svg" alt="info" class="icon-default" />
+            <img src="../images/info-red-500.svg" alt="info" class="icon-hover" />
+            <img src="../images/info-red-400.svg" alt="info" class="icon-active" />
+            Gather environment details
+          </button>
+        </div>
 
         ${this.environmentDetails
         ? html`
-              <h2>Environment details</h2>
+              <h2 class="ml-lg">Environment details</h2>
               <table class="environment-details">
                 <tbody>
                   <tr>
@@ -95,7 +96,6 @@ export class HBPopup extends LitElement {
   }
 
   private async _gatherEnvironmentDetails() {
-    this.isLoading = true;
     try {
       const [tab] = await chrome.tabs.query({
         active: true,
@@ -115,8 +115,6 @@ export class HBPopup extends LitElement {
       }
     } catch (error) {
       console.error('Failed to gather system info:', error);
-    } finally {
-      this.isLoading = false;
     }
   }
 
