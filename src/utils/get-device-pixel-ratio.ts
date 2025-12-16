@@ -4,8 +4,8 @@ export async function getDevicePixelRatio(tabId: number): Promise<string> {
       target: { tabId },
       func: () => window.devicePixelRatio.toString(),
     });
-    return result[0].result ?? 'Unable to get device pixel ratio';
+    return result[0].result ?? 'N/A';
   } catch {
-    return 'Unable to get device pixel ratio';
+    return 'N/A';
   }
 }

@@ -30,7 +30,7 @@ describe('getDevicePixelRatio', () => {
     mockChrome.scripting.executeScript.mockResolvedValue([{ result: null }]);
 
     const result = await getDevicePixelRatio(123);
-    expect(result).toBe('Unable to get device pixel ratio');
+    expect(result).toBe('N/A');
   });
 
   it('should handle decimal pixel ratios', async () => {
@@ -46,6 +46,6 @@ describe('getDevicePixelRatio', () => {
     );
 
     const result = await getDevicePixelRatio(123);
-    expect(result).toBe('Unable to get device pixel ratio');
+    expect(result).toBe('N/A');
   });
 });

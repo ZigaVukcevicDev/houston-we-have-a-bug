@@ -32,7 +32,7 @@ describe('getDisplayResolution', () => {
     mockChrome.scripting.executeScript.mockResolvedValue([{ result: null }]);
 
     const result = await getDisplayResolution(123);
-    expect(result).toBe('Unable to get display resolution');
+    expect(result).toBe('N/A');
   });
 
   it('should return error message when exception occurs', async () => {
@@ -41,6 +41,6 @@ describe('getDisplayResolution', () => {
     );
 
     const result = await getDisplayResolution(123);
-    expect(result).toBe('Unable to get display resolution');
+    expect(result).toBe('N/A');
   });
 });

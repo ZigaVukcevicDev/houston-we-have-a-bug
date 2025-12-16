@@ -6,6 +6,6 @@ export async function getVisibleArea(tabId: number): Promise<string> {
     });
     return results[0]?.result || 'Unknown';
   } catch (error) {
-    return 'Unable to get visible area';
+    return 'N/A';
   }
 }

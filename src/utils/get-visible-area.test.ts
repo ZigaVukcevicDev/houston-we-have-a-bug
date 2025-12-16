@@ -41,6 +41,6 @@ describe('getVisibleArea', () => {
     );
 
     const result = await getVisibleArea(123);
-    expect(result).toBe('Unable to get visible area');
+    expect(result).toBe('N/A');
   });
 });

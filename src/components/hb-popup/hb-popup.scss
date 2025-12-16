@@ -48,7 +48,10 @@
   }
 
   h2 {
-    font-size: $font-size-base;
+    font-size: 16px;
+    margin-left: 20px;
+    margin-top: 20px;
+    line-height: 2;
   }
 
   .action-button.tertiary {
@@ -72,20 +75,43 @@
       th,
       td {
         text-align: left;
+        padding: 8px 4px 8px 2px;
+        line-height: 1;
       }
 
       th {
-        width: 150px;
-        padding: $spacing-sm $spacing-md $spacing-sm 0;
-        background-color: red;
+        width: 140px;
+        padding-top: 3px;
+        padding-left: 20px;
 
         img {
           display: inline-block;
+          transform: translateY(4px);
         }
       }
 
-      td {
-        padding: $spacing-sm $spacing-md;
+      table {
+        margin-left: 17px;
+        margin-top: 6px;
+        margin-bottom: 0;
+
+        tr {
+          background-color: transparent !important;
+
+          td {
+            &:first-child {
+              width: 122px;
+            }
+
+            padding-top: 0;
+            padding-bottom: 0;
+            line-height: 1.4;
+
+            .url {
+              word-break: break-all;
+            }
+          }
+        }
       }
     }
   }

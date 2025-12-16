@@ -4,8 +4,8 @@ export async function getDisplayResolution(tabId: number): Promise<string> {
       target: { tabId },
       func: () => `${window.screen.width} x ${window.screen.height} px`,
     });
-    return result[0].result ?? 'Unable to get display resolution';
+    return result[0].result ?? 'N/A';
   } catch {
-    return 'Unable to get display resolution';
+    return 'N/A';
   }
 }

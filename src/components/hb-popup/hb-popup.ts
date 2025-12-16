@@ -29,12 +29,12 @@ export class HBPopup extends LitElement {
             class="action-button primary"
             @click=${this._annotateScreenshot}
           >
-            <img src="../images/pencil.svg" alt="pencil" />
+            <img src="../images/pencil-white.svg" alt="pencil" />
             Annotate screenshot
           </button>
 
           <button class="action-button tertiary mb-md" @click=${this._gatherEnvironmentDetails}>
-            <img src="../images/info.svg" alt="info" class="icon-default" />
+            <img src="../images/info-black.svg" alt="info" class="icon-default" />
             <img src="../images/info-red-500.svg" alt="info" class="icon-hover" />
             <img src="../images/info-red-400.svg" alt="info" class="icon-active" />
             Gather environment details
@@ -43,52 +43,66 @@ export class HBPopup extends LitElement {
 
         ${this.environmentDetails
         ? html`
-              <h2 class="ml-lg">Environment details</h2>
+              <h2>Environment details</h2>
+              <button @click=${this._copyToClipboard}>Copy to clipboard</button>
               <table class="environment-details">
                 <tbody>
                   <tr>
                     <th>
-                      <img src="../images/clock.svg" alt="clock" />
+                      <img src="../images/clock-black.svg" alt="clock" />
                       Date and time
                     </th>
                     <td>${this.environmentDetails.dateAndTime}</td>
                   </tr>
                   <tr>
-                    <th>
-                      <img src="../images/globe.svg" alt="globe" />
+                    <th colspan="2">
+                      <img src="../images/globe-black.svg" alt="globe" />
                       URL
+                      <table>
+                        <tr>
+                          <td style="width: auto;"><span class="url">${this.environmentDetails.url}</span></td>
+                        </tr>
+                      </table>
                     </th>
-                    <td>${this.environmentDetails.url}</td>
                   </tr>
                   <tr>
-                    <th>
-                      <img src="../images/display.svg" alt="display" />
-                      Visible area
+                    <th colspan="2">
+                      <img src="../images/display-black.svg" alt="display" />
+                      Display
+                      <table>
+                        <tr>
+                          <td>Visible area</td>
+                          <td>${this.environmentDetails.visibleArea}</td>
+                        </tr>
+                        <tr>
+                          <td>Display resolution</td>
+                          <td>${this.environmentDetails.displayResolution}</td>
+                        </tr>
+                        <tr>
+                          <td>Device pixel ratio</td>
+                          <td>${this.environmentDetails.devicePixelRatio}</td>
+                        </tr>
+                      </table>
                     </th>
-                    <td>${this.environmentDetails.visibleArea}</td>
                   </tr>
                   <tr>
-                    <th>Display resolution</th>
-                    <td>${this.environmentDetails.displayResolution}</td>
-                  </tr>
-                  <tr>
-                    <th>Device pixel ratio</th>
-                    <td>${this.environmentDetails.devicePixelRatio}</td>
-                  </tr>
-                  <tr>
-                    <th>
-                      <img src="../images/target.svg" alt="target" />
-                      Browser
+                    <th colspan="2">
+                      <img src="../images/target-black.svg" alt="target" />
+                      System
+                      <table>
+                        <tr>
+                          <td>Browser</td>
+                          <td>${this.environmentDetails.browser}</td>
+                        </tr>
+                        <tr>
+                          <td>Operating system</td>
+                          <td>${this.environmentDetails.os}</td>
+                        </tr>
+                      </table>
                     </th>
-                    <td>${this.environmentDetails.browser}</td>
-                  </tr>
-                  <tr>
-                    <th>Operating system</th>
-                    <td>${this.environmentDetails.os}</td>
                   </tr>
                 </tbody>
               </table>
-              <button @click=${this._copyToClipboard}>Copy to clipboard</button>
             `
         : null}
       </div>

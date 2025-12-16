@@ -55,7 +55,7 @@ export class HBAnnotation extends LitElement {
             Clear annotations
           </button>
           <button class="action-button primary" @click=${this._handleDownload}>
-            <img src="../images/download.svg" alt="download" />
+            <img src="../images/download-white.svg" alt="download" />
             Download
           </button>
         </div>
