@@ -64,7 +64,7 @@ This compiles TypeScript and SCSS into a single bundled JavaScript file.
 Run unit tests with Vitest:
 
 ```bash
-npm test
+npm run test
 ```
 
 Tests are automatically run before every commit using **Husky** hooks to ensure stability.
