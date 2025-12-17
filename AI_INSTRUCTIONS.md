@@ -20,7 +20,6 @@ You must follow these rules when working on this repository.
 ## 4. UI & Styling
 - **SCSS Modules**: Use `@use` to import variables.
 - **Variables**: Always use variables from `_variables.scss` (e.g., `$color-red-500`, `$spacing-md`) instead of hardcoded values.
-- **Popup Width**: The popup width is fixed at `305px`.
 
 ## 5. Icons & Assets
 - **Icon Swapping**: Use the CSS 3-state toggle pattern (Default/Hover/Active) with hidden `img` classes (`.icon-default`, `.icon-hover`, `.icon-active`) instead of SVGs filters or inline SVGs.
