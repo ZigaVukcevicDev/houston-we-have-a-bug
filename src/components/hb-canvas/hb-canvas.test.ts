@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { HBCanvas } from './hb-canvas';
 
 describe('HBCanvas', () => {
@@ -143,6 +143,86 @@ describe('HBCanvas', () => {
         it('should allow setting fontSize', () => {
             canvas.fontSize = 48;
             expect(canvas.fontSize).toBe(48);
+        });
+
+        afterEach(() => {
+            vi.restoreAllMocks();
+        });
+    });
+
+
+    describe('interactions', () => {
+        let mockCanvasElement: any;
+
+        beforeEach(() => {
+            mockCanvasElement = {
+                getBoundingClientRect: vi.fn().mockReturnValue({
+                    left: 0,
+                    top: 0,
+                    width: 800,
+                    height: 600,
+                }),
+                width: 800,
+                height: 600,
+                getContext: vi.fn().mockReturnValue({
+                    clearRect: vi.fn(),
+                    drawImage: vi.fn(),
+                    fillText: vi.fn(),
+                }),
+                style: {},
+            };
+            Object.defineProperty(canvas, 'canvas', {
+                value: mockCanvasElement,
+                writable: true,
+            });
+            // Force context initialization
+            canvas['firstUpdated']();
+        });
+
+        it('should create text input on click', () => {
+            const event = {
+                clientX: 100,
+                clientY: 100,
+            } as MouseEvent;
+
+            canvas['_handleCanvasClick'](event);
+
+            const input = document.body.querySelector('input');
+            expect(input).toBeTruthy();
+            expect(input?.style.position).toBe('fixed');
+
+            // Cleanup
+            input?.remove();
+        });
+
+        it('should add annotation on Enter', () => {
+            // Click to create input
+            canvas['_handleCanvasClick']({ clientX: 100, clientY: 100 } as MouseEvent);
+
+            const input = document.body.querySelector('input')!;
+            input.value = 'Test Annotation';
+
+            // Simulate Enter key
+            const event = new KeyboardEvent('keydown', { key: 'Enter' });
+            // We need to manually trigger the listener because we can't dispatch real events on unattached elements easily in happy-dom if listeners are attached via addEventListener
+            // But hb-canvas attaches via addEventListener in _createTextInput.
+            // So dispatchEvent should work if element is in document.body (which it is)
+            input.dispatchEvent(event);
+
+            expect(canvas['annotations']).toHaveLength(1);
+            expect(canvas['annotations'][0].text).toBe('Test Annotation');
+            expect(document.body.querySelector('input')).toBeNull();
+        });
+
+        it('should cancel on Escape', () => {
+            canvas['_handleCanvasClick']({ clientX: 100, clientY: 100 } as MouseEvent);
+            const input = document.body.querySelector('input')!;
+
+            const event = new KeyboardEvent('keydown', { key: 'Escape' });
+            input.dispatchEvent(event);
+
+            expect(canvas['annotations']).toHaveLength(0);
+            expect(document.body.querySelector('input')).toBeNull();
         });
     });
 });
