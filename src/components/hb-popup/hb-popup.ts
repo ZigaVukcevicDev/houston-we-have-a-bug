@@ -16,6 +16,9 @@ export class HBPopup extends LitElement {
   @state()
   private environmentDetails: EnvironmentDetails | null = null;
 
+  @state()
+  private isCopyingDisabled = false;
+
   render() {
     return html`
       <div class="popup">
@@ -46,10 +49,24 @@ export class HBPopup extends LitElement {
               <div class="environment-details-heading">
                 <h2>Environment details</h2>
 
-                <button class="icon-button-no-background" @click=${this._copyToClipboard} title="Copy to clipboard">
-                  <img src="../images/copy-black.svg" alt="copy" class="icon-default" />
-                  <img src="../images/copy-red-500.svg" alt="copy" class="icon-hover" />
-                  <img src="../images/copy-red-400.svg" alt="copy" class="icon-active" />
+                <button
+                  class="icon-button-no-background"
+                  @click=${this._copyToClipboard}
+                  title="Copy to clipboard"
+                  ?disabled=${this.isCopyingDisabled}
+                >
+                  ${!this.isCopyingDisabled
+            ? html`
+                    <img src="../images/copy-black.svg" alt="copy" class="icon-default" />
+                    <img src="../images/copy-red-500.svg" alt="copy" class="icon-hover" />
+                    <img src="../images/copy-red-400.svg" alt="copy" class="icon-active" />
+                  `
+            : null}
+                  ${this.isCopyingDisabled
+            ? html`
+                    <img src="../images/check-black.svg" alt="check" class="icon-default" />
+                  `
+            : null}
                 </button>
               </div>
 
@@ -157,7 +174,11 @@ export class HBPopup extends LitElement {
       `Operating system: ${this.environmentDetails.os}`,
     ].join('\n');
 
+    this.isCopyingDisabled = true;
     await navigator.clipboard.writeText(text);
+    setTimeout(() => {
+      this.isCopyingDisabled = false;
+    }, 3000);
   }
 
   private async _annotateScreenshot() {

@@ -183,6 +183,10 @@ button {
   }
 
   &.icon-button-no-background {
+    &:disabled {
+      cursor: default;
+    }
+
     img {
 
       &.icon-hover,
@@ -191,7 +195,7 @@ button {
       }
     }
 
-    &:hover {
+    &:hover:not(:disabled) {
       img {
 
         &.icon-default,
@@ -205,7 +209,7 @@ button {
       }
     }
 
-    &:active {
+    &:active:not(:disabled) {
       img {
 
         &.icon-default,
