@@ -16,7 +16,10 @@ export class HBToolbar extends LitElement {
 
   render() {
     return html`
-      <button class="tool-btn" title="Add text">T</button>
+      <button class="icon-button activated" title="Text">
+        <img src="../images/text-black.svg" alt="text" class="icon-default" />
+        <img src="../images/text-white.svg" alt="text" class="icon-hover-and-active" />
+      </button>
 
       <input
         type="color"
@@ -31,8 +34,8 @@ export class HBToolbar extends LitElement {
         title="Font size"
       >
         ${this.fontSizes.map(
-          (size) => html`<option value=${size}>${size}px</option>`
-        )}
+      (size) => html`<option value=${size}>${size}px</option>`
+    )}
       </select>
     `;
   }

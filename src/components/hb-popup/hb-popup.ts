@@ -43,8 +43,16 @@ export class HBPopup extends LitElement {
 
         ${this.environmentDetails
         ? html`
-              <h2>Environment details</h2>
-              <button @click=${this._copyToClipboard}>Copy to clipboard</button>
+              <div class="environment-details-heading">
+                <h2>Environment details</h2>
+
+                <button class="icon-button-no-background" @click=${this._copyToClipboard} title="Copy to clipboard">
+                  <img src="../images/copy-black.svg" alt="copy" class="icon-default" />
+                  <img src="../images/copy-red-500.svg" alt="copy" class="icon-hover" />
+                  <img src="../images/copy-red-400.svg" alt="copy" class="icon-active" />
+                </button>
+              </div>
+
               <table class="environment-details">
                 <tbody>
                   <tr>

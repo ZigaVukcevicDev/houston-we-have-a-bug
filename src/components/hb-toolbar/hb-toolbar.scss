@@ -1,12 +1,10 @@
 @use '../../styles/variables' as *;
+@use '../../styles/buttons';
+@use '../../styles/spacing';
 
 :host {
   display: flex;
   align-items: center;
-}
-
-.tool-btn {
-  // TODO: remove if not used
 }
 
 input[type='color'] {
