@@ -14,6 +14,7 @@ A Chrome extension for quick bug capture with annotation and context.
 - 📸 **Screenshot capture** - Capture visible tab with text annotations
 - 📋 **System info** - Gather browser, OS, and display information
 - 📦 **Modern build setup** - esbuild compilation with Prettier formatting
+- 🗺️ **[Roadmap](ROADMAP.md)** - Planned features and evolution
 
 ## Project structure
 
