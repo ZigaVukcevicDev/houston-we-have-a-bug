@@ -5,16 +5,19 @@
 
 A Chrome extension for quick bug capture with annotation and context.
 
-## Features
+## Key capabilities
 
-- ⚡ **Lit** - Fast, lightweight Web Components framework by Google
+- 📸 **Screenshot with annotations** - Capture visible tab with annotations
+- 📋 **Environment details** - Gather current date and time, URL, display settings, browser, and OS information
+- 🗺️ **[Roadmap](ROADMAP.md)** - Planned features, and evolution
+
+## Tech stack & tooling
+
+- ⚡ **Lit** - Fast, lightweight web components framework by Google
 - 📘 **TypeScript** - Fully typed extension code
+- 🎨 **SCSS** - Styling with variables and nesting
 - 🧪 **Vitest** - Unit testing framework with DOM simulation
-- 🎨 **SCSS** - Advanced styling with variables, mixins, and nesting
-- 📸 **Screenshot capture** - Capture visible tab with text annotations
-- 📋 **System info** - Gather browser, OS, and display information
 - 📦 **Modern build setup** - esbuild compilation with Prettier formatting
-- 🗺️ **[Roadmap](ROADMAP.md)** - Planned features and evolution
 
 ## Project structure
 
