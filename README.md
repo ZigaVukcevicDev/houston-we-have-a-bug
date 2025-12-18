@@ -53,7 +53,7 @@ A Chrome extension for quick bug capture with annotation and context.
 
 ## Installation & setup
 
-### 1. Install Dependencies
+### 1. Install dependencies
 
 ```bash
 npm install
