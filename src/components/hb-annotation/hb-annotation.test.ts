@@ -70,30 +70,6 @@ describe('HBAnnotation', () => {
         });
     });
 
-    describe('_handleColorChange', () => {
-        it('should update color from event detail', () => {
-            const event = new CustomEvent<string>('color-change', {
-                detail: '#00ff00',
-            });
-
-            annotation['_handleColorChange'](event);
-
-            expect(annotation['color']).toBe('#00ff00');
-        });
-    });
-
-    describe('_handleFontSizeChange', () => {
-        it('should update fontSize from event detail', () => {
-            const event = new CustomEvent<number>('font-size-change', {
-                detail: 32,
-            });
-
-            annotation['_handleFontSizeChange'](event);
-
-            expect(annotation['fontSize']).toBe(32);
-        });
-    });
-
     describe('_handleClear', () => {
         it('should call clearAnnotations on canvas element', () => {
             const mockCanvas = {

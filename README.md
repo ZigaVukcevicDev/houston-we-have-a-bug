@@ -30,6 +30,7 @@ A Chrome extension for quick bug capture with annotation and context.
 │   │   ├── hb-popup/             # Popup component
 │   │   ├── hb-annotation/        # Annotation editor component
 │   │   ├── hb-toolbar/           # Annotation toolbar
+│   │   ├── hb-toolbar-tool/      # Annotation toolbar tool
 │   │   └── hb-canvas/            # Canvas for annotations
 │   ├── styles/
 │   │   ├── _variables.scss       # Shared design tokens

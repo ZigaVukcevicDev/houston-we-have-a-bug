@@ -49,6 +49,7 @@ export class HBAnnotation extends LitElement {
     }
 
     return html`
+      <!-- TODO: remove when not needed
       <div class="header">
         <div class="header-actions">
           <button class="action-button secondary" @click=${this._handleClear}>
@@ -60,14 +61,10 @@ export class HBAnnotation extends LitElement {
           </button>
         </div>
       </div>
+      -->
 
       <div class="toolbar-container">
-        <hb-toolbar
-          .color=${this.color}
-          .fontSize=${this.fontSize}
-          @color-change=${this._handleColorChange}
-          @font-size-change=${this._handleFontSizeChange}
-        ></hb-toolbar>
+        <hb-toolbar></hb-toolbar>
       </div>
 
       <div class="canvas-container">
@@ -78,14 +75,6 @@ export class HBAnnotation extends LitElement {
         ></hb-canvas>
       </div>
     `;
-  }
-
-  private _handleColorChange(e: CustomEvent<string>) {
-    this.color = e.detail;
-  }
-
-  private _handleFontSizeChange(e: CustomEvent<number>) {
-    this.fontSize = e.detail;
   }
 
   private _handleClear() {

@@ -1,24 +1,28 @@
 @use '../../styles/variables' as *;
-@use '../../styles/buttons';
-@use '../../styles/spacing';
 
-:host {
-  display: flex;
-  align-items: center;
-}
+.toolbar {
+  border: 3px solid $color-white;
+  background-color: $color-yellow-500;
+  display: inline-block;
+  position: fixed;
+  top: 20px;
+  left: 20px;
 
-input[type='color'] {
-  width: 36px;
-  height: 36px;
-  padding: 2px;
-  cursor: pointer;
+  .logo {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-  &::-webkit-color-swatch-wrapper {
-    padding: 2px;
+    img {
+      width: 20px;
+      height: auto;
+    }
   }
 
-  &::-webkit-color-swatch {
-    border: none;
-    border-radius: 2px;
+  .tools {
+    display: flex;
+    flex-direction: column;
   }
 }

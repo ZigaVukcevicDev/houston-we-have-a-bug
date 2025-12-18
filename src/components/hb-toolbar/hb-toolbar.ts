@@ -1,65 +1,30 @@
 import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import styles from './hb-toolbar.scss';
+import '../hb-toolbar-tool/hb-toolbar-tool';
 
 @customElement('hb-toolbar')
 export class HBToolbar extends LitElement {
   static styles = unsafeCSS(styles);
 
-  @property({ type: String })
-  color: string = '#ff0000';
-
-  @property({ type: Number })
-  fontSize: number = 24;
-
-  private fontSizes = [14, 18, 24, 32, 48];
-
   render() {
     return html`
-      <button class="icon-button activated" title="Text">
-        <img src="../images/text-black.svg" alt="text" class="icon-default" />
-        <img src="../images/text-white.svg" alt="text" class="icon-hover-and-active" />
-      </button>
+      <div class="toolbar">
+        <a href="https://github.com/ZigaVukcevicDev/houston-we-have-a-bug" class="logo" target="_blank" title="GitHub">
+          <img src="../images/rocket.svg" alt="rocket" />
+        </a>
 
-      <input
-        type="color"
-        .value=${this.color}
-        @input=${this._handleColorChange}
-        title="Text color"
-      />
+        <div class="tools">
+          <hb-toolbar-tool title="Text" icon="text" .isActive=${false}></hb-toolbar-tool>
+          <hb-toolbar-tool title="Line" icon="line" .isActive=${false}></hb-toolbar-tool>
+          <hb-toolbar-tool title="Arrow" icon="arrow" .isActive=${true}></hb-toolbar-tool>
+          <hb-toolbar-tool title="Rectangle" icon="rectangle" .isActive=${false}></hb-toolbar-tool>
+          <hb-toolbar-tool title="Crop" icon="crop" .isActive=${false}></hb-toolbar-tool>
+        </div>
 
-      <select
-        .value=${String(this.fontSize)}
-        @change=${this._handleFontSizeChange}
-        title="Font size"
-      >
-        ${this.fontSizes.map(
-      (size) => html`<option value=${size}>${size}px</option>`
-    )}
-      </select>
+        <div class="download">TBD</div>
+      </div> 
     `;
-  }
-
-  private _handleColorChange(e: Event) {
-    const input = e.target as HTMLInputElement;
-    this.dispatchEvent(
-      new CustomEvent('color-change', {
-        detail: input.value,
-        bubbles: true,
-        composed: true,
-      })
-    );
-  }
-
-  private _handleFontSizeChange(e: Event) {
-    const select = e.target as HTMLSelectElement;
-    this.dispatchEvent(
-      new CustomEvent('font-size-change', {
-        detail: parseInt(select.value, 10),
-        bubbles: true,
-        composed: true,
-      })
-    );
   }
 }
 

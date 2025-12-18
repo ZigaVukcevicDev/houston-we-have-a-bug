@@ -1,0 +1,36 @@
+@use '../../styles/variables' as *;
+
+button {
+  width: 34px;
+  height: 34px;
+  background-color: $color-yellow-400;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  transition: $transition;
+
+  .icon-hover-and-activated {
+    display: none;
+  }
+
+  &:hover,
+  &.activated {
+    .icon-default {
+      display: none;
+    }
+
+    .icon-hover-and-activated {
+      display: block;
+    }
+  }
+
+  &:hover {
+    background-color: $color-red-500;
+  }
+
+  &.activated {
+    background-color: $color-red-400;
+  }
+}
