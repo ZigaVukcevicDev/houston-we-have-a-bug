@@ -57,15 +57,15 @@ export class HBPopup extends LitElement {
                 >
                   ${!this.isCopyingDisabled
             ? html`
-                    <img src="../images/copy-black.svg" alt="copy" class="icon-default" />
-                    <img src="../images/copy-red-500.svg" alt="copy" class="icon-hover" />
-                    <img src="../images/copy-red-400.svg" alt="copy" class="icon-active" />
-                  `
+                        <img src="../images/copy-black.svg" alt="copy" class="icon-default" />
+                        <img src="../images/copy-red-500.svg" alt="copy" class="icon-hover" />
+                        <img src="../images/copy-red-400.svg" alt="copy" class="icon-active" />
+                      `
             : null}
                   ${this.isCopyingDisabled
             ? html`
-                    <img src="../images/check-black.svg" alt="check" class="icon-default" />
-                  `
+                        <img src="../images/check-black.svg" alt="check" class="icon-default" />
+                      `
             : null}
                 </button>
               </div>
