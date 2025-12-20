@@ -8,7 +8,7 @@ const mockChrome = {
   },
 };
 
-globalThis.chrome = mockChrome as any;
+globalThis.chrome = mockChrome as unknown as typeof chrome;
 
 describe('getVisibleArea', () => {
   beforeEach(() => {

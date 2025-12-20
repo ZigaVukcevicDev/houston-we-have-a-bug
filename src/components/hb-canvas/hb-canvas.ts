@@ -39,11 +39,15 @@ export class HBCanvas extends LitElement {
   }
 
   render() {
+    const cursorStyle = this.drawingMode === 'line' ? 'crosshair' :
+      this.drawingMode === 'text' ? 'text' : 'default';
+
     return html`<canvas 
       @click=${this._handleCanvasClick}
       @mousedown=${this._handleMouseDown}
       @mousemove=${this._handleMouseMove}
       @mouseup=${this._handleMouseUp}
+      style="cursor: ${cursorStyle}"
     ></canvas>`;
   }
 
@@ -94,19 +98,19 @@ export class HBCanvas extends LitElement {
   }
 
   private _handleCanvasClick(event: MouseEvent) {
-    this._activeTool?.handleClick(event, this.canvas, this.ctx);
+    this._activeTool?.handleClick?.(event, this.canvas);
   }
 
   private _handleMouseDown(event: MouseEvent) {
-    this._activeTool?.handleMouseDown(event, this.canvas, this.ctx);
+    this._activeTool?.handleMouseDown?.(event, this.canvas);
   }
 
   private _handleMouseMove(event: MouseEvent) {
-    this._activeTool?.handleMouseMove(event, this.canvas, this.ctx);
+    this._activeTool?.handleMouseMove?.(event, this.canvas, this.ctx);
   }
 
   private _handleMouseUp(event: MouseEvent) {
-    this._activeTool?.handleMouseUp(event, this.canvas, this.ctx);
+    this._activeTool?.handleMouseUp?.(event, this.canvas);
   }
 
   public download(filename: string = 'screenshot.jpg', quality: number = 0.85) {

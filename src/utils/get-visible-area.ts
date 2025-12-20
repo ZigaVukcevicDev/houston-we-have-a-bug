@@ -5,7 +5,7 @@ export async function getVisibleArea(tabId: number): Promise<string> {
       func: () => `${window.innerWidth} x ${window.innerHeight} px`,
     });
     return results[0]?.result || 'Unknown';
-  } catch (error) {
+  } catch {
     return 'N/A';
   }
 }
