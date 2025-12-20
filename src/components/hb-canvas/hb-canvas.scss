@@ -6,6 +6,17 @@
 
 canvas {
   display: block;
-  cursor: text;
   box-shadow: $shadow-md;
+
+  &.mode-text {
+    cursor: text;
+  }
+
+  &.mode-line {
+    cursor: crosshair;
+  }
+
+  &.mode-default {
+    cursor: default;
+  }
 }

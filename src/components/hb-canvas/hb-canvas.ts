@@ -39,15 +39,14 @@ export class HBCanvas extends LitElement {
   }
 
   render() {
-    const cursorStyle = this.drawingMode === 'line' ? 'crosshair' :
-      this.drawingMode === 'text' ? 'text' : 'default';
+    const modeClass = this.drawingMode ? `mode-${this.drawingMode}` : 'mode-default';
 
     return html`<canvas 
+      class="${modeClass}"
       @click=${this._handleCanvasClick}
       @mousedown=${this._handleMouseDown}
       @mousemove=${this._handleMouseMove}
       @mouseup=${this._handleMouseUp}
-      style="cursor: ${cursorStyle}"
     ></canvas>`;
   }
 
