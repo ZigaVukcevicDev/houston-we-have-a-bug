@@ -1,13 +1,13 @@
 import { ITool } from './base-tool';
 import type { LineAnnotation } from '../types';
-import { TOOL_DEFAULTS } from './constants';
+import { toolStyles } from './tool-styles';
 
 export class LineTool implements ITool {
   private lineAnnotations: LineAnnotation[] = [];
   private isDrawing: boolean = false;
   private startPoint: { x: number; y: number } | null = null;
-  private readonly color: string = TOOL_DEFAULTS.COLOR;
-  private readonly lineWidth: number = TOOL_DEFAULTS.LINE_WIDTH;
+  private readonly color: string = toolStyles.color;
+  private readonly lineWidth: number = toolStyles.lineWidth;
   private onRedraw: () => void;
 
   constructor(onRedraw: () => void) {
