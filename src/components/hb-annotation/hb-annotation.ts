@@ -13,12 +13,6 @@ export class HBAnnotation extends LitElement {
   private dataUrl: string = '';
 
   @state()
-  private color: string = '#ff0000';
-
-  @state()
-  private fontSize: number = 24;
-
-  @state()
   private activeTool: string = 'text';
 
   connectedCallback() {
@@ -61,8 +55,6 @@ export class HBAnnotation extends LitElement {
       <div class="canvas-container">
         <hb-canvas
           .dataUrl=${this.dataUrl}
-          .color=${this.color}
-          .fontSize=${this.fontSize}
           .drawingMode=${this.activeTool}
         ></hb-canvas>
       </div>

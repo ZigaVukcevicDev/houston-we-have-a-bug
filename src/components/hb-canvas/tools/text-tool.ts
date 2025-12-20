@@ -1,25 +1,16 @@
 import { ITool } from './base-tool';
 import type { TextAnnotation } from '../types';
+import { TOOL_DEFAULTS } from './constants';
 
 export class TextTool implements ITool {
   private annotations: TextAnnotation[] = [];
   private textInput: HTMLInputElement | null = null;
-  private color: string;
-  private fontSize: number;
+  private readonly color: string = TOOL_DEFAULTS.COLOR;
+  private readonly fontSize: number = TOOL_DEFAULTS.FONT_SIZE;
   private onRedraw: () => void;
 
-  constructor(color: string, fontSize: number, onRedraw: () => void) {
-    this.color = color;
-    this.fontSize = fontSize;
+  constructor(onRedraw: () => void) {
     this.onRedraw = onRedraw;
-  }
-
-  updateColor(color: string) {
-    this.color = color;
-  }
-
-  updateFontSize(fontSize: number) {
-    this.fontSize = fontSize;
   }
 
   handleClick(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {

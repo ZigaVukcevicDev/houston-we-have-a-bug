@@ -13,14 +13,6 @@ describe('HBCanvas', () => {
         expect(canvas.dataUrl).toBe('');
     });
 
-    it('should have default color property', () => {
-        expect(canvas.color).toBe('#ff0000');
-    });
-
-    it('should have default fontSize property', () => {
-        expect(canvas.fontSize).toBe(24);
-    });
-
     describe('download', () => {
         it('should create download link with default filename and quality', () => {
             // Mock canvas element
@@ -108,16 +100,6 @@ describe('HBCanvas', () => {
         it('should allow setting dataUrl', () => {
             canvas.dataUrl = 'data:image/png;base64,test';
             expect(canvas.dataUrl).toBe('data:image/png;base64,test');
-        });
-
-        it('should allow setting color', () => {
-            canvas.color = '#00ff00';
-            expect(canvas.color).toBe('#00ff00');
-        });
-
-        it('should allow setting fontSize', () => {
-            canvas.fontSize = 48;
-            expect(canvas.fontSize).toBe(48);
         });
 
         afterEach(() => {

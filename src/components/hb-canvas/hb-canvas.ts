@@ -14,12 +14,6 @@ export class HBCanvas extends LitElement {
   dataUrl: string = '';
 
   @property({ type: String })
-  color: string = '#ff0000';
-
-  @property({ type: Number })
-  fontSize: number = 24;
-
-  @property({ type: String })
   drawingMode: DrawingMode = 'text';
 
   @query('canvas')
@@ -36,8 +30,8 @@ export class HBCanvas extends LitElement {
 
   private _initializeTools() {
     // Initialize tools with a redraw callback
-    this.tools.set('text', new TextTool(this.color, this.fontSize, () => this._redraw()));
-    this.tools.set('line', new LineTool(this.color, () => this._redraw()));
+    this.tools.set('text', new TextTool(() => this._redraw()));
+    this.tools.set('line', new LineTool(() => this._redraw()));
   }
 
   private get _activeTool(): ITool | undefined {
@@ -61,16 +55,6 @@ export class HBCanvas extends LitElement {
   protected updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('dataUrl') && this.dataUrl) {
       this._loadImage();
-    }
-
-    // Update tool properties when color or fontSize changes
-    if (changedProperties.has('color')) {
-      (this.tools.get('text') as TextTool)?.updateColor(this.color);
-      (this.tools.get('line') as LineTool)?.updateColor(this.color);
-    }
-
-    if (changedProperties.has('fontSize')) {
-      (this.tools.get('text') as TextTool)?.updateFontSize(this.fontSize);
     }
   }
 

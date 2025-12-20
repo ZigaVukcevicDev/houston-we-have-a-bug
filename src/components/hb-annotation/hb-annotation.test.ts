@@ -18,14 +18,6 @@ describe('HBAnnotation', () => {
     vi.clearAllMocks();
   });
 
-  it('should have default color property', () => {
-    expect(annotation['color']).toBe('#ff0000');
-  });
-
-  it('should have default fontSize property', () => {
-    expect(annotation['fontSize']).toBe(24);
-  });
-
   it('should have empty dataUrl initially', () => {
     expect(annotation['dataUrl']).toBe('');
   });
