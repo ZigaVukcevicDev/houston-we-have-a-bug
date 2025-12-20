@@ -1,11 +1,16 @@
 import { LitElement, html, unsafeCSS } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
 import styles from './hb-toolbar.scss';
 import '../hb-toolbar-tool/hb-toolbar-tool';
+
+type ToolType = 'text' | 'line' | 'arrow' | 'rectangle' | 'crop';
 
 @customElement('hb-toolbar')
 export class HBToolbar extends LitElement {
   static styles = unsafeCSS(styles);
+
+  @state()
+  private _activeTool: ToolType = 'text';
 
   render() {
     return html`
@@ -15,11 +20,11 @@ export class HBToolbar extends LitElement {
         </a>
 
         <div class="tools">
-          <hb-toolbar-tool title="Text" icon="text" .isActive=${false}></hb-toolbar-tool>
-          <hb-toolbar-tool title="Line" icon="line" .isActive=${false}></hb-toolbar-tool>
-          <hb-toolbar-tool title="Arrow" icon="arrow" .isActive=${true}></hb-toolbar-tool>
-          <hb-toolbar-tool title="Rectangle" icon="rectangle" .isActive=${false}></hb-toolbar-tool>
-          <hb-toolbar-tool title="Crop" icon="crop" .isActive=${false}></hb-toolbar-tool>
+          <hb-toolbar-tool title="Text" icon="text" .isActive=${this._activeTool === 'text'} @click=${() => this._handleToolClick('text')}></hb-toolbar-tool>
+          <hb-toolbar-tool title="Line" icon="line" .isActive=${this._activeTool === 'line'} @click=${() => this._handleToolClick('line')}></hb-toolbar-tool>
+          <hb-toolbar-tool title="Arrow" icon="arrow" .isActive=${this._activeTool === 'arrow'} @click=${() => this._handleToolClick('arrow')}></hb-toolbar-tool>
+          <hb-toolbar-tool title="Rectangle" icon="rectangle" .isActive=${this._activeTool === 'rectangle'} @click=${() => this._handleToolClick('rectangle')}></hb-toolbar-tool>
+          <hb-toolbar-tool title="Crop" icon="crop" .isActive=${this._activeTool === 'crop'} @click=${() => this._handleToolClick('crop')}></hb-toolbar-tool>
         </div>
 
         <button class="download" title="Download" @click=${this._handleDownload}>
@@ -27,6 +32,10 @@ export class HBToolbar extends LitElement {
         </button>
       </div> 
     `;
+  }
+
+  private _handleToolClick(tool: ToolType) {
+    this._activeTool = tool;
   }
 
   private _handleDownload() {
