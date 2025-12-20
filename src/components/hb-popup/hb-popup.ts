@@ -44,93 +44,102 @@ export class HBPopup extends LitElement {
           </button>
         </div>
 
-        ${this.environmentDetails
-        ? html`
-              <div class="environment-details-heading">
-                <h2>Environment details</h2>
-
-                <button
-                  class="icon-button"
-                  @click=${this._copyToClipboard}
-                  title="Copy to clipboard"
-                  ?disabled=${this.isCopyingDisabled}
-                >
-                  ${!this.isCopyingDisabled
-            ? html`
-                        <img src="../images/copy-black.svg" alt="copy" class="icon-default" />
-                        <img src="../images/copy-red-500.svg" alt="copy" class="icon-hover" />
-                        <img src="../images/copy-red-400.svg" alt="copy" class="icon-active" />
-                      `
-            : null}
-                  ${this.isCopyingDisabled
-            ? html`
-                        <img src="../images/check-black.svg" alt="check" class="icon-default" />
-                      `
-            : null}
-                </button>
-              </div>
-
-              <table class="environment-details">
-                <tbody>
-                  <tr>
-                    <th>
-                      <img src="../images/clock-black.svg" alt="clock" />
-                      Date and time
-                    </th>
-                    <td>${this.environmentDetails.dateAndTime}</td>
-                  </tr>
-                  <tr>
-                    <th colspan="2">
-                      <img src="../images/globe-black.svg" alt="globe" />
-                      URL
-                      <table>
-                        <tr>
-                          <td style="width: auto;"><span class="url">${this.environmentDetails.url}</span></td>
-                        </tr>
-                      </table>
-                    </th>
-                  </tr>
-                  <tr>
-                    <th colspan="2">
-                      <img src="../images/display-black.svg" alt="display" />
-                      Display
-                      <table>
-                        <tr>
-                          <td>Visible area</td>
-                          <td>${this.environmentDetails.visibleArea}</td>
-                        </tr>
-                        <tr>
-                          <td>Display resolution</td>
-                          <td>${this.environmentDetails.displayResolution}</td>
-                        </tr>
-                        <tr>
-                          <td>Device pixel ratio</td>
-                          <td>${this.environmentDetails.devicePixelRatio}</td>
-                        </tr>
-                      </table>
-                    </th>
-                  </tr>
-                  <tr>
-                    <th colspan="2">
-                      <img src="../images/target-black.svg" alt="target" />
-                      System
-                      <table>
-                        <tr>
-                          <td>Browser</td>
-                          <td>${this.environmentDetails.browser}</td>
-                        </tr>
-                        <tr>
-                          <td>Operating system</td>
-                          <td>${this.environmentDetails.os}</td>
-                        </tr>
-                      </table>
-                    </th>
-                  </tr>
-                </tbody>
-              </table>
-            `
-        : null}
+        ${this._renderEnvironmentDetails()}
       </div>
+    `;
+  }
+
+  private _renderCopyButtonIcon() {
+    if (this.isCopyingDisabled) {
+      return html`
+        <img src="../images/check-black.svg" alt="check" class="icon-default" />
+      `;
+    }
+
+    return html`
+      <img src="../images/copy-black.svg" alt="copy" class="icon-default" />
+      <img src="../images/copy-red-500.svg" alt="copy" class="icon-hover" />
+      <img src="../images/copy-red-400.svg" alt="copy" class="icon-active" />
+    `;
+  }
+
+  private _renderEnvironmentDetails() {
+    if (!this.environmentDetails) {
+      return null;
+    }
+
+    return html`
+      <div class="environment-details-heading">
+        <h2>Environment details</h2>
+
+        <button
+          class="icon-button"
+          @click=${this._copyToClipboard}
+          title="Copy to clipboard"
+          ?disabled=${this.isCopyingDisabled}
+        >
+          ${this._renderCopyButtonIcon()}
+        </button>
+      </div>
+
+      <table class="environment-details">
+        <tbody>
+          <tr>
+            <th>
+              <img src="../images/clock-black.svg" alt="clock" />
+              Date and time
+            </th>
+            <td>${this.environmentDetails.dateAndTime}</td>
+          </tr>
+          <tr>
+            <th colspan="2">
+              <img src="../images/globe-black.svg" alt="globe" />
+              URL
+              <table>
+                <tr>
+                  <td style="width: auto;"><span class="url">${this.environmentDetails.url}</span></td>
+                </tr>
+              </table>
+            </th>
+          </tr>
+          <tr>
+            <th colspan="2">
+              <img src="../images/display-black.svg" alt="display" />
+              Display
+              <table>
+                <tr>
+                  <td>Visible area</td>
+                  <td>${this.environmentDetails.visibleArea}</td>
+                </tr>
+                <tr>
+                  <td>Display resolution</td>
+                  <td>${this.environmentDetails.displayResolution}</td>
+                </tr>
+                <tr>
+                  <td>Device pixel ratio</td>
+                  <td>${this.environmentDetails.devicePixelRatio}</td>
+                </tr>
+              </table>
+            </th>
+          </tr>
+          <tr>
+            <th colspan="2">
+              <img src="../images/target-black.svg" alt="target" />
+              System
+              <table>
+                <tr>
+                  <td>Browser</td>
+                  <td>${this.environmentDetails.browser}</td>
+                </tr>
+                <tr>
+                  <td>Operating system</td>
+                  <td>${this.environmentDetails.os}</td>
+                </tr>
+              </table>
+            </th>
+          </tr>
+        </tbody>
+      </table>
     `;
   }
 
