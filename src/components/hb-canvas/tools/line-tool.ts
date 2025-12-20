@@ -14,11 +14,7 @@ export class LineTool implements ITool {
     this.onRedraw = onRedraw;
   }
 
-  handleClick(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
-    // Line tool doesn't use click, uses mouse down/move/up
-  }
-
-  handleMouseDown(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
+  handleMouseDown(event: MouseEvent, canvas: HTMLCanvasElement): void {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
@@ -49,7 +45,7 @@ export class LineTool implements ITool {
     ctx.stroke();
   }
 
-  handleMouseUp(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
+  handleMouseUp(event: MouseEvent, canvas: HTMLCanvasElement): void {
     if (!this.isDrawing || !this.startPoint) return;
 
     const rect = canvas.getBoundingClientRect();

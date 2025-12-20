@@ -13,7 +13,7 @@ export class TextTool implements ITool {
     this.onRedraw = onRedraw;
   }
 
-  handleClick(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
+  handleClick(event: MouseEvent, canvas: HTMLCanvasElement): void {
     if (this.textInput) {
       this._finalizeTextInput();
       return;
@@ -26,18 +26,6 @@ export class TextTool implements ITool {
     const y = (event.clientY - rect.top) * scaleY;
 
     this._createTextInput(x, y, rect, scaleX, scaleY);
-  }
-
-  handleMouseDown(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
-    // Text tool doesn't use mouse down
-  }
-
-  handleMouseMove(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
-    // Text tool doesn't use mouse move
-  }
-
-  handleMouseUp(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
-    // Text tool doesn't use mouse up
   }
 
   render(ctx: CanvasRenderingContext2D): void {
