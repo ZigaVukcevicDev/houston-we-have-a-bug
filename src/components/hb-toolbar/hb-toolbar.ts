@@ -1,5 +1,5 @@
 import { LitElement, html, unsafeCSS } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 import styles from './hb-toolbar.scss';
 import '../hb-toolbar-tool/hb-toolbar-tool';
 
