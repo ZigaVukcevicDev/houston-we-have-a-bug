@@ -15,7 +15,6 @@ button {
       color: $color-white;
       background-color: $color-black;
       padding-top: calc($spacing-md - 3px);
-      transition: $transition;
 
       img {
         display: inline-block;
@@ -103,7 +102,6 @@ button {
     justify-content: center;
     align-items: center;
     border-radius: 10px;
-    transition: $transition;
 
     img {
       display: inline-block;
