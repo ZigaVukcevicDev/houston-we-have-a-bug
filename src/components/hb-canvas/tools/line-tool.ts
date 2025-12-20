@@ -157,6 +157,10 @@ export class LineTool implements ITool {
     ctx.moveTo(this.startPoint.x, this.startPoint.y);
     ctx.lineTo(x, y);
     ctx.stroke();
+
+    // Show handles while drawing
+    this.renderHandle(ctx, this.startPoint.x, this.startPoint.y, this.color);
+    this.renderHandle(ctx, x, y, this.color);
   }
 
   handleMouseUp(event: MouseEvent, canvas: HTMLCanvasElement): void {
@@ -205,9 +209,7 @@ export class LineTool implements ITool {
       },
     ];
 
-    // Auto-select the newly drawn line
-    this.selectedLineIndex = this.lineAnnotations.length - 1;
-
+    // Don't auto-select - handles will only show during drawing or manual selection
     this.cleanupDrawingState();
     this.onRedraw();
   }

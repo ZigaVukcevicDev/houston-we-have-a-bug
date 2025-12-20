@@ -28,10 +28,13 @@ describe('LineTool', () => {
       strokeStyle: '',
       lineWidth: 0,
       lineCap: '',
+      fillStyle: '',
       beginPath: vi.fn(),
       moveTo: vi.fn(),
       lineTo: vi.fn(),
       stroke: vi.fn(),
+      arc: vi.fn(),
+      fill: vi.fn(),
     } as unknown as CanvasRenderingContext2D;
   });
 
@@ -286,8 +289,8 @@ describe('LineTool', () => {
     it('should render all line annotations', () => {
       lineTool.render(mockCtx);
 
-      // Should draw 2 lines + 2 handles (handle rendering also calls beginPath)
-      expect(mockCtx.beginPath).toHaveBeenCalledTimes(4);
+      // Should draw 2 lines; no handles shown since no line is selected
+      expect(mockCtx.beginPath).toHaveBeenCalledTimes(2);
       expect(mockCtx.moveTo).toHaveBeenCalledTimes(2);
       expect(mockCtx.lineTo).toHaveBeenCalledTimes(2);
       expect(mockCtx.stroke).toHaveBeenCalled();
@@ -510,17 +513,20 @@ describe('LineTool', () => {
       } as unknown as CanvasRenderingContext2D;
     });
 
-    it('should auto-select line after drawing', () => {
+    it('should not auto-select line after drawing', () => {
       lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
       lineTool.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
 
-      expect(lineTool['selectedLineIndex']).toBe(0);
+      expect(lineTool['selectedLineIndex']).toBeNull();
     });
 
     it('should render handles on selected line', () => {
       // Draw a line
       lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
       lineTool.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
+
+      // Manually select it
+      lineTool['selectedLineIndex'] = 0;
 
       mockCtx.arc = vi.fn();
       mockCtx.fill = vi.fn();
@@ -532,7 +538,6 @@ describe('LineTool', () => {
       expect(mockCtx.arc).toHaveBeenCalledTimes(2);
       expect(mockCtx.fill).toHaveBeenCalledTimes(2);
     });
-
     it('should not render handles on non-selected lines', () => {
       // Draw two lines
       lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
@@ -541,8 +546,8 @@ describe('LineTool', () => {
       lineTool.handleMouseDown({ clientX: 300, clientY: 300 } as MouseEvent, mockCanvas);
       lineTool.handleMouseUp({ clientX: 400, clientY: 400, shiftKey: false } as MouseEvent, mockCanvas);
 
-      // Only second line is selected
-      expect(lineTool['selectedLineIndex']).toBe(1);
+      // Manually select only second line
+      lineTool['selectedLineIndex'] = 1;
 
       mockCtx.arc = vi.fn();
       mockCtx.fill = vi.fn();
@@ -554,14 +559,15 @@ describe('LineTool', () => {
     });
 
     it('should select line when clicked', () => {
-      // Draw a line first
+      // Draw lines first
       lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
       lineTool.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
 
-      // Deselect by drawing another line
       lineTool.handleMouseDown({ clientX: 300, clientY: 300 } as MouseEvent, mockCanvas);
       lineTool.handleMouseUp({ clientX: 400, clientY: 400, shiftKey: false } as MouseEvent, mockCanvas);
-      expect(lineTool['selectedLineIndex']).toBe(1);
+
+      // No auto-selection, so should be null
+      expect(lineTool['selectedLineIndex']).toBeNull();
 
       // Click on first line
       lineTool.handleClick!({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
@@ -570,9 +576,12 @@ describe('LineTool', () => {
     });
 
     it('should deselect when clicking empty space', () => {
-      // Draw and select a line
+      // Draw and manually select a line
       lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
       lineTool.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
+
+      // Manually select it
+      lineTool.handleClick!({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
       expect(lineTool['selectedLineIndex']).toBe(0);
 
       // Click far away
@@ -582,9 +591,12 @@ describe('LineTool', () => {
     });
 
     it('should deselect when starting to draw new line', () => {
-      // Draw and select a line
+      // Draw and manually select a line
       lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
       lineTool.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
+
+      // Manually select it
+      lineTool.handleClick!({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
       expect(lineTool['selectedLineIndex']).toBe(0);
 
       // Start drawing new line
@@ -596,9 +608,12 @@ describe('LineTool', () => {
 
   describe('handle dragging', () => {
     beforeEach(() => {
-      // Draw a line and select it
+      // Draw a line
       lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
       lineTool.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
+
+      // Manually select it for dragging tests
+      lineTool['selectedLineIndex'] = 0;
       mockRedraw.mockClear();
     });
 
@@ -803,7 +818,10 @@ describe('LineTool', () => {
       lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
       lineTool.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
 
-      // Edit first line
+      // Manually select it for editing
+      lineTool['selectedLineIndex'] = 0;
+
+      // Edit first line by dragging start handle
       lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
       lineTool.handleMouseMove(
         { clientX: 120, clientY: 120, shiftKey: false } as MouseEvent,
