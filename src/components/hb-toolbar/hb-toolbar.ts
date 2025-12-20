@@ -10,7 +10,7 @@ export class HBToolbar extends LitElement {
   static styles = unsafeCSS(styles);
 
   @state()
-  private _activeTool: ToolType = 'text';
+  private _activeTool: ToolType | null = null;
 
   render() {
     return html`

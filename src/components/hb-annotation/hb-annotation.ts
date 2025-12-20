@@ -13,7 +13,7 @@ export class HBAnnotation extends LitElement {
   private dataUrl: string = '';
 
   @state()
-  private activeTool: string = 'text';
+  private activeTool: string | null = null;
 
   connectedCallback() {
     super.connectedCallback();
