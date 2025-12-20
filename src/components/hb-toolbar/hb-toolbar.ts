@@ -3,7 +3,7 @@ import { customElement, state } from 'lit/decorators.js';
 import styles from './hb-toolbar.scss';
 import '../hb-toolbar-tool/hb-toolbar-tool';
 
-type ToolType = 'text' | 'line' | 'arrow' | 'rectangle' | 'crop';
+type ToolType = 'select' | 'text' | 'line' | 'arrow' | 'rectangle' | 'crop';
 
 @customElement('hb-toolbar')
 export class HBToolbar extends LitElement {
@@ -20,6 +20,7 @@ export class HBToolbar extends LitElement {
         </a>
 
         <div class="tools">
+          <hb-toolbar-tool title="Select" icon="select" .isActive=${this._activeTool === 'select'} @click=${() => this._handleToolClick('select')}></hb-toolbar-tool>
           <hb-toolbar-tool title="Text" icon="text" .isActive=${this._activeTool === 'text'} @click=${() => this._handleToolClick('text')}></hb-toolbar-tool>
           <hb-toolbar-tool title="Line" icon="line" .isActive=${this._activeTool === 'line'} @click=${() => this._handleToolClick('line')}></hb-toolbar-tool>
           <hb-toolbar-tool title="Arrow" icon="arrow" .isActive=${this._activeTool === 'arrow'} @click=${() => this._handleToolClick('arrow')}></hb-toolbar-tool>
