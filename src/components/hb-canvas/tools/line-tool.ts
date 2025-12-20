@@ -31,8 +31,23 @@ export class LineTool implements ITool {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-    const x = (event.clientX - rect.left) * scaleX;
-    const y = (event.clientY - rect.top) * scaleY;
+    let x = (event.clientX - rect.left) * scaleX;
+    let y = (event.clientY - rect.top) * scaleY;
+
+    // If Shift is pressed, constrain to horizontal or vertical
+    if (event.shiftKey) {
+      const dx = Math.abs(x - this.startPoint.x);
+      const dy = Math.abs(y - this.startPoint.y);
+
+      // Snap to the direction with more movement
+      if (dx > dy) {
+        // Horizontal line
+        y = this.startPoint.y;
+      } else {
+        // Vertical line
+        x = this.startPoint.x;
+      }
+    }
 
     // Redraw with preview line
     this.onRedraw();
@@ -51,8 +66,23 @@ export class LineTool implements ITool {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-    const x = (event.clientX - rect.left) * scaleX;
-    const y = (event.clientY - rect.top) * scaleY;
+    let x = (event.clientX - rect.left) * scaleX;
+    let y = (event.clientY - rect.top) * scaleY;
+
+    // If Shift is pressed, constrain to horizontal or vertical
+    if (event.shiftKey) {
+      const dx = Math.abs(x - this.startPoint.x);
+      const dy = Math.abs(y - this.startPoint.y);
+
+      // Snap to the direction with more movement
+      if (dx > dy) {
+        // Horizontal line
+        y = this.startPoint.y;
+      } else {
+        // Vertical line
+        x = this.startPoint.x;
+      }
+    }
 
     // Add the line annotation
     this.lineAnnotations = [
