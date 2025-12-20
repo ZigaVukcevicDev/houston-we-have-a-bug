@@ -6,6 +6,14 @@ You must follow these rules when working on this repository.
 - **Run Tests**: You must run `npm run test` after every change to logic, components, or styles that could affect functionality.
 - **Fix Immediately**: If a test fails, fixing it is your top priority. Do not proceed with new features until tests pass.
 - **No Regressions**: Ensure that existing features (like the Screenshot or Environment Details) continue to work.
+- **Comprehensive Coverage Required**: When creating new functionality or updating existing functionality, you MUST write comprehensive tests that cover:
+  - All major code paths and functionality
+  - Edge cases and error handling
+  - Integration points with other components
+  - User interactions and state changes
+- **Avoid Duplicate Coverage**: Component tests should focus on the component's responsibilities (initialization, delegation, rendering), not duplicate behavior tests that exist in child component/tool test files. For example:
+  - ✅ Test that `HBCanvas` properly initializes and delegates to `TextTool`
+  - ❌ Don't test `TextTool`'s text input behavior in `HBCanvas` tests (that's in `text-tool.test.ts`)
 
 ## 2. Code Quality & Cleanliness
 - **No Leftovers**: When refactoring or removing features (e.g., Memory Usage), fully remove all related code, types, and unused imports.
