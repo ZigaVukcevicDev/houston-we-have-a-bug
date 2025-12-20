@@ -19,6 +19,10 @@ You must follow these rules when working on this repository.
 - **No Leftovers**: When refactoring or removing features (e.g., Memory Usage), fully remove all related code, types, and unused imports.
 - **No Commented Code**: Do not leave commented-out code blocks. If code is not used, delete it.
 - **Strict Types**: Use TypeScript interfaces properly. Avoid `any`.
+- **Type Organization**: All type definitions and interfaces must be properly organized:
+  - **Interfaces**: `src/interfaces/*.interface.ts` (e.g. `annotation.interface.ts`)
+  - **Types**: `src/types/*.type.ts` (e.g. `drawing-mode.type.ts`)
+  - Never define types/interfaces in functionality files
 
 ## 3. Source of Truth
 - **`src/*` Only**: specificly edit files in `src/`.

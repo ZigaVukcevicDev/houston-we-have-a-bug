@@ -1,8 +1,8 @@
 import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import styles from './hb-canvas.scss';
-import type { DrawingMode } from './types';
-import type { ITool } from './tools/base-tool';
+import type { DrawingMode } from '../../types/drawing-mode.type';
+import type { Tool } from '../../interfaces/tool.interface';
 import { TextTool } from './tools/text-tool';
 import { LineTool } from './tools/line-tool';
 
@@ -21,7 +21,7 @@ export class HBCanvas extends LitElement {
 
   private ctx!: CanvasRenderingContext2D;
   private originalImage: HTMLImageElement | null = null;
-  private tools: Map<DrawingMode, ITool> = new Map();
+  private tools: Map<DrawingMode, Tool> = new Map();
 
   constructor() {
     super();
@@ -34,7 +34,7 @@ export class HBCanvas extends LitElement {
     this.tools.set('line', new LineTool(() => this._redraw()));
   }
 
-  private get _activeTool(): ITool | undefined {
+  private get _activeTool(): Tool | undefined {
     return this.tools.get(this.drawingMode);
   }
 

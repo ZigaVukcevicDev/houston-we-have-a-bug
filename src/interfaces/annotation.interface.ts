@@ -14,7 +14,3 @@ export interface LineAnnotation {
   color: string;
   width: number;
 }
-
-export type Annotation = TextAnnotation | LineAnnotation;
-
-export type DrawingMode = 'text' | 'line' | 'arrow' | 'rectangle' | 'crop';

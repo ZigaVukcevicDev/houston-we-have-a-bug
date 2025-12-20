@@ -6,7 +6,7 @@ import { getDevicePixelRatio } from '../../utils/get-device-pixel-ratio';
 import { getDisplayResolution } from '../../utils/get-display-resolution';
 import { getOS } from '../../utils/get-os';
 import { getVisibleArea } from '../../utils/get-visible-area';
-import type { EnvironmentDetails } from '../../types/environment-details';
+import type { EnvironmentDetails } from '../../interfaces/environment-details.interface';
 import styles from './hb-popup.scss';
 
 @customElement('hb-popup')

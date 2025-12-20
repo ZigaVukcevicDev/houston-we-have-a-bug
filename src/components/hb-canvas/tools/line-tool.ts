@@ -1,11 +1,11 @@
-import { ITool } from './base-tool';
-import type { LineAnnotation } from '../types';
+import type { Tool } from '../../../interfaces/tool.interface';
+import type { LineAnnotation } from '../../../interfaces/annotation.interface';
 import { toolStyles } from './tool-styles';
 
 const HANDLE_RADIUS = 8;
 const LINE_HIT_THRESHOLD = 10;
 
-export class LineTool implements ITool {
+export class LineTool implements Tool {
   private lineAnnotations: LineAnnotation[] = [];
   private isDrawing: boolean = false;
   private startPoint: { x: number; y: number } | null = null;

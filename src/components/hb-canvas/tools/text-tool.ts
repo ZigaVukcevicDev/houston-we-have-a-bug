@@ -1,8 +1,8 @@
-import { ITool } from './base-tool';
-import type { TextAnnotation } from '../types';
+import type { Tool } from '../../../interfaces/tool.interface';
+import type { TextAnnotation } from '../../../interfaces/annotation.interface';
 import { toolStyles } from './tool-styles';
 
-export class TextTool implements ITool {
+export class TextTool implements Tool {
   private annotations: TextAnnotation[] = [];
   private textInput: HTMLInputElement | null = null;
   private readonly color: string = toolStyles.color;

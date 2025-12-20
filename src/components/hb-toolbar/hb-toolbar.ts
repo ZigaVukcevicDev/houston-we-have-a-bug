@@ -2,8 +2,8 @@ import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import styles from './hb-toolbar.scss';
 import '../hb-toolbar-tool/hb-toolbar-tool';
+import type { ToolType } from '../../types/tool-type.type';
 
-type ToolType = 'select' | 'text' | 'line' | 'arrow' | 'rectangle' | 'crop';
 
 @customElement('hb-toolbar')
 export class HBToolbar extends LitElement {
