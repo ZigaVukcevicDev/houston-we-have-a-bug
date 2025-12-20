@@ -49,24 +49,9 @@ export class HBAnnotation extends LitElement {
     }
 
     return html`
-      <!-- TODO: remove when not needed
-      <div class="header">
-        <div class="header-actions">
-          <button class="action-button secondary" @click=${this._handleClear}>
-            Clear annotations
-          </button>
-          <button class="action-button primary" @click=${this._handleDownload}>
-            <img src="../images/download-white.svg" alt="download" />
-            Download
-          </button>
-        </div>
-      </div>
-      -->
-
       <div class="toolbar-container">
-        <hb-toolbar></hb-toolbar>
+        <hb-toolbar @download=${this._handleDownload}></hb-toolbar>
       </div>
-
       <div class="canvas-container">
         <hb-canvas
           .dataUrl=${this.dataUrl}
@@ -75,11 +60,6 @@ export class HBAnnotation extends LitElement {
         ></hb-canvas>
       </div>
     `;
-  }
-
-  private _handleClear() {
-    const canvas = this.shadowRoot?.querySelector('hb-canvas') as HBCanvas;
-    canvas?.clearAnnotations();
   }
 
   private _handleDownload() {

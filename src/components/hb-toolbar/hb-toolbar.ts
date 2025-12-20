@@ -22,9 +22,15 @@ export class HBToolbar extends LitElement {
           <hb-toolbar-tool title="Crop" icon="crop" .isActive=${false}></hb-toolbar-tool>
         </div>
 
-        <div class="download">TBD</div>
+        <button class="download" title="Download" @click=${this._handleDownload}>
+          <img src="../images/download-white.svg" alt="download" />
+        </button>
       </div> 
     `;
+  }
+
+  private _handleDownload() {
+    this.dispatchEvent(new CustomEvent('download', { bubbles: true, composed: true }));
   }
 }
 
