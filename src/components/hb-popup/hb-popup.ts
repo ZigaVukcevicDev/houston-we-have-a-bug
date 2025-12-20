@@ -36,7 +36,7 @@ export class HBPopup extends LitElement {
             Annotate screenshot
           </button>
 
-          <button class="action-button tertiary mb-md" @click=${this._gatherEnvironmentDetails}>
+          <button class="action-button secondary mt-md mb-md" @click=${this._gatherEnvironmentDetails}>
             <img src="../images/info-black.svg" alt="info" class="icon-default" />
             <img src="../images/info-red-500.svg" alt="info" class="icon-hover" />
             <img src="../images/info-red-400.svg" alt="info" class="icon-active" />
@@ -50,7 +50,7 @@ export class HBPopup extends LitElement {
                 <h2>Environment details</h2>
 
                 <button
-                  class="icon-button-no-background"
+                  class="icon-button"
                   @click=${this._copyToClipboard}
                   title="Copy to clipboard"
                   ?disabled=${this.isCopyingDisabled}
