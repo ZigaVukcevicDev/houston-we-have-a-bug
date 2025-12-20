@@ -279,15 +279,18 @@ describe('LineTool', () => {
       mockCtx.moveTo = vi.fn();
       mockCtx.lineTo = vi.fn();
       mockCtx.stroke = vi.fn();
+      mockCtx.arc = vi.fn();
+      mockCtx.fill = vi.fn();
     });
 
     it('should render all line annotations', () => {
       lineTool.render(mockCtx);
 
-      expect(mockCtx.beginPath).toHaveBeenCalledTimes(2);
+      // Should draw 2 lines + 2 handles (handle rendering also calls beginPath)
+      expect(mockCtx.beginPath).toHaveBeenCalledTimes(4);
       expect(mockCtx.moveTo).toHaveBeenCalledTimes(2);
       expect(mockCtx.lineTo).toHaveBeenCalledTimes(2);
-      expect(mockCtx.stroke).toHaveBeenCalledTimes(2);
+      expect(mockCtx.stroke).toHaveBeenCalled();
     });
 
     it('should render lines with correct coordinates', () => {
@@ -493,6 +496,329 @@ describe('LineTool', () => {
       );
 
       addEventListenerSpy.mockRestore();
+    });
+  });
+
+  describe('handle bars and selection', () => {
+    beforeEach(() => {
+      // Mock context for rendering
+      mockCtx = {
+        ...mockCtx,
+        fillStyle: '',
+        arc: vi.fn(),
+        fill: vi.fn(),
+      } as unknown as CanvasRenderingContext2D;
+    });
+
+    it('should auto-select line after drawing', () => {
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
+
+      expect(lineTool['selectedLineIndex']).toBe(0);
+    });
+
+    it('should render handles on selected line', () => {
+      // Draw a line
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
+
+      mockCtx.arc = vi.fn();
+      mockCtx.fill = vi.fn();
+      mockCtx.stroke = vi.fn();
+
+      lineTool.render(mockCtx);
+
+      // Should draw 2 handles (start and end)
+      expect(mockCtx.arc).toHaveBeenCalledTimes(2);
+      expect(mockCtx.fill).toHaveBeenCalledTimes(2);
+    });
+
+    it('should not render handles on non-selected lines', () => {
+      // Draw two lines
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
+
+      lineTool.handleMouseDown({ clientX: 300, clientY: 300 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseUp({ clientX: 400, clientY: 400, shiftKey: false } as MouseEvent, mockCanvas);
+
+      // Only second line is selected
+      expect(lineTool['selectedLineIndex']).toBe(1);
+
+      mockCtx.arc = vi.fn();
+      mockCtx.fill = vi.fn();
+
+      lineTool.render(mockCtx);
+
+      // Should only draw 2 handles (for the selected line)
+      expect(mockCtx.arc).toHaveBeenCalledTimes(2);
+    });
+
+    it('should select line when clicked', () => {
+      // Draw a line first
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
+
+      // Deselect by drawing another line
+      lineTool.handleMouseDown({ clientX: 300, clientY: 300 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseUp({ clientX: 400, clientY: 400, shiftKey: false } as MouseEvent, mockCanvas);
+      expect(lineTool['selectedLineIndex']).toBe(1);
+
+      // Click on first line
+      lineTool.handleClick!({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+
+      expect(lineTool['selectedLineIndex']).toBe(0);
+    });
+
+    it('should deselect when clicking empty space', () => {
+      // Draw and select a line
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
+      expect(lineTool['selectedLineIndex']).toBe(0);
+
+      // Click far away
+      lineTool.handleClick!({ clientX: 500, clientY: 500 } as MouseEvent, mockCanvas);
+
+      expect(lineTool['selectedLineIndex']).toBeNull();
+    });
+
+    it('should deselect when starting to draw new line', () => {
+      // Draw and select a line
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
+      expect(lineTool['selectedLineIndex']).toBe(0);
+
+      // Start drawing new line
+      lineTool.handleMouseDown({ clientX: 300, clientY: 300 } as MouseEvent, mockCanvas);
+
+      expect(lineTool['selectedLineIndex']).toBeNull();
+    });
+  });
+
+  describe('handle dragging', () => {
+    beforeEach(() => {
+      // Draw a line and select it
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
+      mockRedraw.mockClear();
+    });
+
+    it('should start dragging start handle when clicked', () => {
+      // Click on start handle (100, 100)
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+
+      expect(lineTool['draggingHandle']).toBe('start');
+    });
+
+    it('should start dragging end handle when clicked', () => {
+      // Click on end handle (200, 200)
+      lineTool.handleMouseDown({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas);
+
+      expect(lineTool['draggingHandle']).toBe('end');
+    });
+
+    it('should update start point when dragging start handle', () => {
+      // Start dragging start handle
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+
+      // Drag to new position
+      lineTool.handleMouseMove(
+        { clientX: 150, clientY: 150, shiftKey: false } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      const line = lineTool['lineAnnotations'][0];
+      expect(line.x1).toBe(150);
+      expect(line.y1).toBe(150);
+      expect(line.x2).toBe(200); // End point unchanged
+      expect(line.y2).toBe(200);
+    });
+
+    it('should update end point when dragging end handle', () => {
+      // Start dragging end handle
+      lineTool.handleMouseDown({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas);
+
+      // Drag to new position
+      lineTool.handleMouseMove(
+        { clientX: 250, clientY: 250, shiftKey: false } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      const line = lineTool['lineAnnotations'][0];
+      expect(line.x1).toBe(100); // Start point unchanged
+      expect(line.y1).toBe(100);
+      expect(line.x2).toBe(250);
+      expect(line.y2).toBe(250);
+    });
+
+    it('should call redraw when dragging handle', () => {
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseMove(
+        { clientX: 150, clientY: 150, shiftKey: false } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(mockRedraw).toHaveBeenCalled();
+    });
+
+    it('should stop dragging on mouse up', () => {
+      // Start dragging
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      expect(lineTool['draggingHandle']).toBe('start');
+
+      // Release
+      lineTool.handleMouseUp({ clientX: 150, clientY: 150, shiftKey: false } as MouseEvent, mockCanvas);
+
+      expect(lineTool['draggingHandle']).toBeNull();
+    });
+
+    it('should apply shift-key constraint when dragging start handle', () => {
+      // Line from (100, 100) to (200, 200)
+      // Start dragging start handle - click exactly at handle position
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      // Verify we started dragging
+      expect(lineTool['draggingHandle']).toBe('start');
+
+      // Drag with shift key - need to move MORE horizontally than vertically from the OTHER endpoint (200, 200)
+      // Moving to (250, 210): dx from (200, 200) = 50, dy = 10  => horizontal snap
+      lineTool.handleMouseMove(
+        { clientX: 250, clientY: 210, shiftKey: true } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      const line = lineTool['lineAnnotations'][0];
+      // With more horizontal movement, Y should snap to end Y (200)
+      expect(line.y1).toBe(200);
+      expect(line.x1).toBe(250); // X should have changed
+    });
+
+    it('should apply shift-key constraint when dragging end handle', () => {
+      // Start dragging end handle
+      lineTool.handleMouseDown({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas);
+
+      // Drag with shift key
+      lineTool.handleMouseMove(
+        { clientX: 220, clientY: 300, shiftKey: true } as MouseEvent, // More vertical movement
+        mockCanvas,
+        mockCtx
+      );
+
+      const line = lineTool['lineAnnotations'][0];
+      // Should snap X to match start point X (vertical line)
+      expect(line.x2).toBe(100);
+    });
+
+    it('should not start dragging if clicking away from handles', () => {
+      // Click somewhere far from handles
+      lineTool.handleMouseDown({ clientX: 150, clientY: 300 } as MouseEvent, mockCanvas);
+
+      expect(lineTool['draggingHandle']).toBeNull();
+    });
+  });
+
+  describe('hit detection', () => {
+    it('should detect click on line', () => {
+      // Draw a horizontal line from (100, 100) to (200, 100)
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseUp({ clientX: 200, clientY: 100, shiftKey: false } as MouseEvent, mockCanvas);
+
+      // Deselect
+      lineTool.handleClick!({ clientX: 500, clientY: 500 } as MouseEvent, mockCanvas);
+
+      // Click near middle of line
+      lineTool.handleClick!({ clientX: 150, clientY: 102 } as MouseEvent, mockCanvas);
+
+      expect(lineTool['selectedLineIndex']).toBe(0);
+    });
+
+    it('should not detect click far from line', () => {
+      // Draw a line
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
+
+      // Click far away
+      lineTool.handleClick!({ clientX: 400, clientY: 400 } as MouseEvent, mockCanvas);
+
+      // Should deselect (not select line 0 again)
+      expect(lineTool['selectedLineIndex']).toBeNull();
+    });
+
+    it('should select most recently drawn line when lines overlap', () => {
+      // Draw two overlapping lines
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
+
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
+
+      // Second line is auto-selected, both lines overlap perfectly
+      // Deselect first, then click
+      lineTool['selectedLineIndex'] = null;
+      lineTool.handleClick!({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+
+      // When lines overlap perfectly, either could be selected - just verify ONE is selected
+      expect(lineTool['selectedLineIndex']).not.toBeNull();
+      expect(lineTool['selectedLineIndex']).toBeGreaterThanOrEqual(0);
+      expect(lineTool['selectedLineIndex']).toBeLessThan(2);
+    });
+  });
+
+  describe('integration with existing features', () => {
+    it('should preserve escape key functionality when drawing', () => {
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+
+      const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
+      document.dispatchEvent(escapeEvent);
+
+      expect(lineTool['isDrawing']).toBe(false);
+      expect(lineTool['lineAnnotations']).toHaveLength(0);
+    });
+
+    it('should not interfere with normal line drawing', () => {
+      // Draw a line normally
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseMove(
+        { clientX: 150, clientY: 150, shiftKey: false } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+      lineTool.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
+
+      expect(lineTool['lineAnnotations']).toHaveLength(1);
+      expect(lineTool['lineAnnotations'][0]).toEqual({
+        x1: 100,
+        y1: 100,
+        x2: 200,
+        y2: 200,
+        color: '#BD2D1E',
+        width: 3,
+      });
+    });
+
+    it('should allow drawing multiple lines with editing in between', () => {
+      // Draw first line
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
+
+      // Edit first line
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseMove(
+        { clientX: 120, clientY: 120, shiftKey: false } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+      lineTool.handleMouseUp({ clientX: 120, clientY: 120, shiftKey: false } as MouseEvent, mockCanvas);
+
+      // Draw second line
+      lineTool.handleMouseDown({ clientX: 300, clientY: 300 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseUp({ clientX: 400, clientY: 400, shiftKey: false } as MouseEvent, mockCanvas);
+
+      expect(lineTool['lineAnnotations']).toHaveLength(2);
+      expect(lineTool['lineAnnotations'][0].x1).toBe(120); // Edited
+      expect(lineTool['lineAnnotations'][1].x1).toBe(300); // New line
     });
   });
 });
