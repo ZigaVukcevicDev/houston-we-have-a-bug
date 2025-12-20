@@ -89,6 +89,47 @@ export class LineTool implements ITool {
     let x = (event.clientX - rect.left) * scaleX;
     let y = (event.clientY - rect.top) * scaleY;
 
+    // Update cursor based on what's under the mouse
+    if (!this.isDrawing && !this.draggingHandle) {
+      // Check if hovering over a handle of selected line
+      if (this.selectedLineIndex !== null) {
+        const line = this.lineAnnotations[this.selectedLineIndex];
+
+        if (this.isPointOnHandle(x, y, line.x1, line.y1) ||
+          this.isPointOnHandle(x, y, line.x2, line.y2)) {
+          canvas.style.cursor = 'move';
+        } else if (this.isPointOnLine(x, y, line)) {
+          canvas.style.cursor = 'pointer';
+        } else {
+          // Check other lines
+          let onAnyLine = false;
+          for (let i = this.lineAnnotations.length - 1; i >= 0; i--) {
+            if (i !== this.selectedLineIndex && this.isPointOnLine(x, y, this.lineAnnotations[i])) {
+              canvas.style.cursor = 'pointer';
+              onAnyLine = true;
+              break;
+            }
+          }
+          if (!onAnyLine) {
+            canvas.style.cursor = 'crosshair';
+          }
+        }
+      } else {
+        // No line selected - check if hovering over any line
+        let found = false;
+        for (let i = this.lineAnnotations.length - 1; i >= 0; i--) {
+          if (this.isPointOnLine(x, y, this.lineAnnotations[i])) {
+            canvas.style.cursor = 'pointer';
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          canvas.style.cursor = 'crosshair';
+        }
+      }
+    }
+
     // Handle dragging endpoint
     if (this.draggingHandle && this.selectedLineIndex !== null) {
       x -= this.dragOffset.x;
@@ -194,6 +235,15 @@ export class LineTool implements ITool {
         // Vertical line
         x = this.startPoint.x;
       }
+    }
+
+    // Check if line is too short (prevent zero-length lines from single clicks)
+    const lineLength = Math.sqrt((x - this.startPoint.x) ** 2 + (y - this.startPoint.y) ** 2);
+    if (lineLength < 2) {
+      // Too short, don't create line
+      this.cleanupDrawingState();
+      this.onRedraw();
+      return;
     }
 
     // Add the line annotation

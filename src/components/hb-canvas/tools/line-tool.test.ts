@@ -21,6 +21,9 @@ describe('LineTool', () => {
       }),
       width: 800,
       height: 600,
+      style: {
+        cursor: 'default',
+      },
     } as unknown as HTMLCanvasElement;
 
     // Mock context
@@ -81,9 +84,11 @@ describe('LineTool', () => {
     });
 
     it('should draw preview line when dragging', () => {
+      lineTool.handleMouseDown({ clientX: 50, clientY: 50 } as MouseEvent, mockCanvas);
+
       const event = {
-        clientX: 200,
-        clientY: 200,
+        clientX: 100,
+        clientY: 100,
         shiftKey: false,
       } as MouseEvent;
 
@@ -91,8 +96,8 @@ describe('LineTool', () => {
 
       expect(mockRedraw).toHaveBeenCalled();
       expect(mockCtx.beginPath).toHaveBeenCalled();
-      expect(mockCtx.moveTo).toHaveBeenCalledWith(100, 100);
-      expect(mockCtx.lineTo).toHaveBeenCalledWith(200, 200);
+      expect(mockCtx.moveTo).toHaveBeenCalledWith(50, 50);
+      expect(mockCtx.lineTo).toHaveBeenCalledWith(100, 100);
       expect(mockCtx.stroke).toHaveBeenCalled();
     });
 
@@ -323,7 +328,7 @@ describe('LineTool', () => {
   });
 
   describe('edge cases', () => {
-    it('should handle zero-length lines', () => {
+    it('should prevent zero-length lines (single click without drag)', () => {
       lineTool.handleMouseDown(
         { clientX: 100, clientY: 100 } as MouseEvent,
         mockCanvas
@@ -333,15 +338,8 @@ describe('LineTool', () => {
         mockCanvas
       );
 
-      expect(lineTool['lineAnnotations']).toHaveLength(1);
-      expect(lineTool['lineAnnotations'][0]).toEqual({
-        x1: 100,
-        y1: 100,
-        x2: 100,
-        y2: 100,
-        color: '#BD2D1E',
-        width: 3,
-      });
+      // Should NOT create a line for single click
+      expect(lineTool['lineAnnotations']).toHaveLength(0);
     });
 
     it('should handle canvas offset', () => {
