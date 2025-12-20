@@ -9,6 +9,7 @@ export class LineTool implements ITool {
   private readonly color: string = toolStyles.color;
   private readonly lineWidth: number = toolStyles.lineWidth;
   private onRedraw: () => void;
+  private keydownHandler: ((event: KeyboardEvent) => void) | null = null;
 
   constructor(onRedraw: () => void) {
     this.onRedraw = onRedraw;
@@ -23,6 +24,14 @@ export class LineTool implements ITool {
 
     this.isDrawing = true;
     this.startPoint = { x, y };
+
+    // Add keyboard listener for Escape key
+    this.keydownHandler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        this.cancelDrawing();
+      }
+    };
+    document.addEventListener('keydown', this.keydownHandler);
   }
 
   handleMouseMove(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
@@ -97,9 +106,26 @@ export class LineTool implements ITool {
       },
     ];
 
+    this.cleanupDrawingState();
+    this.onRedraw();
+  }
+
+  private cancelDrawing(): void {
+    if (!this.isDrawing) return;
+
+    this.cleanupDrawingState();
+    this.onRedraw();
+  }
+
+  private cleanupDrawingState(): void {
     this.isDrawing = false;
     this.startPoint = null;
-    this.onRedraw();
+
+    // Remove keyboard listener
+    if (this.keydownHandler) {
+      document.removeEventListener('keydown', this.keydownHandler);
+      this.keydownHandler = null;
+    }
   }
 
   render(ctx: CanvasRenderingContext2D): void {

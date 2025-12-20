@@ -374,4 +374,125 @@ describe('LineTool', () => {
       expect(lineTool['lineAnnotations'][0].y2).toBe(200);
     });
   });
+
+  describe('escape key cancel functionality', () => {
+    beforeEach(() => {
+      // Start drawing
+      lineTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      mockRedraw.mockClear();
+    });
+
+    it('should cancel drawing when Escape key is pressed', () => {
+      expect(lineTool['isDrawing']).toBe(true);
+      expect(lineTool['startPoint']).not.toBeNull();
+
+      // Simulate Escape key press
+      const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
+      document.dispatchEvent(escapeEvent);
+
+      expect(lineTool['isDrawing']).toBe(false);
+      expect(lineTool['startPoint']).toBeNull();
+    });
+
+    it('should call redraw when canceling with Escape', () => {
+      const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
+      document.dispatchEvent(escapeEvent);
+
+      expect(mockRedraw).toHaveBeenCalled();
+    });
+
+    it('should not add annotation when canceled with Escape', () => {
+      // Move mouse to create a line preview
+      lineTool.handleMouseMove(
+        { clientX: 200, clientY: 200, shiftKey: false } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      // Cancel with Escape
+      const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
+      document.dispatchEvent(escapeEvent);
+
+      expect(lineTool['lineAnnotations']).toHaveLength(0);
+    });
+
+    it('should remove keyboard event listener after canceling', () => {
+      const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
+
+      const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
+      document.dispatchEvent(escapeEvent);
+
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        'keydown',
+        expect.any(Function)
+      );
+      expect(lineTool['keydownHandler']).toBeNull();
+
+      removeEventListenerSpy.mockRestore();
+    });
+
+    it('should remove keyboard event listener after mouse up', () => {
+      const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
+
+      lineTool.handleMouseUp(
+        { clientX: 200, clientY: 200, shiftKey: false } as MouseEvent,
+        mockCanvas
+      );
+
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        'keydown',
+        expect.any(Function)
+      );
+      expect(lineTool['keydownHandler']).toBeNull();
+
+      removeEventListenerSpy.mockRestore();
+    });
+
+    it('should not crash when Escape is pressed while not drawing', () => {
+      // First complete a line
+      lineTool.handleMouseUp(
+        { clientX: 200, clientY: 200, shiftKey: false } as MouseEvent,
+        mockCanvas
+      );
+
+      // Now try to cancel when not drawing
+      expect(() => {
+        const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
+        document.dispatchEvent(escapeEvent);
+      }).not.toThrow();
+
+      expect(lineTool['isDrawing']).toBe(false);
+    });
+
+    it('should ignore other key presses', () => {
+      const initialDrawingState = lineTool['isDrawing'];
+
+      // Press a different key
+      const aKeyEvent = new KeyboardEvent('keydown', { key: 'a' });
+      document.dispatchEvent(aKeyEvent);
+
+      expect(lineTool['isDrawing']).toBe(initialDrawingState);
+      expect(mockRedraw).not.toHaveBeenCalled();
+    });
+
+    it('should add keyboard listener on each mouse down', () => {
+      const addEventListenerSpy = vi.spyOn(document, 'addEventListener');
+
+      // Start a new line
+      lineTool.handleMouseDown(
+        { clientX: 250, clientY: 250 } as MouseEvent,
+        mockCanvas
+      );
+
+      expect(addEventListenerSpy).toHaveBeenCalledWith(
+        'keydown',
+        expect.any(Function)
+      );
+
+      addEventListenerSpy.mockRestore();
+    });
+  });
 });
