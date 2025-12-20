@@ -18,6 +18,9 @@ export class HBAnnotation extends LitElement {
   @state()
   private fontSize: number = 24;
 
+  @state()
+  private activeTool: string = 'text';
+
   connectedCallback() {
     super.connectedCallback();
     this._loadScreenshotFromStorage();
@@ -50,16 +53,24 @@ export class HBAnnotation extends LitElement {
 
     return html`
       <div class="toolbar-container">
-        <hb-toolbar @download=${this._handleDownload}></hb-toolbar>
+        <hb-toolbar 
+          @download=${this._handleDownload}
+          @tool-change=${this._handleToolChange}
+        ></hb-toolbar>
       </div>
       <div class="canvas-container">
         <hb-canvas
           .dataUrl=${this.dataUrl}
           .color=${this.color}
           .fontSize=${this.fontSize}
+          .drawingMode=${this.activeTool}
         ></hb-canvas>
       </div>
     `;
+  }
+
+  private _handleToolChange(event: CustomEvent) {
+    this.activeTool = event.detail.tool;
   }
 
   private _handleDownload() {

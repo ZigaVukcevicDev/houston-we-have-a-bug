@@ -1,14 +1,10 @@
 import { LitElement, html, unsafeCSS } from 'lit';
-import { customElement, property, state, query } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import styles from './hb-canvas.scss';
-
-interface TextAnnotation {
-  x: number;
-  y: number;
-  text: string;
-  color: string;
-  fontSize: number;
-}
+import type { DrawingMode } from './types';
+import type { ITool } from './tools/base-tool';
+import { TextTool } from './tools/text-tool';
+import { LineTool } from './tools/line-tool';
 
 @customElement('hb-canvas')
 export class HBCanvas extends LitElement {
@@ -23,19 +19,38 @@ export class HBCanvas extends LitElement {
   @property({ type: Number })
   fontSize: number = 24;
 
+  @property({ type: String })
+  drawingMode: DrawingMode = 'text';
+
   @query('canvas')
   private canvas!: HTMLCanvasElement;
 
   private ctx!: CanvasRenderingContext2D;
   private originalImage: HTMLImageElement | null = null;
+  private tools: Map<DrawingMode, ITool> = new Map();
 
-  @state()
-  private annotations: TextAnnotation[] = [];
+  constructor() {
+    super();
+    this._initializeTools();
+  }
 
-  private textInput: HTMLInputElement | null = null;
+  private _initializeTools() {
+    // Initialize tools with a redraw callback
+    this.tools.set('text', new TextTool(this.color, this.fontSize, () => this._redraw()));
+    this.tools.set('line', new LineTool(this.color, () => this._redraw()));
+  }
+
+  private get _activeTool(): ITool | undefined {
+    return this.tools.get(this.drawingMode);
+  }
 
   render() {
-    return html`<canvas @click=${this._handleCanvasClick}></canvas>`;
+    return html`<canvas 
+      @click=${this._handleCanvasClick}
+      @mousedown=${this._handleMouseDown}
+      @mousemove=${this._handleMouseMove}
+      @mouseup=${this._handleMouseUp}
+    ></canvas>`;
   }
 
   protected firstUpdated() {
@@ -46,6 +61,16 @@ export class HBCanvas extends LitElement {
   protected updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('dataUrl') && this.dataUrl) {
       this._loadImage();
+    }
+
+    // Update tool properties when color or fontSize changes
+    if (changedProperties.has('color')) {
+      (this.tools.get('text') as TextTool)?.updateColor(this.color);
+      (this.tools.get('line') as LineTool)?.updateColor(this.color);
+    }
+
+    if (changedProperties.has('fontSize')) {
+      (this.tools.get('text') as TextTool)?.updateFontSize(this.fontSize);
     }
   }
 
@@ -78,124 +103,26 @@ export class HBCanvas extends LitElement {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.drawImage(this.originalImage, 0, 0);
 
-    this.annotations.forEach((annotation) => {
-      this.ctx.font = `bold ${annotation.fontSize}px Arial, sans-serif`;
-      this.ctx.fillStyle = annotation.color;
-      this.ctx.textBaseline = 'middle';
-
-      this.ctx.fillText(annotation.text, annotation.x, annotation.y);
+    // Render all tools' annotations
+    this.tools.forEach((tool) => {
+      tool.render(this.ctx);
     });
   }
 
   private _handleCanvasClick(event: MouseEvent) {
-    if (this.textInput) {
-      this._finalizeTextInput();
-      return;
-    }
-
-    const rect = this.canvas.getBoundingClientRect();
-    const scaleX = this.canvas.width / rect.width;
-    const scaleY = this.canvas.height / rect.height;
-    const x = (event.clientX - rect.left) * scaleX;
-    const y = (event.clientY - rect.top) * scaleY;
-
-    this._createTextInput(x, y, rect, scaleX, scaleY);
+    this._activeTool?.handleClick(event, this.canvas, this.ctx);
   }
 
-  private _createTextInput(
-    canvasX: number,
-    canvasY: number,
-    rect: DOMRect,
-    scaleX: number,
-    scaleY: number
-  ) {
-    this.textInput = document.createElement('input');
-    this.textInput.type = 'text';
-    this.textInput.style.cssText = `
-      position: fixed;
-      left: ${canvasX / scaleX + rect.left}px;
-      top: ${canvasY / scaleY + rect.top - this.fontSize / 2}px;
-      font-size: ${this.fontSize / scaleY}px;
-      font-family: Arial, sans-serif;
-      font-weight: bold;
-      color: ${this.color};
-      background: rgba(255, 255, 255, 0.9);
-      border: 2px dashed #333;
-      outline: none;
-      padding: 2px 4px;
-      min-width: 100px;
-      z-index: 10000;
-    `;
-
-    this.textInput.dataset.canvasX = canvasX.toString();
-    this.textInput.dataset.canvasY = canvasY.toString();
-    this.textInput.dataset.color = this.color;
-    this.textInput.dataset.fontSize = this.fontSize.toString();
-
-    document.body.appendChild(this.textInput);
-    this.textInput.focus();
-
-    this.textInput.addEventListener('keydown', this._handleTextInputKeydown);
-    this.textInput.addEventListener('blur', this._handleTextInputBlur);
+  private _handleMouseDown(event: MouseEvent) {
+    this._activeTool?.handleMouseDown(event, this.canvas, this.ctx);
   }
 
-  private _handleTextInputKeydown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      this._finalizeTextInput();
-    } else if (e.key === 'Escape') {
-      this._removeTextInput();
-    }
-  };
-
-  private _handleTextInputBlur = () => {
-    setTimeout(() => this._finalizeTextInput(), 100);
-  };
-
-  private _finalizeTextInput() {
-    if (!this.textInput) return;
-
-    const text = this.textInput.value.trim();
-    if (text) {
-      const x = parseFloat(this.textInput.dataset.canvasX || '0');
-      const y = parseFloat(this.textInput.dataset.canvasY || '0');
-      const annotationColor = this.textInput.dataset.color || this.color;
-      const annotationFontSize = parseInt(
-        this.textInput.dataset.fontSize || this.fontSize.toString(),
-        10
-      );
-
-      this.annotations = [
-        ...this.annotations,
-        {
-          x,
-          y,
-          text,
-          color: annotationColor,
-          fontSize: annotationFontSize,
-        },
-      ];
-
-      this._redraw();
-    }
-
-    this._removeTextInput();
+  private _handleMouseMove(event: MouseEvent) {
+    this._activeTool?.handleMouseMove(event, this.canvas, this.ctx);
   }
 
-  private _removeTextInput() {
-    if (this.textInput && this.textInput.parentNode) {
-      this.textInput.removeEventListener(
-        'keydown',
-        this._handleTextInputKeydown
-      );
-      this.textInput.removeEventListener('blur', this._handleTextInputBlur);
-      this.textInput.parentNode.removeChild(this.textInput);
-    }
-    this.textInput = null;
-  }
-
-  public clearAnnotations() {
-    this.annotations = [];
-    this._redraw();
+  private _handleMouseUp(event: MouseEvent) {
+    this._activeTool?.handleMouseUp(event, this.canvas, this.ctx);
   }
 
   public download(filename: string = 'screenshot.jpg', quality: number = 0.85) {

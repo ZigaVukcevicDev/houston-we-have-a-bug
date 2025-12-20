@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { HBCanvas } from './hb-canvas';
+import { TextTool } from './tools/text-tool';
 
 describe('HBCanvas', () => {
     let canvas: HBCanvas;
@@ -18,32 +19,6 @@ describe('HBCanvas', () => {
 
     it('should have default fontSize property', () => {
         expect(canvas.fontSize).toBe(24);
-    });
-
-    it('should initialize with empty annotations array', () => {
-        expect(canvas['annotations']).toEqual([]);
-    });
-
-    describe('clearAnnotations', () => {
-        it('should clear all annotations', () => {
-            // Add some mock annotations
-            canvas['annotations'] = [
-                { x: 10, y: 20, text: 'Test 1', color: '#ff0000', fontSize: 24 },
-                { x: 30, y: 40, text: 'Test 2', color: '#00ff00', fontSize: 32 },
-            ];
-
-            canvas.clearAnnotations();
-
-            expect(canvas['annotations']).toEqual([]);
-        });
-
-        it('should work when annotations array is already empty', () => {
-            canvas['annotations'] = [];
-
-            canvas.clearAnnotations();
-
-            expect(canvas['annotations']).toEqual([]);
-        });
     });
 
     describe('download', () => {
@@ -209,8 +184,10 @@ describe('HBCanvas', () => {
             // So dispatchEvent should work if element is in document.body (which it is)
             input.dispatchEvent(event);
 
-            expect(canvas['annotations']).toHaveLength(1);
-            expect(canvas['annotations'][0].text).toBe('Test Annotation');
+            // Access annotations through the tool
+            const textTool = canvas['tools'].get('text') as TextTool;
+            expect(textTool['annotations']).toHaveLength(1);
+            expect(textTool['annotations'][0].text).toBe('Test Annotation');
             expect(document.body.querySelector('input')).toBeNull();
         });
 
@@ -221,7 +198,9 @@ describe('HBCanvas', () => {
             const event = new KeyboardEvent('keydown', { key: 'Escape' });
             input.dispatchEvent(event);
 
-            expect(canvas['annotations']).toHaveLength(0);
+            // Access annotations through the tool
+            const textTool = canvas['tools'].get('text') as TextTool;
+            expect(textTool['annotations']).toHaveLength(0);
             expect(document.body.querySelector('input')).toBeNull();
         });
     });

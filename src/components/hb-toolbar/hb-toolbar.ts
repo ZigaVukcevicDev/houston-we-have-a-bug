@@ -36,6 +36,11 @@ export class HBToolbar extends LitElement {
 
   private _handleToolClick(tool: ToolType) {
     this._activeTool = tool;
+    this.dispatchEvent(new CustomEvent('tool-change', {
+      bubbles: true,
+      composed: true,
+      detail: { tool }
+    }));
   }
 
   private _handleDownload() {
