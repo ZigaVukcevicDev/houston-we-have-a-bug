@@ -219,51 +219,21 @@ describe('SelectTool', () => {
   });
 
   describe('cursor management', () => {
-    it('should set cursor to "move" when hovering over handle', () => {
-      selectTool['selectedAnnotationId'] = 'line-1';
-
-      selectTool.handleMouseMove(
-        { clientX: 100, clientY: 100, shiftKey: false } as MouseEvent,
-        mockCanvas,
-        mockCtx
-      );
-
-      expect(mockCanvas.style.cursor).toBe('move');
-    });
-
-    it('should set cursor to "pointer" when hovering over line', () => {
-      selectTool.handleMouseMove(
-        { clientX: 150, clientY: 150, shiftKey: false } as MouseEvent,
-        mockCanvas,
-        mockCtx
-      );
-
-      expect(mockCanvas.style.cursor).toBe('pointer');
-    });
-
-    it('should set cursor to "default" when not hovering over anything', () => {
-      selectTool.handleMouseMove(
-        { clientX: 500, clientY: 500, shiftKey: false } as MouseEvent,
-        mockCanvas,
-        mockCtx
-      );
-
-      expect(mockCanvas.style.cursor).toBe('default');
-    });
+    // Note: Cursor is now managed by CSS classes (.mode-select, .mode-line, etc.)
+    // not by SelectTool directly, so we don't test style.cursor here
 
     it('should not update cursor while dragging', () => {
-      selectTool['selectedAnnotationId'] = 'line-1';
       selectTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      mockCanvas.style.cursor = 'move';
+      const initialCursor = mockCanvas.style.cursor;
 
       selectTool.handleMouseMove(
-        { clientX: 120, clientY: 120, shiftKey: false } as MouseEvent,
+        { clientX: 150, clientY: 150 } as MouseEvent,
         mockCanvas,
         mockCtx
       );
 
-      // Cursor should not change during drag
-      expect(mockCanvas.style.cursor).toBe('move');
+      // Cursor shouldn't be modified while dragging
+      expect(mockCanvas.style.cursor).toBe(initialCursor);
     });
   });
 

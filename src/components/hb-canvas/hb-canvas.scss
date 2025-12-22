@@ -8,19 +8,19 @@ canvas {
   display: block;
   box-shadow: $shadow-md;
 
-  &.mode-text {
-    cursor: text;
-  }
-
-  &.mode-line {
-    cursor: crosshair;
+  &.mode-default {
+    cursor: default;
   }
 
   &.mode-select {
     cursor: default;
   }
 
-  &.mode-default {
-    cursor: default;
+  &.mode-text {
+    cursor: text;
+  }
+
+  &.mode-line {
+    cursor: crosshair;
   }
 }

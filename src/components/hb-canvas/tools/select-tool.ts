@@ -74,32 +74,8 @@ export class SelectTool implements Tool {
 
   handleMouseMove(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
     if (!this.draggingHandle || this.selectedAnnotationId === null) {
-      // Update cursor based on what's under mouse
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      const x = (event.clientX - rect.left) * scaleX;
-      const y = (event.clientY - rect.top) * scaleY;
-
-      // Check for handles first
-      const selectedLine = this.lineAnnotations.find(l => l.id === this.selectedAnnotationId);
-      if (selectedLine) {
-        if (this.isPointOnHandle(x, y, selectedLine.x1, selectedLine.y1) ||
-          this.isPointOnHandle(x, y, selectedLine.x2, selectedLine.y2)) {
-          canvas.style.cursor = 'move';
-          return;
-        }
-      }
-
-      // Check for lines
-      for (const line of this.lineAnnotations) {
-        if (this.isPointOnLine(x, y, line)) {
-          canvas.style.cursor = 'pointer';
-          return;
-        }
-      }
-
-      canvas.style.cursor = 'default';
+      // Note: Cursor is now managed by CSS classes, not direct style manipulation
+      // This prevents cursor from sticking when switching tools
       return;
     }
 
