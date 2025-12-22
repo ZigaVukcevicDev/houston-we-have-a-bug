@@ -12,6 +12,7 @@ export class LineTool implements Tool {
   private readonly color: string = toolStyles.color;
   private readonly lineWidth: number = toolStyles.lineWidth;
   private onRedraw: () => void;
+  private onToolChange?: (tool: string) => void;
   private keydownHandler: ((event: KeyboardEvent) => void) | null = null;
 
   // Selection and dragging state
@@ -19,8 +20,9 @@ export class LineTool implements Tool {
   private draggingHandle: 'start' | 'end' | null = null;
   private dragOffset: { x: number; y: number } = { x: 0, y: 0 };
 
-  constructor(onRedraw: () => void) {
+  constructor(onRedraw: () => void, onToolChange?: (tool: string) => void) {
     this.onRedraw = onRedraw;
+    this.onToolChange = onToolChange;
   }
 
   handleClick(event: MouseEvent, canvas: HTMLCanvasElement): void {
@@ -262,6 +264,9 @@ export class LineTool implements Tool {
     // Don't auto-select - handles will only show during drawing or manual selection
     this.cleanupDrawingState();
     this.onRedraw();
+
+    // Switch to select tool after drawing
+    this.onToolChange?.('select');
   }
 
   private cancelDrawing(): void {

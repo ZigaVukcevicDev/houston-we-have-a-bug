@@ -837,4 +837,59 @@ describe('LineTool', () => {
       expect(lineTool['lineAnnotations'][1].x1).toBe(300); // New line
     });
   });
+
+  describe('tool change callback', () => {
+    it('should call onToolChange with "select" after drawing a line', () => {
+      const mockToolChange = vi.fn();
+      const lineToolWithCallback = new LineTool(() => { }, mockToolChange);
+
+      // Draw a line
+      lineToolWithCallback.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineToolWithCallback.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
+
+      expect(mockToolChange).toHaveBeenCalledWith('select');
+      expect(mockToolChange).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not call onToolChange if callback not provided', () => {
+      // Should not crash without callback
+      const lineToolNoCallback = new LineTool(() => { });
+
+      expect(() => {
+        lineToolNoCallback.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+        lineToolNoCallback.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
+      }).not.toThrow();
+    });
+
+    it('should not call onToolChange for zero-length lines', () => {
+      const mockToolChange = vi.fn();
+      const lineToolWithCallback = new LineTool(() => { }, mockToolChange);
+
+      // Try to draw zero-length line (single click)
+      lineToolWithCallback.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineToolWithCallback.handleMouseUp({ clientX: 100, clientY: 100, shiftKey: false } as MouseEvent, mockCanvas);
+
+      expect(mockToolChange).not.toHaveBeenCalled();
+    });
+
+    it('should not call onToolChange when dragging handle', () => {
+      const mockToolChange = vi.fn();
+      const lineToolWithCallback = new LineTool(() => { }, mockToolChange);
+
+      // Draw a line first
+      lineToolWithCallback.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineToolWithCallback.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
+
+      // Clear previous calls
+      mockToolChange.mockClear();
+
+      // Select and drag handle
+      lineToolWithCallback['selectedLineIndex'] = 0;
+      lineToolWithCallback.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineToolWithCallback.handleMouseUp({ clientX: 120, clientY: 120, shiftKey: false } as MouseEvent, mockCanvas);
+
+      // Should not call onToolChange for handle dragging
+      expect(mockToolChange).not.toHaveBeenCalled();
+    });
+  });
 });

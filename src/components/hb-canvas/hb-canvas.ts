@@ -31,7 +31,19 @@ export class HBCanvas extends LitElement {
   private _initializeTools() {
     // Initialize tools with a redraw callback
     this.tools.set('text', new TextTool(() => this._redraw()));
-    this.tools.set('line', new LineTool(() => this._redraw()));
+    this.tools.set('line', new LineTool(
+      () => this._redraw(),
+      (tool: string) => this._handleToolChange(tool)
+    ));
+  }
+
+  private _handleToolChange(tool: string) {
+    // Dispatch event to notify toolbar of tool change
+    this.dispatchEvent(new CustomEvent('tool-change', {
+      detail: { tool },
+      bubbles: true,
+      composed: true
+    }));
   }
 
   private get _activeTool(): Tool | undefined {
