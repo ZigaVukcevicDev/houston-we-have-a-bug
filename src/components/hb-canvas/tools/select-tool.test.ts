@@ -408,4 +408,50 @@ describe('SelectTool', () => {
       expect(selectTool['selectedAnnotationId']).toBe('line-2');
     });
   });
+
+  describe('line body dragging', () => {
+    it('should start dragging line when clicking on line body', () => {
+      selectTool['selectedAnnotationId'] = 'line-1';
+      
+      // Click on line body (not on handles)
+      selectTool.handleMouseDown({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+
+      expect(selectTool['draggingLine']).toBe(true);
+    });
+
+    it('should move entire line when dragging line body', () => {
+      selectTool['selectedAnnotationId'] = 'line-1';
+      const originalX1 = lineAnnotations[0].x1;
+      const originalY1 = lineAnnotations[0].y1;
+      const originalX2 = lineAnnotations[0].x2;
+      const originalY2 = lineAnnotations[0].y2;
+      
+      // Start dragging line body
+      selectTool.handleMouseDown({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+      
+      // Drag to new position
+      selectTool.handleMouseMove(
+        { clientX: 180, clientY: 180 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      // Both endpoints should have moved by the same amount
+      const dx = lineAnnotations[0].x1 - originalX1;
+      const dy = lineAnnotations[0].y1 - originalY1;
+      
+      expect(lineAnnotations[0].x2).toBe(originalX2 + dx);
+      expect(lineAnnotations[0].y2).toBe(originalY2 + dy);
+      expect(mockRedraw).toHaveBeenCalled();
+    });
+
+    it('should stop dragging line on mouse up', () => {
+      selectTool['selectedAnnotationId'] = 'line-1';
+      selectTool.handleMouseDown({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+      
+      selectTool.handleMouseUp();
+
+      expect(selectTool['draggingLine']).toBe(false);
+    });
+  });
 });

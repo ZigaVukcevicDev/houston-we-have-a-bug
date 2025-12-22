@@ -20,7 +20,7 @@ The goal is to cover **real-world bug reporting needs** with a small, reliable t
 - Download annotated image
 
 ### Annotation tools
-- Select / Move
+- Select
 - Text
 - Line
 - Arrow
@@ -38,6 +38,7 @@ This version prioritizes **stability, clarity, and performance**.
 
 ### Annotation tools
 - Blur
+- Marker for highlighting
 - Color choice
 - Numbered markers
 - Keyboard shortucts

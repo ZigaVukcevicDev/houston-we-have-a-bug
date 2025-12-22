@@ -9,7 +9,9 @@ export class SelectTool implements Tool {
   private lineAnnotations: LineAnnotation[] = [];
   private selectedAnnotationId: string | null = null;
   private draggingHandle: 'start' | 'end' | null = null;
+  private draggingLine: boolean = false;
   private dragOffset: { x: number; y: number } = { x: 0, y: 0 };
+  private dragStartPosition: { x: number; y: number } = { x: 0, y: 0 };
   private onRedraw: () => void;
 
   constructor(lineAnnotations: LineAnnotation[], onRedraw: () => void) {
@@ -56,15 +58,24 @@ export class SelectTool implements Tool {
       const line = this.lineAnnotations.find(l => l.id === this.selectedAnnotationId);
       if (!line) return;
 
+      // Check start handle first
       if (this.isPointOnHandle(x, y, line.x1, line.y1)) {
         this.draggingHandle = 'start';
         this.dragOffset = { x: x - line.x1, y: y - line.y1 };
         return;
       }
 
+      // Check end handle second
       if (this.isPointOnHandle(x, y, line.x2, line.y2)) {
         this.draggingHandle = 'end';
         this.dragOffset = { x: x - line.x2, y: y - line.y2 };
+        return;
+      }
+
+      // Check if clicking on the line body (to drag entire line)
+      if (this.isPointOnLine(x, y, line)) {
+        this.draggingLine = true;
+        this.dragOffset = { x, y };
         return;
       }
     }
@@ -72,7 +83,7 @@ export class SelectTool implements Tool {
 
   handleMouseMove(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
     // Provide cursor feedback when hovering (but not while dragging)
-    if (!this.draggingHandle) {
+    if (!this.draggingHandle && !this.draggingLine) {
       // Provide cursor feedback when hovering over handles or lines
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
@@ -110,22 +121,32 @@ export class SelectTool implements Tool {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-    // Get raw mouse position first
     let x = (event.clientX - rect.left) * scaleX;
     let y = (event.clientY - rect.top) * scaleY;
 
-    // Apply shift-key constraint for straight lines
-    if (event.shiftKey) {
+    if (this.draggingLine) {
+      // Dragging entire line - move both endpoints
+      const dx = x - this.dragOffset.x;
+      const dy = y - this.dragOffset.y;
+
+      line.x1 += dx;
+      line.y1 += dy;
+      line.x2 += dx;
+      line.y2 += dy;
+
+      this.dragOffset = { x, y };
+      this.onRedraw();
+      return;
+    }
+
+    // Apply shift-key constraint for straight lines (only for handle dragging)
+    if (event.shiftKey && this.draggingHandle) {
       const otherX = this.draggingHandle === 'start' ? line.x2 : line.x1;
       const otherY = this.draggingHandle === 'start' ? line.y2 : line.y1;
 
-      // Get the handle's current position (where we started dragging from)
-      const handleX = this.draggingHandle === 'start' ? line.x1 : line.x2;
-      const handleY = this.draggingHandle === 'start' ? line.y1 : line.y2;
-
-      // Measure drag direction from the handle's position
-      const dx = Math.abs(x - (handleX + this.dragOffset.x));
-      const dy = Math.abs(y - (handleY + this.dragOffset.y));
+      // Measure drag direction from initial drag start position (prevents jumping)
+      const dx = Math.abs(x - this.dragStartPosition.x);
+      const dy = Math.abs(y - this.dragStartPosition.y);
 
       if (dx > dy) {
         y = otherY; // Horizontal
@@ -151,6 +172,7 @@ export class SelectTool implements Tool {
 
   handleMouseUp(): void {
     this.draggingHandle = null;
+    this.draggingLine = false;
     this.dragOffset = { x: 0, y: 0 };
     this.onRedraw();
   }
