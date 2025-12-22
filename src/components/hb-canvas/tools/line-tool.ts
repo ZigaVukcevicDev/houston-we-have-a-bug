@@ -108,19 +108,16 @@ export class LineTool implements Tool {
       return;
     }
 
-    // Add the line annotation
-    this.lineAnnotations = [
-      ...this.lineAnnotations,
-      {
-        id: crypto.randomUUID(),
-        x1: this.startPoint.x,
-        y1: this.startPoint.y,
-        x2: x,
-        y2: y,
-        color: this.color,
-        width: this.lineWidth,
-      },
-    ];
+    // Add the line annotation (use push to maintain array reference)
+    this.lineAnnotations.push({
+      id: crypto.randomUUID(),
+      x1: this.startPoint.x,
+      y1: this.startPoint.y,
+      x2: x,
+      y2: y,
+      color: this.color,
+      width: this.lineWidth,
+    });
 
     // Don't auto-select - handles will only show during drawing or manual selection
     this.cleanupDrawingState();

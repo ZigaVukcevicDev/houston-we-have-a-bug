@@ -18,6 +18,8 @@ You must follow these rules when working on this repository.
 ## 2. Code quality & cleanliness
 - **No leftovers**: When refactoring or removing features (e.g., Memory Usage), fully remove all related code, types, and unused imports.
 - **No commented code**: Do not leave commented-out code blocks. If code is not used, delete it.
+- **Remove dead code**: When refactoring, always identify and remove any unused functions, variables, or imports that are no longer needed.
+- **Avoid ALL CAPS comments**: Avoid using ALL CAPS words in comments (e.g., use "Get raw position first" instead of "Get raw position FIRST").
 - **Strict types**: Use TypeScript interfaces properly. Avoid `any`.
 
 ## Code organization
@@ -31,6 +33,9 @@ You must follow these rules when working on this repository.
     - ✅ Correct: `private handleClick()`, `private redraw()`
     - ❌ Incorrect: `private _handleClick()`, `private _redraw()`
   - The `private` keyword is sufficient; underscore prefixes are redundant in modern TypeScript
+  - Constants: Use camelCase, **not SCREAMING_SNAKE_CASE**
+    - ✅ Correct: `const handleRadius = 8;`
+    - ❌ Incorrect: `const HANDLE_RADIUS = 8;`
 
 - **Component method order**:
   - In LitElement components, place the `render()` method near the top, immediately after class properties

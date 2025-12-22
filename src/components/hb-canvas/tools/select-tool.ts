@@ -2,8 +2,8 @@ import type { Tool } from '../../../interfaces/tool.interface';
 import type { LineAnnotation } from '../../../interfaces/annotation.interface';
 import { toolStyles } from './tool-styles';
 
-const HANDLE_RADIUS = 8;
-const LINE_HIT_THRESHOLD = 10;
+const handleRadius = 8;
+const lineHitThreshold = 10;
 
 export class SelectTool implements Tool {
   private lineAnnotations: LineAnnotation[] = [];
@@ -17,12 +17,10 @@ export class SelectTool implements Tool {
     this.onRedraw = onRedraw;
   }
 
-  // Select the most recently added line (for auto-selection after drawing)
-  selectLastLine(): void {
-    if (this.lineAnnotations.length > 0) {
-      this.selectedAnnotationId = this.lineAnnotations[this.lineAnnotations.length - 1].id;
-      this.onRedraw();
-    }
+  // Select a specific annotation by ID (for auto-selection after drawing)
+  selectAnnotation(id: string): void {
+    this.selectedAnnotationId = id;
+    this.onRedraw();
   }
 
   handleClick(event: MouseEvent, canvas: HTMLCanvasElement): void {
@@ -86,16 +84,22 @@ export class SelectTool implements Tool {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-    let x = (event.clientX - rect.left) * scaleX - this.dragOffset.x;
-    let y = (event.clientY - rect.top) * scaleY - this.dragOffset.y;
+    // Get raw mouse position first
+    let x = (event.clientX - rect.left) * scaleX;
+    let y = (event.clientY - rect.top) * scaleY;
 
     // Apply shift-key constraint for straight lines
     if (event.shiftKey) {
       const otherX = this.draggingHandle === 'start' ? line.x2 : line.x1;
       const otherY = this.draggingHandle === 'start' ? line.y2 : line.y1;
 
-      const dx = Math.abs(x - otherX);
-      const dy = Math.abs(y - otherY);
+      // Get the handle's current position (where we started dragging from)
+      const handleX = this.draggingHandle === 'start' ? line.x1 : line.x2;
+      const handleY = this.draggingHandle === 'start' ? line.y1 : line.y2;
+
+      // Measure drag direction from the handle's position
+      const dx = Math.abs(x - (handleX + this.dragOffset.x));
+      const dy = Math.abs(y - (handleY + this.dragOffset.y));
 
       if (dx > dy) {
         y = otherY; // Horizontal
@@ -103,6 +107,10 @@ export class SelectTool implements Tool {
         x = otherX; // Vertical
       }
     }
+
+    // Then subtract drag offset
+    x = x - this.dragOffset.x;
+    y = y - this.dragOffset.y;
 
     if (this.draggingHandle === 'start') {
       line.x1 = x;
@@ -138,7 +146,7 @@ export class SelectTool implements Tool {
     ctx.strokeStyle = toolStyles.handleStrokeColor;
     ctx.lineWidth = toolStyles.handleStrokeWidth;
     ctx.beginPath();
-    ctx.arc(x, y, HANDLE_RADIUS, 0, 2 * Math.PI);
+    ctx.arc(x, y, handleRadius, 0, 2 * Math.PI);
     ctx.fill();
     ctx.stroke();
     ctx.restore();
@@ -146,7 +154,7 @@ export class SelectTool implements Tool {
 
   private isPointOnHandle(px: number, py: number, hx: number, hy: number): boolean {
     const distance = Math.sqrt((px - hx) ** 2 + (py - hy) ** 2);
-    return distance <= HANDLE_RADIUS;
+    return distance <= handleRadius;
   }
 
   private isPointOnLine(px: number, py: number, line: LineAnnotation): boolean {
@@ -161,6 +169,6 @@ export class SelectTool implements Tool {
     const closestY = y1 + t * (y2 - y1);
     const distance = Math.sqrt((px - closestX) ** 2 + (py - closestY) ** 2);
 
-    return distance <= LINE_HIT_THRESHOLD;
+    return distance <= lineHitThreshold;
   }
 }

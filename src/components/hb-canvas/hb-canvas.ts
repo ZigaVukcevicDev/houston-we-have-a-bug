@@ -60,11 +60,12 @@ export class HBCanvas extends LitElement {
       this.loadImage();
     }
 
-    // Auto-select last line when switching to select tool
+    // Auto-select last annotation when switching to select tool
     if (changedProperties.has('drawingMode') && this.drawingMode === 'select') {
       const selectTool = this.tools.get('select') as SelectTool;
       if (selectTool && this.lineAnnotations.length > 0) {
-        selectTool.selectLastLine();
+        const lastLineId = this.lineAnnotations[this.lineAnnotations.length - 1].id;
+        selectTool.selectAnnotation(lastLineId);
       }
     }
   }

@@ -62,7 +62,24 @@ describe('SelectTool', () => {
     } as unknown as CanvasRenderingContext2D;
   });
 
-  describe('selection', () => {
+  describe('annotation selection', () => {
+    it('should select annotation by ID', () => {
+      selectTool.selectAnnotation('line-2');
+
+      expect(selectTool['selectedAnnotationId']).toBe('line-2');
+      expect(mockRedraw).toHaveBeenCalled();
+    });
+
+    it('should change selection when called with different ID', () => {
+      selectTool.selectAnnotation('line-1');
+      expect(selectTool['selectedAnnotationId']).toBe('line-1');
+
+      selectTool.selectAnnotation('line-2');
+      expect(selectTool['selectedAnnotationId']).toBe('line-2');
+    });
+  });
+
+  describe('line selection', () => {
     it('should select a line when clicked on it', () => {
       // Click near the middle of line-1
       selectTool.handleClick({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
@@ -146,36 +163,33 @@ describe('SelectTool', () => {
       expect(mockRedraw).toHaveBeenCalled();
     });
 
-    it.skip('should apply shift-key constraint when dragging start handle horizontally', () => {
-      const originalY = lineAnnotations[0].y2; // Store end point Y
+    it('should apply shift-key constraint when dragging start handle horizontally', () => {
       selectTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
 
-      // Move more horizontally (dx=50, dy=30), should snap Y to end point
+      // Move more horizontally (dx=50, dy=30), should snap Y to create horizontal line
       selectTool.handleMouseMove(
         { clientX: 150, clientY: 130, shiftKey: true } as MouseEvent,
         mockCanvas,
         mockCtx
       );
 
-      // Y should snap to match end point (horizontal line)
-      // TODO: Fix shift-key logic to apply constraint after drag offset calculation
-      expect(lineAnnotations[0].y1).toBe(originalY);
+      // Line should be horizontal (y1 === y2)
+      expect(lineAnnotations[0].y1).toBe(lineAnnotations[0].y2);
     });
 
-    it.skip('should apply shift-key constraint when dragging start handle vertically', () => {
-      const originalX = lineAnnotations[0].x2; // Store end point X
+
+    it('should apply shift-key constraint when dragging start handle vertically', () => {
       selectTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
 
-      // Move more vertically (dx=30, dy=50), should snap X to end point
+      // Move more vertically (dx=30, dy=50), should snap X to create vertical line
       selectTool.handleMouseMove(
         { clientX: 130, clientY: 150, shiftKey: true } as MouseEvent,
         mockCanvas,
         mockCtx
       );
 
-      // X should snap to match end point (vertical line)
-      // TODO: Fix shift-key logic to apply constraint after drag offset calculation
-      expect(lineAnnotations[0].x1).toBe(originalX);
+      // Line should be vertical (x1 === x2)
+      expect(lineAnnotations[0].x1).toBe(lineAnnotations[0].x2);
     });
   });
 
@@ -266,7 +280,7 @@ describe('SelectTool', () => {
         1,
         100,
         100,
-        8, // HANDLE_RADIUS
+        8, // handleRadius
         0,
         2 * Math.PI
       );
@@ -274,7 +288,7 @@ describe('SelectTool', () => {
         2,
         200,
         200,
-        8, // HANDLE_RADIUS
+        8, // handleRadius
         0,
         2 * Math.PI
       );
