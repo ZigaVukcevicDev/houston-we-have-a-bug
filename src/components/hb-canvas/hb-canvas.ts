@@ -59,6 +59,14 @@ export class HBCanvas extends LitElement {
     if (changedProperties.has('dataUrl') && this.dataUrl) {
       this.loadImage();
     }
+
+    // Auto-select last line when switching to select tool
+    if (changedProperties.has('drawingMode') && this.drawingMode === 'select') {
+      const selectTool = this.tools.get('select') as SelectTool;
+      if (selectTool && this.lineAnnotations.length > 0) {
+        selectTool.selectLastLine();
+      }
+    }
   }
 
   private initializeTools() {

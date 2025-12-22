@@ -17,6 +17,14 @@ export class SelectTool implements Tool {
     this.onRedraw = onRedraw;
   }
 
+  // Select the most recently added line (for auto-selection after drawing)
+  selectLastLine(): void {
+    if (this.lineAnnotations.length > 0) {
+      this.selectedAnnotationId = this.lineAnnotations[this.lineAnnotations.length - 1].id;
+      this.onRedraw();
+    }
+  }
+
   handleClick(event: MouseEvent, canvas: HTMLCanvasElement): void {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;

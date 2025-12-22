@@ -16,6 +16,10 @@ canvas {
     cursor: crosshair;
   }
 
+  &.mode-select {
+    cursor: default;
+  }
+
   &.mode-default {
     cursor: default;
   }
