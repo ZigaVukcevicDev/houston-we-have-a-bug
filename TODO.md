@@ -5,24 +5,28 @@
 1. Line tool
 
 - draw line
-  - [ ] free
+  - [x] free
   - [ ] with shift
 - move endpoint
   - first endpoint
-    - [ ] free
+    - [x] free
     - [ ] with shift
   - second endpoint
-    - [ ] free
+    - [x] free
     - [ ] with shift
 - move line
-  - [ ] free
+  - [x] free
   - [ ] with shift
 - rotate line
   - [ ] first endpoint
   - [ ] second endpoint
-- all tests
 
-## Details
+Details:
+- [ ] make line thicker
+- [ ] stroke body of line
+- [ ] change cursor on move line
+
+## Extra
 
 - [ ] Style "No screenshot loaded. Please capture a screenshot from the extension popup."
 - [ ] px to rem?
