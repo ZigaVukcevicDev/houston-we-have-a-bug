@@ -299,8 +299,8 @@ describe('TextTool', () => {
     it('should render each annotation with its own color and fontSize', () => {
       // Manually create annotations with different properties
       textTool['annotations'] = [
-        { x: 10, y: 10, text: 'Red 20', color: '#FF0000', fontSize: 20 },
-        { x: 20, y: 20, text: 'Blue 30', color: '#0000FF', fontSize: 30 },
+        { id: 'test-1', x: 10, y: 10, text: 'Red 20', color: '#FF0000', fontSize: 20 },
+        { id: 'test-2', x: 20, y: 20, text: 'Blue 30', color: '#0000FF', fontSize: 30 },
       ];
 
       textTool.render(mockCtx);
