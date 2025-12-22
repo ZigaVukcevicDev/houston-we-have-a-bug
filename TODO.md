@@ -2,11 +2,18 @@
 
 # Main functionalities 
 
-1. Line tool
+1. Select tool
+
+- [ ] stroke body of annotation
+- [ ] on hover stroke annotation
+- [ ] change cursor on move annotation
+- [ ] if no annotation is clicked, unselect all annotations 
+
+2. Line tool
 
 - draw line
   - [x] free
-  - [ ] with shift
+  - [x] with shift
 - move endpoint
   - first endpoint
     - [x] free
@@ -23,8 +30,6 @@
 
 Details:
 - [ ] make line thicker
-- [ ] stroke body of line
-- [ ] change cursor on move line
 
 ## Extra
 
