@@ -34,32 +34,6 @@ export class HBCanvas extends LitElement {
     this.initializeTools();
   }
 
-  private initializeTools() {
-    // Initialize tools with shared annotations and callbacks
-    this.tools.set('text', new TextTool(
-      this.textAnnotations,
-      () => this.redraw()
-    ));
-    this.tools.set('line', new LineTool(
-      this.lineAnnotations,
-      () => this.redraw(),
-      (tool: string) => this.handleToolChange(tool)
-    ));
-    this.tools.set('select', new SelectTool(
-      this.lineAnnotations,
-      () => this.redraw()
-    ));
-  }
-
-  private handleToolChange(tool: string) {
-    // Dispatch event to notify toolbar of tool change
-    this.dispatchEvent(new CustomEvent('tool-change', {
-      detail: { tool },
-      bubbles: true,
-      composed: true
-    }));
-  }
-
   private get activeTool(): Tool | undefined {
     return this.tools.get(this.drawingMode);
   }
@@ -85,6 +59,32 @@ export class HBCanvas extends LitElement {
     if (changedProperties.has('dataUrl') && this.dataUrl) {
       this.loadImage();
     }
+  }
+
+  private initializeTools() {
+    // Initialize tools with shared annotations and callbacks
+    this.tools.set('text', new TextTool(
+      this.textAnnotations,
+      () => this.redraw()
+    ));
+    this.tools.set('line', new LineTool(
+      this.lineAnnotations,
+      () => this.redraw(),
+      (tool: string) => this.handleToolChange(tool)
+    ));
+    this.tools.set('select', new SelectTool(
+      this.lineAnnotations,
+      () => this.redraw()
+    ));
+  }
+
+  private handleToolChange(tool: string) {
+    // Dispatch event to notify toolbar of tool change
+    this.dispatchEvent(new CustomEvent('tool-change', {
+      detail: { tool },
+      bubbles: true,
+      composed: true
+    }));
   }
 
   private async loadImage() {

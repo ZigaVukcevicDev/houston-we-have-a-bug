@@ -32,6 +32,11 @@ You must follow these rules when working on this repository.
     - ❌ Incorrect: `private _handleClick()`, `private _redraw()`
   - The `private` keyword is sufficient; underscore prefixes are redundant in modern TypeScript
 
+- **Component Method Order**:
+  - In LitElement components, place the `render()` method near the top, immediately after class properties
+  - This makes the component's output visible at a glance
+  - Order: `constructor` → properties → `render()` → lifecycle methods → event handlers → helper methods
+
 ## 3. Source of Truth
 - **`src/*` Only**: specificly edit files in `src/`.
 - **`dist/*` is Forbidden**: Never edit files in `dist/`. They are auto-generated.

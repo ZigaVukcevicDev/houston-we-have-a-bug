@@ -15,24 +15,6 @@ export class HBAnnotation extends LitElement {
   @state()
   private activeTool: string | null = null;
 
-  connectedCallback() {
-    super.connectedCallback();
-    this.loadScreenshotFromStorage();
-  }
-
-  private async loadScreenshotFromStorage() {
-    try {
-      const response = await chrome.runtime.sendMessage({
-        type: 'GET_SCREENSHOT',
-      });
-      if (response?.dataUrl) {
-        this.dataUrl = response.dataUrl;
-      }
-    } catch (error) {
-      console.error('Failed to load screenshot:', error);
-    }
-  }
-
   render() {
     if (!this.dataUrl) {
       return html`
@@ -61,6 +43,24 @@ export class HBAnnotation extends LitElement {
         ></hb-canvas>
       </div>
     `;
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.loadScreenshotFromStorage();
+  }
+
+  private async loadScreenshotFromStorage() {
+    try {
+      const response = await chrome.runtime.sendMessage({
+        type: 'GET_SCREENSHOT',
+      });
+      if (response?.dataUrl) {
+        this.dataUrl = response.dataUrl;
+      }
+    } catch (error) {
+      console.error('Failed to load screenshot:', error);
+    }
   }
 
   private handleToolChange(event: CustomEvent) {
