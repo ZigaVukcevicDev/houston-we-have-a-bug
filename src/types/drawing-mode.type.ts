@@ -1,1 +1,1 @@
-export type DrawingMode = 'text' | 'line' | 'arrow' | 'rectangle' | 'crop';
+export type DrawingMode = 'select' | 'text' | 'line' | 'arrow' | 'rectangle' | 'crop';

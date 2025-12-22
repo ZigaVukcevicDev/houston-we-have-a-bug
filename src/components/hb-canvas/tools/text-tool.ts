@@ -3,19 +3,20 @@ import type { TextAnnotation } from '../../../interfaces/annotation.interface';
 import { toolStyles } from './tool-styles';
 
 export class TextTool implements Tool {
-  private annotations: TextAnnotation[] = [];
+  private annotations: TextAnnotation[];
   private textInput: HTMLInputElement | null = null;
   private readonly color: string = toolStyles.color;
   private readonly fontSize: number = toolStyles.fontSize;
   private onRedraw: () => void;
 
-  constructor(onRedraw: () => void) {
+  constructor(annotations: TextAnnotation[], onRedraw: () => void) {
+    this.annotations = annotations;
     this.onRedraw = onRedraw;
   }
 
   handleClick(event: MouseEvent, canvas: HTMLCanvasElement): void {
     if (this.textInput) {
-      this._finalizeTextInput();
+      this.finalizeTextInput();
       return;
     }
 
@@ -25,7 +26,7 @@ export class TextTool implements Tool {
     const x = (event.clientX - rect.left) * scaleX;
     const y = (event.clientY - rect.top) * scaleY;
 
-    this._createTextInput(x, y, rect, scaleX, scaleY);
+    this.createTextInput(x, y, rect, scaleX, scaleY);
   }
 
   render(ctx: CanvasRenderingContext2D): void {
@@ -37,7 +38,7 @@ export class TextTool implements Tool {
     });
   }
 
-  private _createTextInput(
+  private createTextInput(
     canvasX: number,
     canvasY: number,
     rect: DOMRect,
@@ -70,23 +71,23 @@ export class TextTool implements Tool {
     document.body.appendChild(this.textInput);
     this.textInput.focus();
 
-    this.textInput.addEventListener('keydown', this._handleTextInputKeydown);
-    this.textInput.addEventListener('blur', this._handleTextInputBlur);
+    this.textInput.addEventListener('keydown', this.handleTextInputKeydown);
+    this.textInput.addEventListener('blur', this.handleTextInputBlur);
   }
 
-  private _handleTextInputKeydown = (e: KeyboardEvent) => {
+  private handleTextInputKeydown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
-      this._finalizeTextInput();
+      this.finalizeTextInput();
     } else if (e.key === 'Escape') {
-      this._removeTextInput();
+      this.removeTextInput();
     }
   };
 
-  private _handleTextInputBlur = () => {
-    setTimeout(() => this._finalizeTextInput(), 100);
+  private handleTextInputBlur = () => {
+    setTimeout(() => this.finalizeTextInput(), 100);
   };
 
-  private _finalizeTextInput() {
+  private finalizeTextInput() {
     if (!this.textInput) return;
 
     const text = this.textInput.value.trim();
@@ -102,6 +103,7 @@ export class TextTool implements Tool {
       this.annotations = [
         ...this.annotations,
         {
+          id: crypto.randomUUID(),
           x,
           y,
           text,
@@ -113,13 +115,13 @@ export class TextTool implements Tool {
       this.onRedraw();
     }
 
-    this._removeTextInput();
+    this.removeTextInput();
   }
 
-  private _removeTextInput() {
+  private removeTextInput() {
     if (this.textInput && this.textInput.parentNode) {
-      this.textInput.removeEventListener('keydown', this._handleTextInputKeydown);
-      this.textInput.removeEventListener('blur', this._handleTextInputBlur);
+      this.textInput.removeEventListener('keydown', this.handleTextInputKeydown);
+      this.textInput.removeEventListener('blur', this.handleTextInputBlur);
       this.textInput.parentNode.removeChild(this.textInput);
     }
     this.textInput = null;

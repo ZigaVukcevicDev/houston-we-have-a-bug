@@ -29,7 +29,7 @@ describe('HBAnnotation', () => {
         dataUrl: mockDataUrl,
       });
 
-      await annotation['_loadScreenshotFromStorage']();
+      await annotation['loadScreenshotFromStorage']();
 
       expect(mockChrome.runtime.sendMessage).toHaveBeenCalledWith({
         type: 'GET_SCREENSHOT',
@@ -40,7 +40,7 @@ describe('HBAnnotation', () => {
     it('should handle missing dataUrl in response', async () => {
       mockChrome.runtime.sendMessage.mockResolvedValue({});
 
-      await annotation['_loadScreenshotFromStorage']();
+      await annotation['loadScreenshotFromStorage']();
 
       expect(annotation['dataUrl']).toBe('');
     });
@@ -51,7 +51,7 @@ describe('HBAnnotation', () => {
         new Error('Failed to load screenshot')
       );
 
-      await annotation['_loadScreenshotFromStorage']();
+      await annotation['loadScreenshotFromStorage']();
 
       expect(annotation['dataUrl']).toBe('');
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -81,7 +81,7 @@ describe('HBAnnotation', () => {
       vi.useFakeTimers();
       vi.setSystemTime(new Date('2025-12-15T21:00:00Z'));
 
-      annotation['_handleDownload']();
+      annotation['handleDownload']();
 
       expect(mockCanvas.download).toHaveBeenCalledWith(
         expect.stringMatching(
@@ -100,7 +100,7 @@ describe('HBAnnotation', () => {
         writable: true,
       });
 
-      expect(() => annotation['_handleDownload']()).not.toThrow();
+      expect(() => annotation['handleDownload']()).not.toThrow();
     });
   });
 });

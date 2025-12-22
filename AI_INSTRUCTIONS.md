@@ -19,10 +19,18 @@ You must follow these rules when working on this repository.
 - **No Leftovers**: When refactoring or removing features (e.g., Memory Usage), fully remove all related code, types, and unused imports.
 - **No Commented Code**: Do not leave commented-out code blocks. If code is not used, delete it.
 - **Strict Types**: Use TypeScript interfaces properly. Avoid `any`.
-- **Type Organization**: All type definitions and interfaces must be properly organized:
-  - **Interfaces**: `src/interfaces/*.interface.ts` (e.g. `annotation.interface.ts`)
-  - **Types**: `src/types/*.type.ts` (e.g. `drawing-mode.type.ts`)
-  - Never define types/interfaces in functionality files
+
+## Code Organization
+
+- **Types vs Interfaces**: 
+  - `src/types/` - For type aliases (e.g., `type DrawingMode = 'text' | 'line'`)
+  - `src/interfaces/` - For object structures (e.g., `interface LineAnnotation { ... }`)
+  
+- **Naming Conventions**:
+  - Private methods: Use `private` keyword only, **no underscore prefix**
+    - ✅ Correct: `private handleClick()`, `private redraw()`
+    - ❌ Incorrect: `private _handleClick()`, `private _redraw()`
+  - The `private` keyword is sufficient; underscore prefixes are redundant in modern TypeScript
 
 ## 3. Source of Truth
 - **`src/*` Only**: specificly edit files in `src/`.

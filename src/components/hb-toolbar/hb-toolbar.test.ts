@@ -18,7 +18,7 @@ describe('HBToolbar', () => {
       const eventSpy = vi.fn();
       toolbar.addEventListener('download', eventSpy);
 
-      toolbar['_handleDownload']();
+      toolbar['handleDownload']();
 
       expect(eventSpy).toHaveBeenCalled();
     });
@@ -29,7 +29,7 @@ describe('HBToolbar', () => {
         capturedEvent = e as CustomEvent;
       });
 
-      toolbar['_handleDownload']();
+      toolbar['handleDownload']();
 
       expect(capturedEvent).not.toBeNull();
       expect(capturedEvent!.bubbles).toBe(true);
@@ -41,7 +41,7 @@ describe('HBToolbar', () => {
         capturedEvent = e as CustomEvent;
       });
 
-      toolbar['_handleDownload']();
+      toolbar['handleDownload']();
 
       expect(capturedEvent).not.toBeNull();
       expect(capturedEvent!.composed).toBe(true);

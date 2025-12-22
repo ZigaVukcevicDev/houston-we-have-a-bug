@@ -3,8 +3,10 @@ import { customElement, property, query } from 'lit/decorators.js';
 import styles from './hb-canvas.scss';
 import type { DrawingMode } from '../../types/drawing-mode.type';
 import type { Tool } from '../../interfaces/tool.interface';
+import type { LineAnnotation, TextAnnotation } from '../../interfaces/annotation.interface';
 import { TextTool } from './tools/text-tool';
 import { LineTool } from './tools/line-tool';
+import { SelectTool } from './tools/select-tool';
 
 @customElement('hb-canvas')
 export class HBCanvas extends LitElement {
@@ -23,21 +25,33 @@ export class HBCanvas extends LitElement {
   private originalImage: HTMLImageElement | null = null;
   private tools: Map<DrawingMode, Tool> = new Map();
 
+  // Centralized annotation storage
+  private lineAnnotations: LineAnnotation[] = [];
+  private textAnnotations: TextAnnotation[] = [];
+
   constructor() {
     super();
-    this._initializeTools();
+    this.initializeTools();
   }
 
-  private _initializeTools() {
-    // Initialize tools with a redraw callback
-    this.tools.set('text', new TextTool(() => this._redraw()));
+  private initializeTools() {
+    // Initialize tools with shared annotations and callbacks
+    this.tools.set('text', new TextTool(
+      this.textAnnotations,
+      () => this.redraw()
+    ));
     this.tools.set('line', new LineTool(
-      () => this._redraw(),
-      (tool: string) => this._handleToolChange(tool)
+      this.lineAnnotations,
+      () => this.redraw(),
+      (tool: string) => this.handleToolChange(tool)
+    ));
+    this.tools.set('select', new SelectTool(
+      this.lineAnnotations,
+      () => this.redraw()
     ));
   }
 
-  private _handleToolChange(tool: string) {
+  private handleToolChange(tool: string) {
     // Dispatch event to notify toolbar of tool change
     this.dispatchEvent(new CustomEvent('tool-change', {
       detail: { tool },
@@ -46,7 +60,7 @@ export class HBCanvas extends LitElement {
     }));
   }
 
-  private get _activeTool(): Tool | undefined {
+  private get activeTool(): Tool | undefined {
     return this.tools.get(this.drawingMode);
   }
 
@@ -55,25 +69,25 @@ export class HBCanvas extends LitElement {
 
     return html`<canvas 
       class="${modeClass}"
-      @click=${this._handleCanvasClick}
-      @mousedown=${this._handleMouseDown}
-      @mousemove=${this._handleMouseMove}
-      @mouseup=${this._handleMouseUp}
+      @click=${this.handleCanvasClick}
+      @mousedown=${this.handleMouseDown}
+      @mousemove=${this.handleMouseMove}
+      @mouseup=${this.handleMouseUp}
     ></canvas>`;
   }
 
   protected firstUpdated() {
     this.ctx = this.canvas.getContext('2d')!;
-    this._loadImage();
+    this.loadImage();
   }
 
   protected updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('dataUrl') && this.dataUrl) {
-      this._loadImage();
+      this.loadImage();
     }
   }
 
-  private async _loadImage() {
+  private async loadImage() {
     if (!this.dataUrl) return;
 
     const img = new Image();
@@ -91,12 +105,12 @@ export class HBCanvas extends LitElement {
       this.canvas.style.width = `${img.width / dpr}px`;
       this.canvas.style.height = `${img.height / dpr}px`;
 
-      this._redraw();
+      this.redraw();
     };
     img.src = this.dataUrl;
   }
 
-  private _redraw() {
+  private redraw() {
     if (!this.originalImage) return;
 
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -108,20 +122,20 @@ export class HBCanvas extends LitElement {
     });
   }
 
-  private _handleCanvasClick(event: MouseEvent) {
-    this._activeTool?.handleClick?.(event, this.canvas);
+  private handleCanvasClick(event: MouseEvent) {
+    this.activeTool?.handleClick?.(event, this.canvas);
   }
 
-  private _handleMouseDown(event: MouseEvent) {
-    this._activeTool?.handleMouseDown?.(event, this.canvas);
+  private handleMouseDown(event: MouseEvent) {
+    this.activeTool?.handleMouseDown?.(event, this.canvas);
   }
 
-  private _handleMouseMove(event: MouseEvent) {
-    this._activeTool?.handleMouseMove?.(event, this.canvas, this.ctx);
+  private handleMouseMove(event: MouseEvent) {
+    this.activeTool?.handleMouseMove?.(event, this.canvas, this.ctx);
   }
 
-  private _handleMouseUp(event: MouseEvent) {
-    this._activeTool?.handleMouseUp?.(event, this.canvas);
+  private handleMouseUp(event: MouseEvent) {
+    this.activeTool?.handleMouseUp?.(event, this.canvas);
   }
 
   public download(filename: string = 'screenshot.jpg', quality: number = 0.85) {

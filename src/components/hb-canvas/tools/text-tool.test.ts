@@ -14,7 +14,7 @@ describe('TextTool', () => {
 
   beforeEach(() => {
     mockRedraw = vi.fn();
-    textTool = new TextTool(mockRedraw);
+    textTool = new TextTool([], mockRedraw);
 
     // Mock canvas
     mockCanvas = {
@@ -184,7 +184,7 @@ describe('TextTool', () => {
       const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
       input.dispatchEvent(enterEvent);
 
-      expect(textTool['annotations'][0]).toEqual({
+      expect(textTool['annotations'][0]).toMatchObject({
         x: 150,
         y: 200,
         text: 'Test Annotation',
@@ -289,7 +289,7 @@ describe('TextTool', () => {
     });
 
     it('should handle empty annotations', () => {
-      const emptyTextTool = new TextTool(vi.fn());
+      const emptyTextTool = new TextTool([], vi.fn());
 
       emptyTextTool.render(mockCtx);
 

@@ -20,22 +20,22 @@ export class HBToolbar extends LitElement {
         </a>
 
         <div class="tools">
-          <hb-toolbar-tool title="Select" icon="select" .isActive=${this.activeTool === 'select'} @click=${() => this._handleToolClick('select')}></hb-toolbar-tool>
-          <hb-toolbar-tool title="Text" icon="text" .isActive=${this.activeTool === 'text'} @click=${() => this._handleToolClick('text')}></hb-toolbar-tool>
-          <hb-toolbar-tool title="Line" icon="line" .isActive=${this.activeTool === 'line'} @click=${() => this._handleToolClick('line')}></hb-toolbar-tool>
-          <hb-toolbar-tool title="Arrow" icon="arrow" .isActive=${this.activeTool === 'arrow'} @click=${() => this._handleToolClick('arrow')}></hb-toolbar-tool>
-          <hb-toolbar-tool title="Rectangle" icon="rectangle" .isActive=${this.activeTool === 'rectangle'} @click=${() => this._handleToolClick('rectangle')}></hb-toolbar-tool>
-          <hb-toolbar-tool title="Crop" icon="crop" .isActive=${this.activeTool === 'crop'} @click=${() => this._handleToolClick('crop')}></hb-toolbar-tool>
+          <hb-toolbar-tool title="Select" icon="select" .isActive=${this.activeTool === 'select'} @click=${() => this.handleToolClick('select')}></hb-toolbar-tool>
+          <hb-toolbar-tool title="Text" icon="text" .isActive=${this.activeTool === 'text'} @click=${() => this.handleToolClick('text')}></hb-toolbar-tool>
+          <hb-toolbar-tool title="Line" icon="line" .isActive=${this.activeTool === 'line'} @click=${() => this.handleToolClick('line')}></hb-toolbar-tool>
+          <hb-toolbar-tool title="Arrow" icon="arrow" .isActive=${this.activeTool === 'arrow'} @click=${() => this.handleToolClick('arrow')}></hb-toolbar-tool>
+          <hb-toolbar-tool title="Rectangle" icon="rectangle" .isActive=${this.activeTool === 'rectangle'} @click=${() => this.handleToolClick('rectangle')}></hb-toolbar-tool>
+          <hb-toolbar-tool title="Crop" icon="crop" .isActive=${this.activeTool === 'crop'} @click=${() => this.handleToolClick('crop')}></hb-toolbar-tool>
         </div>
 
-        <button class="download" title="Download" @click=${this._handleDownload}>
+        <button class="download" title="Download" @click=${this.handleDownload}>
           <img src="../images/download-white.svg" alt="download" />
         </button>
       </div> 
     `;
   }
 
-  private _handleToolClick(tool: ToolType) {
+  private handleToolClick(tool: ToolType) {
     this.activeTool = tool;
 
     this.dispatchEvent(new CustomEvent('tool-change', {
@@ -45,7 +45,7 @@ export class HBToolbar extends LitElement {
     }));
   }
 
-  private _handleDownload() {
+  private handleDownload() {
     this.dispatchEvent(new CustomEvent('download', { bubbles: true, composed: true }));
   }
 }

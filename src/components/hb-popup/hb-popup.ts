@@ -30,13 +30,13 @@ export class HBPopup extends LitElement {
         <div class="ml-lg">
           <button
             class="action-button primary"
-            @click=${this._annotateScreenshot}
+            @click=${this.annotateScreenshot}
           >
             <img src="../images/pencil-white.svg" alt="pencil" />
             Annotate screenshot
           </button>
 
-          <button class="action-button secondary mt-md mb-md" @click=${this._gatherEnvironmentDetails}>
+          <button class="action-button secondary mt-md mb-md" @click=${this.gatherEnvironmentDetails}>
             <img src="../images/info-black.svg" alt="info" class="icon-default" />
             <img src="../images/info-red-500.svg" alt="info" class="icon-hover" />
             <img src="../images/info-red-400.svg" alt="info" class="icon-active" />
@@ -44,12 +44,12 @@ export class HBPopup extends LitElement {
           </button>
         </div>
 
-        ${this._renderEnvironmentDetails()}
+        ${this.renderEnvironmentDetails()}
       </div>
     `;
   }
 
-  private _renderCopyButtonIcon() {
+  private renderCopyButtonIcon() {
     if (this.isCopyingDisabled) {
       return html`
         <img src="../images/check-black.svg" alt="check" class="icon-default" />
@@ -63,7 +63,7 @@ export class HBPopup extends LitElement {
     `;
   }
 
-  private _renderEnvironmentDetails() {
+  private renderEnvironmentDetails() {
     if (!this.environmentDetails) {
       return null;
     }
@@ -74,11 +74,11 @@ export class HBPopup extends LitElement {
 
         <button
           class="icon-button"
-          @click=${this._copyToClipboard}
+          @click=${this.copyToClipboard}
           title="Copy to clipboard"
           ?disabled=${this.isCopyingDisabled}
         >
-          ${this._renderCopyButtonIcon()}
+          ${this.renderCopyButtonIcon()}
         </button>
       </div>
 

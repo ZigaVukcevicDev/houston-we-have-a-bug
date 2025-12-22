@@ -25,9 +25,10 @@ describe('HBCanvas', () => {
       expect(canvas.drawingMode).toBe('text');
     });
 
-    it('should initialize tools map with text and line tools', () => {
+    it('should initialize tools map with select, text and line tools', () => {
       const tools = canvas['tools'];
-      expect(tools.size).toBe(2);
+      expect(tools.size).toBe(3);
+      expect(tools.get('select')).toBeDefined();
       expect(tools.get('text')).toBeDefined();
       expect(tools.get('line')).toBeDefined();
     });
@@ -60,15 +61,15 @@ describe('HBCanvas', () => {
       const lineTool = canvas['tools'].get('line');
 
       canvas.drawingMode = 'text';
-      expect(canvas['_activeTool']).toBe(textTool);
+      expect(canvas['activeTool']).toBe(textTool);
 
       canvas.drawingMode = 'line';
-      expect(canvas['_activeTool']).toBe(lineTool);
+      expect(canvas['activeTool']).toBe(lineTool);
     });
 
     it('should return undefined for invalid drawing mode', () => {
       canvas.drawingMode = 'invalid' as any;
-      expect(canvas['_activeTool']).toBeUndefined();
+      expect(canvas['activeTool']).toBeUndefined();
     });
   });
 
@@ -113,19 +114,19 @@ describe('HBCanvas', () => {
 
     it('should not load image if dataUrl is empty', async () => {
       canvas.dataUrl = '';
-      await canvas['_loadImage']();
+      await canvas['loadImage']();
       expect(mockCtx.drawImage).not.toHaveBeenCalled();
     });
 
     it('should verify image loading method exists', () => {
       // Integration testing of image loading requires proper DOM/Image mocking
       // This test verifies the method exists and is callable
-      expect(canvas['_loadImage']).toBeDefined();
-      expect(typeof canvas['_loadImage']).toBe('function');
+      expect(canvas['loadImage']).toBeDefined();
+      expect(typeof canvas['loadImage']).toBe('function');
     });
 
     it('should trigger image load when dataUrl changes', async () => {
-      const loadImageSpy = vi.spyOn(canvas as any, '_loadImage');
+      const loadImageSpy = vi.spyOn(canvas as any, 'loadImage');
 
       canvas.dataUrl = 'data:image/png;base64,newimage';
       canvas['updated'](new Map([['dataUrl', '']]));
@@ -134,7 +135,7 @@ describe('HBCanvas', () => {
     });
 
     it('should not reload image when other properties change', () => {
-      const loadImageSpy = vi.spyOn(canvas as any, '_loadImage');
+      const loadImageSpy = vi.spyOn(canvas as any, 'loadImage');
 
       canvas['updated'](new Map([['drawingMode', 'text']]));
 
@@ -190,12 +191,12 @@ describe('HBCanvas', () => {
 
     it('should not redraw if no image is loaded', () => {
       canvas['originalImage'] = null;
-      canvas['_redraw']();
+      canvas['redraw']();
       expect(mockCtx.clearRect).not.toHaveBeenCalled();
     });
 
     it('should clear canvas and redraw image', () => {
-      canvas['_redraw']();
+      canvas['redraw']();
 
       expect(mockCtx.clearRect).toHaveBeenCalledWith(0, 0, 800, 600);
       expect(mockCtx.drawImage).toHaveBeenCalledWith(mockImage, 0, 0);
@@ -208,7 +209,7 @@ describe('HBCanvas', () => {
       const textRenderSpy = vi.spyOn(textTool, 'render');
       const lineRenderSpy = vi.spyOn(lineTool, 'render');
 
-      canvas['_redraw']();
+      canvas['redraw']();
 
       expect(textRenderSpy).toHaveBeenCalledWith(mockCtx);
       expect(lineRenderSpy).toHaveBeenCalledWith(mockCtx);
@@ -260,7 +261,7 @@ describe('HBCanvas', () => {
 
       const event = { clientX: 100, clientY: 100 } as MouseEvent;
       canvas.drawingMode = 'text';
-      canvas['_handleCanvasClick'](event);
+      canvas['handleCanvasClick'](event);
 
       expect(handleClickSpy).toHaveBeenCalledWith(event, mockCanvasElement);
     });
@@ -271,7 +272,7 @@ describe('HBCanvas', () => {
 
       const event = { clientX: 50, clientY: 50 } as MouseEvent;
       canvas.drawingMode = 'line';
-      canvas['_handleMouseDown'](event);
+      canvas['handleMouseDown'](event);
 
       expect(handleMouseDownSpy).toHaveBeenCalledWith(event, mockCanvasElement);
     });
@@ -282,7 +283,7 @@ describe('HBCanvas', () => {
 
       const event = { clientX: 60, clientY: 60 } as MouseEvent;
       canvas.drawingMode = 'line';
-      canvas['_handleMouseMove'](event);
+      canvas['handleMouseMove'](event);
 
       expect(handleMouseMoveSpy).toHaveBeenCalledWith(event, mockCanvasElement, mockCtx);
     });
@@ -293,7 +294,7 @@ describe('HBCanvas', () => {
 
       const event = { clientX: 100, clientY: 100 } as MouseEvent;
       canvas.drawingMode = 'line';
-      canvas['_handleMouseUp'](event);
+      canvas['handleMouseUp'](event);
 
       expect(handleMouseUpSpy).toHaveBeenCalledWith(event, mockCanvasElement);
     });
@@ -304,17 +305,17 @@ describe('HBCanvas', () => {
 
       // Line tool doesn't have handleClick - should not throw
       const event = { clientX: 100, clientY: 100 } as MouseEvent;
-      expect(() => canvas['_handleCanvasClick'](event)).not.toThrow();
+      expect(() => canvas['handleCanvasClick'](event)).not.toThrow();
     });
 
     it('should not crash when no active tool exists', () => {
       canvas.drawingMode = 'invalid' as any;
 
       const event = { clientX: 100, clientY: 100 } as MouseEvent;
-      expect(() => canvas['_handleCanvasClick'](event)).not.toThrow();
-      expect(() => canvas['_handleMouseDown'](event)).not.toThrow();
-      expect(() => canvas['_handleMouseMove'](event)).not.toThrow();
-      expect(() => canvas['_handleMouseUp'](event)).not.toThrow();
+      expect(() => canvas['handleCanvasClick'](event)).not.toThrow();
+      expect(() => canvas['handleMouseDown'](event)).not.toThrow();
+      expect(() => canvas['handleMouseMove'](event)).not.toThrow();
+      expect(() => canvas['handleMouseUp'](event)).not.toThrow();
     });
   });
 

@@ -17,10 +17,10 @@ export class HBAnnotation extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this._loadScreenshotFromStorage();
+    this.loadScreenshotFromStorage();
   }
 
-  private async _loadScreenshotFromStorage() {
+  private async loadScreenshotFromStorage() {
     try {
       const response = await chrome.runtime.sendMessage({
         type: 'GET_SCREENSHOT',
@@ -49,25 +49,25 @@ export class HBAnnotation extends LitElement {
       <div class="toolbar-container">
         <hb-toolbar 
           .activeTool=${this.activeTool}
-          @download=${this._handleDownload}
-          @tool-change=${this._handleToolChange}
+          @download=${this.handleDownload}
+          @tool-change=${this.handleToolChange}
         ></hb-toolbar>
       </div>
       <div class="canvas-container">
         <hb-canvas
           .dataUrl=${this.dataUrl}
           .drawingMode=${this.activeTool}
-          @tool-change=${this._handleToolChange}
+          @tool-change=${this.handleToolChange}
         ></hb-canvas>
       </div>
     `;
   }
 
-  private _handleToolChange(event: CustomEvent) {
+  private handleToolChange(event: CustomEvent) {
     this.activeTool = event.detail.tool;
   }
 
-  private _handleDownload() {
+  private handleDownload() {
     const canvas = this.shadowRoot?.querySelector('hb-canvas') as HBCanvas;
     const now = new Date();
     const date = now.toISOString().slice(0, 10);
