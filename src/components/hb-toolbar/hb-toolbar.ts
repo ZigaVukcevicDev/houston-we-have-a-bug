@@ -1,5 +1,5 @@
 import { LitElement, html, unsafeCSS } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import styles from './hb-toolbar.scss';
 import '../hb-toolbar-tool/hb-toolbar-tool';
 import type { ToolType } from '../../types/tool-type.type';
@@ -9,8 +9,8 @@ import type { ToolType } from '../../types/tool-type.type';
 export class HBToolbar extends LitElement {
   static styles = unsafeCSS(styles);
 
-  @state()
-  private _activeTool: ToolType | null = null;
+  @property({ type: String })
+  activeTool: ToolType | null = null;
 
   render() {
     return html`
@@ -20,12 +20,12 @@ export class HBToolbar extends LitElement {
         </a>
 
         <div class="tools">
-          <hb-toolbar-tool title="Select" icon="select" .isActive=${this._activeTool === 'select'} @click=${() => this._handleToolClick('select')}></hb-toolbar-tool>
-          <hb-toolbar-tool title="Text" icon="text" .isActive=${this._activeTool === 'text'} @click=${() => this._handleToolClick('text')}></hb-toolbar-tool>
-          <hb-toolbar-tool title="Line" icon="line" .isActive=${this._activeTool === 'line'} @click=${() => this._handleToolClick('line')}></hb-toolbar-tool>
-          <hb-toolbar-tool title="Arrow" icon="arrow" .isActive=${this._activeTool === 'arrow'} @click=${() => this._handleToolClick('arrow')}></hb-toolbar-tool>
-          <hb-toolbar-tool title="Rectangle" icon="rectangle" .isActive=${this._activeTool === 'rectangle'} @click=${() => this._handleToolClick('rectangle')}></hb-toolbar-tool>
-          <hb-toolbar-tool title="Crop" icon="crop" .isActive=${this._activeTool === 'crop'} @click=${() => this._handleToolClick('crop')}></hb-toolbar-tool>
+          <hb-toolbar-tool title="Select" icon="select" .isActive=${this.activeTool === 'select'} @click=${() => this._handleToolClick('select')}></hb-toolbar-tool>
+          <hb-toolbar-tool title="Text" icon="text" .isActive=${this.activeTool === 'text'} @click=${() => this._handleToolClick('text')}></hb-toolbar-tool>
+          <hb-toolbar-tool title="Line" icon="line" .isActive=${this.activeTool === 'line'} @click=${() => this._handleToolClick('line')}></hb-toolbar-tool>
+          <hb-toolbar-tool title="Arrow" icon="arrow" .isActive=${this.activeTool === 'arrow'} @click=${() => this._handleToolClick('arrow')}></hb-toolbar-tool>
+          <hb-toolbar-tool title="Rectangle" icon="rectangle" .isActive=${this.activeTool === 'rectangle'} @click=${() => this._handleToolClick('rectangle')}></hb-toolbar-tool>
+          <hb-toolbar-tool title="Crop" icon="crop" .isActive=${this.activeTool === 'crop'} @click=${() => this._handleToolClick('crop')}></hb-toolbar-tool>
         </div>
 
         <button class="download" title="Download" @click=${this._handleDownload}>
@@ -36,7 +36,8 @@ export class HBToolbar extends LitElement {
   }
 
   private _handleToolClick(tool: ToolType) {
-    this._activeTool = tool;
+    this.activeTool = tool;
+
     this.dispatchEvent(new CustomEvent('tool-change', {
       bubbles: true,
       composed: true,

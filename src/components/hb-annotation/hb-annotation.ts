@@ -48,6 +48,7 @@ export class HBAnnotation extends LitElement {
     return html`
       <div class="toolbar-container">
         <hb-toolbar 
+          .activeTool=${this.activeTool}
           @download=${this._handleDownload}
           @tool-change=${this._handleToolChange}
         ></hb-toolbar>
@@ -56,6 +57,7 @@ export class HBAnnotation extends LitElement {
         <hb-canvas
           .dataUrl=${this.dataUrl}
           .drawingMode=${this.activeTool}
+          @tool-change=${this._handleToolChange}
         ></hb-canvas>
       </div>
     `;
