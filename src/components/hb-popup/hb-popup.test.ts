@@ -35,7 +35,22 @@ describe('HBPopup', () => {
     vi.clearAllMocks();
   });
 
-  describe('_gatherEnvironmentDetails', () => {
+  describe('Button handler wiring', () => {
+    it('should have annotateScreenshot method available for button click', () => {
+      // Verify that the method exists and can be called
+      expect(typeof popup['annotateScreenshot']).toBe('function');
+    });
+
+    it('should have gatherEnvironmentDetails method available for button click', () => {
+      expect(typeof popup['gatherEnvironmentDetails']).toBe('function');
+    });
+
+    it('should have copyToClipboard method available for button click', () => {
+      expect(typeof popup['copyToClipboard']).toBe('function');
+    });
+  });
+
+  describe('gatherEnvironmentDetails', () => {
     it('should gather environment details from active tab', async () => {
       const mockTab = {
         id: 123,
@@ -44,7 +59,7 @@ describe('HBPopup', () => {
 
       mockChrome.tabs.query.mockResolvedValue([mockTab]);
 
-      await popup['_gatherEnvironmentDetails']();
+      await popup['gatherEnvironmentDetails']();
 
       expect(mockChrome.tabs.query).toHaveBeenCalledWith({
         active: true,
@@ -59,7 +74,7 @@ describe('HBPopup', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
       mockChrome.tabs.query.mockRejectedValue(new Error('Tab query failed'));
 
-      await popup['_gatherEnvironmentDetails']();
+      await popup['gatherEnvironmentDetails']();
 
       expect(popup['environmentDetails']).toBeNull();
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -72,13 +87,13 @@ describe('HBPopup', () => {
     it('should not gather details if no tab URL or ID', async () => {
       mockChrome.tabs.query.mockResolvedValue([{}]);
 
-      await popup['_gatherEnvironmentDetails']();
+      await popup['gatherEnvironmentDetails']();
 
       expect(popup['environmentDetails']).toBeNull();
     });
   });
 
-  describe('_copyToClipboard', () => {
+  describe('copyToClipboard', () => {
     it('should copy environment details to clipboard', async () => {
       popup['environmentDetails'] = {
         dateAndTime: '2025-12-15 21:00:00',
@@ -90,7 +105,7 @@ describe('HBPopup', () => {
         os: 'macOS',
       };
 
-      await popup['_copyToClipboard']();
+      await popup['copyToClipboard']();
 
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
         expect.stringContaining('Date and time: 2025-12-15 21:00:00')
@@ -103,13 +118,13 @@ describe('HBPopup', () => {
     it('should not copy if no environment details', async () => {
       popup['environmentDetails'] = null;
 
-      await popup['_copyToClipboard']();
+      await popup['copyToClipboard']();
 
       expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
     });
   });
 
-  describe('_annotateScreenshot', () => {
+  describe('annotateScreenshot', () => {
     it('should capture screenshot and open editor tab', async () => {
       const mockTab = {
         id: 123,
@@ -121,7 +136,7 @@ describe('HBPopup', () => {
         'data:image/png;base64,mock'
       );
 
-      await popup['_annotateScreenshot']();
+      await popup['annotateScreenshot']();
 
       expect(mockChrome.tabs.captureVisibleTab).toHaveBeenCalledWith(456, {
         format: 'png',
@@ -142,7 +157,7 @@ describe('HBPopup', () => {
         new Error('Screenshot capture failed')
       );
 
-      await popup['_annotateScreenshot']();
+      await popup['annotateScreenshot']();
 
       expect(mockChrome.tabs.captureVisibleTab).not.toHaveBeenCalled();
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -155,7 +170,7 @@ describe('HBPopup', () => {
     it('should not capture if no tab ID or window ID', async () => {
       mockChrome.tabs.query.mockResolvedValue([{}]);
 
-      await popup['_annotateScreenshot']();
+      await popup['annotateScreenshot']();
 
       expect(mockChrome.tabs.captureVisibleTab).not.toHaveBeenCalled();
     });

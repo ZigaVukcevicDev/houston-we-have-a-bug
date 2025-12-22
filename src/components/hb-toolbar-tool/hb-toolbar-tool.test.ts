@@ -16,7 +16,7 @@ describe('HBToolbarTool', () => {
 
   it('should render correct images based on icon property', async () => {
     tool.icon = 'text';
-    tool.title = 'Text Tool';
+    tool.title = 'Text tool';
     tool.isActive = false;
 
     // In a real test we'd need to wait for update and check shadowRoot

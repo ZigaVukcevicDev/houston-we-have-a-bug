@@ -66,7 +66,7 @@ describe('TextTool', () => {
       );
 
       const input = getTextInput()!;
-      input.value = 'Test Text';
+      input.value = 'Test text';
 
       // Second click - finalize
       textTool.handleClick(
@@ -75,7 +75,7 @@ describe('TextTool', () => {
       );
 
       expect(textTool['annotations']).toHaveLength(1);
-      expect(textTool['annotations'][0].text).toBe('Test Text');
+      expect(textTool['annotations'][0].text).toBe('Test text');
       expect(getTextInput()).toBeNull();
     });
 
@@ -133,19 +133,19 @@ describe('TextTool', () => {
 
     it('should finalize text on Enter key', () => {
       const input = getTextInput()!;
-      input.value = 'Enter Test';
+      input.value = 'Enter test';
 
       const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
       input.dispatchEvent(enterEvent);
 
       expect(textTool['annotations']).toHaveLength(1);
-      expect(textTool['annotations'][0].text).toBe('Enter Test');
+      expect(textTool['annotations'][0].text).toBe('Enter test');
       expect(getTextInput()).toBeNull();
     });
 
     it('should cancel text input on Escape key', () => {
       const input = getTextInput()!;
-      input.value = 'Escape Test';
+      input.value = 'Escape test';
 
       const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
       input.dispatchEvent(escapeEvent);
@@ -156,7 +156,7 @@ describe('TextTool', () => {
 
     it('should not finalize on other keys', () => {
       const input = getTextInput()!;
-      input.value = 'Other Key Test';
+      input.value = 'Other key test';
 
       const aKeyEvent = new KeyboardEvent('keydown', { key: 'a' });
       input.dispatchEvent(aKeyEvent);
@@ -177,7 +177,7 @@ describe('TextTool', () => {
 
     it('should add annotation with correct properties', () => {
       const input = getTextInput()!;
-      input.value = 'Test Annotation';
+      input.value = 'Test annotation';
       input.dataset.canvasX = '150';
       input.dataset.canvasY = '200';
 
@@ -187,7 +187,7 @@ describe('TextTool', () => {
       expect(textTool['annotations'][0]).toMatchObject({
         x: 150,
         y: 200,
-        text: 'Test Annotation',
+        text: 'Test annotation',
         color: '#BD2D1E',
         fontSize: 24,
       });
@@ -195,7 +195,7 @@ describe('TextTool', () => {
 
     it('should call redraw after finalization', () => {
       const input = getTextInput()!;
-      input.value = 'Redraw Test';
+      input.value = 'Redraw test';
 
       const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
       input.dispatchEvent(enterEvent);
@@ -215,12 +215,12 @@ describe('TextTool', () => {
 
     it('should trim whitespace from text', () => {
       const input = getTextInput()!;
-      input.value = '  Trimmed Text  ';
+      input.value = '  Trimmed text  ';
 
       const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
       input.dispatchEvent(enterEvent);
 
-      expect(textTool['annotations'][0].text).toBe('Trimmed Text');
+      expect(textTool['annotations'][0].text).toBe('Trimmed text');
     });
 
     it('should allow multiple text annotations', () => {
@@ -254,7 +254,7 @@ describe('TextTool', () => {
         mockCanvas
       );
       let input = getTextInput()!;
-      input.value = 'First Text';
+      input.value = 'First text';
       input.dataset.canvasX = '100';
       input.dataset.canvasY = '100';
       input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
@@ -264,7 +264,7 @@ describe('TextTool', () => {
         mockCanvas
       );
       input = getTextInput()!;
-      input.value = 'Second Text';
+      input.value = 'Second text';
       input.dataset.canvasX = '200';
       input.dataset.canvasY = '200';
       input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
@@ -276,8 +276,8 @@ describe('TextTool', () => {
       textTool.render(mockCtx);
 
       expect(mockCtx.fillText).toHaveBeenCalledTimes(2);
-      expect(mockCtx.fillText).toHaveBeenCalledWith('First Text', 100, 100);
-      expect(mockCtx.fillText).toHaveBeenCalledWith('Second Text', 200, 200);
+      expect(mockCtx.fillText).toHaveBeenCalledWith('First text', 100, 100);
+      expect(mockCtx.fillText).toHaveBeenCalledWith('Second text', 200, 200);
     });
 
     it('should apply correct text styling', () => {
@@ -404,7 +404,7 @@ describe('TextTool', () => {
       );
 
       const input = getTextInput()!;
-      input.value = 'Blur Test';
+      input.value = 'Blur test';
 
       input.dispatchEvent(new Event('blur'));
 
@@ -412,7 +412,7 @@ describe('TextTool', () => {
       await new Promise((resolve) => setTimeout(resolve, 150));
 
       expect(textTool['annotations']).toHaveLength(1);
-      expect(textTool['annotations'][0].text).toBe('Blur Test');
+      expect(textTool['annotations'][0].text).toBe('Blur test');
     });
   });
 });

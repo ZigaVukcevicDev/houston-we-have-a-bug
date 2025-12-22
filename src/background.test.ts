@@ -18,7 +18,7 @@ globalThis.chrome = mockChrome as any;
 // Using dynamic import to ensure mock is set up first
 await import('./background');
 
-describe('Background Service Worker', () => {
+describe('Background service worker', () => {
   let messageListener: Function;
 
   beforeEach(() => {

@@ -143,7 +143,7 @@ export class HBPopup extends LitElement {
     `;
   }
 
-  private async _gatherEnvironmentDetails() {
+  private async gatherEnvironmentDetails() {
     try {
       const [tab] = await chrome.tabs.query({
         active: true,
@@ -166,7 +166,7 @@ export class HBPopup extends LitElement {
     }
   }
 
-  private async _copyToClipboard() {
+  private async copyToClipboard() {
     if (!this.environmentDetails) return;
 
     const text = [
@@ -190,7 +190,7 @@ export class HBPopup extends LitElement {
     }, 3000);
   }
 
-  private async _annotateScreenshot() {
+  private async annotateScreenshot() {
     try {
       const [tab] = await chrome.tabs.query({
         active: true,
