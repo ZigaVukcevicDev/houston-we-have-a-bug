@@ -237,17 +237,22 @@ describe('SelectTool', () => {
     // not by SelectTool directly, so we don't test style.cursor here
 
     it('should not update cursor while dragging', () => {
+      // First select a line
+      selectTool['selectedAnnotationId'] = 'line-1';
+      
+      // Then start dragging a handle
       selectTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      const initialCursor = mockCanvas.style.cursor;
+      mockCanvas.style.cursor = 'move';
 
+      // Move mouse while dragging
       selectTool.handleMouseMove(
         { clientX: 150, clientY: 150 } as MouseEvent,
         mockCanvas,
         mockCtx
       );
 
-      // Cursor shouldn't be modified while dragging
-      expect(mockCanvas.style.cursor).toBe(initialCursor);
+      // Cursor should not change during drag
+      expect(mockCanvas.style.cursor).toBe('move');
     });
   });
 

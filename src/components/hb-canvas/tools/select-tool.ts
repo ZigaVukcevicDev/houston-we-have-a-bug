@@ -71,13 +71,39 @@ export class SelectTool implements Tool {
   }
 
   handleMouseMove(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
-    if (!this.draggingHandle || this.selectedAnnotationId === null) {
-      // Note: Cursor is now managed by CSS classes, not direct style manipulation
-      // This prevents cursor from sticking when switching tools
+    // Provide cursor feedback when hovering (but not while dragging)
+    if (!this.draggingHandle) {
+      // Provide cursor feedback when hovering over handles or lines
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = (event.clientX - rect.left) * scaleX;
+      const y = (event.clientY - rect.top) * scaleY;
+
+      // Check if hovering over a handle of selected line
+      const selectedLine = this.lineAnnotations.find(l => l.id === this.selectedAnnotationId);
+      if (selectedLine) {
+        if (this.isPointOnHandle(x, y, selectedLine.x1, selectedLine.y1) ||
+          this.isPointOnHandle(x, y, selectedLine.x2, selectedLine.y2)) {
+          canvas.style.cursor = 'move';
+          return;
+        }
+      }
+
+      // Check if hovering over any line
+      for (const line of this.lineAnnotations) {
+        if (this.isPointOnLine(x, y, line)) {
+          canvas.style.cursor = 'pointer';
+          return;
+        }
+      }
+
+      // Not hovering over anything - reset to CSS-controlled cursor
+      canvas.style.cursor = '';
       return;
     }
 
-    // Handle dragging
+    // Handle dragging (cursor doesn't change during drag)
     const line = this.lineAnnotations.find(l => l.id === this.selectedAnnotationId);
     if (!line) return;
 
