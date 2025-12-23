@@ -1,8 +1,8 @@
 export const toolStyles = {
   color: '#BD2D1E',
   fontSize: 24,
-  lineWidth: 3,
+  lineWidth: 5,
   handleFillColor: '#ffffff',
-  handleStrokeColor: '#BD2D1E',
+  handleStrokeColor: '#E74C3C',
   handleStrokeWidth: 2,
 } as const;

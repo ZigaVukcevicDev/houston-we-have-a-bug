@@ -59,15 +59,6 @@ export class HBCanvas extends LitElement {
     if (changedProperties.has('dataUrl') && this.dataUrl) {
       this.loadImage();
     }
-
-    // Auto-select last annotation when switching to select tool
-    if (changedProperties.has('drawingMode') && this.drawingMode === 'select') {
-      const selectTool = this.tools.get('select') as SelectTool;
-      if (selectTool && this.lineAnnotations.length > 0) {
-        const lastLineId = this.lineAnnotations[this.lineAnnotations.length - 1].id;
-        selectTool.selectAnnotation(lastLineId);
-      }
-    }
   }
 
   private initializeTools() {
@@ -87,13 +78,21 @@ export class HBCanvas extends LitElement {
     ));
   }
 
-  private handleToolChange(tool: string) {
+  private handleToolChange(tool: string, annotationId?: string) {
     // Dispatch event to notify toolbar of tool change
     this.dispatchEvent(new CustomEvent('tool-change', {
       detail: { tool },
       bubbles: true,
       composed: true
     }));
+
+    // If an annotation ID is provided, select it after tool change
+    if (annotationId && tool === 'select') {
+      const selectTool = this.tools.get('select') as SelectTool;
+      if (selectTool) {
+        selectTool.selectAnnotation(annotationId);
+      }
+    }
   }
 
   private async loadImage() {

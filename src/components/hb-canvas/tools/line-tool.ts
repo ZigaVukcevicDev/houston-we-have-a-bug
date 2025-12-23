@@ -9,10 +9,10 @@ export class LineTool implements Tool {
   private readonly color: string = toolStyles.color;
   private readonly lineWidth: number = toolStyles.lineWidth;
   private onRedraw: () => void;
-  private onToolChange?: (tool: string) => void;
+  private onToolChange?: (tool: string, annotationId?: string) => void;
   private keydownHandler: ((event: KeyboardEvent) => void) | null = null;
 
-  constructor(lineAnnotations: LineAnnotation[], onRedraw: () => void, onToolChange?: (tool: string) => void) {
+  constructor(lineAnnotations: LineAnnotation[], onRedraw: () => void, onToolChange?: (tool: string, annotationId?: string) => void) {
     this.lineAnnotations = lineAnnotations;
     this.onRedraw = onRedraw;
     this.onToolChange = onToolChange;
@@ -123,8 +123,9 @@ export class LineTool implements Tool {
     this.cleanupDrawingState();
     this.onRedraw();
 
-    // Switch to select tool after drawing
-    this.onToolChange?.('select');
+    // Switch to select tool after drawing and select the newly created line
+    const newLineId = this.lineAnnotations[this.lineAnnotations.length - 1].id;
+    this.onToolChange?.('select', newLineId);
   }
 
   private cancelDrawing(): void {

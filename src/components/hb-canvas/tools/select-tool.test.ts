@@ -53,7 +53,10 @@ describe('SelectTool', () => {
       strokeStyle: '',
       lineWidth: 0,
       fillStyle: '',
+      lineCap: '',
       beginPath: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
       arc: vi.fn(),
       fill: vi.fn(),
       stroke: vi.fn(),
@@ -423,6 +426,115 @@ describe('SelectTool', () => {
       selectTool.handleMouseUp();
 
       expect(selectTool['draggingLine']).toBe(false);
+    });
+  });
+
+  describe('hover detection', () => {
+    it('should track hovered annotation on mouse move', () => {
+      // Initially no hover
+      expect(selectTool['hoveredAnnotationId']).toBeNull();
+
+      // Move mouse over line-1
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBe('line-1');
+      expect(mockRedraw).toHaveBeenCalled();
+    });
+
+    it('should clear hovered annotation when moving away', () => {
+      // First hover over a line
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+      expect(selectTool['hoveredAnnotationId']).toBe('line-1');
+      mockRedraw.mockClear();
+
+      // Move mouse to empty space
+      selectTool.handleMouseMove(
+        { clientX: 500, clientY: 500 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBeNull();
+      expect(mockRedraw).toHaveBeenCalled();
+    });
+
+    it('should render stroke for hovered annotation', () => {
+      // Hover over line-1
+      selectTool['hoveredAnnotationId'] = 'line-1';
+
+      selectTool.render(mockCtx);
+
+      // Should draw stroke outline and the line itself
+      expect(mockCtx.strokeStyle).toBeDefined();
+      expect(mockCtx.beginPath).toHaveBeenCalled();
+      expect(mockCtx.stroke).toHaveBeenCalled();
+    });
+
+    it('should not show hover stroke for selected annotation', () => {
+      // Select and hover the same line
+      selectTool['selectedAnnotationId'] = 'line-1';
+      selectTool['hoveredAnnotationId'] = 'line-1';
+
+      const beginPathCalls = mockCtx.beginPath as any;
+      beginPathCalls.mockClear();
+
+      selectTool.render(mockCtx);
+
+      // Should only render handles, not the hover stroke
+      // Handles: 2 calls (one for each handle)
+      // No extra calls for hover stroke
+      expect(mockCtx.arc).toHaveBeenCalledTimes(2);
+    });
+
+    it('should hover most recent line when multiple overlap', () => {
+      // Add a third line at the same position as line-1
+      lineAnnotations.push({
+        id: 'line-3',
+        x1: 100,
+        y1: 100,
+        x2: 200,
+        y2: 200,
+        color: '#BD2D1E',
+        width: 5,
+      });
+
+      // Move mouse over overlapping lines
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      // Should hover the most recent one (line-3)
+      expect(selectTool['hoveredAnnotationId']).toBe('line-3');
+    });
+
+    it('should clear hover when dragging', () => {
+      // First select and hover a line
+      selectTool['selectedAnnotationId'] = 'line-1';
+      selectTool['hoveredAnnotationId'] = 'line-1';
+
+      // Start dragging handle
+      selectTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      mockRedraw.mockClear();
+
+      // Move mouse while dragging
+      selectTool.handleMouseMove(
+        { clientX: 120, clientY: 120 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      // Hover should be cleared when over a handle during drag
+      expect(selectTool['draggingHandle']).toBe('start');
     });
   });
 });

@@ -149,7 +149,7 @@ describe('LineTool', () => {
       );
 
       expect(mockCtx.strokeStyle).toBe('#BD2D1E');
-      expect(mockCtx.lineWidth).toBe(3);
+      expect(mockCtx.lineWidth).toBe(5);
       expect(mockCtx.lineCap).toBe('round');
     });
   });
@@ -179,7 +179,7 @@ describe('LineTool', () => {
         x2: 200,
         y2: 250,
         color: '#BD2D1E',
-        width: 3,
+        width: 5,
       });
       expect(lineTool['isDrawing']).toBe(false);
       expect(lineTool['startPoint']).toBeNull();
@@ -201,7 +201,7 @@ describe('LineTool', () => {
         x2: 300,
         y2: 100, // Y constrained to start point
         color: '#BD2D1E',
-        width: 3,
+        width: 5,
       });
     });
 
@@ -220,7 +220,7 @@ describe('LineTool', () => {
         x2: 100, // X constrained to start point
         y2: 300,
         color: '#BD2D1E',
-        width: 3,
+        width: 5,
       });
     });
 
@@ -248,7 +248,7 @@ describe('LineTool', () => {
         x2: 350,
         y2: 350,
         color: '#BD2D1E',
-        width: 3,
+        width: 5,
       });
     });
 
@@ -316,7 +316,7 @@ describe('LineTool', () => {
       lineTool.render(mockCtx);
 
       expect(mockCtx.strokeStyle).toBe('#BD2D1E');
-      expect(mockCtx.lineWidth).toBe(3);
+      expect(mockCtx.lineWidth).toBe(5);
       expect(mockCtx.lineCap).toBe('round');
     });
 
@@ -512,7 +512,7 @@ describe('LineTool', () => {
       lineToolWithCallback.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
       lineToolWithCallback.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
 
-      expect(mockToolChange).toHaveBeenCalledWith('select');
+      expect(mockToolChange).toHaveBeenCalledWith('select', expect.any(String));
       expect(mockToolChange).toHaveBeenCalledTimes(1);
     });
 

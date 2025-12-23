@@ -4,13 +4,9 @@
 
 1. Select tool
 
-- [ ] stroke body of annotation
-- [ ] on hover stroke annotation
-- [ ] change cursor on move annotation
-- [ ] if no annotation is clicked, unselect all annotations 
-- [ ] if coming from other tool, don't select any annotation
-Details:
-- [ ] all tests
+- [x] on hover stroke annotation
+- [x] if no annotation is clicked, unselect all annotations 
+- [x] if coming from other tool, don't select any annotation
 
 2. Line tool
 
@@ -26,13 +22,9 @@ Details:
   - [ ] first endpoint
   - [ ] second endpoint
 
-  3. Download
+3. Download
 
-  - deselect annotaions when downloading
-
-Details:
-- [ ] all tests
-- [ ] make line thicker
+- [x] deselect annotaions when downloading
 
 ## Extra
 

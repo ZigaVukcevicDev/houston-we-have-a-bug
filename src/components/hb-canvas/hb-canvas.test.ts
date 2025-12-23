@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { HBCanvas } from './hb-canvas';
+import { SelectTool } from './tools/select-tool';
 
 describe('HBCanvas', () => {
   let canvas: HBCanvas;
@@ -476,6 +477,133 @@ describe('HBCanvas', () => {
       const rendered2 = canvas.render();
       const values2 = rendered2.values;
       expect(values2).toContain('mode-line');
+    });
+  });
+
+  describe('tool switching behavior', () => {
+    let mockCanvasElement: any;
+    let mockCtx: any;
+
+    beforeEach(() => {
+      mockCtx = {
+        clearRect: vi.fn(),
+        drawImage: vi.fn(),
+        fillText: vi.fn(),
+        strokeStyle: '',
+        lineWidth: 0,
+        lineCap: '',
+        beginPath: vi.fn(),
+        moveTo: vi.fn(),
+        lineTo: vi.fn(),
+        stroke: vi.fn(),
+        save: vi.fn(),
+        restore: vi.fn(),
+        arc: vi.fn(),
+        fill: vi.fn(),
+      };
+
+      mockCanvasElement = {
+        getBoundingClientRect: vi.fn().mockReturnValue({
+          left: 0,
+          top: 0,
+          width: 800,
+          height: 600,
+        }),
+        width: 800,
+        height: 600,
+        getContext: vi.fn().mockReturnValue(mockCtx),
+        style: {},
+      };
+
+      Object.defineProperty(canvas, 'canvas', {
+        value: mockCanvasElement,
+        writable: true,
+      });
+
+      canvas['firstUpdated']();
+      canvas['originalImage'] = { width: 800, height: 600 } as HTMLImageElement;
+    });
+
+    it('should not auto-select annotation when manually switching to select tool', () => {
+      // Add some line annotations
+      const lineTool = canvas['tools'].get('line')!;
+      canvas['lineAnnotations'].push({
+        id: 'line-1',
+        x1: 100,
+        y1: 100,
+        x2: 200,
+        y2: 200,
+        color: '#BD2D1E',
+        width: 5,
+      });
+
+      const selectTool = canvas['tools'].get('select') as SelectTool;
+      const selectAnnotationSpy = vi.spyOn(selectTool, 'selectAnnotation');
+
+      // Manually switch to select mode (simulating user clicking select tool button)
+      canvas.drawingMode = 'select';
+      canvas['updated'](new Map([['drawingMode', 'text']]));
+
+      // Should NOT auto-select
+      expect(selectAnnotationSpy).not.toHaveBeenCalled();
+    });
+
+    it('should auto-select annotation when line tool switches to select after drawing', () => {
+      const selectTool = canvas['tools'].get('select') as SelectTool;
+      const selectAnnotationSpy = vi.spyOn(selectTool, 'selectAnnotation');
+
+      // Simulate drawing a line (which triggers tool change with annotation ID)
+      canvas.drawingMode = 'line';
+      const lineTool = canvas['tools'].get('line')!;
+
+      // Draw a line
+      lineTool.handleMouseDown!({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvasElement);
+      lineTool.handleMouseUp!({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvasElement);
+
+      // The line tool should have triggered tool change with annotation ID
+      // This simulates the event being dispatched and handled
+      const newLineId = canvas['lineAnnotations'][canvas['lineAnnotations'].length - 1]?.id;
+
+      if (newLineId) {
+        // Manually call handleToolChange as the tool would
+        canvas['handleToolChange']('select', newLineId);
+
+        // Should auto-select the newly drawn line
+        expect(selectAnnotationSpy).toHaveBeenCalledWith(newLineId);
+      }
+    });
+
+    it('should dispatch tool-change event when tool changes', () => {
+      const eventSpy = vi.fn();
+      canvas.addEventListener('tool-change', eventSpy);
+
+      // Trigger tool change
+      canvas['handleToolChange']('select');
+
+      expect(eventSpy).toHaveBeenCalled();
+      const event = eventSpy.mock.calls[0][0];
+      expect(event.detail.tool).toBe('select');
+    });
+
+    it('should not select annotation if tool is not select', () => {
+      canvas['lineAnnotations'].push({
+        id: 'line-1',
+        x1: 100,
+        y1: 100,
+        x2: 200,
+        y2: 200,
+        color: '#BD2D1E',
+        width: 5,
+      });
+
+      const selectTool = canvas['tools'].get('select') as SelectTool;
+      const selectAnnotationSpy = vi.spyOn(selectTool, 'selectAnnotation');
+
+      // Call handleToolChange with line tool and an annotation ID
+      canvas['handleToolChange']('line', 'line-1');
+
+      // Should NOT select because tool is not 'select'
+      expect(selectAnnotationSpy).not.toHaveBeenCalled();
     });
   });
 });

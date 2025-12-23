@@ -8,6 +8,7 @@ const lineHitThreshold = 10;
 export class SelectTool implements Tool {
   private lineAnnotations: LineAnnotation[] = [];
   private selectedAnnotationId: string | null = null;
+  private hoveredAnnotationId: string | null = null;
   private draggingHandle: 'start' | 'end' | null = null;
   private draggingLine: boolean = false;
   private dragOffset: { x: number; y: number } = { x: 0, y: 0 };
@@ -97,19 +98,29 @@ export class SelectTool implements Tool {
         if (this.isPointOnHandle(x, y, selectedLine.x1, selectedLine.y1) ||
           this.isPointOnHandle(x, y, selectedLine.x2, selectedLine.y2)) {
           canvas.style.cursor = 'move';
+          this.hoveredAnnotationId = null;
+          this.onRedraw();
           return;
         }
       }
 
-      // Check if hovering over any line
-      for (const line of this.lineAnnotations) {
-        if (this.isPointOnLine(x, y, line)) {
+      // Check if hovering over any line (iterate backwards for most recent)
+      for (let i = this.lineAnnotations.length - 1; i >= 0; i--) {
+        if (this.isPointOnLine(x, y, this.lineAnnotations[i])) {
           canvas.style.cursor = 'pointer';
+          if (this.hoveredAnnotationId !== this.lineAnnotations[i].id) {
+            this.hoveredAnnotationId = this.lineAnnotations[i].id;
+            this.onRedraw();
+          }
           return;
         }
       }
 
       // Not hovering over anything - reset to CSS-controlled cursor
+      if (this.hoveredAnnotationId !== null) {
+        this.hoveredAnnotationId = null;
+        this.onRedraw();
+      }
       canvas.style.cursor = '';
       return;
     }
@@ -163,12 +174,41 @@ export class SelectTool implements Tool {
   }
 
   render(ctx: CanvasRenderingContext2D): void {
+    // Render stroke for hovered annotation (if not selected)
+    if (this.hoveredAnnotationId !== null && this.hoveredAnnotationId !== this.selectedAnnotationId) {
+      const hoveredLine = this.lineAnnotations.find(l => l.id === this.hoveredAnnotationId);
+      if (hoveredLine) {
+        // Draw thin stroke outline around hovered line
+        ctx.save();
+        ctx.strokeStyle = toolStyles.handleStrokeColor;
+        ctx.lineWidth = hoveredLine.width + 4; // Thin outline (2px on each side)
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(hoveredLine.x1, hoveredLine.y1);
+        ctx.lineTo(hoveredLine.x2, hoveredLine.y2);
+        ctx.stroke();
+        ctx.restore();
+
+        // Draw the line itself on top in its original color
+        ctx.save();
+        ctx.strokeStyle = hoveredLine.color;
+        ctx.lineWidth = hoveredLine.width;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(hoveredLine.x1, hoveredLine.y1);
+        ctx.lineTo(hoveredLine.x2, hoveredLine.y2);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
     // Render handles for selected annotation
     if (this.selectedAnnotationId === null) return;
 
     const selectedLine = this.lineAnnotations.find(l => l.id === this.selectedAnnotationId);
     if (!selectedLine) return;
 
+    // Draw handles only (no stroke outline for selected line)
     this.renderHandle(ctx, selectedLine.x1, selectedLine.y1);
     this.renderHandle(ctx, selectedLine.x2, selectedLine.y2);
   }
