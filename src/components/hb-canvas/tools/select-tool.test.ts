@@ -162,35 +162,6 @@ describe('SelectTool', () => {
       expect(lineAnnotations[0].y2).toBe(200);
       expect(mockRedraw).toHaveBeenCalled();
     });
-
-    it('should apply shift-key constraint when dragging start handle horizontally', () => {
-      selectTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-
-      // Move more horizontally (dx=50, dy=30), should snap Y to create horizontal line
-      selectTool.handleMouseMove(
-        { clientX: 150, clientY: 130, shiftKey: true } as MouseEvent,
-        mockCanvas,
-        mockCtx
-      );
-
-      // Line should be horizontal (y1 === y2)
-      expect(lineAnnotations[0].y1).toBe(lineAnnotations[0].y2);
-    });
-
-
-    it('should apply shift-key constraint when dragging start handle vertically', () => {
-      selectTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-
-      // Move more vertically (dx=30, dy=50), should snap X to create vertical line
-      selectTool.handleMouseMove(
-        { clientX: 130, clientY: 150, shiftKey: true } as MouseEvent,
-        mockCanvas,
-        mockCtx
-      );
-
-      // Line should be vertical (x1 === x2)
-      expect(lineAnnotations[0].x1).toBe(lineAnnotations[0].x2);
-    });
   });
 
   describe('handle dragging - end handle', () => {
@@ -239,7 +210,7 @@ describe('SelectTool', () => {
     it('should not update cursor while dragging', () => {
       // First select a line
       selectTool['selectedAnnotationId'] = 'line-1';
-      
+
       // Then start dragging a handle
       selectTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
       mockCanvas.style.cursor = 'move';
@@ -412,7 +383,7 @@ describe('SelectTool', () => {
   describe('line body dragging', () => {
     it('should start dragging line when clicking on line body', () => {
       selectTool['selectedAnnotationId'] = 'line-1';
-      
+
       // Click on line body (not on handles)
       selectTool.handleMouseDown({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
 
@@ -425,10 +396,10 @@ describe('SelectTool', () => {
       const originalY1 = lineAnnotations[0].y1;
       const originalX2 = lineAnnotations[0].x2;
       const originalY2 = lineAnnotations[0].y2;
-      
+
       // Start dragging line body
       selectTool.handleMouseDown({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
-      
+
       // Drag to new position
       selectTool.handleMouseMove(
         { clientX: 180, clientY: 180 } as MouseEvent,
@@ -439,7 +410,7 @@ describe('SelectTool', () => {
       // Both endpoints should have moved by the same amount
       const dx = lineAnnotations[0].x1 - originalX1;
       const dy = lineAnnotations[0].y1 - originalY1;
-      
+
       expect(lineAnnotations[0].x2).toBe(originalX2 + dx);
       expect(lineAnnotations[0].y2).toBe(originalY2 + dy);
       expect(mockRedraw).toHaveBeenCalled();
@@ -448,7 +419,7 @@ describe('SelectTool', () => {
     it('should stop dragging line on mouse up', () => {
       selectTool['selectedAnnotationId'] = 'line-1';
       selectTool.handleMouseDown({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
-      
+
       selectTool.handleMouseUp();
 
       expect(selectTool['draggingLine']).toBe(false);

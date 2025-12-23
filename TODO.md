@@ -8,7 +8,7 @@
 - [ ] on hover stroke annotation
 - [ ] change cursor on move annotation
 - [ ] if no annotation is clicked, unselect all annotations 
-- [] if coming from other tool, don't select any annotation
+- [ ] if coming from other tool, don't select any annotation
 Details:
 - [ ] all tests
 
@@ -18,15 +18,10 @@ Details:
   - [x] free
   - [x] with shift
 - move endpoint
-  - first endpoint
-    - [x] free
-    - [ ] with shift
-  - second endpoint
-    - [x] free
-    - [ ] with shift
+  - [x] first endpoint
+  - [x] second endpoint
 - move line
   - [x] free
-  - [ ] with shift
 - rotate line
   - [ ] first endpoint
   - [ ] second endpoint

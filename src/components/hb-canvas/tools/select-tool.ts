@@ -139,23 +139,8 @@ export class SelectTool implements Tool {
       return;
     }
 
-    // Apply shift-key constraint for straight lines (only for handle dragging)
-    if (event.shiftKey && this.draggingHandle) {
-      const otherX = this.draggingHandle === 'start' ? line.x2 : line.x1;
-      const otherY = this.draggingHandle === 'start' ? line.y2 : line.y1;
-
-      // Measure drag direction from initial drag start position (prevents jumping)
-      const dx = Math.abs(x - this.dragStartPosition.x);
-      const dy = Math.abs(y - this.dragStartPosition.y);
-
-      if (dx > dy) {
-        y = otherY; // Horizontal
-      } else {
-        x = otherX; // Vertical
-      }
-    }
-
-    // Then subtract drag offset
+    // Handle dragging endpoints
+    // Subtract drag offset
     x = x - this.dragOffset.x;
     y = y - this.dragOffset.y;
 
