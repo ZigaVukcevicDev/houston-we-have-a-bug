@@ -23,11 +23,11 @@ button {
       }
 
       &:hover {
-        background-color: $color-red-500;
+        background-color: $color-red-400;
       }
 
       &:active {
-        background-color: $color-red-400;
+        background-color: $color-red-500;
       }
     }
 
@@ -55,8 +55,8 @@ button {
       }
 
       &:hover {
-        color: $color-red-500;
-        border-color: $color-red-500;
+        color: $color-red-400;
+        border-color: $color-red-400;
 
         img {
 
@@ -72,8 +72,8 @@ button {
       }
 
       &:active {
-        color: $color-red-400;
-        border-color: $color-red-400;
+        color: $color-red-500;
+        border-color: $color-red-500;
 
         img {
 

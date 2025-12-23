@@ -26,10 +26,10 @@ button {
   }
 
   &:hover {
-    background-color: $color-red-500;
+    background-color: $color-red-400;
   }
 
   &.activated {
-    background-color: $color-red-400;
+    background-color: $color-red-500;
   }
 }

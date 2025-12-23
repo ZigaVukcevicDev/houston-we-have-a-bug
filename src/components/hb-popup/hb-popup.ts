@@ -38,8 +38,8 @@ export class HBPopup extends LitElement {
 
           <button class="action-button secondary mt-md mb-md" @click=${this.gatherEnvironmentDetails}>
             <img src="../images/info-black.svg" alt="info" class="icon-default" />
-            <img src="../images/info-red-500.svg" alt="info" class="icon-hover" />
-            <img src="../images/info-red-400.svg" alt="info" class="icon-active" />
+            <img src="../images/info-red-400.svg" alt="info" class="icon-hover" />
+            <img src="../images/info-red-500.svg" alt="info" class="icon-active" />
             Gather environment details
           </button>
         </div>
@@ -58,8 +58,8 @@ export class HBPopup extends LitElement {
 
     return html`
       <img src="../images/copy-black.svg" alt="copy" class="icon-default" />
-      <img src="../images/copy-red-500.svg" alt="copy" class="icon-hover" />
-      <img src="../images/copy-red-400.svg" alt="copy" class="icon-active" />
+      <img src="../images/copy-red-400.svg" alt="copy" class="icon-hover" />
+      <img src="../images/copy-red-500.svg" alt="copy" class="icon-active" />
     `;
   }
 

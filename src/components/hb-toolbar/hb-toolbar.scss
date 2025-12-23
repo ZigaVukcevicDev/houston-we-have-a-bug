@@ -37,11 +37,11 @@
     cursor: pointer;
 
     &:hover {
-      background-color: $color-red-500;
+      background-color: $color-red-400;
     }
 
     &:active {
-      background-color: $color-red-400;
+      background-color: $color-red-500;
     }
 
     img {

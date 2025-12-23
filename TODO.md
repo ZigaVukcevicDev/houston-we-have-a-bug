@@ -8,6 +8,9 @@
 - [ ] on hover stroke annotation
 - [ ] change cursor on move annotation
 - [ ] if no annotation is clicked, unselect all annotations 
+- [] if coming from other tool, don't select any annotation
+Details:
+- [ ] all tests
 
 2. Line tool
 
@@ -28,7 +31,12 @@
   - [ ] first endpoint
   - [ ] second endpoint
 
+  3. Download
+
+  - deselect annotaions when downloading
+
 Details:
+- [ ] all tests
 - [ ] make line thicker
 
 ## Extra
