@@ -31,7 +31,7 @@ describe('SelectTool', () => {
         width: 3,
       },
     ];
-    selectTool = new SelectTool(lineAnnotations, mockRedraw);
+    selectTool = new SelectTool(lineAnnotations, [], mockRedraw);
 
     // Mock canvas
     mockCanvas = {
@@ -242,6 +242,7 @@ describe('SelectTool', () => {
 
     it('should render handles for selected line', () => {
       selectTool['selectedAnnotationId'] = 'line-1';
+      selectTool['selectedAnnotationType'] = 'line';
 
       selectTool.render(mockCtx);
 
@@ -252,6 +253,7 @@ describe('SelectTool', () => {
 
     it('should render handles at correct positions', () => {
       selectTool['selectedAnnotationId'] = 'line-1';
+      selectTool['selectedAnnotationType'] = 'line';
 
       selectTool.render(mockCtx);
 
@@ -275,6 +277,7 @@ describe('SelectTool', () => {
 
     it('should save and restore context when rendering handles', () => {
       selectTool['selectedAnnotationId'] = 'line-1';
+      selectTool['selectedAnnotationType'] = 'line';
 
       selectTool.render(mockCtx);
 
@@ -292,7 +295,7 @@ describe('SelectTool', () => {
 
   describe('edge cases', () => {
     it('should handle empty line annotations array', () => {
-      const emptySelectTool = new SelectTool([], mockRedraw);
+      const emptySelectTool = new SelectTool([], [], mockRedraw);
 
       emptySelectTool.handleClick({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
 
@@ -469,6 +472,7 @@ describe('SelectTool', () => {
     it('should render stroke for hovered annotation', () => {
       // Hover over line-1
       selectTool['hoveredAnnotationId'] = 'line-1';
+      selectTool['hoveredAnnotationType'] = 'line';
 
       selectTool.render(mockCtx);
 
@@ -481,7 +485,9 @@ describe('SelectTool', () => {
     it('should not show hover stroke for selected annotation', () => {
       // Select and hover the same line
       selectTool['selectedAnnotationId'] = 'line-1';
+      selectTool['selectedAnnotationType'] = 'line';
       selectTool['hoveredAnnotationId'] = 'line-1';
+      selectTool['hoveredAnnotationType'] = 'line';
 
       const beginPathCalls = mockCtx.beginPath as any;
       beginPathCalls.mockClear();

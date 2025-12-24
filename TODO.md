@@ -19,7 +19,20 @@
 - move line
   - [x] free
 
-3. Download
+3. Rectangle tool
+
+- draw rectangle
+  - [ ] free
+  - [ ] with shift
+- move endpoint
+  - [ ] first endpoint
+  - [ ] second endpoint
+  - [ ] third endpoint
+  - [ ] fourth endpoint
+- move rectangle
+  - [ ] free
+
+4. Download
 
 - [x] deselect annotaions when downloading
 

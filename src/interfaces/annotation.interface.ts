@@ -16,3 +16,14 @@ export interface LineAnnotation {
   color: string;
   width: number;
 }
+
+export interface RectangleAnnotation {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  color: string;
+  strokeWidth: number;
+}
+

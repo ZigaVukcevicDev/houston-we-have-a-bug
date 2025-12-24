@@ -1,27 +1,37 @@
 import type { Tool } from '../../../interfaces/tool.interface';
-import type { LineAnnotation } from '../../../interfaces/annotation.interface';
+import type { LineAnnotation, RectangleAnnotation } from '../../../interfaces/annotation.interface';
 import { renderHandle, isPointOnHandle } from '../../../utils/render-handle';
 
 const lineHitThreshold = 10;
 
 export class SelectTool implements Tool {
   private lineAnnotations: LineAnnotation[] = [];
+  private rectangleAnnotations: RectangleAnnotation[] = [];
   private selectedAnnotationId: string | null = null;
+  private selectedAnnotationType: 'line' | 'rectangle' | null = null;
   private hoveredAnnotationId: string | null = null;
-  private draggingHandle: 'start' | 'end' | null = null;
+  private hoveredAnnotationType: 'line' | 'rectangle' | null = null;
+  private draggingHandle: 'start' | 'end' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | null = null;
   private draggingLine: boolean = false;
   private dragOffset: { x: number; y: number } = { x: 0, y: 0 };
 
   private onRedraw: () => void;
 
-  constructor(lineAnnotations: LineAnnotation[], onRedraw: () => void) {
+  constructor(lineAnnotations: LineAnnotation[], rectangleAnnotations: RectangleAnnotation[], onRedraw: () => void) {
     this.lineAnnotations = lineAnnotations;
+    this.rectangleAnnotations = rectangleAnnotations;
     this.onRedraw = onRedraw;
   }
 
   // Select a specific annotation by ID (for auto-selection after drawing)
   selectAnnotation(id: string): void {
     this.selectedAnnotationId = id;
+    // Determine annotation type
+    if (this.lineAnnotations.find(l => l.id === id)) {
+      this.selectedAnnotationType = 'line';
+    } else if (this.rectangleAnnotations.find(r => r.id === id)) {
+      this.selectedAnnotationType = 'rectangle';
+    }
     this.onRedraw();
   }
 
@@ -32,10 +42,21 @@ export class SelectTool implements Tool {
     const x = (event.clientX - rect.left) * scaleX;
     const y = (event.clientY - rect.top) * scaleY;
 
-    // Check if clicking on a line to select it (iterate backwards for most recent)
+    // Check rectangles first (iterate backwards for most recent)
+    for (let i = this.rectangleAnnotations.length - 1; i >= 0; i--) {
+      if (this.isPointOnRectangle(x, y, this.rectangleAnnotations[i])) {
+        this.selectedAnnotationId = this.rectangleAnnotations[i].id;
+        this.selectedAnnotationType = 'rectangle';
+        this.onRedraw();
+        return;
+      }
+    }
+
+    // Check lines (iterate backwards for most recent)
     for (let i = this.lineAnnotations.length - 1; i >= 0; i--) {
       if (this.isPointOnLine(x, y, this.lineAnnotations[i])) {
         this.selectedAnnotationId = this.lineAnnotations[i].id;
+        this.selectedAnnotationType = 'line';
         this.onRedraw();
         return;
       }
@@ -43,6 +64,7 @@ export class SelectTool implements Tool {
 
     // Click on empty space - deselect
     this.selectedAnnotationId = null;
+    this.selectedAnnotationType = null;
     this.onRedraw();
   }
 
@@ -173,33 +195,57 @@ export class SelectTool implements Tool {
   }
 
   render(ctx: CanvasRenderingContext2D): void {
+    const dpr = window.devicePixelRatio || 1;
+
     // Render yellow centerline for hovered annotation (if not selected)
     if (this.hoveredAnnotationId !== null && this.hoveredAnnotationId !== this.selectedAnnotationId) {
-      const hoveredLine = this.lineAnnotations.find(l => l.id === this.hoveredAnnotationId);
-      if (hoveredLine) {
-        const dpr = window.devicePixelRatio || 1;
-        // Draw yellow 1px centerline
-        ctx.save();
-        ctx.strokeStyle = '#FAC021';
-        ctx.lineWidth = 1 * dpr;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(hoveredLine.x1, hoveredLine.y1);
-        ctx.lineTo(hoveredLine.x2, hoveredLine.y2);
-        ctx.stroke();
-        ctx.restore();
+      if (this.hoveredAnnotationType === 'line') {
+        const hoveredLine = this.lineAnnotations.find(l => l.id === this.hoveredAnnotationId);
+        if (hoveredLine) {
+          ctx.save();
+          ctx.strokeStyle = '#FAC021';
+          ctx.lineWidth = 1 * dpr;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(hoveredLine.x1, hoveredLine.y1);
+          ctx.lineTo(hoveredLine.x2, hoveredLine.y2);
+          ctx.stroke();
+          ctx.restore();
+        }
+      } else if (this.hoveredAnnotationType === 'rectangle') {
+        const hoveredRect = this.rectangleAnnotations.find(r => r.id === this.hoveredAnnotationId);
+        if (hoveredRect) {
+          ctx.save();
+          ctx.strokeStyle = '#FAC021';
+          ctx.lineWidth = 1 * dpr;
+          ctx.lineJoin = 'round';
+          ctx.beginPath();
+          ctx.rect(hoveredRect.x, hoveredRect.y, hoveredRect.width, hoveredRect.height);
+          ctx.stroke();
+          ctx.restore();
+        }
       }
     }
 
     // Render handles for selected annotation
     if (this.selectedAnnotationId === null) return;
 
-    const selectedLine = this.lineAnnotations.find(l => l.id === this.selectedAnnotationId);
-    if (!selectedLine) return;
-
-    // Draw handles only (no stroke outline for selected line)
-    renderHandle(ctx, selectedLine.x1, selectedLine.y1);
-    renderHandle(ctx, selectedLine.x2, selectedLine.y2);
+    if (this.selectedAnnotationType === 'line') {
+      const selectedLine = this.lineAnnotations.find(l => l.id === this.selectedAnnotationId);
+      if (selectedLine) {
+        renderHandle(ctx, selectedLine.x1, selectedLine.y1);
+        renderHandle(ctx, selectedLine.x2, selectedLine.y2);
+      }
+    } else if (this.selectedAnnotationType === 'rectangle') {
+      const selectedRect = this.rectangleAnnotations.find(r => r.id === this.selectedAnnotationId);
+      if (selectedRect) {
+        // Draw corner handles
+        renderHandle(ctx, selectedRect.x, selectedRect.y); // top-left
+        renderHandle(ctx, selectedRect.x + selectedRect.width, selectedRect.y); // top-right
+        renderHandle(ctx, selectedRect.x, selectedRect.y + selectedRect.height); // bottom-left
+        renderHandle(ctx, selectedRect.x + selectedRect.width, selectedRect.y + selectedRect.height); // bottom-right
+      }
+    }
   }
 
   private isPointOnLine(px: number, py: number, line: LineAnnotation): boolean {
@@ -216,4 +262,18 @@ export class SelectTool implements Tool {
 
     return distance <= lineHitThreshold;
   }
+
+  private isPointOnRectangle(px: number, py: number, rectangle: RectangleAnnotation): boolean {
+    const { x, y, width, height, strokeWidth } = rectangle;
+    const threshold = strokeWidth + 2;
+
+    // Check if point is near any of the four edges
+    const nearLeft = Math.abs(px - x) <= threshold && py >= y && py <= y + height;
+    const nearRight = Math.abs(px - (x + width)) <= threshold && py >= y && py <= y + height;
+    const nearTop = Math.abs(py - y) <= threshold && px >= x && px <= x + width;
+    const nearBottom = Math.abs(py - (y + height)) <= threshold && px >= x && px <= x + width;
+
+    return nearLeft || nearRight || nearTop || nearBottom;
+  }
+
 }

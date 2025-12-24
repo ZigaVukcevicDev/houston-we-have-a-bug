@@ -26,12 +26,13 @@ describe('HBCanvas', () => {
       expect(canvas.drawingMode).toBe('text');
     });
 
-    it('should initialize tools map with select, text and line tools', () => {
+    it('should initialize tools map with select, text, line, and rectangle tools', () => {
       const tools = canvas['tools'];
-      expect(tools.size).toBe(3);
+      expect(tools.size).toBe(4);
       expect(tools.get('select')).toBeDefined();
       expect(tools.get('text')).toBeDefined();
       expect(tools.get('line')).toBeDefined();
+      expect(tools.get('rectangle')).toBeDefined();
     });
 
     it('should create tools with render method', () => {

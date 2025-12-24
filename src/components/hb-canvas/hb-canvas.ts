@@ -3,9 +3,10 @@ import { customElement, property, query } from 'lit/decorators.js';
 import styles from './hb-canvas.scss';
 import type { DrawingMode } from '../../types/drawing-mode.type';
 import type { Tool } from '../../interfaces/tool.interface';
-import type { LineAnnotation, TextAnnotation } from '../../interfaces/annotation.interface';
+import type { LineAnnotation, TextAnnotation, RectangleAnnotation } from '../../interfaces/annotation.interface';
 import { TextTool } from './tools/text-tool';
 import { LineTool } from './tools/line-tool';
+import { RectangleTool } from './tools/rectangle-tool';
 import { SelectTool } from './tools/select-tool';
 
 @customElement('hb-canvas')
@@ -27,6 +28,7 @@ export class HBCanvas extends LitElement {
 
   // Centralized annotation storage
   private lineAnnotations: LineAnnotation[] = [];
+  private rectangleAnnotations: RectangleAnnotation[] = [];
   private textAnnotations: TextAnnotation[] = [];
 
   constructor() {
@@ -70,10 +72,16 @@ export class HBCanvas extends LitElement {
     this.tools.set('line', new LineTool(
       this.lineAnnotations,
       () => this.redraw(),
-      (tool: string) => this.handleToolChange(tool)
+      (tool: string, annotationId?: string) => this.handleToolChange(tool, annotationId)
+    ));
+    this.tools.set('rectangle', new RectangleTool(
+      this.rectangleAnnotations,
+      () => this.redraw(),
+      (tool: string, annotationId?: string) => this.handleToolChange(tool, annotationId)
     ));
     this.tools.set('select', new SelectTool(
       this.lineAnnotations,
+      this.rectangleAnnotations,
       () => this.redraw()
     ));
   }
