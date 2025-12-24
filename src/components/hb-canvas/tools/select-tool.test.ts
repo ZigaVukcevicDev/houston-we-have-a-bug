@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
+import { describe, it, expect, beforeEach, vi, type Mock, afterEach } from 'vitest';
 import { SelectTool } from './select-tool';
 import type { LineAnnotation, RectangleAnnotation } from '../../../interfaces/annotation.interface';
 
@@ -88,6 +88,14 @@ describe('SelectTool', () => {
       save: vi.fn(),
       restore: vi.fn(),
     } as unknown as CanvasRenderingContext2D;
+
+    // Activate the tool to register event listeners
+    selectTool.activate();
+  });
+
+  afterEach(() => {
+    // Clean up event listeners
+    selectTool.deactivate();
   });
 
   describe('annotation selection', () => {
@@ -995,6 +1003,60 @@ describe('SelectTool', () => {
       // Should still be dragging line-1  (the selected one)
       expect(selectTool['selectedAnnotationId']).toBe('line-1');
       expect(selectTool['draggingLine']).toBe(true);
+    });
+  });
+
+  describe('delete key functionality', () => {
+    it('should delete selected line when Delete key is pressed', () => {
+      // Select a line
+      selectTool.selectAnnotation('line-1');
+      const initialLength = lineAnnotations.length;
+
+      // Simulate Delete key press
+      const deleteEvent = new KeyboardEvent('keydown', { key: 'Delete' });
+      document.dispatchEvent(deleteEvent);
+
+      // Line should be deleted
+      expect(lineAnnotations.length).toBe(initialLength - 1);
+      expect(lineAnnotations.find(l => l.id === 'line-1')).toBeUndefined();
+      expect(selectTool['selectedAnnotationId']).toBeNull();
+    });
+
+    it('should delete selected rectangle when Backspace key is pressed', () => {
+      // Select a rectangle
+      selectTool.selectAnnotation('rect-1');
+      const initialLength = rectangleAnnotations.length;
+
+      // Simulate Backspace key press
+      const backspaceEvent = new KeyboardEvent('keydown', { key: 'Backspace' });
+      document.dispatchEvent(backspaceEvent);
+
+      // Rectangle should be deleted
+      expect(rectangleAnnotations.length).toBe(initialLength - 1);
+      expect(rectangleAnnotations.find(r => r.id === 'rect-1')).toBeUndefined();
+      expect(selectTool['selectedAnnotationId']).toBeNull();
+    });
+
+    it('should not delete when no annotation is selected', () => {
+      const initialLinesLength = lineAnnotations.length;
+      const initialRectsLength = rectangleAnnotations.length;
+
+      // Simulate Delete key press with no selection
+      const deleteEvent = new KeyboardEvent('keydown', { key: 'Delete' });
+      document.dispatchEvent(deleteEvent);
+
+      // Nothing should be deleted
+      expect(lineAnnotations.length).toBe(initialLinesLength);
+      expect(rectangleAnnotations.length).toBe(initialRectsLength);
+    });
+
+    it('should cleanup event listener on deactivate', () => {
+      const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
+
+      selectTool.deactivate();
+
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+      expect(selectTool['keydownHandler']).toBeNull();
     });
   });
 });

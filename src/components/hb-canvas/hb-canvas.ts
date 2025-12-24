@@ -55,11 +55,27 @@ export class HBCanvas extends LitElement {
   protected firstUpdated() {
     this.ctx = this.canvas.getContext('2d')!;
     this.loadImage();
+
+    // Activate the initial tool
+    this.activeTool?.activate?.();
   }
 
   protected updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('dataUrl') && this.dataUrl) {
       this.loadImage();
+    }
+
+    // Handle tool switching
+    if (changedProperties.has('drawingMode')) {
+      // Deactivate previous tool
+      const previousMode = changedProperties.get('drawingMode') as DrawingMode | undefined;
+      if (previousMode) {
+        const prevTool = this.tools.get(previousMode);
+        prevTool?.deactivate?.();
+      }
+
+      // Activate new tool
+      this.activeTool?.activate?.();
     }
   }
 

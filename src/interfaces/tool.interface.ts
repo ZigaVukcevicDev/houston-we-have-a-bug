@@ -8,4 +8,8 @@ export interface Tool {
   handleMouseUp?(event: MouseEvent, canvas: HTMLCanvasElement): void;
 
   render(ctx: CanvasRenderingContext2D): void;
+
+  activate?(): void;
+
+  deactivate?(): void;
 }

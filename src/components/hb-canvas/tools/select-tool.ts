@@ -14,6 +14,7 @@ export class SelectTool implements Tool {
   private draggingHandle: 'start' | 'end' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | null = null;
   private draggingLine: boolean = false;
   private dragOffset: { x: number; y: number } = { x: 0, y: 0 };
+  private keydownHandler: ((event: KeyboardEvent) => void) | null = null;
 
   private onRedraw: () => void;
 
@@ -21,6 +22,45 @@ export class SelectTool implements Tool {
     this.lineAnnotations = lineAnnotations;
     this.rectangleAnnotations = rectangleAnnotations;
     this.onRedraw = onRedraw;
+  }
+
+  activate(): void {
+    // Add keyboard listener for Delete/Backspace keys
+    this.keydownHandler = (e: KeyboardEvent) => {
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        this.deleteSelectedAnnotation();
+      }
+    };
+    document.addEventListener('keydown', this.keydownHandler);
+  }
+
+  deactivate(): void {
+    // Remove keyboard listener
+    if (this.keydownHandler) {
+      document.removeEventListener('keydown', this.keydownHandler);
+      this.keydownHandler = null;
+    }
+  }
+
+  private deleteSelectedAnnotation(): void {
+    if (this.selectedAnnotationId === null) return;
+
+    if (this.selectedAnnotationType === 'line') {
+      const index = this.lineAnnotations.findIndex(l => l.id === this.selectedAnnotationId);
+      if (index !== -1) {
+        this.lineAnnotations.splice(index, 1);
+      }
+    } else if (this.selectedAnnotationType === 'rectangle') {
+      const index = this.rectangleAnnotations.findIndex(r => r.id === this.selectedAnnotationId);
+      if (index !== -1) {
+        this.rectangleAnnotations.splice(index, 1);
+      }
+    }
+
+    // Clear selection after deletion
+    this.selectedAnnotationId = null;
+    this.selectedAnnotationType = null;
+    this.onRedraw();
   }
 
   // Select a specific annotation by ID (for auto-selection after drawing)

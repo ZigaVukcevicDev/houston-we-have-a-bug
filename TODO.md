@@ -7,7 +7,7 @@
 - [x] on hover stroke annotation
 - [x] if no annotation is clicked, unselect all annotations 
 - [x] if coming from other tool, don't select any annotation
-- [ ] delete key deletes selected annotation
+- [x] delete key deletes selected annotation
 
 2. Line tool
 
@@ -32,8 +32,8 @@
   - [x] bottom-left endpoint
   - [x] bottom-right endpoint
 - move rectangle
-  - [ ] without selection
-  - [ ] with selection
+  - [x] without selection
+  - [x] with selection
 
 4. Download
 
