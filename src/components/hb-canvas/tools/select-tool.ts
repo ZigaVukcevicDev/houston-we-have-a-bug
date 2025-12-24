@@ -177,6 +177,25 @@ export class SelectTool implements Tool {
         }
       }
 
+      // Check if hovering over a handle of selected rectangle
+      const selectedRect = this.rectangleAnnotations.find(r => r.id === this.selectedAnnotationId);
+      if (selectedRect) {
+        const topLeft = { x: selectedRect.x, y: selectedRect.y };
+        const topRight = { x: selectedRect.x + selectedRect.width, y: selectedRect.y };
+        const bottomLeft = { x: selectedRect.x, y: selectedRect.y + selectedRect.height };
+        const bottomRight = { x: selectedRect.x + selectedRect.width, y: selectedRect.y + selectedRect.height };
+
+        if (isPointOnHandle(x, y, topLeft.x, topLeft.y) ||
+          isPointOnHandle(x, y, topRight.x, topRight.y) ||
+          isPointOnHandle(x, y, bottomLeft.x, bottomLeft.y) ||
+          isPointOnHandle(x, y, bottomRight.x, bottomRight.y)) {
+          canvas.style.cursor = 'move';
+          this.hoveredAnnotationId = null;
+          this.onRedraw();
+          return;
+        }
+      }
+
       // Check if hovering over any line (iterate backwards for most recent)
       for (let i = this.lineAnnotations.length - 1; i >= 0; i--) {
         if (this.isPointOnLine(x, y, this.lineAnnotations[i])) {
