@@ -41,6 +41,5 @@
 
 ## Extra
 
-- [ ] Style "No screenshot loaded. Please capture a screenshot from the extension popup."
-- [ ] px to rem?
-- [ ] add shadow to toolbar
+- [ ] style "No screenshot loaded. Please capture a screenshot from the extension popup."
+- [x] add shadow to toolbar
