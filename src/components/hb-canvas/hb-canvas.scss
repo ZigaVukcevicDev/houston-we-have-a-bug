@@ -23,4 +23,8 @@ canvas {
   &.mode-line {
     cursor: crosshair;
   }
+
+  &.mode-rectangle {
+    cursor: crosshair;
+  }
 }

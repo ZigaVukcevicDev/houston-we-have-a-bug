@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
 import { SelectTool } from './select-tool';
-import type { LineAnnotation } from '../../../interfaces/annotation.interface';
+import type { LineAnnotation, RectangleAnnotation } from '../../../interfaces/annotation.interface';
 
 describe('SelectTool', () => {
   let selectTool: SelectTool;
@@ -8,6 +8,7 @@ describe('SelectTool', () => {
   let mockCanvas: HTMLCanvasElement;
   let mockCtx: CanvasRenderingContext2D;
   let lineAnnotations: LineAnnotation[];
+  let rectangleAnnotations: RectangleAnnotation[];
 
   beforeEach(() => {
     mockRedraw = vi.fn();
@@ -31,7 +32,27 @@ describe('SelectTool', () => {
         width: 3,
       },
     ];
-    selectTool = new SelectTool(lineAnnotations, [], mockRedraw);
+    rectangleAnnotations = [
+      {
+        id: 'rect-1',
+        x: 100,
+        y: 300,
+        width: 100,
+        height: 50,
+        color: '#BD2D1E',
+        strokeWidth: 5,
+      },
+      {
+        id: 'rect-2',
+        x: 300,
+        y: 300,
+        width: 80,
+        height: 60,
+        color: '#BD2D1E',
+        strokeWidth: 5,
+      },
+    ];
+    selectTool = new SelectTool(lineAnnotations, rectangleAnnotations, mockRedraw);
 
     // Mock canvas
     mockCanvas = {
@@ -54,10 +75,12 @@ describe('SelectTool', () => {
       lineWidth: 0,
       fillStyle: '',
       lineCap: '',
+      lineJoin: '',
       beginPath: vi.fn(),
       moveTo: vi.fn(),
       lineTo: vi.fn(),
       arc: vi.fn(),
+      rect: vi.fn(),
       fill: vi.fn(),
       stroke: vi.fn(),
       fillRect: vi.fn(),
@@ -144,6 +167,7 @@ describe('SelectTool', () => {
     beforeEach(() => {
       // Select line-1
       selectTool['selectedAnnotationId'] = 'line-1';
+      selectTool['selectedAnnotationType'] = 'line';
     });
 
     it('should start dragging start handle when clicked', () => {
@@ -173,6 +197,7 @@ describe('SelectTool', () => {
     beforeEach(() => {
       // Select line-1
       selectTool['selectedAnnotationId'] = 'line-1';
+      selectTool['selectedAnnotationType'] = 'line';
     });
 
     it('should start dragging end handle when clicked', () => {
@@ -215,6 +240,7 @@ describe('SelectTool', () => {
     it('should not update cursor while dragging', () => {
       // First select a line
       selectTool['selectedAnnotationId'] = 'line-1';
+      selectTool['selectedAnnotationType'] = 'line';
 
       // Then start dragging a handle
       selectTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
@@ -310,6 +336,7 @@ describe('SelectTool', () => {
 
     it('should handle clicking away from handles when line is selected', () => {
       selectTool['selectedAnnotationId'] = 'line-1';
+      selectTool['selectedAnnotationType'] = 'line';
 
       // Click somewhere that's not on a handle
       selectTool.handleMouseDown({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
@@ -319,6 +346,7 @@ describe('SelectTool', () => {
 
     it('should handle drag offset correctly', () => {
       selectTool['selectedAnnotationId'] = 'line-1';
+      selectTool['selectedAnnotationType'] = 'line';
 
       // Mouse down at position slightly offset from handle center
       selectTool.handleMouseDown({ clientX: 102, clientY: 103 } as MouseEvent, mockCanvas);
@@ -389,6 +417,7 @@ describe('SelectTool', () => {
   describe('line body dragging', () => {
     it('should start dragging line when clicking on line body', () => {
       selectTool['selectedAnnotationId'] = 'line-1';
+      selectTool['selectedAnnotationType'] = 'line';
 
       // Click on line body (not on handles)
       selectTool.handleMouseDown({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
@@ -398,6 +427,7 @@ describe('SelectTool', () => {
 
     it('should move entire line when dragging line body', () => {
       selectTool['selectedAnnotationId'] = 'line-1';
+      selectTool['selectedAnnotationType'] = 'line';
       const originalX1 = lineAnnotations[0].x1;
       const originalY1 = lineAnnotations[0].y1;
       const originalX2 = lineAnnotations[0].x2;
@@ -424,6 +454,7 @@ describe('SelectTool', () => {
 
     it('should stop dragging line on mouse up', () => {
       selectTool['selectedAnnotationId'] = 'line-1';
+      selectTool['selectedAnnotationType'] = 'line';
       selectTool.handleMouseDown({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
 
       selectTool.handleMouseUp();
@@ -526,6 +557,7 @@ describe('SelectTool', () => {
     it('should clear hover when dragging', () => {
       // First select and hover a line
       selectTool['selectedAnnotationId'] = 'line-1';
+      selectTool['selectedAnnotationType'] = 'line';
       selectTool['hoveredAnnotationId'] = 'line-1';
 
       // Start dragging handle
@@ -541,6 +573,200 @@ describe('SelectTool', () => {
 
       // Hover should be cleared when over a handle during drag
       expect(selectTool['draggingHandle']).toBe('start');
+    });
+  });
+
+  describe('rectangle selection', () => {
+    it('should select a rectangle when clicked on it', () => {
+      // Click on rect-1's edge
+      selectTool.handleClick({ clientX: 100, clientY: 310 } as MouseEvent, mockCanvas);
+
+      expect(selectTool['selectedAnnotationId']).toBe('rect-1');
+      expect(selectTool['selectedAnnotationType']).toBe('rectangle');
+      expect(mockRedraw).toHaveBeenCalled();
+    });
+
+    it('should select the most recent rectangle when multiple rectangles overlap', () => {
+      // Add a third rectangle at the same position as rect-1
+      rectangleAnnotations.push({
+        id: 'rect-3',
+        x: 100,
+        y: 300,
+        width: 100,
+        height: 50,
+        color: '#BD2D1E',
+        strokeWidth: 5,
+      });
+
+      // Click on overlapping rectangles
+      selectTool.handleClick({ clientX: 100, clientY: 310 } as MouseEvent, mockCanvas);
+
+      // Should select the most recent one (rect-3)
+      expect(selectTool['selectedAnnotationId']).toBe('rect-3');
+    });
+
+    it('should render handles for selected rectangle', () => {
+      selectTool['selectedAnnotationId'] = 'rect-1';
+      selectTool['selectedAnnotationType'] = 'rectangle';
+
+      selectTool.render(mockCtx);
+
+      // Should render 4 corner handles
+      expect(mockCtx.fillRect).toHaveBeenCalledTimes(4);
+      expect(mockCtx.strokeRect).toHaveBeenCalledTimes(4);
+    });
+
+    it('should render handles at correct corner positions', () => {
+      selectTool['selectedAnnotationId'] = 'rect-1';
+      selectTool['selectedAnnotationType'] = 'rectangle';
+      const rect = rectangleAnnotations[0];
+
+      selectTool.render(mockCtx);
+
+      // Check positions of the 4 corner handles
+      // Top-left
+      expect(mockCtx.fillRect).toHaveBeenNthCalledWith(1, 96, 296, 8, 8);
+      // Top-right
+      expect(mockCtx.fillRect).toHaveBeenNthCalledWith(2, 196, 296, 8, 8);
+      // Bottom-left
+      expect(mockCtx.fillRect).toHaveBeenNthCalledWith(3, 96, 346, 8, 8);
+      // Bottom-right
+      expect(mockCtx.fillRect).toHaveBeenNthCalledWith(4, 196, 346, 8, 8);
+    });
+  });
+
+  describe('rectangle body dragging', () => {
+    it('should start dragging rectangle when clicking on rectangle edge', () => {
+      selectTool['selectedAnnotationId'] = 'rect-1';
+      selectTool['selectedAnnotationType'] = 'rectangle';
+
+      // Click on rectangle edge
+      selectTool.handleMouseDown({ clientX: 100, clientY: 310 } as MouseEvent, mockCanvas);
+
+      expect(selectTool['draggingLine']).toBe(true);
+    });
+
+    it('should move entire rectangle when dragging rectangle body', () => {
+      selectTool['selectedAnnotationId'] = 'rect-1';
+      selectTool['selectedAnnotationType'] = 'rectangle';
+      const originalX = rectangleAnnotations[0].x;
+      const originalY = rectangleAnnotations[0].y;
+
+      // Start dragging rectangle body (click on left edge)
+      selectTool.handleMouseDown({ clientX: 100, clientY: 310 } as MouseEvent, mockCanvas);
+
+      // Drag to new position
+      selectTool.handleMouseMove(
+        { clientX: 130, clientY: 340 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      // Rectangle position should have moved
+      expect(rectangleAnnotations[0].x).toBe(originalX + 30);
+      expect(rectangleAnnotations[0].y).toBe(originalY + 30);
+      expect(mockRedraw).toHaveBeenCalled();
+    });
+
+    it('should stop dragging rectangle on mouse up', () => {
+      selectTool['selectedAnnotationId'] = 'rect-1';
+      selectTool['selectedAnnotationType'] = 'rectangle';
+      selectTool.handleMouseDown({ clientX: 110, clientY: 310 } as MouseEvent, mockCanvas);
+
+      selectTool.handleMouseUp();
+
+      expect(selectTool['draggingLine']).toBe(false);
+    });
+
+    it('should not change rectangle size when dragging', () => {
+      selectTool['selectedAnnotationId'] = 'rect-1';
+      selectTool['selectedAnnotationType'] = 'rectangle';
+      const originalWidth = rectangleAnnotations[0].width;
+      const originalHeight = rectangleAnnotations[0].height;
+
+      // Start dragging and move
+      selectTool.handleMouseDown({ clientX: 110, clientY: 310 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseMove(
+        { clientX: 140, clientY: 340 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      // Width and height should remain unchanged
+      expect(rectangleAnnotations[0].width).toBe(originalWidth);
+      expect(rectangleAnnotations[0].height).toBe(originalHeight);
+    });
+  });
+
+  describe('rectangle hover detection', () => {
+    it('should track hovered rectangle on mouse move', () => {
+      expect(selectTool['hoveredAnnotationId']).toBeNull();
+
+      // Move mouse over rect-1 edge
+      selectTool.handleMouseMove(
+        { clientX: 100, clientY: 310 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBe('rect-1');
+      expect(selectTool['hoveredAnnotationType']).toBe('rectangle');
+      expect(mockRedraw).toHaveBeenCalled();
+    });
+
+    it('should render stroke for hovered rectangle', () => {
+      selectTool['hoveredAnnotationId'] = 'rect-1';
+      selectTool['hoveredAnnotationType'] = 'rectangle';
+
+      selectTool.render(mockCtx);
+
+      expect(mockCtx.strokeStyle).toBeDefined();
+      expect(mockCtx.beginPath).toHaveBeenCalled();
+      expect(mockCtx.stroke).toHaveBeenCalled();
+    });
+
+    it('should not show hover stroke for selected rectangle', () => {
+      // Select and hover the same rectangle
+      selectTool['selectedAnnotationId'] = 'rect-1';
+      selectTool['selectedAnnotationType'] = 'rectangle';
+      selectTool['hoveredAnnotationId'] = 'rect-1';
+      selectTool['hoveredAnnotationType'] = 'rectangle';
+
+      const beginPathCalls = mockCtx.beginPath as any;
+      beginPathCalls.mockClear();
+
+      selectTool.render(mockCtx);
+
+      // Should only render handles (4 for rectangle corners)
+      expect(mockCtx.fillRect).toHaveBeenCalledTimes(4);
+    });
+  });
+
+  describe('rectangle edge cases', () => {
+    it('should handle empty rectangle annotations array', () => {
+      const emptySelectTool = new SelectTool([], [], mockRedraw);
+
+      emptySelectTool.handleClick({ clientX: 150, clientY: 310 } as MouseEvent, mockCanvas);
+
+      expect(emptySelectTool['selectedAnnotationId']).toBeNull();
+    });
+
+    it('should not start dragging if no rectangle is selected', () => {
+      selectTool.handleMouseDown({ clientX: 110, clientY: 310 } as MouseEvent, mockCanvas);
+
+      expect(selectTool['draggingLine']).toBe(false);
+    });
+
+    it('should handle switching between line and rectangle selection', () => {
+      // Select a line first
+      selectTool.handleClick({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+      expect(selectTool['selectedAnnotationId']).toBe('line-1');
+      expect(selectTool['selectedAnnotationType']).toBe('line');
+
+      // Select a rectangle
+      selectTool.handleClick({ clientX: 100, clientY: 310 } as MouseEvent, mockCanvas);
+      expect(selectTool['selectedAnnotationId']).toBe('rect-1');
+      expect(selectTool['selectedAnnotationType']).toBe('rectangle');
     });
   });
 });

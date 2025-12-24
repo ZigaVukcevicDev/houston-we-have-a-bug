@@ -75,30 +75,45 @@ export class SelectTool implements Tool {
     const x = (event.clientX - rect.left) * scaleX;
     const y = (event.clientY - rect.top) * scaleY;
 
-    // Check if clicking on a handle of selected line
+    // Check if clicking on a handle or body of selected annotation
     if (this.selectedAnnotationId !== null) {
-      const line = this.lineAnnotations.find(l => l.id === this.selectedAnnotationId);
-      if (!line) return;
+      // Handle line annotations
+      if (this.selectedAnnotationType === 'line') {
+        const line = this.lineAnnotations.find(l => l.id === this.selectedAnnotationId);
+        if (!line) return;
 
-      // Check start handle first
-      if (isPointOnHandle(x, y, line.x1, line.y1)) {
-        this.draggingHandle = 'start';
-        this.dragOffset = { x: x - line.x1, y: y - line.y1 };
-        return;
+        // Check start handle first
+        if (isPointOnHandle(x, y, line.x1, line.y1)) {
+          this.draggingHandle = 'start';
+          this.dragOffset = { x: x - line.x1, y: y - line.y1 };
+          return;
+        }
+
+        // Check end handle second
+        if (isPointOnHandle(x, y, line.x2, line.y2)) {
+          this.draggingHandle = 'end';
+          this.dragOffset = { x: x - line.x2, y: y - line.y2 };
+          return;
+        }
+
+        // Check if clicking on the line body (to drag entire line)
+        if (this.isPointOnLine(x, y, line)) {
+          this.draggingLine = true;
+          this.dragOffset = { x, y };
+          return;
+        }
       }
+      // Handle rectangle annotations
+      else if (this.selectedAnnotationType === 'rectangle') {
+        const rectangle = this.rectangleAnnotations.find(r => r.id === this.selectedAnnotationId);
+        if (!rectangle) return;
 
-      // Check end handle second
-      if (isPointOnHandle(x, y, line.x2, line.y2)) {
-        this.draggingHandle = 'end';
-        this.dragOffset = { x: x - line.x2, y: y - line.y2 };
-        return;
-      }
-
-      // Check if clicking on the line body (to drag entire line)
-      if (this.isPointOnLine(x, y, line)) {
-        this.draggingLine = true;
-        this.dragOffset = { x, y };
-        return;
+        // Check if clicking on the rectangle body (to drag entire rectangle)
+        if (this.isPointOnRectangle(x, y, rectangle)) {
+          this.draggingLine = true; // Reusing draggingLine flag for rectangle dragging
+          this.dragOffset = { x, y };
+          return;
+        }
       }
     }
   }
@@ -162,44 +177,64 @@ export class SelectTool implements Tool {
     }
 
     // Handle dragging (cursor doesn't change during drag)
-    const line = this.lineAnnotations.find(l => l.id === this.selectedAnnotationId);
-    if (!line) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    let x = (event.clientX - rect.left) * scaleX;
-    let y = (event.clientY - rect.top) * scaleY;
-
     if (this.draggingLine) {
-      // Dragging entire line - move both endpoints
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = (event.clientX - rect.left) * scaleX;
+      const y = (event.clientY - rect.top) * scaleY;
+
       const dx = x - this.dragOffset.x;
       const dy = y - this.dragOffset.y;
 
-      line.x1 += dx;
-      line.y1 += dy;
-      line.x2 += dx;
-      line.y2 += dy;
+      if (this.selectedAnnotationType === 'line') {
+        const line = this.lineAnnotations.find(l => l.id === this.selectedAnnotationId);
+        if (line) {
+          // Dragging entire line - move both endpoints
+          line.x1 += dx;
+          line.y1 += dy;
+          line.x2 += dx;
+          line.y2 += dy;
+        }
+      } else if (this.selectedAnnotationType === 'rectangle') {
+        const rectangle = this.rectangleAnnotations.find(r => r.id === this.selectedAnnotationId);
+        if (rectangle) {
+          // Dragging entire rectangle
+          rectangle.x += dx;
+          rectangle.y += dy;
+        }
+      }
 
       this.dragOffset = { x, y };
       this.onRedraw();
       return;
     }
 
-    // Handle dragging endpoints
-    // Subtract drag offset
-    x = x - this.dragOffset.x;
-    y = y - this.dragOffset.y;
+    // Handle dragging line endpoints
+    if (this.draggingHandle) {
+      const line = this.lineAnnotations.find(l => l.id === this.selectedAnnotationId);
+      if (!line) return;
 
-    if (this.draggingHandle === 'start') {
-      line.x1 = x;
-      line.y1 = y;
-    } else {
-      line.x2 = x;
-      line.y2 = y;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      let x = (event.clientX - rect.left) * scaleX;
+      let y = (event.clientY - rect.top) * scaleY;
+
+      // Subtract drag offset
+      x = x - this.dragOffset.x;
+      y = y - this.dragOffset.y;
+
+      if (this.draggingHandle === 'start') {
+        line.x1 = x;
+        line.y1 = y;
+      } else {
+        line.x2 = x;
+        line.y2 = y;
+      }
+
+      this.onRedraw();
     }
-
-    this.onRedraw();
   }
 
   handleMouseUp(): void {

@@ -15,27 +15,27 @@
   - [x] free
   - [x] with shift
 - move endpoint
-  - [x] first endpoint
-  - [x] second endpoint
+  - [x] start endpoint
+  - [x] end endpoint
 - move line
   - [x] free
 
 3. Rectangle tool
 
 - draw rectangle
-  - [ ] free
-  - [ ] with shift
+  - [x] free
+  - [x] with shift
 - move endpoint
-  - [ ] first endpoint
-  - [ ] second endpoint
-  - [ ] third endpoint
-  - [ ] fourth endpoint
+  - [ ] top-left endpoint
+  - [ ] top-right endpoint
+  - [ ] bottom-left endpoint
+  - [ ] bottom-right endpoint
 - move rectangle
-  - [ ] free
+  - [x] free
 
 4. Download
 
-- [x] deselect annotaions when downloading
+- [ ] deselect annotaions when downloading
 
 ## Extra
 
