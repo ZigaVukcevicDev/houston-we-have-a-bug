@@ -728,6 +728,121 @@ describe('SelectTool', () => {
     });
   });
 
+  describe('rectangle corner handle resizing', () => {
+    beforeEach(() => {
+      selectTool['selectedAnnotationId'] = 'rect-1';
+      selectTool['selectedAnnotationType'] = 'rectangle';
+    });
+
+    it('should start dragging when clicking on top-left corner handle', () => {
+      selectTool.handleMouseDown({ clientX: 100, clientY: 300 } as MouseEvent, mockCanvas);
+
+      expect(selectTool['draggingHandle']).toBe('top-left');
+    });
+
+    it('should resize rectangle when dragging top-left corner', () => {
+      const originalX = rectangleAnnotations[0].x;
+      const originalY = rectangleAnnotations[0].y;
+      const originalWidth = rectangleAnnotations[0].width;
+      const originalHeight = rectangleAnnotations[0].height;
+
+      // Click on top-left corner
+      selectTool.handleMouseDown({ clientX: 100, clientY: 300 } as MouseEvent, mockCanvas);
+
+      // Drag to new position (moving corner inward)
+      selectTool.handleMouseMove(
+        { clientX: 120, clientY: 320 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      // Rectangle should be resized from top-left
+      expect(rectangleAnnotations[0].x).toBe(120);
+      expect(rectangleAnnotations[0].y).toBe(320);
+      expect(rectangleAnnotations[0].width).toBe(originalWidth - 20);
+      expect(rectangleAnnotations[0].height).toBe(originalHeight - 20);
+    });
+
+    it('should resize rectangle when dragging top-right corner', () => {
+      const originalX = rectangleAnnotations[0].x;
+      const originalY = rectangleAnnotations[0].y;
+      const originalWidth = rectangleAnnotations[0].width;
+      const originalHeight = rectangleAnnotations[0].height;
+
+      // Click on top-right corner (x=200, y=300)
+      selectTool.handleMouseDown({ clientX: 200, clientY: 300 } as MouseEvent, mockCanvas);
+
+      // Drag to new position
+      selectTool.handleMouseMove(
+        { clientX: 220, clientY: 320 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      // Rectangle should be resized from top-right
+      expect(rectangleAnnotations[0].x).toBe(originalX); // x unchanged
+      expect(rectangleAnnotations[0].y).toBe(320); // y moved
+      expect(rectangleAnnotations[0].width).toBe(originalWidth + 20);
+      expect(rectangleAnnotations[0].height).toBe(originalHeight - 20);
+    });
+
+    it('should resize rectangle when dragging bottom-left corner', () => {
+      const originalX = rectangleAnnotations[0].x;
+      const originalY = rectangleAnnotations[0].y;
+      const originalWidth = rectangleAnnotations[0].width;
+      const originalHeight = rectangleAnnotations[0].height;
+
+      // Click on bottom-left corner (x=100, y=350)
+      selectTool.handleMouseDown({ clientX: 100, clientY: 350 } as MouseEvent, mockCanvas);
+
+      // Drag to new position
+      selectTool.handleMouseMove(
+        { clientX: 120, clientY: 370 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      // Rectangle should be resized from bottom-left
+      expect(rectangleAnnotations[0].x).toBe(120); // x moved
+      expect(rectangleAnnotations[0].y).toBe(originalY); // y unchanged
+      expect(rectangleAnnotations[0].width).toBe(originalWidth - 20);
+      expect(rectangleAnnotations[0].height).toBe(originalHeight + 20);
+    });
+
+    it('should resize rectangle when dragging bottom-right corner', () => {
+      const originalX = rectangleAnnotations[0].x;
+      const originalY = rectangleAnnotations[0].y;
+      const originalWidth = rectangleAnnotations[0].width;
+      const originalHeight = rectangleAnnotations[0].height;
+
+      // Click on bottom-right corner (x=200, y=350)
+      selectTool.handleMouseDown({ clientX: 200, clientY: 350 } as MouseEvent, mockCanvas);
+
+      // Drag to new position
+      selectTool.handleMouseMove(
+        { clientX: 220, clientY: 370 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      // Rectangle should be resized from bottom-right
+      expect(rectangleAnnotations[0].x).toBe(originalX); // x unchanged
+      expect(rectangleAnnotations[0].y).toBe(originalY); // y unchanged
+      expect(rectangleAnnotations[0].width).toBe(originalWidth + 20);
+      expect(rectangleAnnotations[0].height).toBe(originalHeight + 20);
+    });
+
+    it('should stop dragging corner handle on mouse up', () => {
+      selectTool.handleMouseDown({ clientX: 100, clientY: 300 } as MouseEvent, mockCanvas);
+      expect(selectTool['draggingHandle']).toBe('top-left');
+
+      selectTool.handleMouseUp();
+
+      expect(selectTool['draggingHandle']).toBeNull();
+    });
+  });
+
+
   describe('rectangle hover detection', () => {
     it('should track hovered rectangle on mouse move', () => {
       expect(selectTool['hoveredAnnotationId']).toBeNull();

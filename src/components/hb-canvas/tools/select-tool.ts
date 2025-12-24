@@ -118,6 +118,33 @@ export class SelectTool implements Tool {
         const rectangle = this.rectangleAnnotations.find(r => r.id === this.selectedAnnotationId);
         if (!rectangle) return;
 
+        // Check corner handles first (top-left, top-right, bottom-left, bottom-right)
+        const topLeft = { x: rectangle.x, y: rectangle.y };
+        const topRight = { x: rectangle.x + rectangle.width, y: rectangle.y };
+        const bottomLeft = { x: rectangle.x, y: rectangle.y + rectangle.height };
+        const bottomRight = { x: rectangle.x + rectangle.width, y: rectangle.y + rectangle.height };
+
+        if (isPointOnHandle(x, y, topLeft.x, topLeft.y)) {
+          this.draggingHandle = 'top-left';
+          this.dragOffset = { x: x - topLeft.x, y: y - topLeft.y };
+          return;
+        }
+        if (isPointOnHandle(x, y, topRight.x, topRight.y)) {
+          this.draggingHandle = 'top-right';
+          this.dragOffset = { x: x - topRight.x, y: y - topRight.y };
+          return;
+        }
+        if (isPointOnHandle(x, y, bottomLeft.x, bottomLeft.y)) {
+          this.draggingHandle = 'bottom-left';
+          this.dragOffset = { x: x - bottomLeft.x, y: y - bottomLeft.y };
+          return;
+        }
+        if (isPointOnHandle(x, y, bottomRight.x, bottomRight.y)) {
+          this.draggingHandle = 'bottom-right';
+          this.dragOffset = { x: x - bottomRight.x, y: y - bottomRight.y };
+          return;
+        }
+
         // Check if clicking on the rectangle body (to drag entire rectangle)
         if (this.isPointOnRectangle(x, y, rectangle)) {
           this.draggingLine = true; // Reusing draggingLine flag for rectangle dragging
@@ -220,11 +247,8 @@ export class SelectTool implements Tool {
       return;
     }
 
-    // Handle dragging line endpoints
+    // Handle dragging handles (line endpoints or rectangle corners)
     if (this.draggingHandle) {
-      const line = this.lineAnnotations.find(l => l.id === this.selectedAnnotationId);
-      if (!line) return;
-
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
       const scaleY = canvas.height / rect.height;
@@ -235,12 +259,43 @@ export class SelectTool implements Tool {
       x = x - this.dragOffset.x;
       y = y - this.dragOffset.y;
 
-      if (this.draggingHandle === 'start') {
-        line.x1 = x;
-        line.y1 = y;
-      } else {
-        line.x2 = x;
-        line.y2 = y;
+      if (this.selectedAnnotationType === 'line') {
+        const line = this.lineAnnotations.find(l => l.id === this.selectedAnnotationId);
+        if (!line) return;
+
+        if (this.draggingHandle === 'start') {
+          line.x1 = x;
+          line.y1 = y;
+        } else if (this.draggingHandle === 'end') {
+          line.x2 = x;
+          line.y2 = y;
+        }
+      } else if (this.selectedAnnotationType === 'rectangle') {
+        const rectangle = this.rectangleAnnotations.find(r => r.id === this.selectedAnnotationId);
+        if (!rectangle) return;
+
+        // Store original rectangle bounds
+        const originalRight = rectangle.x + rectangle.width;
+        const originalBottom = rectangle.y + rectangle.height;
+
+        // Resize based on which corner is being dragged
+        if (this.draggingHandle === 'top-left') {
+          rectangle.width = originalRight - x;
+          rectangle.height = originalBottom - y;
+          rectangle.x = x;
+          rectangle.y = y;
+        } else if (this.draggingHandle === 'top-right') {
+          rectangle.width = x - rectangle.x;
+          rectangle.height = originalBottom - y;
+          rectangle.y = y;
+        } else if (this.draggingHandle === 'bottom-left') {
+          rectangle.width = originalRight - x;
+          rectangle.height = y - rectangle.y;
+          rectangle.x = x;
+        } else if (this.draggingHandle === 'bottom-right') {
+          rectangle.width = x - rectangle.x;
+          rectangle.height = y - rectangle.y;
+        }
       }
 
       this.onRedraw();
