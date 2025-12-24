@@ -41,6 +41,7 @@
 
 ## Extra
 
+- [ ] change color of annotations to use light red
+- [ ] screenshot has some unnecessary space
 - [ ] style "No screenshot loaded. Please capture a screenshot from the extension popup."
 - [x] add shadow to toolbar
-- [ ] screenshot has some unnecessary space
