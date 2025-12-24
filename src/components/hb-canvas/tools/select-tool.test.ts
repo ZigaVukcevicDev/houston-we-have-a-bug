@@ -60,6 +60,8 @@ describe('SelectTool', () => {
       arc: vi.fn(),
       fill: vi.fn(),
       stroke: vi.fn(),
+      fillRect: vi.fn(),
+      strokeRect: vi.fn(),
       save: vi.fn(),
       restore: vi.fn(),
     } as unknown as CanvasRenderingContext2D;
@@ -234,8 +236,8 @@ describe('SelectTool', () => {
     it('should not render handles when nothing is selected', () => {
       selectTool.render(mockCtx);
 
-      expect(mockCtx.arc).not.toHaveBeenCalled();
-      expect(mockCtx.fill).not.toHaveBeenCalled();
+      expect(mockCtx.fillRect).not.toHaveBeenCalled();
+      expect(mockCtx.strokeRect).not.toHaveBeenCalled();
     });
 
     it('should render handles for selected line', () => {
@@ -244,9 +246,8 @@ describe('SelectTool', () => {
       selectTool.render(mockCtx);
 
       // Should render 2 handles (start and end)
-      expect(mockCtx.arc).toHaveBeenCalledTimes(2);
-      expect(mockCtx.fill).toHaveBeenCalledTimes(2);
-      expect(mockCtx.stroke).toHaveBeenCalledTimes(2);
+      expect(mockCtx.fillRect).toHaveBeenCalledTimes(2);
+      expect(mockCtx.strokeRect).toHaveBeenCalledTimes(2);
     });
 
     it('should render handles at correct positions', () => {
@@ -254,22 +255,21 @@ describe('SelectTool', () => {
 
       selectTool.render(mockCtx);
 
-      // Check if arc was called with correct positions
-      expect(mockCtx.arc).toHaveBeenNthCalledWith(
+      // Check if fillRect was called with correct positions
+      // Handles are 8x8 squares, centered at the point
+      expect(mockCtx.fillRect).toHaveBeenNthCalledWith(
         1,
-        100,
-        100,
-        8, // handleRadius
-        0,
-        2 * Math.PI
+        96, // 100 - 4 (half of handleSize)
+        96, // 100 - 4
+        8,  // handleSize
+        8   // handleSize
       );
-      expect(mockCtx.arc).toHaveBeenNthCalledWith(
+      expect(mockCtx.fillRect).toHaveBeenNthCalledWith(
         2,
-        200,
-        200,
-        8, // handleRadius
-        0,
-        2 * Math.PI
+        196, // 200 - 4
+        196, // 200 - 4
+        8,   // handleSize
+        8    // handleSize
       );
     });
 
@@ -286,7 +286,7 @@ describe('SelectTool', () => {
       selectTool['selectedAnnotationId'] = 'non-existent-id';
 
       expect(() => selectTool.render(mockCtx)).not.toThrow();
-      expect(mockCtx.arc).not.toHaveBeenCalled();
+      expect(mockCtx.fillRect).not.toHaveBeenCalled();
     });
   });
 
@@ -491,7 +491,7 @@ describe('SelectTool', () => {
       // Should only render handles, not the hover stroke
       // Handles: 2 calls (one for each handle)
       // No extra calls for hover stroke
-      expect(mockCtx.arc).toHaveBeenCalledTimes(2);
+      expect(mockCtx.fillRect).toHaveBeenCalledTimes(2);
     });
 
     it('should hover most recent line when multiple overlap', () => {

@@ -18,9 +18,6 @@
   - [x] second endpoint
 - move line
   - [x] free
-- rotate line
-  - [ ] first endpoint
-  - [ ] second endpoint
 
 3. Download
 

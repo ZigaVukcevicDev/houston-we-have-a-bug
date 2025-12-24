@@ -1,0 +1,102 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { renderHandle, isPointOnHandle, handleSize } from './render-handle';
+
+describe('render-handle utility', () => {
+  describe('handleSize', () => {
+    it('should export the handle size constant', () => {
+      expect(handleSize).toBe(8);
+    });
+  });
+
+  describe('renderHandle', () => {
+    let mockCtx: any;
+
+    beforeEach(() => {
+      mockCtx = {
+        save: vi.fn(),
+        restore: vi.fn(),
+        fillRect: vi.fn(),
+        strokeRect: vi.fn(),
+        fillStyle: '',
+        strokeStyle: '',
+        lineWidth: 0,
+      };
+    });
+
+    it('should render a rectangle at specified coordinates', () => {
+      renderHandle(mockCtx, 100, 150);
+
+      expect(mockCtx.save).toHaveBeenCalled();
+      expect(mockCtx.fillRect).toHaveBeenCalledWith(96, 146, handleSize, handleSize);
+      expect(mockCtx.strokeRect).toHaveBeenCalledWith(96, 146, handleSize, handleSize);
+      expect(mockCtx.restore).toHaveBeenCalled();
+    });
+
+    it('should apply correct styling - white fill with black stroke', () => {
+      renderHandle(mockCtx, 50, 75);
+
+      expect(mockCtx.fillStyle).toBe('#ffffff');
+      expect(mockCtx.strokeStyle).toBe('#000000');
+      expect(mockCtx.lineWidth).toBe(1);
+    });
+
+    it('should save and restore context', () => {
+      renderHandle(mockCtx, 0, 0);
+
+      expect(mockCtx.save).toHaveBeenCalledBefore(mockCtx.fillRect);
+      expect(mockCtx.restore).toHaveBeenCalled();
+    });
+
+    it('should center rectangle on given coordinates', () => {
+      renderHandle(mockCtx, 100, 100);
+
+      const halfSize = handleSize / 2;
+      expect(mockCtx.fillRect).toHaveBeenCalledWith(
+        100 - halfSize,
+        100 - halfSize,
+        handleSize,
+        handleSize
+      );
+    });
+  });
+
+  describe('isPointOnHandle', () => {
+    it('should return true when point is exactly on handle center', () => {
+      expect(isPointOnHandle(100, 100, 100, 100)).toBe(true);
+    });
+
+    it('should return true when point is within handle bounds', () => {
+      expect(isPointOnHandle(103, 100, 100, 100)).toBe(true);
+      expect(isPointOnHandle(100, 103, 100, 100)).toBe(true);
+      expect(isPointOnHandle(97, 100, 100, 100)).toBe(true);
+      expect(isPointOnHandle(100, 97, 100, 100)).toBe(true);
+    });
+
+    it('should return false when point is outside handle bounds', () => {
+      expect(isPointOnHandle(105, 100, 100, 100)).toBe(false);
+      expect(isPointOnHandle(100, 105, 100, 100)).toBe(false);
+      expect(isPointOnHandle(95, 100, 100, 100)).toBe(false);
+      expect(isPointOnHandle(100, 95, 100, 100)).toBe(false);
+    });
+
+    it('should return true when point is exactly at edge', () => {
+      expect(isPointOnHandle(104, 100, 100, 100)).toBe(true);
+      expect(isPointOnHandle(96, 100, 100, 100)).toBe(true);
+      expect(isPointOnHandle(100, 104, 100, 100)).toBe(true);
+      expect(isPointOnHandle(100, 96, 100, 100)).toBe(true);
+    });
+
+    it('should handle corner points correctly', () => {
+      expect(isPointOnHandle(104, 104, 100, 100)).toBe(true);
+      expect(isPointOnHandle(96, 96, 100, 100)).toBe(true);
+      expect(isPointOnHandle(104, 96, 100, 100)).toBe(true);
+      expect(isPointOnHandle(96, 104, 100, 100)).toBe(true);
+    });
+
+    it('should work with negative coordinates', () => {
+      expect(isPointOnHandle(-100, -100, -100, -100)).toBe(true);
+      expect(isPointOnHandle(-103, -100, -100, -100)).toBe(true);
+      expect(isPointOnHandle(-105, -100, -100, -100)).toBe(false);
+    });
+  });
+});

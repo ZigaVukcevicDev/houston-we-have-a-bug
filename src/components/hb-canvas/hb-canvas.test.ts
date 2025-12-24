@@ -90,6 +90,8 @@ describe('HBCanvas', () => {
         moveTo: vi.fn(),
         lineTo: vi.fn(),
         stroke: vi.fn(),
+        fillRect: vi.fn(),
+        strokeRect: vi.fn(),
       };
 
       mockCanvasElement = {
@@ -164,6 +166,8 @@ describe('HBCanvas', () => {
         moveTo: vi.fn(),
         lineTo: vi.fn(),
         stroke: vi.fn(),
+        fillRect: vi.fn(),
+        strokeRect: vi.fn(),
       };
 
       mockCanvasElement = {
@@ -233,6 +237,8 @@ describe('HBCanvas', () => {
         moveTo: vi.fn(),
         lineTo: vi.fn(),
         stroke: vi.fn(),
+        fillRect: vi.fn(),
+        strokeRect: vi.fn(),
       };
 
       mockCanvasElement = {
@@ -500,6 +506,8 @@ describe('HBCanvas', () => {
         restore: vi.fn(),
         arc: vi.fn(),
         fill: vi.fn(),
+        fillRect: vi.fn(),
+        strokeRect: vi.fn(),
       };
 
       mockCanvasElement = {

@@ -60,5 +60,26 @@ You must follow these rules when working on this repository.
     - Test descriptions (e.g., `it('should handle errors gracefully')`)
     - Documentation headings and content
 
+
 ## 5. Icons & assets
 - **Icon swapping**: Use the CSS 3-state toggle pattern (Default/Hover/Active) with hidden `img` classes (`.icon-default`, `.icon-hover`, `.icon-active`) instead of SVGs filters or inline SVGs.
+
+## 6. Canvas rendering & Retina display support
+- **Device pixel ratio scaling**: All canvas drawing operations MUST account for `window.devicePixelRatio` to render correctly on Retina/high-DPI displays
+  - When drawing shapes, multiply dimensions by DPR: `size * (window.devicePixelRatio || 1)`
+  - When drawing strokes, multiply line widths by DPR: `lineWidth * (window.devicePixelRatio || 1)`
+  - When hit-testing canvas elements, multiply hit areas by DPR
+  - Example:
+    ```typescript
+    const dpr = window.devicePixelRatio || 1;
+    ctx.lineWidth = baseLineWidth * dpr;
+    ctx.fillRect(x, y, width * dpr, height * dpr);
+    ```
+- **Why this matters**: On Retina displays (DPR=2), canvas pixels ≠ CSS pixels. Without DPR scaling:
+  - An 8px canvas element appears as 4 CSS pixels (50% too small)
+  - A 5px line appears as 2.5 CSS pixels (looks thin/blurry)
+- **Affected areas**: 
+  - Handle rendering (`render-handle.ts`)
+  - Line annotation rendering (`line-tool.ts`, `select-tool.ts`)
+  - Any future canvas-based annotations (arrows, rectangles, etc.)
+

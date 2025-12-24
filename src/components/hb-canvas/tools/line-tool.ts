@@ -66,7 +66,7 @@ export class LineTool implements Tool {
     // Redraw with preview line
     this.onRedraw();
     ctx.strokeStyle = this.color;
-    ctx.lineWidth = this.lineWidth;
+    ctx.lineWidth = this.lineWidth * (window.devicePixelRatio || 1);
     ctx.lineCap = 'round';
     ctx.beginPath();
     ctx.moveTo(this.startPoint.x, this.startPoint.y);
@@ -147,10 +147,11 @@ export class LineTool implements Tool {
   }
 
   render(ctx: CanvasRenderingContext2D): void {
+    const dpr = window.devicePixelRatio || 1;
     this.lineAnnotations.forEach((line) => {
       ctx.save();
       ctx.strokeStyle = line.color;
-      ctx.lineWidth = line.width;
+      ctx.lineWidth = line.width * dpr;
       ctx.lineCap = 'round';
       ctx.beginPath();
       ctx.moveTo(line.x1, line.y1);

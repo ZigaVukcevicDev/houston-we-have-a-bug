@@ -1,8 +1,8 @@
 import type { Tool } from '../../../interfaces/tool.interface';
 import type { LineAnnotation } from '../../../interfaces/annotation.interface';
 import { toolStyles } from './tool-styles';
+import { renderHandle, isPointOnHandle } from '../../../utils/render-handle';
 
-const handleRadius = 8;
 const lineHitThreshold = 10;
 
 export class SelectTool implements Tool {
@@ -12,7 +12,7 @@ export class SelectTool implements Tool {
   private draggingHandle: 'start' | 'end' | null = null;
   private draggingLine: boolean = false;
   private dragOffset: { x: number; y: number } = { x: 0, y: 0 };
-  private dragStartPosition: { x: number; y: number } = { x: 0, y: 0 };
+
   private onRedraw: () => void;
 
   constructor(lineAnnotations: LineAnnotation[], onRedraw: () => void) {
@@ -60,14 +60,14 @@ export class SelectTool implements Tool {
       if (!line) return;
 
       // Check start handle first
-      if (this.isPointOnHandle(x, y, line.x1, line.y1)) {
+      if (isPointOnHandle(x, y, line.x1, line.y1)) {
         this.draggingHandle = 'start';
         this.dragOffset = { x: x - line.x1, y: y - line.y1 };
         return;
       }
 
       // Check end handle second
-      if (this.isPointOnHandle(x, y, line.x2, line.y2)) {
+      if (isPointOnHandle(x, y, line.x2, line.y2)) {
         this.draggingHandle = 'end';
         this.dragOffset = { x: x - line.x2, y: y - line.y2 };
         return;
@@ -95,8 +95,8 @@ export class SelectTool implements Tool {
       // Check if hovering over a handle of selected line
       const selectedLine = this.lineAnnotations.find(l => l.id === this.selectedAnnotationId);
       if (selectedLine) {
-        if (this.isPointOnHandle(x, y, selectedLine.x1, selectedLine.y1) ||
-          this.isPointOnHandle(x, y, selectedLine.x2, selectedLine.y2)) {
+        if (isPointOnHandle(x, y, selectedLine.x1, selectedLine.y1) ||
+          isPointOnHandle(x, y, selectedLine.x2, selectedLine.y2)) {
           canvas.style.cursor = 'move';
           this.hoveredAnnotationId = null;
           this.onRedraw();
@@ -178,10 +178,11 @@ export class SelectTool implements Tool {
     if (this.hoveredAnnotationId !== null && this.hoveredAnnotationId !== this.selectedAnnotationId) {
       const hoveredLine = this.lineAnnotations.find(l => l.id === this.hoveredAnnotationId);
       if (hoveredLine) {
+        const dpr = window.devicePixelRatio || 1;
         // Draw thin stroke outline around hovered line
         ctx.save();
         ctx.strokeStyle = toolStyles.handleStrokeColor;
-        ctx.lineWidth = hoveredLine.width + 4; // Thin outline (2px on each side)
+        ctx.lineWidth = (hoveredLine.width + 4) * dpr; // Thin outline (2px on each side)
         ctx.lineCap = 'round';
         ctx.beginPath();
         ctx.moveTo(hoveredLine.x1, hoveredLine.y1);
@@ -192,7 +193,7 @@ export class SelectTool implements Tool {
         // Draw the line itself on top in its original color
         ctx.save();
         ctx.strokeStyle = hoveredLine.color;
-        ctx.lineWidth = hoveredLine.width;
+        ctx.lineWidth = hoveredLine.width * dpr;
         ctx.lineCap = 'round';
         ctx.beginPath();
         ctx.moveTo(hoveredLine.x1, hoveredLine.y1);
@@ -209,26 +210,11 @@ export class SelectTool implements Tool {
     if (!selectedLine) return;
 
     // Draw handles only (no stroke outline for selected line)
-    this.renderHandle(ctx, selectedLine.x1, selectedLine.y1);
-    this.renderHandle(ctx, selectedLine.x2, selectedLine.y2);
+    renderHandle(ctx, selectedLine.x1, selectedLine.y1);
+    renderHandle(ctx, selectedLine.x2, selectedLine.y2);
   }
 
-  private renderHandle(ctx: CanvasRenderingContext2D, x: number, y: number): void {
-    ctx.save();
-    ctx.fillStyle = toolStyles.handleFillColor;
-    ctx.strokeStyle = toolStyles.handleStrokeColor;
-    ctx.lineWidth = toolStyles.handleStrokeWidth;
-    ctx.beginPath();
-    ctx.arc(x, y, handleRadius, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.stroke();
-    ctx.restore();
-  }
 
-  private isPointOnHandle(px: number, py: number, hx: number, hy: number): boolean {
-    const distance = Math.sqrt((px - hx) ** 2 + (py - hy) ** 2);
-    return distance <= handleRadius;
-  }
 
   private isPointOnLine(px: number, py: number, line: LineAnnotation): boolean {
     const { x1, y1, x2, y2 } = line;
