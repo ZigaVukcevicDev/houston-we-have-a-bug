@@ -17,6 +17,7 @@ You must follow these rules when working on this repository.
 
 ## 2. Code quality & cleanliness
 - **No leftovers**: When refactoring or removing features (e.g., Memory Usage), fully remove all related code, types, and unused imports.
+- **Remove unused imports**: After any refactoring, ALWAYS delete unused import statements. Check imports in all modified files.
 - **No commented code**: Do not leave commented-out code blocks. If code is not used, delete it.
 - **Remove dead code**: When refactoring, always identify and remove any unused functions, variables, or imports that are no longer needed.
 - **Avoid ALL CAPS comments**: Avoid using ALL CAPS words in comments (e.g., use "Get raw position first" instead of "Get raw position FIRST").

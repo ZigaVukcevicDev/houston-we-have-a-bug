@@ -1,6 +1,5 @@
 import type { Tool } from '../../../interfaces/tool.interface';
 import type { LineAnnotation } from '../../../interfaces/annotation.interface';
-import { toolStyles } from './tool-styles';
 import { renderHandle, isPointOnHandle } from '../../../utils/render-handle';
 
 const lineHitThreshold = 10;
@@ -174,26 +173,15 @@ export class SelectTool implements Tool {
   }
 
   render(ctx: CanvasRenderingContext2D): void {
-    // Render stroke for hovered annotation (if not selected)
+    // Render yellow centerline for hovered annotation (if not selected)
     if (this.hoveredAnnotationId !== null && this.hoveredAnnotationId !== this.selectedAnnotationId) {
       const hoveredLine = this.lineAnnotations.find(l => l.id === this.hoveredAnnotationId);
       if (hoveredLine) {
         const dpr = window.devicePixelRatio || 1;
-        // Draw thin stroke outline around hovered line
+        // Draw yellow 1px centerline
         ctx.save();
-        ctx.strokeStyle = toolStyles.handleStrokeColor;
-        ctx.lineWidth = (hoveredLine.width + 4) * dpr; // Thin outline (2px on each side)
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(hoveredLine.x1, hoveredLine.y1);
-        ctx.lineTo(hoveredLine.x2, hoveredLine.y2);
-        ctx.stroke();
-        ctx.restore();
-
-        // Draw the line itself on top in its original color
-        ctx.save();
-        ctx.strokeStyle = hoveredLine.color;
-        ctx.lineWidth = hoveredLine.width * dpr;
+        ctx.strokeStyle = '#FAC021';
+        ctx.lineWidth = 1 * dpr;
         ctx.lineCap = 'round';
         ctx.beginPath();
         ctx.moveTo(hoveredLine.x1, hoveredLine.y1);
@@ -213,8 +201,6 @@ export class SelectTool implements Tool {
     renderHandle(ctx, selectedLine.x1, selectedLine.y1);
     renderHandle(ctx, selectedLine.x2, selectedLine.y2);
   }
-
-
 
   private isPointOnLine(px: number, py: number, line: LineAnnotation): boolean {
     const { x1, y1, x2, y2 } = line;
