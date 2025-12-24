@@ -12,28 +12,6 @@
   height: 100%;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: $spacing-md $spacing-lg;
-  background-color: $color-yellow-500;
-}
-
-h1 {
-  font-size: $font-size-lg;
-  font-weight: 600;
-  margin: 0;
-}
-
-.header-actions {
-  display: flex;
-}
-
-.toolbar-container {
-  // TODO: remove class if not being used
-}
-
 .canvas-container {
   flex: 1;
   overflow: auto;
