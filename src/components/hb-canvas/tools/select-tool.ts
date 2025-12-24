@@ -35,6 +35,16 @@ export class SelectTool implements Tool {
     this.onRedraw();
   }
 
+  // Deselect all annotations (used for download)
+  deselectAll(): void {
+    this.selectedAnnotationId = null;
+    this.selectedAnnotationType = null;
+    this.hoveredAnnotationId = null;
+    this.hoveredAnnotationType = null;
+    this.onRedraw();
+  }
+
+
   handleClick(event: MouseEvent, canvas: HTMLCanvasElement): void {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;

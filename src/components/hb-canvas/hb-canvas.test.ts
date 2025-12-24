@@ -422,6 +422,25 @@ describe('HBCanvas', () => {
       canvas.download('test.jpg', 0.1);
       expect(mockCanvasElement.toDataURL).toHaveBeenCalledWith('image/jpeg', 0.1);
     });
+
+    it('should deselect all annotations before downloading', () => {
+      const selectTool = canvas['tools'].get('select') as SelectTool;
+      const deselectAllSpy = vi.spyOn(selectTool, 'deselectAll');
+
+      const mockLink = {
+        download: '',
+        href: '',
+        click: vi.fn(),
+      };
+
+      vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
+
+      canvas.download();
+
+      expect(deselectAllSpy).toHaveBeenCalled();
+      // Verify deselectAll was called before toDataURL
+      expect(deselectAllSpy).toHaveBeenCalledBefore(mockCanvasElement.toDataURL);
+    });
   });
 
 

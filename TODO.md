@@ -35,7 +35,7 @@
 
 4. Download
 
-- [ ] deselect annotaions when downloading
+- [x] deselect annotaions when downloading
 
 ## Extra
 

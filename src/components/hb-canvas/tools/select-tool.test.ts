@@ -105,6 +105,36 @@ describe('SelectTool', () => {
       selectTool.selectAnnotation('line-2');
       expect(selectTool['selectedAnnotationId']).toBe('line-2');
     });
+
+    it('should deselect all annotations when deselectAll is called', () => {
+      // First select something
+      selectTool.selectAnnotation('line-1');
+      expect(selectTool['selectedAnnotationId']).toBe('line-1');
+      expect(selectTool['selectedAnnotationType']).toBe('line');
+      mockRedraw.mockClear();
+
+      // Then deselect all
+      selectTool.deselectAll();
+
+      expect(selectTool['selectedAnnotationId']).toBeNull();
+      expect(selectTool['selectedAnnotationType']).toBeNull();
+      expect(selectTool['hoveredAnnotationId']).toBeNull();
+      expect(selectTool['hoveredAnnotationType']).toBeNull();
+      expect(mockRedraw).toHaveBeenCalled();
+    });
+
+    it('should clear hover state when deselectAll is called', () => {
+      // Set up selected and hovered state
+      selectTool['selectedAnnotationId'] = 'line-1';
+      selectTool['selectedAnnotationType'] = 'line';
+      selectTool['hoveredAnnotationId'] = 'line-2';
+      selectTool['hoveredAnnotationType'] = 'line';
+
+      selectTool.deselectAll();
+
+      expect(selectTool['selectedAnnotationId']).toBeNull();
+      expect(selectTool['hoveredAnnotationId']).toBeNull();
+    });
   });
 
   describe('line selection', () => {
