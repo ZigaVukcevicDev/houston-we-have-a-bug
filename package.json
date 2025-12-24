@@ -1,7 +1,7 @@
 {
   "name": "houston-we-have-a-bug",
   "version": "0.0.1",
-  "description": "A Chrome extension for quick bug capture with annotation and context.",
+  "description": "Annotate screenshots, and gather system info for quick reporting.",
   "scripts": {
     "build": "node build.js",
     "prebuild": "rm -rf dist && mkdir -p dist",
