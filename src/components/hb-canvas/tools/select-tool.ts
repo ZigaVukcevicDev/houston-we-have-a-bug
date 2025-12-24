@@ -131,6 +131,20 @@ export class SelectTool implements Tool {
           canvas.style.cursor = 'pointer';
           if (this.hoveredAnnotationId !== this.lineAnnotations[i].id) {
             this.hoveredAnnotationId = this.lineAnnotations[i].id;
+            this.hoveredAnnotationType = 'line';
+            this.onRedraw();
+          }
+          return;
+        }
+      }
+
+      // Check if hovering over any rectangle (iterate backwards for most recent)
+      for (let i = this.rectangleAnnotations.length - 1; i >= 0; i--) {
+        if (this.isPointOnRectangle(x, y, this.rectangleAnnotations[i])) {
+          canvas.style.cursor = 'pointer';
+          if (this.hoveredAnnotationId !== this.rectangleAnnotations[i].id) {
+            this.hoveredAnnotationId = this.rectangleAnnotations[i].id;
+            this.hoveredAnnotationType = 'rectangle';
             this.onRedraw();
           }
           return;
@@ -140,6 +154,7 @@ export class SelectTool implements Tool {
       // Not hovering over anything - reset to CSS-controlled cursor
       if (this.hoveredAnnotationId !== null) {
         this.hoveredAnnotationId = null;
+        this.hoveredAnnotationType = null;
         this.onRedraw();
       }
       canvas.style.cursor = '';

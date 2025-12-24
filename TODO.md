@@ -7,6 +7,7 @@
 - [x] on hover stroke annotation
 - [x] if no annotation is clicked, unselect all annotations 
 - [x] if coming from other tool, don't select any annotation
+- [ ] key deletes selected annotation
 
 2. Line tool
 
