@@ -914,4 +914,87 @@ describe('SelectTool', () => {
       expect(selectTool['selectedAnnotationType']).toBe('rectangle');
     });
   });
+
+  describe('direct drag on hover', () => {
+    it('should start dragging unselected line immediately on mousedown', () => {
+      // No selection initially
+      expect(selectTool['selectedAnnotationId']).toBeNull();
+
+      // Click on line-1 (not selected)
+      selectTool.handleMouseDown({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+
+      // Should auto-select and start dragging
+      expect(selectTool['selectedAnnotationId']).toBe('line-1');
+      expect(selectTool['selectedAnnotationType']).toBe('line');
+      expect(selectTool['draggingLine']).toBe(true);
+    });
+
+    it('should move unselected line when dragging', () => {
+      const originalX1 = lineAnnotations[0].x1;
+      const originalY1 = lineAnnotations[0].y1;
+      const originalX2 = lineAnnotations[0].x2;
+      const originalY2 = lineAnnotations[0].y2;
+
+      // Click on unselected line
+      selectTool.handleMouseDown({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+
+      // Drag to new position
+      selectTool.handleMouseMove(
+        { clientX: 180, clientY: 180 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      // Line should have moved
+      const dx = lineAnnotations[0].x1 - originalX1;
+      const dy = lineAnnotations[0].y1 - originalY1;
+      expect(lineAnnotations[0].x2).toBe(originalX2 + dx);
+      expect(lineAnnotations[0].y2).toBe(originalY2 + dy);
+    });
+
+    it('should start dragging unselected rectangle immediately on mousedown', () => {
+      // No selection initially
+      expect(selectTool['selectedAnnotationId']).toBeNull();
+
+      // Click on rect-1 (not selected)
+      selectTool.handleMouseDown({ clientX: 100, clientY: 310 } as MouseEvent, mockCanvas);
+
+      // Should auto-select and start dragging
+      expect(selectTool['selectedAnnotationId']).toBe('rect-1');
+      expect(selectTool['selectedAnnotationType']).toBe('rectangle');
+      expect(selectTool['draggingLine']).toBe(true);
+    });
+
+    it('should move unselected rectangle when dragging', () => {
+      const originalX = rectangleAnnotations[0].x;
+      const originalY = rectangleAnnotations[0].y;
+
+      // Click on unselected rectangle
+      selectTool.handleMouseDown({ clientX: 100, clientY: 310 } as MouseEvent, mockCanvas);
+
+      // Drag to new position
+      selectTool.handleMouseMove(
+        { clientX: 130, clientY: 340 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      // Rectangle should have moved
+      expect(rectangleAnnotations[0].x).toBe(originalX + 30);
+      expect(rectangleAnnotations[0].y).toBe(originalY + 30);
+    });
+
+    it('should prioritize selected annotation over hovered annotation', () => {
+      // Select line-1
+      selectTool['selectedAnnotationId'] = 'line-1';
+      selectTool['selectedAnnotationType'] = 'line';
+
+      // Click on line-2 area (but line-1 is selected and we're on it)
+      selectTool.handleMouseDown({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+
+      // Should still be dragging line-1  (the selected one)
+      expect(selectTool['selectedAnnotationId']).toBe('line-1');
+      expect(selectTool['draggingLine']).toBe(true);
+    });
+  });
 });

@@ -153,6 +153,31 @@ export class SelectTool implements Tool {
         }
       }
     }
+
+    // Allow dragging hovered (not selected) annotations immediately
+    // Check rectangles first (iterate backwards for most recent)
+    for (let i = this.rectangleAnnotations.length - 1; i >= 0; i--) {
+      if (this.isPointOnRectangle(x, y, this.rectangleAnnotations[i])) {
+        this.selectedAnnotationId = this.rectangleAnnotations[i].id;
+        this.selectedAnnotationType = 'rectangle';
+        this.draggingLine = true;
+        this.dragOffset = { x, y };
+        this.onRedraw();
+        return;
+      }
+    }
+
+    // Check lines (iterate backwards for most recent)
+    for (let i = this.lineAnnotations.length - 1; i >= 0; i--) {
+      if (this.isPointOnLine(x, y, this.lineAnnotations[i])) {
+        this.selectedAnnotationId = this.lineAnnotations[i].id;
+        this.selectedAnnotationType = 'line';
+        this.draggingLine = true;
+        this.dragOffset = { x, y };
+        this.onRedraw();
+        return;
+      }
+    }
   }
 
   handleMouseMove(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {

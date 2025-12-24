@@ -18,7 +18,8 @@
   - [x] start endpoint
   - [x] end endpoint
 - move line
-  - [x] free
+  - [x] without selection
+  - [x] with selection
 
 3. Rectangle tool
 
@@ -31,7 +32,8 @@
   - [x] bottom-left endpoint
   - [x] bottom-right endpoint
 - move rectangle
-  - [x] free
+  - [ ] without selection
+  - [ ] with selection
 
 4. Download
 
