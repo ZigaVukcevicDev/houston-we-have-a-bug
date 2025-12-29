@@ -1,7 +1,11 @@
 # Houston, we have a bug
 
+![Status](https://img.shields.io/badge/status-work_in_progress-orange)
 ![Tests](https://github.com/ZigaVukcevicDev/houston-we-have-a-bug/actions/workflows/test.yml/badge.svg)
 ![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)
+![Platform](https://img.shields.io/badge/platform-Chrome_extension-blue)
+![TypeScript](https://img.shields.io/badge/language-TypeScript-blue)
+![Build](https://img.shields.io/badge/build-esbuild-lightgrey)
 
 A Chrome extension that helps you annotate screenshots and gather system info for quick bug reporting.
 
