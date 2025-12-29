@@ -3,7 +3,7 @@
 ![Tests](https://github.com/ZigaVukcevicDev/houston-we-have-a-bug/actions/workflows/test.yml/badge.svg)
 ![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)
 
-A Chrome extension for quick bug capture with annotation and context.
+A Chrome extension that helps you annotate screenshots and gather system info for quick bug reporting.
 
 ## Key capabilities
 

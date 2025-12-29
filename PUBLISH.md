@@ -14,7 +14,7 @@ Houston, we have a bug
 
 **Summary from package**
 
-Annotate screenshots, and gather system info for quick reporting.
+Annotate screenshots, and gather system info for quick bug reporting.
 
 **Description**
 

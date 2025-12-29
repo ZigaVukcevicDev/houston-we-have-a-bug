@@ -1,7 +1,7 @@
 {
   "name": "houston-we-have-a-bug",
   "version": "0.0.1",
-  "description": "Annotate screenshots, and gather system info for quick reporting.",
+  "description": "Annotate screenshots, and gather system info for quick bug reporting.",
   "scripts": {
     "build": "node build.js",
     "prebuild": "rm -rf dist && mkdir -p dist",
