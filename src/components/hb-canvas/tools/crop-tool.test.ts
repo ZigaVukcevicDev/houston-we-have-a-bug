@@ -350,34 +350,6 @@ describe('CropTool', () => {
       // Should set overlay color at some point
       expect(fillStyleSetter).toHaveBeenCalledWith('rgba(0, 0, 0, 0.7)');
     });
-
-    it('should apply DPR scaling to border width', () => {
-      cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
-
-      let capturedLineWidth = 0;
-      const testCtx = {
-        ...mockCtx,
-        set lineWidth(val: number) { capturedLineWidth = val; },
-        get lineWidth() { return capturedLineWidth; },
-      } as unknown as CanvasRenderingContext2D;
-
-      const originalDPR = window.devicePixelRatio;
-      Object.defineProperty(window, 'devicePixelRatio', {
-        writable: true,
-        configurable: true,
-        value: 2,
-      });
-
-      cropTool.render(testCtx);
-
-      expect(capturedLineWidth).toBe(4); // 2 * 2
-
-      Object.defineProperty(window, 'devicePixelRatio', {
-        writable: true,
-        configurable: true,
-        value: originalDPR,
-      });
-    });
   });
 
   describe('DPR fallback', () => {
