@@ -11,6 +11,7 @@
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "prepare": "husky"
@@ -20,6 +21,7 @@
     "@types/node": "^20.10.0",
     "@typescript-eslint/eslint-plugin": "^8.50.0",
     "@typescript-eslint/parser": "^8.50.0",
+    "@vitest/coverage-v8": "^4.0.16",
     "@vitest/ui": "^4.0.15",
     "chokidar-cli": "^3.0.0",
     "concurrently": "^8.2.2",
