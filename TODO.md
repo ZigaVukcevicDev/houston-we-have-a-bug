@@ -21,7 +21,19 @@
   - [x] without selection
   - [x] with selection
 
-3. Rectangle tool
+3. Arrow tool
+
+- draw arrow
+  - [ ] free
+  - [ ] with shift
+- move endpoint
+  - [ ] start endpoint
+  - [ ] end endpoint
+- move arrow
+  - [ ] without selection
+  - [ ] with selection
+
+4. Rectangle tool
 
 - draw rectangle
   - [x] free
@@ -35,7 +47,7 @@
   - [x] without selection
   - [x] with selection
 
-4. Download
+5. Download
 
 - [x] deselect annotaions when downloading
 
@@ -48,4 +60,4 @@
 - [x] exclude extension-presentation from build
 - [x] change "environment details" to "system info"
 - [x] when hovering over rectangle, highlight is visible only when hover over horizontal parts
-- [ ] find a way to have better hover color for secondary button
+- [ ] find a way to have better hover color for secondary button (as current is too pale)

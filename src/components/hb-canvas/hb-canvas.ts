@@ -6,6 +6,7 @@ import type { Tool } from '../../interfaces/tool.interface';
 import type { LineAnnotation, TextAnnotation, RectangleAnnotation } from '../../interfaces/annotation.interface';
 import { TextTool } from './tools/text-tool';
 import { LineTool } from './tools/line-tool';
+import { ArrowTool } from './tools/arrow-tool';
 import { RectangleTool } from './tools/rectangle-tool';
 import { SelectTool } from './tools/select-tool';
 
@@ -86,6 +87,11 @@ export class HBCanvas extends LitElement {
       () => this.redraw()
     ));
     this.tools.set('line', new LineTool(
+      this.lineAnnotations,
+      () => this.redraw(),
+      (tool: string, annotationId?: string) => this.handleToolChange(tool, annotationId)
+    ));
+    this.tools.set('arrow', new ArrowTool(
       this.lineAnnotations,
       () => this.redraw(),
       (tool: string, annotationId?: string) => this.handleToolChange(tool, annotationId)

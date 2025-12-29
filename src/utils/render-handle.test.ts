@@ -9,7 +9,7 @@ describe('render-handle utility', () => {
   });
 
   describe('renderHandle', () => {
-    let mockCtx: any;
+    let mockCtx: CanvasRenderingContext2D;
 
     beforeEach(() => {
       mockCtx = {
@@ -20,7 +20,7 @@ describe('render-handle utility', () => {
         fillStyle: '',
         strokeStyle: '',
         lineWidth: 0,
-      };
+      } as unknown as CanvasRenderingContext2D;
     });
 
     it('should render a rectangle at specified coordinates', () => {
@@ -43,7 +43,7 @@ describe('render-handle utility', () => {
     it('should save and restore context', () => {
       renderHandle(mockCtx, 0, 0);
 
-      expect(mockCtx.save).toHaveBeenCalledBefore(mockCtx.fillRect);
+      expect(mockCtx.save).toHaveBeenCalledBefore(mockCtx.fillRect as any);
       expect(mockCtx.restore).toHaveBeenCalled();
     });
 
