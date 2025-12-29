@@ -55,15 +55,17 @@
 - deselect crop rectangle
   - [x] selecting any other tool
   - [x] pressing escape (then switch to select tool automatically)
-- move endpoints
-  - [ ] top-left endpoint
-  - [ ] top-right endpoint
-  - [ ] bottom-left endpoint
-  - [ ] bottom-right endpoint
-  - [ ] left endpoint
-  - [ ] right endpoint
-  - [ ] top endpoint
-  - [ ] bottom endpoint
+- move crop endpoints
+  - [x] top-left endpoint
+  - [x] top-right endpoint
+  - [x] bottom-left endpoint
+  - [x] bottom-right endpoint
+  - [x] left endpoint
+  - [x] right endpoint
+  - [x] top endpoint
+  - [x] bottom endpoint
+- move crop rectangle
+  - [ ] on hover crop rectangle
 
 6. Download
 
@@ -72,6 +74,7 @@
 ## Extra
 
 - [ ] when moving array via endpoint (start or end), it sometimes goes to select tool when release mouse button
+- [ ] change cursors when moving endpoints or annotations (reference to crop tool)
 - [x] change color of annotations to use color E74C3C
 - [ ] screenshot has some unnecessary space
 - [ ] style "No screenshot loaded. Please capture a screenshot from the extension popup."

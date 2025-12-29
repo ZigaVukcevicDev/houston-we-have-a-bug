@@ -14,6 +14,7 @@ export class CropTool implements Tool {
   private draggedHandle: HandleType | null = null;
   private dragStartPoint: { x: number; y: number } | null = null;
   private originalCropRect: { x: number; y: number; width: number; height: number } | null = null;
+  private isDraggingCrop: boolean = false;
 
   constructor(onRedraw: () => void, onToolChange?: (tool: string) => void) {
     this.onRedraw = onRedraw;
@@ -36,12 +37,21 @@ export class CropTool implements Tool {
       this.dragStartPoint = { x, y };
       this.originalCropRect = { ...this.cropRect };
       this.isDrawing = false;
+      this.isDraggingCrop = false;
+    } else if (this.cropRect && this.isPointInCropRect(x, y)) {
+      // Start dragging the entire crop rectangle
+      this.isDraggingCrop = true;
+      this.dragStartPoint = { x, y };
+      this.originalCropRect = { ...this.cropRect };
+      this.isDrawing = false;
+      this.draggedHandle = null;
     } else {
       // Start drawing a new crop rectangle
       this.isDrawing = true;
       this.startPoint = { x, y };
       this.cropRect = null;
       this.draggedHandle = null;
+      this.isDraggingCrop = false;
     }
 
     // Add keyboard listener for Escape key
@@ -67,11 +77,27 @@ export class CropTool implements Tool {
       return;
     }
 
+    // Crop rectangle dragging logic
+    if (this.isDraggingCrop && this.dragStartPoint && this.originalCropRect) {
+      const dx = x - this.dragStartPoint.x;
+      const dy = y - this.dragStartPoint.y;
+      this.cropRect = {
+        x: this.originalCropRect.x + dx,
+        y: this.originalCropRect.y + dy,
+        width: this.originalCropRect.width,
+        height: this.originalCropRect.height,
+      };
+      this.onRedraw();
+      return;
+    }
+
     // Handle hovering - update cursor
     if (!this.isDrawing && this.cropRect) {
       const handle = this.getHandleAtPoint(x, y);
       if (handle) {
         canvas.style.cursor = this.getCursorForHandle(handle);
+      } else if (this.isPointInCropRect(x, y)) {
+        canvas.style.cursor = 'move';
       } else {
         canvas.style.cursor = 'crosshair';
       }
@@ -110,6 +136,16 @@ export class CropTool implements Tool {
     // If dragging a handle, finalize it
     if (this.draggedHandle) {
       this.draggedHandle = null;
+      this.dragStartPoint = null;
+      this.originalCropRect = null;
+      canvas.style.cursor = 'crosshair';
+      this.onRedraw();
+      return;
+    }
+
+    // If dragging entire crop, finalize it
+    if (this.isDraggingCrop) {
+      this.isDraggingCrop = false;
       this.dragStartPoint = null;
       this.originalCropRect = null;
       canvas.style.cursor = 'crosshair';
@@ -250,6 +286,18 @@ export class CropTool implements Tool {
     }
 
     return null;
+  }
+
+  private isPointInCropRect(x: number, y: number): boolean {
+    if (!this.cropRect) return false;
+
+    const { x: cropX, y: cropY, width, height } = this.cropRect;
+    return (
+      x >= cropX &&
+      x <= cropX + width &&
+      y >= cropY &&
+      y <= cropY + height
+    );
   }
 
   private getCursorForHandle(handle: HandleType): string {
