@@ -893,6 +893,28 @@ describe('SelectTool', () => {
       // Should only render handles (4 for rectangle corners)
       expect(mockCtx.fillRect).toHaveBeenCalledTimes(4);
     });
+
+    it('should detect hover near top-left corner (vertical edge)', () => {
+      // Test hovering slightly above the top-left corner on the left edge
+      selectTool.handleMouseMove(
+        { clientX: 100, clientY: 295 } as MouseEvent, // y=295 is just above rect y=300 but within threshold
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBe('rect-1');
+    });
+
+    it('should detect hover near top-left corner (horizontal edge)', () => {
+      // Test hovering slightly left of the top-left corner on the top edge
+      selectTool.handleMouseMove(
+        { clientX: 95, clientY: 300 } as MouseEvent, // x=95 is just left of rect x=100 but within threshold
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBe('rect-1');
+    });
   });
 
   describe('rectangle edge cases', () => {
