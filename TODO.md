@@ -65,7 +65,7 @@
   - [x] top endpoint
   - [x] bottom endpoint
 - move crop rectangle
-  - [ ] on hover crop rectangle
+  - [x] on hover crop rectangle
 
 6. Download
 
@@ -74,7 +74,7 @@
 ## Extra
 
 - [ ] when moving array via endpoint (start or end), it sometimes goes to select tool when release mouse button
-- [ ] change cursors when moving endpoints or annotations (reference to crop tool)
+- [ ] change cursors when moving endpoints or annotations (reference to crop tool - if applicable?)
 - [x] change color of annotations to use color E74C3C
 - [ ] screenshot has some unnecessary space
 - [ ] style "No screenshot loaded. Please capture a screenshot from the extension popup."

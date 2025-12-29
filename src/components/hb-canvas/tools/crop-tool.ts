@@ -138,7 +138,6 @@ export class CropTool implements Tool {
       this.draggedHandle = null;
       this.dragStartPoint = null;
       this.originalCropRect = null;
-      canvas.style.cursor = 'crosshair';
       this.onRedraw();
       return;
     }
@@ -148,7 +147,6 @@ export class CropTool implements Tool {
       this.isDraggingCrop = false;
       this.dragStartPoint = null;
       this.originalCropRect = null;
-      canvas.style.cursor = 'crosshair';
       this.onRedraw();
       return;
     }
