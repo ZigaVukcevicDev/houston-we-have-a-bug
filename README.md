@@ -5,6 +5,8 @@
 
 A Chrome extension that helps you annotate screenshots and gather system info for quick bug reporting.
 
+> 🚧 **Status: in development — not yet published**
+
 ## Key capabilities
 
 - 📸 **Screenshot with annotations** - Capture visible tab with annotations
