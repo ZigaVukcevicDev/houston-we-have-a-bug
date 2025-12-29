@@ -537,4 +537,75 @@ describe('LineTool', () => {
       expect(mockToolChange).not.toHaveBeenCalled();
     });
   });
+
+  describe('DPR fallback', () => {
+    it('should use fallback DPR of 1 in handleMouseMove preview when devicePixelRatio is undefined', () => {
+      const originalDPR = window.devicePixelRatio;
+      Object.defineProperty(window, 'devicePixelRatio', {
+        writable: true,
+        configurable: true,
+        value: undefined,
+      });
+
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+
+      (mockCtx.stroke as any).mockClear();
+      lineTool.handleMouseMove({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(mockCtx.stroke).toHaveBeenCalled();
+
+      // Restore
+      Object.defineProperty(window, 'devicePixelRatio', {
+        writable: true,
+        configurable: true,
+        value: originalDPR,
+      });
+    });
+
+    it('should use fallback DPR of 1 in render when devicePixelRatio is undefined', () => {
+      const originalDPR = window.devicePixelRatio;
+      Object.defineProperty(window, 'devicePixelRatio', {
+        writable: true,
+        configurable: true,
+        value: undefined,
+      });
+
+      // Create a line first
+      lineTool.handleMouseDown({ clientX: 50, clientY: 50 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseUp({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+
+      (mockCtx.stroke as any).mockClear();
+      lineTool.render(mockCtx);
+
+      expect(mockCtx.stroke).toHaveBeenCalled();
+
+      // Restore
+      Object.defineProperty(window, 'devicePixelRatio', {
+        writable: true,
+        configurable: true,
+        value: originalDPR,
+      });
+    });
+  });
+
+  describe('cleanupDrawingState', () => {
+    it('should remove event listener when keydownHandler exists', () => {
+      const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
+
+      // Start drawing to set up keydownHandler
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+
+      // Verify keydownHandler was set
+      expect(lineTool['keydownHandler']).not.toBeNull();
+
+      // Complete the line (this calls cleanupDrawingState)
+      lineTool.handleMouseUp({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas);
+
+      // Should have removed the event listener
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+      expect(lineTool['keydownHandler']).toBeNull();
+
+      removeEventListenerSpy.mockRestore();
+    });
+  });
 });
