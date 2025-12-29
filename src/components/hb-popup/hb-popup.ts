@@ -14,7 +14,7 @@ export class HBPopup extends LitElement {
   static styles = unsafeCSS(styles);
 
   @state()
-  private environmentDetails: EnvironmentDetails | null = null;
+  private systemInfo: EnvironmentDetails | null = null;
 
   @state()
   private isCopyingDisabled = false;
@@ -36,15 +36,15 @@ export class HBPopup extends LitElement {
             Annotate screenshot
           </button>
 
-          <button class="action-button secondary mt-md mb-md" @click=${this.gatherEnvironmentDetails}>
+          <button class="action-button secondary mt-md mb-md" @click=${this.gatherSystemInfo}>
             <img src="../images/info-black.svg" alt="info" class="icon-default" />
             <img src="../images/info-red-400.svg" alt="info" class="icon-hover" />
             <img src="../images/info-red-500.svg" alt="info" class="icon-active" />
-            Gather environment details
+            Gather system info
           </button>
         </div>
 
-        ${this.renderEnvironmentDetails()}
+        ${this.renderSystemInfo()}
       </div>
     `;
   }
@@ -63,14 +63,14 @@ export class HBPopup extends LitElement {
     `;
   }
 
-  private renderEnvironmentDetails() {
-    if (!this.environmentDetails) {
+  private renderSystemInfo() {
+    if (!this.systemInfo) {
       return null;
     }
 
     return html`
-      <div class="environment-details-heading">
-        <h2>Environment details</h2>
+      <div class="system-info-heading">
+        <h2>System info</h2>
 
         <button
           class="icon-button"
@@ -82,14 +82,14 @@ export class HBPopup extends LitElement {
         </button>
       </div>
 
-      <table class="environment-details">
+      <table class="system-info">
         <tbody>
           <tr>
             <th>
               <img src="../images/clock-black.svg" alt="clock" />
               Date and time
             </th>
-            <td>${this.environmentDetails.dateAndTime}</td>
+            <td>${this.systemInfo.dateAndTime}</td>
           </tr>
           <tr>
             <th colspan="2">
@@ -97,7 +97,7 @@ export class HBPopup extends LitElement {
               URL
               <table>
                 <tr>
-                  <td style="width: auto;"><span class="url">${this.environmentDetails.url}</span></td>
+                  <td style="width: auto;"><span class="url">${this.systemInfo.url}</span></td>
                 </tr>
               </table>
             </th>
@@ -109,15 +109,15 @@ export class HBPopup extends LitElement {
               <table>
                 <tr>
                   <td>Visible area</td>
-                  <td>${this.environmentDetails.visibleArea}</td>
+                  <td>${this.systemInfo.visibleArea}</td>
                 </tr>
                 <tr>
                   <td>Display resolution</td>
-                  <td>${this.environmentDetails.displayResolution}</td>
+                  <td>${this.systemInfo.displayResolution}</td>
                 </tr>
                 <tr>
                   <td>Device pixel ratio</td>
-                  <td>${this.environmentDetails.devicePixelRatio}</td>
+                  <td>${this.systemInfo.devicePixelRatio}</td>
                 </tr>
               </table>
             </th>
@@ -129,11 +129,11 @@ export class HBPopup extends LitElement {
               <table>
                 <tr>
                   <td>Browser</td>
-                  <td>${this.environmentDetails.browser}</td>
+                  <td>${this.systemInfo.browser}</td>
                 </tr>
                 <tr>
                   <td>Operating system</td>
-                  <td>${this.environmentDetails.os}</td>
+                  <td>${this.systemInfo.os}</td>
                 </tr>
               </table>
             </th>
@@ -143,7 +143,7 @@ export class HBPopup extends LitElement {
     `;
   }
 
-  private async gatherEnvironmentDetails() {
+  private async gatherSystemInfo() {
     try {
       const [tab] = await chrome.tabs.query({
         active: true,
@@ -151,7 +151,7 @@ export class HBPopup extends LitElement {
       });
 
       if (tab?.url && tab.id) {
-        this.environmentDetails = {
+        this.systemInfo = {
           dateAndTime: getDateAndTime(),
           url: tab.url,
           visibleArea: await getVisibleArea(tab.id),
@@ -167,20 +167,20 @@ export class HBPopup extends LitElement {
   }
 
   private async copyToClipboard() {
-    if (!this.environmentDetails) return;
+    if (!this.systemInfo) return;
 
     const text = [
-      `Date and time: ${this.environmentDetails.dateAndTime}`,
-      `URL: ${this.environmentDetails.url}`,
+      `Date and time: ${this.systemInfo.dateAndTime}`,
+      `URL: ${this.systemInfo.url}`,
       ``,
       `Display`,
-      `Visible area: ${this.environmentDetails.visibleArea}`,
-      `Display resolution: ${this.environmentDetails.displayResolution}`,
-      `Device pixel ratio: ${this.environmentDetails.devicePixelRatio}`,
+      `Visible area: ${this.systemInfo.visibleArea}`,
+      `Display resolution: ${this.systemInfo.displayResolution}`,
+      `Device pixel ratio: ${this.systemInfo.devicePixelRatio}`,
       ``,
       `System`,
-      `Browser: ${this.environmentDetails.browser}`,
-      `Operating system: ${this.environmentDetails.os}`,
+      `Browser: ${this.systemInfo.browser}`,
+      `Operating system: ${this.systemInfo.os}`,
     ].join('\n');
 
     this.isCopyingDisabled = true;

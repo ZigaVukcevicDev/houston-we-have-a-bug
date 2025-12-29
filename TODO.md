@@ -46,6 +46,6 @@
 - [ ] style "No screenshot loaded. Please capture a screenshot from the extension popup."
 - [x] add shadow to toolbar
 - [x] exclude extension-presentation from build
-- [ ] change "environment details" to "system info"
+- [x] change "environment details" to "system info"
 - [ ] when hovering over rectangle, highlight is visible only when hover over horizontal parts
 ```
