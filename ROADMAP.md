@@ -17,31 +17,30 @@ The goal is to cover **real-world bug reporting needs** with a small, reliable t
 ### Core actions
 - Automatic system info
 - Screenshot capture
-- Download annotated image
+- Download annotated screenshot
 
 ### Annotation tools
 - Select
 - Text
 - Line
 - Arrow
+- Rectangle
+- Crop
 
 This version prioritizes **stability, clarity, and performance**.
 
 ## Version 2
 
 ### Annotation tools
+- Marker for highlighting
 - Undo / Redo
-- Rectangle
-- Crop
+- Keyboard shortcuts
 
 ## Version 3
 
 ### Annotation tools
 - Blur
-- Marker for highlighting
-- Color choice
 - Numbered markers
-- Keyboard shortucts
 
 ## Future versions ideas
 
