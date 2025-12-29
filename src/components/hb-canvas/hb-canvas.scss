@@ -23,6 +23,10 @@ canvas {
     cursor: crosshair;
   }
 
+  &.mode-arrow {
+    cursor: crosshair;
+  }
+
   &.mode-rectangle {
     cursor: crosshair;
   }
