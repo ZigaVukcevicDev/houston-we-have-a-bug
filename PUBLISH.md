@@ -1,6 +1,6 @@
 # Publish
 
-These are the information which are needed to publish the extension.
+These are the information which are needed to publish the extension at [Chrome Web Store](https://chrome.google.com/webstore).
 
 ## 1. Build
 
