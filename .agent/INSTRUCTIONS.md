@@ -25,6 +25,13 @@ You must follow these rules when working on this repository.
   - ✅ Good: Well-named functions with clear parameters (no comment needed)
   - ❌ Bad: `/** Returns a filename-safe date and time string */` above `getFilenameSafeDateTime()`
   - Only add comments when explaining **why** or documenting non-obvious behavior/edge cases
+- **Console statements**: Do not use console.log, console.warn, or console.debug in production code
+  - ✅ Acceptable: `console.error()` in catch blocks for critical errors (e.g., failed screenshot capture, system info gathering failures)
+  - ❌ Avoid: Debug logging, informational messages, or warnings that clutter the console
+  - Keep error messages informative but concise
+- **Consistent spacing**: Use exactly one empty line between methods, functions, and major code blocks
+  - ✅ Correct: Single empty line between methods
+  - ❌ Incorrect: Two or more empty lines between methods
 - **Strict types**: Use TypeScript interfaces properly. Avoid `any`.
 
 ## Code organization
