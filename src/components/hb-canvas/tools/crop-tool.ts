@@ -2,6 +2,10 @@ import type { Tool } from '../../../interfaces/tool.interface';
 import { toolStyles } from './tool-styles';
 import { renderHandle } from '../../../utils/render-handle';
 
+type HandleType =
+  | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+  | 'top' | 'bottom' | 'left' | 'right';
+
 export class CropTool implements Tool {
   private cropRect: { x: number; y: number; width: number; height: number } | null = null;
   private isDrawing: boolean = false;
@@ -10,6 +14,10 @@ export class CropTool implements Tool {
   private onRedraw: () => void;
   private onToolChange?: (tool: string) => void;
   private keydownHandler: ((event: KeyboardEvent) => void) | null = null;
+  private draggedHandle: HandleType | null = null;
+  private dragStartPoint: { x: number; y: number } | null = null;
+  private originalCropRect: { x: number; y: number; width: number; height: number } | null = null;
+  private readonly handleSize = 8;
 
   constructor(onRedraw: () => void, onToolChange?: (tool: string) => void) {
     this.onRedraw = onRedraw;
@@ -23,9 +31,22 @@ export class CropTool implements Tool {
     const x = (event.clientX - rect.left) * scaleX;
     const y = (event.clientY - rect.top) * scaleY;
 
-    this.isDrawing = true;
-    this.startPoint = { x, y };
-    this.cropRect = null;
+    // Check if clicking on an existing handle
+    const handle = this.getHandleAtPoint(x, y);
+
+    if (handle && this.cropRect) {
+      // Start dragging a handle
+      this.draggedHandle = handle;
+      this.dragStartPoint = { x, y };
+      this.originalCropRect = { ...this.cropRect };
+      this.isDrawing = false;
+    } else {
+      // Start drawing a new crop rectangle
+      this.isDrawing = true;
+      this.startPoint = { x, y };
+      this.cropRect = null;
+      this.draggedHandle = null;
+    }
 
     // Add keyboard listener for Escape key
     this.keydownHandler = (e: KeyboardEvent) => {
@@ -37,29 +58,51 @@ export class CropTool implements Tool {
   }
 
   handleMouseMove(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
-    if (!this.isDrawing || !this.startPoint) return;
-
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-    let x = (event.clientX - rect.left) * scaleX;
-    let y = (event.clientY - rect.top) * scaleY;
+    const x = (event.clientX - rect.left) * scaleX;
+    const y = (event.clientY - rect.top) * scaleY;
+
+    // Handle dragging logic
+    if (this.draggedHandle && this.dragStartPoint && this.originalCropRect) {
+      this.resizeCropRect(this.draggedHandle, x, y);
+      this.onRedraw();
+      return;
+    }
+
+    // Handle hovering - update cursor
+    if (!this.isDrawing && this.cropRect) {
+      const handle = this.getHandleAtPoint(x, y);
+      if (handle) {
+        canvas.style.cursor = this.getCursorForHandle(handle);
+      } else {
+        canvas.style.cursor = 'crosshair';
+      }
+      return;
+    }
+
+    // Original drawing logic
+    if (!this.isDrawing || !this.startPoint) return;
+
+    let currentX = x;
+    let currentY = y;
 
     // Apply shift-key constraint for square crop
     if (event.shiftKey) {
-      const dx = Math.abs(x - this.startPoint.x);
-      const dy = Math.abs(y - this.startPoint.y);
+      const dx = Math.abs(currentX - this.startPoint.x);
+      const dy = Math.abs(currentY - this.startPoint.y);
       const size = Math.min(dx, dy);
 
-      x = this.startPoint.x + (x > this.startPoint.x ? size : -size);
-      y = this.startPoint.y + (y > this.startPoint.y ? size : -size);
+      currentX = this.startPoint.x + (currentX > this.startPoint.x ? size : -size);
+      currentY = this.startPoint.y + (currentY > this.startPoint.y ? size : -size);
     }
 
     // Calculate rectangle position and dimensions
-    const rectX = Math.min(this.startPoint.x, x);
-    const rectY = Math.min(this.startPoint.y, y);
-    const rectWidth = Math.abs(x - this.startPoint.x);
-    const rectHeight = Math.abs(y - this.startPoint.y);
+    const rectX = Math.min(this.startPoint.x, currentX);
+    const rectY = Math.min(this.startPoint.y, currentY);
+    const rectWidth = Math.abs(currentX - this.startPoint.x);
+    const rectHeight = Math.abs(currentY - this.startPoint.y);
 
     this.cropRect = { x: rectX, y: rectY, width: rectWidth, height: rectHeight };
 
@@ -68,6 +111,17 @@ export class CropTool implements Tool {
   }
 
   handleMouseUp(event: MouseEvent, canvas: HTMLCanvasElement): void {
+    // If dragging a handle, finalize it
+    if (this.draggedHandle) {
+      this.draggedHandle = null;
+      this.dragStartPoint = null;
+      this.originalCropRect = null;
+      canvas.style.cursor = 'crosshair';
+      this.onRedraw();
+      return;
+    }
+
+    // Original drawing logic
     if (!this.isDrawing) return;
 
     const rect = canvas.getBoundingClientRect();
@@ -108,6 +162,112 @@ export class CropTool implements Tool {
 
   handleClick(event: MouseEvent, canvas: HTMLCanvasElement): void {
     // Crop tool uses drag interaction, no click handling needed
+  }
+
+  private resizeCropRect(handle: HandleType, x: number, y: number): void {
+    if (!this.originalCropRect || !this.dragStartPoint) return;
+
+    const orig = this.originalCropRect;
+    const dx = x - this.dragStartPoint.x;
+    const dy = y - this.dragStartPoint.y;
+
+    let newX = orig.x;
+    let newY = orig.y;
+    let newWidth = orig.width;
+    let newHeight = orig.height;
+
+    switch (handle) {
+      case 'top-left':
+        newX = orig.x + dx;
+        newY = orig.y + dy;
+        newWidth = orig.width - dx;
+        newHeight = orig.height - dy;
+        break;
+      case 'top-right':
+        newY = orig.y + dy;
+        newWidth = orig.width + dx;
+        newHeight = orig.height - dy;
+        break;
+      case 'bottom-left':
+        newX = orig.x + dx;
+        newWidth = orig.width - dx;
+        newHeight = orig.height + dy;
+        break;
+      case 'bottom-right':
+        newWidth = orig.width + dx;
+        newHeight = orig.height + dy;
+        break;
+      case 'left':
+        newX = orig.x + dx;
+        newWidth = orig.width - dx;
+        break;
+      case 'right':
+        newWidth = orig.width + dx;
+        break;
+      case 'top':
+        newY = orig.y + dy;
+        newHeight = orig.height - dy;
+        break;
+      case 'bottom':
+        newHeight = orig.height + dy;
+        break;
+    }
+
+    // Ensure minimum size
+    if (newWidth < 10) newWidth = 10;
+    if (newHeight < 10) newHeight = 10;
+
+    // Adjust position if width/height went negative
+    if (newWidth === 10 && handle.includes('left')) {
+      newX = orig.x + orig.width - 10;
+    }
+    if (newHeight === 10 && handle.includes('top')) {
+      newY = orig.y + orig.height - 10;
+    }
+
+    this.cropRect = { x: newX, y: newY, width: newWidth, height: newHeight };
+  }
+
+  private getHandleAtPoint(x: number, y: number): HandleType | null {
+    if (!this.cropRect) return null;
+
+    const { x: cropX, y: cropY, width, height } = this.cropRect;
+    const threshold = this.handleSize / 2 + 2;
+
+    const handles: { type: HandleType; x: number; y: number }[] = [
+      { type: 'top-left', x: cropX, y: cropY },
+      { type: 'top-right', x: cropX + width, y: cropY },
+      { type: 'bottom-left', x: cropX, y: cropY + height },
+      { type: 'bottom-right', x: cropX + width, y: cropY + height },
+      { type: 'top', x: cropX + width / 2, y: cropY },
+      { type: 'bottom', x: cropX + width / 2, y: cropY + height },
+      { type: 'left', x: cropX, y: cropY + height / 2 },
+      { type: 'right', x: cropX + width, y: cropY + height / 2 },
+    ];
+
+    for (const handle of handles) {
+      const dx = Math.abs(x - handle.x);
+      const dy = Math.abs(y - handle.y);
+      if (dx <= threshold && dy <= threshold) {
+        return handle.type;
+      }
+    }
+
+    return null;
+  }
+
+  private getCursorForHandle(handle: HandleType): string {
+    const cursorMap: Record<HandleType, string> = {
+      'top-left': 'nwse-resize',
+      'bottom-right': 'nwse-resize',
+      'top-right': 'nesw-resize',
+      'bottom-left': 'nesw-resize',
+      'left': 'ew-resize',
+      'right': 'ew-resize',
+      'top': 'ns-resize',
+      'bottom': 'ns-resize',
+    };
+    return cursorMap[handle];
   }
 
   private cancelCrop(): void {

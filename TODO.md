@@ -55,6 +55,15 @@
 - deselect crop rectangle
   - [x] selecting any other tool
   - [x] pressing escape (then switch to select tool automatically)
+- move endpoints
+  - [ ] top-left endpoint
+  - [ ] top-right endpoint
+  - [ ] bottom-left endpoint
+  - [ ] bottom-right endpoint
+  - [ ] left endpoint
+  - [ ] right endpoint
+  - [ ] top endpoint
+  - [ ] bottom endpoint
 
 6. Download
 
