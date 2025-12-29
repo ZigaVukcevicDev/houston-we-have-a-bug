@@ -467,12 +467,11 @@ export class SelectTool implements Tool {
     const threshold = strokeWidth + 2;
 
     // Check if point is near any of the four edges
-    const nearLeft = Math.abs(px - x) <= threshold && py >= y && py <= y + height;
-    const nearRight = Math.abs(px - (x + width)) <= threshold && py >= y && py <= y + height;
-    const nearTop = Math.abs(py - y) <= threshold && px >= x && px <= x + width;
-    const nearBottom = Math.abs(py - (y + height)) <= threshold && px >= x && px <= x + width;
+    const nearLeft = Math.abs(px - x) <= threshold && py >= y - threshold && py <= y + height + threshold;
+    const nearRight = Math.abs(px - (x + width)) <= threshold && py >= y - threshold && py <= y + height + threshold;
+    const nearTop = Math.abs(py - y) <= threshold && px >= x - threshold && px <= x + width + threshold;
+    const nearBottom = Math.abs(py - (y + height)) <= threshold && px >= x - threshold && px <= x + width + threshold;
 
     return nearLeft || nearRight || nearTop || nearBottom;
   }
-
 }

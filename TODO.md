@@ -47,5 +47,5 @@
 - [x] add shadow to toolbar
 - [x] exclude extension-presentation from build
 - [x] change "environment details" to "system info"
-- [ ] when hovering over rectangle, highlight is visible only when hover over horizontal parts
-```
+- [x] when hovering over rectangle, highlight is visible only when hover over horizontal parts
+- [ ] find a way to have better hover color for secondary button
