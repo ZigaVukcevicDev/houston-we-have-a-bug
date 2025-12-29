@@ -15,6 +15,7 @@ export interface LineAnnotation {
   y2: number;
   color: string;
   width: number;
+  hasArrowhead?: boolean;
 }
 
 export interface RectangleAnnotation {

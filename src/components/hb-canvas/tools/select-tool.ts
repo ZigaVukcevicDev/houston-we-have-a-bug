@@ -448,18 +448,85 @@ export class SelectTool implements Tool {
   }
 
   private isPointOnLine(px: number, py: number, line: LineAnnotation): boolean {
-    const { x1, y1, x2, y2 } = line;
+    const { x1, y1, x2, y2, width } = line;
+    const threshold = width + 2;
 
     // Calculate distance from point to line segment
-    const lineLength = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-    if (lineLength === 0) return false;
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const lengthSquared = dx * dx + dy * dy;
 
-    const t = Math.max(0, Math.min(1, ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / (lineLength ** 2)));
-    const closestX = x1 + t * (x2 - x1);
-    const closestY = y1 + t * (y2 - y1);
-    const distance = Math.sqrt((px - closestX) ** 2 + (py - closestY) ** 2);
+    if (lengthSquared === 0) {
+      // Line is actually a point
+      return Math.abs(px - x1) <= threshold && Math.abs(py - y1) <= threshold;
+    }
 
-    return distance <= lineHitThreshold;
+    // Find the projection of the point onto the line
+    const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / lengthSquared));
+    const projX = x1 + t * dx;
+    const projY = y1 + t * dy;
+
+    // Calculate distance from point to projection
+    const distance = Math.sqrt((px - projX) ** 2 + (py - projY) ** 2);
+
+    // Check if point is on the line
+    if (distance <= threshold) {
+      return true;
+    }
+
+    // If this is an arrow, also check if point is near the arrowhead
+    if (line.hasArrowhead) {
+      return this.isPointOnArrowhead(px, py, line);
+    }
+
+    return false;
+  }
+
+  private isPointOnArrowhead(px: number, py: number, line: LineAnnotation): boolean {
+    const { x1, y1, x2, y2, width } = line;
+    const threshold = width + 2;
+
+    // Calculate angle of the arrow
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+
+    // Arrowhead dimensions (same as in ArrowTool)
+    const headLength = 16;
+    const arrowAngle = Math.PI / 4; // 45 degrees
+
+    // Calculate arrowhead points
+    const point1x = x2 - headLength * Math.cos(angle - arrowAngle);
+    const point1y = y2 - headLength * Math.sin(angle - arrowAngle);
+    const point2x = x2 - headLength * Math.cos(angle + arrowAngle);
+    const point2y = y2 - headLength * Math.sin(angle + arrowAngle);
+
+    // Check if point is near either arrowhead line
+    return this.isPointNearLineSegment(px, py, x2, y2, point1x, point1y, threshold) ||
+      this.isPointNearLineSegment(px, py, x2, y2, point2x, point2y, threshold);
+  }
+
+  private isPointNearLineSegment(
+    px: number,
+    py: number,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    threshold: number
+  ): boolean {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const lengthSquared = dx * dx + dy * dy;
+
+    if (lengthSquared === 0) {
+      return Math.abs(px - x1) <= threshold && Math.abs(py - y1) <= threshold;
+    }
+
+    const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / lengthSquared));
+    const projX = x1 + t * dx;
+    const projY = y1 + t * dy;
+
+    const distance = Math.sqrt((px - projX) ** 2 + (py - projY) ** 2);
+    return distance <= threshold;
   }
 
   private isPointOnRectangle(px: number, py: number, rectangle: RectangleAnnotation): boolean {

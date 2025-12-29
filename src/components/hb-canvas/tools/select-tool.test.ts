@@ -917,6 +917,152 @@ describe('SelectTool', () => {
     });
   });
 
+  describe('arrow hover detection with arrowhead', () => {
+    beforeEach(() => {
+      // Add an arrow (line with hasArrowhead: true)
+      lineAnnotations.push({
+        id: 'arrow-1',
+        x1: 100,
+        y1: 100,
+        x2: 200,
+        y2: 100, // Horizontal arrow pointing right
+        color: '#E74C3C',
+        width: 5,
+        hasArrowhead: true,
+      });
+      selectTool = new SelectTool(lineAnnotations, rectangleAnnotations, mockRedraw);
+    });
+
+    it('should detect hover on arrow line body', () => {
+      // Hover on the middle of the line
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 100 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBe('arrow-1');
+      expect(selectTool['hoveredAnnotationType']).toBe('line');
+    });
+
+    it('should detect hover on arrowhead - upper line', () => {
+      // Hover near the upper arrowhead line
+      // For horizontal arrow at y=100, upper arrowhead line goes up and to the left
+      selectTool.handleMouseMove(
+        { clientX: 195, clientY: 95 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBe('arrow-1');
+      expect(selectTool['hoveredAnnotationType']).toBe('line');
+    });
+
+    it('should detect hover on arrowhead - lower line', () => {
+      // Hover near the lower arrowhead line
+      selectTool.handleMouseMove(
+        { clientX: 195, clientY: 105 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBe('arrow-1');
+      expect(selectTool['hoveredAnnotationType']).toBe('line');
+    });
+
+    it('should detect hover on arrowhead tip', () => {
+      // Hover right at the arrow endpoint where arrowhead starts
+      selectTool.handleMouseMove(
+        { clientX: 200, clientY: 100 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBe('arrow-1');
+    });
+
+    it('should not detect hover far from arrow and arrowhead', () => {
+      // Clear existing lines and add only arrow
+      lineAnnotations.length = 0;
+      lineAnnotations.push({
+        id: 'arrow-1',
+        x1: 100,
+        y1: 100,
+        x2: 200,
+        y2: 100,
+        color: '#E74C3C',
+        width: 5,
+        hasArrowhead: true,
+      });
+      selectTool = new SelectTool(lineAnnotations, rectangleAnnotations, mockRedraw);
+
+      // Hover way below the arrow
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBeNull();
+    });
+
+    it('should work with diagonal arrows', () => {
+      // Add a diagonal arrow
+      lineAnnotations.push({
+        id: 'arrow-diag',
+        x1: 50,
+        y1: 50,
+        x2: 150,
+        y2: 150,
+        color: '#E74C3C',
+        width: 5,
+        hasArrowhead: true,
+      });
+      selectTool = new SelectTool(lineAnnotations, rectangleAnnotations, mockRedraw);
+
+      // Hover near the diagonal arrowhead
+      selectTool.handleMouseMove(
+        { clientX: 145, clientY: 140 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBe('arrow-diag');
+    });
+
+    it('should distinguish between regular lines and arrows', () => {
+      // Clear and add only an arrow
+      lineAnnotations.length = 0;
+      lineAnnotations.push({
+        id: 'arrow-only',
+        x1: 100,
+        y1: 100,
+        x2: 200,
+        y2: 100,
+        color: '#E74C3C',
+        width: 5,
+        hasArrowhead: true,
+      });
+
+      selectTool = new SelectTool(lineAnnotations, rectangleAnnotations, mockRedraw);
+
+      // Now set hasArrowhead to false to make it a regular line
+      lineAnnotations[0].hasArrowhead = false;
+      selectTool = new SelectTool(lineAnnotations, rectangleAnnotations, mockRedraw);
+
+      // Hover where arrowhead would be - should not detect for regular line  
+      // This point is only near arrowhead, not the main line body
+      selectTool.handleMouseMove(
+        { clientX: 190, clientY: 90 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      // Should not hover on line without arrowhead at this distant point
+      expect(selectTool['hoveredAnnotationId']).toBeNull();
+    });
+  });
+
   describe('rectangle edge cases', () => {
     it('should handle empty rectangle annotations array', () => {
       const emptySelectTool = new SelectTool([], [], mockRedraw);

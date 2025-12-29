@@ -117,6 +117,7 @@ export class LineTool implements Tool {
       y2: y,
       color: this.color,
       width: this.lineWidth,
+      hasArrowhead: this.shouldHaveArrowhead(),
     });
 
     // Don't auto-select - handles will only show during drawing or manual selection
@@ -144,6 +145,10 @@ export class LineTool implements Tool {
       document.removeEventListener('keydown', this.keydownHandler);
       this.keydownHandler = null;
     }
+  }
+
+  protected shouldHaveArrowhead(): boolean {
+    return false;
   }
 
   render(ctx: CanvasRenderingContext2D): void {

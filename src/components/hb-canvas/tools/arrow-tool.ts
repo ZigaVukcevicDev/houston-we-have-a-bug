@@ -84,4 +84,8 @@ export class ArrowTool extends LineTool {
 
     ctx.restore();
   }
+
+  protected shouldHaveArrowhead(): boolean {
+    return true;
+  }
 }
