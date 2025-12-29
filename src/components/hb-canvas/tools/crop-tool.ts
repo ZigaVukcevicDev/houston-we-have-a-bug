@@ -1,10 +1,7 @@
 import type { Tool } from '../../../interfaces/tool.interface';
+import type { HandleType } from '../../../types/handle-type.type';
 import { toolStyles } from './tool-styles';
-import { renderHandle } from '../../../utils/render-handle';
-
-type HandleType =
-  | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
-  | 'top' | 'bottom' | 'left' | 'right';
+import { renderHandle, handleSize } from '../../../utils/render-handle';
 
 export class CropTool implements Tool {
   private cropRect: { x: number; y: number; width: number; height: number } | null = null;
@@ -17,7 +14,6 @@ export class CropTool implements Tool {
   private draggedHandle: HandleType | null = null;
   private dragStartPoint: { x: number; y: number } | null = null;
   private originalCropRect: { x: number; y: number; width: number; height: number } | null = null;
-  private readonly handleSize = 8;
 
   constructor(onRedraw: () => void, onToolChange?: (tool: string) => void) {
     this.onRedraw = onRedraw;
@@ -232,7 +228,7 @@ export class CropTool implements Tool {
     if (!this.cropRect) return null;
 
     const { x: cropX, y: cropY, width, height } = this.cropRect;
-    const threshold = this.handleSize / 2 + 2;
+    const threshold = handleSize / 2 + 2;
 
     const handles: { type: HandleType; x: number; y: number }[] = [
       { type: 'top-left', x: cropX, y: cropY },
