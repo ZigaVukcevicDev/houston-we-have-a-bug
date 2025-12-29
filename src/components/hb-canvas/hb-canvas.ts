@@ -76,6 +76,14 @@ export class HBCanvas extends LitElement {
         prevTool?.deactivate?.();
       }
 
+      // Deselect all annotations when switching to crop tool
+      if (this.drawingMode === 'crop') {
+        const selectTool = this.tools.get('select') as SelectTool;
+        if (selectTool) {
+          selectTool.deselectAll();
+        }
+      }
+
       // Activate new tool
       this.activeTool?.activate?.();
     }
@@ -195,6 +203,14 @@ export class HBCanvas extends LitElement {
     link.download = filename.replace(/\.png$/i, '.jpg');
     link.href = dataUrl;
     link.click();
+  }
+
+  public deselectAll() {
+    const selectTool = this.tools.get('select') as SelectTool;
+    if (selectTool) {
+      selectTool.deselectAll();
+      this.redraw();
+    }
   }
 }
 
