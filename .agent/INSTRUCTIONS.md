@@ -21,12 +21,16 @@ You must follow these rules when working on this repository.
 - **No commented code**: Do not leave commented-out code blocks. If code is not used, delete it.
 - **Remove dead code**: When refactoring, always identify and remove any unused functions, variables, or imports that are no longer needed.
 - **Avoid ALL CAPS comments**: Avoid using ALL CAPS words in comments (e.g., use "Get raw position first" instead of "Get raw position FIRST").
+- **No redundant method descriptions**: Avoid JSDoc-style comments that merely restate what the function name and signature already convey
+  - ✅ Good: Well-named functions with clear parameters (no comment needed)
+  - ❌ Bad: `/** Returns a filename-safe date and time string */` above `getFilenameSafeDateTime()`
+  - Only add comments when explaining **why** or documenting non-obvious behavior/edge cases
 - **Strict types**: Use TypeScript interfaces properly. Avoid `any`.
 
 ## Code organization
 
 - **Types vs interfaces**: 
-  - `src/types/` - For type aliases (e.g., `type DrawingMode = 'text' | 'line'`)
+  - `src/types/` - For type aliases (e.g., `type ActiveTool = 'text' | 'line'`)
   - `src/interfaces/` - For object structures (e.g., `interface LineAnnotation { ... }`)
   
 - **Naming conventions**:
@@ -83,4 +87,64 @@ You must follow these rules when working on this repository.
   - Handle rendering (`render-handle.ts`)
   - Line annotation rendering (`line-tool.ts`, `select-tool.ts`)
   - Any future canvas-based annotations (arrows, rectangles, etc.)
+
+## 7. Utility functions
+
+- **Canvas coordinate conversion**: ALWAYS use `getCanvasCoordinates()` from `utils/get-canvas-coordinates.ts` to convert mouse events to canvas coordinates
+  - ✅ Correct: `const { x, y } = getCanvasCoordinates(event, canvas);`
+  - ❌ Incorrect: Manual calculation with `getBoundingClientRect()` + scaling (creates duplication)
+  
+- **Arrowhead rendering**: Use `renderArrowhead()` and `getArrowheadPoints()` from `utils/render-arrowhead.ts`
+  - For drawing: `renderArrowhead(ctx, x1, y1, x2, y2, color, width, dpr)`
+  - For hit detection: `getArrowheadPoints(x1, y1, x2, y2, dpr)` returns the arrowhead line endpoints
+  - Constants available: `arrowheadLength`, `arrowheadAngle`
+  
+- **Date formatting**: Use utilities from `utils/`
+  - For display: `getDateAndTime()` from `get-date-and-time.ts` returns "DD.MM.YYYY at HH:MM"
+  - For filenames: `getDateTimeForFilename()` from `get-date-time-for-filename.ts` returns "YYYY-MM-DD at HH-MM-SS"
+  
+- **Handle rendering**: Use `renderHandle()` from `utils/render-handle.ts`
+  - Function: `renderHandle(ctx, x, y)` - handles DPR automatically
+  - For hit detection: `isPointOnHandle(px, py, hx, hy)`
+  - Constants: `handleSize`, `handleHitThreshold`
+
+## 8. Tool development patterns
+
+- **ID generation**: ALWAYS use `crypto.randomUUID()` for creating annotation IDs
+  - ✅ Correct: `id: crypto.randomUUID()`
+  - ❌ Incorrect: `` id: `rect-${Date.now()}` `` (not collision-safe, inconsistent)
+
+- **Constraints** (shift-key behavior):
+  - Extract constraint logic into private/protected methods, don't duplicate
+  - LineTool example: `applyLineConstraint(x, y, startPoint)` (protected for inheritance)
+  - RectangleTool example: `applySquareConstraint(width, height)` (private)
+
+- **Lifecycle methods**: Tools should implement `deactivate()` to clean up resources
+  - Always remove event listeners in `deactivate()`
+  - Call cleanup methods like `cancelDrawing()` in `deactivate()`
+  - Example pattern:
+    ```typescript
+    deactivate(): void {
+      this.cancelDrawing();
+    }
+    
+    private cleanupDrawingState(): void {
+      this.isDrawing = false;
+      this.startPoint = null;
+      if (this.keydownHandler) {
+        document.removeEventListener('keydown', this.keydownHandler);
+        this.keydownHandler = null;
+      }
+    }
+    ```
+
+- **Error handling consistency**: All utility functions that can fail should return 'N/A' on error
+  - ✅ Correct: `return 'N/A';`
+  - ❌ Incorrect: `return 'Unknown';` or other inconsistent error strings
+
+## 9. Type aliasing
+
+- **Avoid duplicate types**: If two types have identical definitions, delete one and use the other consistently
+  - Example: `ActiveTool` and `ToolType` were identical → kept `ActiveTool`, deleted `ToolType`
+  - When refactoring types, update all imports and usages
 

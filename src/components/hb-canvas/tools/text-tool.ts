@@ -1,6 +1,7 @@
 import type { Tool } from '../../../interfaces/tool.interface';
 import type { TextAnnotation } from '../../../interfaces/annotation.interface';
 import { toolStyles } from './tool-styles';
+import { getCanvasCoordinates } from '../../../utils/get-canvas-coordinates';
 
 export class TextTool implements Tool {
   private annotations: TextAnnotation[];
@@ -21,10 +22,9 @@ export class TextTool implements Tool {
     }
 
     const rect = canvas.getBoundingClientRect();
+    const { x, y } = getCanvasCoordinates(event, canvas);
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-    const x = (event.clientX - rect.left) * scaleX;
-    const y = (event.clientY - rect.top) * scaleY;
 
     this.createTextInput(x, y, rect, scaleX, scaleY);
   }

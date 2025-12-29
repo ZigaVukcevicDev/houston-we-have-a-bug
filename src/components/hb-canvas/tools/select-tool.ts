@@ -1,8 +1,8 @@
 import type { Tool } from '../../../interfaces/tool.interface';
 import type { LineAnnotation, RectangleAnnotation } from '../../../interfaces/annotation.interface';
 import { renderHandle, isPointOnHandle } from '../../../utils/render-handle';
-
-const lineHitThreshold = 10;
+import { getCanvasCoordinates } from '../../../utils/get-canvas-coordinates';
+import { renderArrowhead, getArrowheadPoints } from '../../../utils/render-arrowhead';
 
 export class SelectTool implements Tool {
   private lineAnnotations: LineAnnotation[] = [];
@@ -86,11 +86,7 @@ export class SelectTool implements Tool {
 
 
   handleClick(event: MouseEvent, canvas: HTMLCanvasElement): void {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const x = (event.clientX - rect.left) * scaleX;
-    const y = (event.clientY - rect.top) * scaleY;
+    const { x, y } = getCanvasCoordinates(event, canvas);
 
     // Check rectangles first (iterate backwards for most recent)
     for (let i = this.rectangleAnnotations.length - 1; i >= 0; i--) {
@@ -119,11 +115,7 @@ export class SelectTool implements Tool {
   }
 
   handleMouseDown(event: MouseEvent, canvas: HTMLCanvasElement): void {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const x = (event.clientX - rect.left) * scaleX;
-    const y = (event.clientY - rect.top) * scaleY;
+    const { x, y } = getCanvasCoordinates(event, canvas);
 
     // Check if clicking on a handle or body of selected annotation
     if (this.selectedAnnotationId !== null) {
@@ -224,11 +216,7 @@ export class SelectTool implements Tool {
     // Provide cursor feedback when hovering (but not while dragging)
     if (!this.draggingHandle && !this.draggingLine) {
       // Provide cursor feedback when hovering over handles or lines
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      const x = (event.clientX - rect.left) * scaleX;
-      const y = (event.clientY - rect.top) * scaleY;
+      const { x, y } = getCanvasCoordinates(event, canvas);
 
       // Check if hovering over a handle of selected line
       const selectedLine = this.lineAnnotations.find(l => l.id === this.selectedAnnotationId);
@@ -299,11 +287,7 @@ export class SelectTool implements Tool {
 
     // Handle dragging (cursor doesn't change during drag)
     if (this.draggingLine) {
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      const x = (event.clientX - rect.left) * scaleX;
-      const y = (event.clientY - rect.top) * scaleY;
+      const { x, y } = getCanvasCoordinates(event, canvas);
 
       const dx = x - this.dragOffset.x;
       const dy = y - this.dragOffset.y;
@@ -333,11 +317,7 @@ export class SelectTool implements Tool {
 
     // Handle dragging handles (line endpoints or rectangle corners)
     if (this.draggingHandle) {
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      let x = (event.clientX - rect.left) * scaleX;
-      let y = (event.clientY - rect.top) * scaleY;
+      let { x, y } = getCanvasCoordinates(event, canvas);
 
       // Subtract drag offset
       x = x - this.dragOffset.x;
@@ -413,7 +393,16 @@ export class SelectTool implements Tool {
 
           // Also render arrowhead if this is an arrow
           if (hoveredLine.hasArrowhead) {
-            this.renderArrowhead(ctx, hoveredLine, dpr, '#FAC021'); // Use the same hover color
+            renderArrowhead(
+              ctx,
+              hoveredLine.x1,
+              hoveredLine.y1,
+              hoveredLine.x2,
+              hoveredLine.y2,
+              '#FAC021',
+              1,
+              dpr
+            );
           }
         }
       } else if (this.hoveredAnnotationType === 'rectangle') {
@@ -452,47 +441,7 @@ export class SelectTool implements Tool {
     }
   }
 
-  private renderArrowhead(
-    ctx: CanvasRenderingContext2D,
-    arrow: LineAnnotation,
-    dpr: number,
-    color: string
-  ): void {
-    const { x1, y1, x2, y2 } = arrow;
 
-    // Calculate angle of the arrow
-    const angle = Math.atan2(y2 - y1, x2 - x1);
-
-    // Arrowhead dimensions (same as in ArrowTool)
-    const headLength = 16 * dpr;
-    const arrowAngle = Math.PI / 4; // 45 degrees
-
-    ctx.save();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1 * dpr; // Use 1px for hover, not the arrow's width
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-
-    // Draw first line of arrowhead (upper line)
-    ctx.beginPath();
-    ctx.moveTo(x2, y2);
-    ctx.lineTo(
-      x2 - headLength * Math.cos(angle - arrowAngle),
-      y2 - headLength * Math.sin(angle - arrowAngle)
-    );
-    ctx.stroke();
-
-    // Draw second line of arrowhead (lower line)
-    ctx.beginPath();
-    ctx.moveTo(x2, y2);
-    ctx.lineTo(
-      x2 - headLength * Math.cos(angle + arrowAngle),
-      y2 - headLength * Math.sin(angle + arrowAngle)
-    );
-    ctx.stroke();
-
-    ctx.restore();
-  }
 
   private isPointOnLine(px: number, py: number, line: LineAnnotation): boolean {
     const { x1, y1, x2, y2, width } = line;
@@ -532,23 +481,14 @@ export class SelectTool implements Tool {
   private isPointOnArrowhead(px: number, py: number, line: LineAnnotation): boolean {
     const { x1, y1, x2, y2, width } = line;
     const threshold = width + 2;
+    const dpr = window.devicePixelRatio || 1;
 
-    // Calculate angle of the arrow
-    const angle = Math.atan2(y2 - y1, x2 - x1);
-
-    // Arrowhead dimensions (same as in ArrowTool)
-    const headLength = 16;
-    const arrowAngle = Math.PI / 4; // 45 degrees
-
-    // Calculate arrowhead points
-    const point1x = x2 - headLength * Math.cos(angle - arrowAngle);
-    const point1y = y2 - headLength * Math.sin(angle - arrowAngle);
-    const point2x = x2 - headLength * Math.cos(angle + arrowAngle);
-    const point2y = y2 - headLength * Math.sin(angle + arrowAngle);
+    // Get arrowhead points using utility
+    const { point1, point2 } = getArrowheadPoints(x1, y1, x2, y2, dpr);
 
     // Check if point is near either arrowhead line
-    return this.isPointNearLineSegment(px, py, x2, y2, point1x, point1y, threshold) ||
-      this.isPointNearLineSegment(px, py, x2, y2, point2x, point2y, threshold);
+    return this.isPointNearLineSegment(px, py, x2, y2, point1.x, point1.y, threshold) ||
+      this.isPointNearLineSegment(px, py, x2, y2, point2.x, point2.y, threshold);
   }
 
   private isPointNearLineSegment(

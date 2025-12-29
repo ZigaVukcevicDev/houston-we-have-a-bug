@@ -1,28 +1,19 @@
 import { LineTool } from './line-tool';
 import type { LineAnnotation } from '../../../interfaces/annotation.interface';
+import { getCanvasCoordinates } from '../../../utils/get-canvas-coordinates';
+import { renderArrowhead } from '../../../utils/render-arrowhead';
 
 export class ArrowTool extends LineTool {
   private currentPreviewX: number = 0;
   private currentPreviewY: number = 0;
 
   handleMouseMove(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    let x = (event.clientX - rect.left) * scaleX;
-    let y = (event.clientY - rect.top) * scaleY;
+    let { x, y } = getCanvasCoordinates(event, canvas);
 
-    // Apply shift-key constraints (same logic as parent)
+    // Apply shift-key constraints (use parent method)
     const startPoint = (this as any).startPoint as { x: number; y: number } | null;
     if (event.shiftKey && startPoint) {
-      const dx = Math.abs(x - startPoint.x);
-      const dy = Math.abs(y - startPoint.y);
-
-      if (dx > dy) {
-        y = startPoint.y; // Horizontal
-      } else {
-        x = startPoint.x; // Vertical
-      }
+      ({ x, y } = this.applyLineConstraint(x, y, startPoint));
     }
 
     // Store constrained coordinates for preview
@@ -44,7 +35,7 @@ export class ArrowTool extends LineTool {
 
     // Add arrowheads to all existing arrows
     annotations.forEach(arrow => {
-      this.drawArrowhead(ctx, arrow, dpr);
+      renderArrowhead(ctx, arrow.x1, arrow.y1, arrow.x2, arrow.y2, arrow.color, arrow.width, dpr);
     });
 
     // Also draw arrowhead on preview during drawing
@@ -52,54 +43,19 @@ export class ArrowTool extends LineTool {
     const startPoint = (this as any).startPoint as { x: number; y: number } | null;
 
     if (isDrawing && startPoint) {
-      const preview: LineAnnotation = {
-        id: 'preview',
-        x1: startPoint.x,
-        y1: startPoint.y,
-        x2: this.currentPreviewX,
-        y2: this.currentPreviewY,
-        color: (this as any).color,
-        width: (this as any).lineWidth,
-      };
-      this.drawArrowhead(ctx, preview, dpr);
+      const color = (this as any).color;
+      const lineWidth = (this as any).lineWidth;
+      renderArrowhead(
+        ctx,
+        startPoint.x,
+        startPoint.y,
+        this.currentPreviewX,
+        this.currentPreviewY,
+        color,
+        lineWidth,
+        dpr
+      );
     }
-  }
-
-  private drawArrowhead(ctx: CanvasRenderingContext2D, arrow: LineAnnotation, dpr: number): void {
-    const { x1, y1, x2, y2, color, width } = arrow;
-
-    // Calculate angle of the arrow
-    const angle = Math.atan2(y2 - y1, x2 - x1);
-
-    // Arrowhead dimensions
-    const headLength = 16 * dpr;
-    const arrowAngle = Math.PI / 4; // 45 degrees
-
-    ctx.save();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = width * dpr;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-
-    // Draw first line of arrowhead (upper line)
-    ctx.beginPath();
-    ctx.moveTo(x2, y2);
-    ctx.lineTo(
-      x2 - headLength * Math.cos(angle - arrowAngle),
-      y2 - headLength * Math.sin(angle - arrowAngle)
-    );
-    ctx.stroke();
-
-    // Draw second line of arrowhead (lower line)
-    ctx.beginPath();
-    ctx.moveTo(x2, y2);
-    ctx.lineTo(
-      x2 - headLength * Math.cos(angle + arrowAngle),
-      y2 - headLength * Math.sin(angle + arrowAngle)
-    );
-    ctx.stroke();
-
-    ctx.restore();
   }
 
   protected shouldHaveArrowhead(): boolean {

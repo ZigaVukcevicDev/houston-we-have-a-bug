@@ -23,7 +23,7 @@ describe('HBCanvas', () => {
     });
 
     it('should have default drawing mode as "text"', () => {
-      expect(canvas.drawingMode).toBe('text');
+      expect(canvas.activeTool).toBe('text');
     });
 
     it('should initialize tools map with select, text, line, arrow, rectangle, and crop tools', () => {
@@ -50,30 +50,30 @@ describe('HBCanvas', () => {
 
   describe('drawing mode', () => {
     it('should switch to line mode', () => {
-      canvas.drawingMode = 'line';
-      expect(canvas.drawingMode).toBe('line');
+      canvas.activeTool = 'line';
+      expect(canvas.activeTool).toBe('line');
     });
 
     it('should switch to text mode', () => {
-      canvas.drawingMode = 'line';
-      canvas.drawingMode = 'text';
-      expect(canvas.drawingMode).toBe('text');
+      canvas.activeTool = 'line';
+      canvas.activeTool = 'text';
+      expect(canvas.activeTool).toBe('text');
     });
 
     it('should return correct active tool based on drawing mode', () => {
       const textTool = canvas['tools'].get('text');
       const lineTool = canvas['tools'].get('line');
 
-      canvas.drawingMode = 'text';
-      expect(canvas['activeTool']).toBe(textTool);
+      canvas.activeTool = 'text';
+      expect(canvas['currentTool']).toBe(textTool);
 
-      canvas.drawingMode = 'line';
-      expect(canvas['activeTool']).toBe(lineTool);
+      canvas.activeTool = 'line';
+      expect(canvas['currentTool']).toBe(lineTool);
     });
 
     it('should return undefined for invalid drawing mode', () => {
-      canvas.drawingMode = 'invalid' as any;
-      expect(canvas['activeTool']).toBeUndefined();
+      canvas.activeTool = 'invalid' as any;
+      expect(canvas['currentTool']).toBeUndefined();
     });
   });
 
@@ -143,7 +143,7 @@ describe('HBCanvas', () => {
     it('should not reload image when other properties change', () => {
       const loadImageSpy = vi.spyOn(canvas as any, 'loadImage');
 
-      canvas['updated'](new Map([['drawingMode', 'text']]));
+      canvas['updated'](new Map([['activeTool', 'text']]));
 
       expect(loadImageSpy).not.toHaveBeenCalled();
     });
@@ -270,7 +270,7 @@ describe('HBCanvas', () => {
       const handleClickSpy = vi.spyOn(textTool, 'handleClick' as any);
 
       const event = { clientX: 100, clientY: 100 } as MouseEvent;
-      canvas.drawingMode = 'text';
+      canvas.activeTool = 'text';
       canvas['handleCanvasClick'](event);
 
       expect(handleClickSpy).toHaveBeenCalledWith(event, mockCanvasElement);
@@ -281,7 +281,7 @@ describe('HBCanvas', () => {
       const handleMouseDownSpy = vi.spyOn(lineTool, 'handleMouseDown');
 
       const event = { clientX: 50, clientY: 50 } as MouseEvent;
-      canvas.drawingMode = 'line';
+      canvas.activeTool = 'line';
       canvas['handleMouseDown'](event);
 
       expect(handleMouseDownSpy).toHaveBeenCalledWith(event, mockCanvasElement);
@@ -292,7 +292,7 @@ describe('HBCanvas', () => {
       const handleMouseMoveSpy = vi.spyOn(lineTool, 'handleMouseMove');
 
       const event = { clientX: 60, clientY: 60 } as MouseEvent;
-      canvas.drawingMode = 'line';
+      canvas.activeTool = 'line';
       canvas['handleMouseMove'](event);
 
       expect(handleMouseMoveSpy).toHaveBeenCalledWith(event, mockCanvasElement, mockCtx);
@@ -303,14 +303,14 @@ describe('HBCanvas', () => {
       const handleMouseUpSpy = vi.spyOn(lineTool, 'handleMouseUp');
 
       const event = { clientX: 100, clientY: 100 } as MouseEvent;
-      canvas.drawingMode = 'line';
+      canvas.activeTool = 'line';
       canvas['handleMouseUp'](event);
 
       expect(handleMouseUpSpy).toHaveBeenCalledWith(event, mockCanvasElement);
     });
 
     it('should not crash when active tool does not implement handler', () => {
-      canvas.drawingMode = 'line';
+      canvas.activeTool = 'line';
       const lineTool = canvas['tools'].get('line')!;
 
       // Line tool doesn't have handleClick - should not throw
@@ -319,7 +319,7 @@ describe('HBCanvas', () => {
     });
 
     it('should not crash when no active tool exists', () => {
-      canvas.drawingMode = 'invalid' as any;
+      canvas.activeTool = 'invalid' as any;
 
       const event = { clientX: 100, clientY: 100 } as MouseEvent;
       expect(() => canvas['handleCanvasClick'](event)).not.toThrow();
@@ -450,10 +450,10 @@ describe('HBCanvas', () => {
   describe('edge cases', () => {
     it('should handle rapid mode switches', () => {
       expect(() => {
-        canvas.drawingMode = 'text';
-        canvas.drawingMode = 'line';
-        canvas.drawingMode = 'text';
-        canvas.drawingMode = 'line';
+        canvas.activeTool = 'text';
+        canvas.activeTool = 'line';
+        canvas.activeTool = 'text';
+        canvas.activeTool = 'line';
       }).not.toThrow();
     });
 
@@ -495,13 +495,13 @@ describe('HBCanvas', () => {
 
   describe('render method', () => {
     it('should render canvas with correct mode class', () => {
-      canvas.drawingMode = 'text';
+      canvas.activeTool = 'text';
       const rendered = canvas.render();
       // Lit templates have values stored separately
       const values = rendered.values;
       expect(values).toContain('mode-text');
 
-      canvas.drawingMode = 'line';
+      canvas.activeTool = 'line';
       const rendered2 = canvas.render();
       const values2 = rendered2.values;
       expect(values2).toContain('mode-line');
@@ -571,8 +571,8 @@ describe('HBCanvas', () => {
       const selectAnnotationSpy = vi.spyOn(selectTool, 'selectAnnotation');
 
       // Manually switch to select mode (simulating user clicking select tool button)
-      canvas.drawingMode = 'select';
-      canvas['updated'](new Map([['drawingMode', 'text']]));
+      canvas.activeTool = 'select';
+      canvas['updated'](new Map([['activeTool', 'text']]));
 
       // Should NOT auto-select
       expect(selectAnnotationSpy).not.toHaveBeenCalled();
@@ -583,7 +583,7 @@ describe('HBCanvas', () => {
       const selectAnnotationSpy = vi.spyOn(selectTool, 'selectAnnotation');
 
       // Simulate drawing a line (which triggers tool change with annotation ID)
-      canvas.drawingMode = 'line';
+      canvas.activeTool = 'line';
       const lineTool = canvas['tools'].get('line')!;
 
       // Draw a line

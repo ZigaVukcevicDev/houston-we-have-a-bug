@@ -1,7 +1,8 @@
 import type { Tool } from '../../../interfaces/tool.interface';
 import type { HandleType } from '../../../types/handle-type.type';
 import { toolStyles } from './tool-styles';
-import { renderHandle, handleSize } from '../../../utils/render-handle';
+import { renderHandle, handleSize, handleHitThreshold } from '../../../utils/render-handle';
+import { getCanvasCoordinates } from '../../../utils/get-canvas-coordinates';
 
 export class CropTool implements Tool {
   private cropRect: { x: number; y: number; width: number; height: number } | null = null;
@@ -22,11 +23,7 @@ export class CropTool implements Tool {
   }
 
   handleMouseDown(event: MouseEvent, canvas: HTMLCanvasElement): void {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const x = (event.clientX - rect.left) * scaleX;
-    const y = (event.clientY - rect.top) * scaleY;
+    const { x, y } = getCanvasCoordinates(event, canvas);
 
     // Check if clicking on an existing handle
     const handle = this.getHandleAtPoint(x, y);
@@ -64,11 +61,7 @@ export class CropTool implements Tool {
   }
 
   handleMouseMove(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const x = (event.clientX - rect.left) * scaleX;
-    const y = (event.clientY - rect.top) * scaleY;
+    const { x, y } = getCanvasCoordinates(event, canvas);
 
     // Handle dragging logic
     if (this.draggedHandle && this.dragStartPoint && this.originalCropRect) {
@@ -154,11 +147,7 @@ export class CropTool implements Tool {
     // Original drawing logic
     if (!this.isDrawing) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    let x = (event.clientX - rect.left) * scaleX;
-    let y = (event.clientY - rect.top) * scaleY;
+    let { x, y } = getCanvasCoordinates(event, canvas);
 
     if (!this.startPoint) return;
 
@@ -262,7 +251,7 @@ export class CropTool implements Tool {
     if (!this.cropRect) return null;
 
     const { x: cropX, y: cropY, width, height } = this.cropRect;
-    const threshold = handleSize / 2 + 2;
+    const threshold = handleSize / 2 + handleHitThreshold;
 
     const handles: { type: HandleType; x: number; y: number }[] = [
       { type: 'top-left', x: cropX, y: cropY },

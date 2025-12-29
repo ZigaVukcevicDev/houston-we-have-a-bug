@@ -190,7 +190,7 @@ describe('RectangleTool', () => {
         color: '#E74C3C',
         strokeWidth: 5,
       });
-      expect(rectangleAnnotations[0].id).toMatch(/^rect-/);
+      expect(rectangleAnnotations[0].id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i); // UUID format
     });
 
     it('should normalize negative dimensions', () => {
@@ -232,7 +232,7 @@ describe('RectangleTool', () => {
         mockCanvas
       );
 
-      expect(mockToolChange).toHaveBeenCalledWith('select', expect.stringMatching(/^rect-/));
+      expect(mockToolChange).toHaveBeenCalledWith('select', expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)); // UUID format
     });
 
     it('should not create rectangle if dimensions are too small', () => {
@@ -270,10 +270,7 @@ describe('RectangleTool', () => {
     });
   });
 
-  describe('activate and deactivate', () => {
-    it('should do nothing on activate', () => {
-      expect(() => rectangleTool.activate()).not.toThrow();
-    });
+  describe('deactivate', () => {
 
     it('should cancel drawing on deactivate', () => {
       rectangleTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);

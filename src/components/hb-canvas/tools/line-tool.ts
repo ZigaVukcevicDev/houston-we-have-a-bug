@@ -1,6 +1,7 @@
 import type { Tool } from '../../../interfaces/tool.interface';
 import type { LineAnnotation } from '../../../interfaces/annotation.interface';
 import { toolStyles } from './tool-styles';
+import { getCanvasCoordinates } from '../../../utils/get-canvas-coordinates';
 
 export class LineTool implements Tool {
   private lineAnnotations: LineAnnotation[];
@@ -18,13 +19,8 @@ export class LineTool implements Tool {
     this.onToolChange = onToolChange;
   }
 
-
   handleMouseDown(event: MouseEvent, canvas: HTMLCanvasElement): void {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const x = (event.clientX - rect.left) * scaleX;
-    const y = (event.clientY - rect.top) * scaleY;
+    const { x, y } = getCanvasCoordinates(event, canvas);
 
     // Start drawing new line
     this.isDrawing = true;
@@ -42,25 +38,11 @@ export class LineTool implements Tool {
   handleMouseMove(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
     if (!this.isDrawing || !this.startPoint) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    let x = (event.clientX - rect.left) * scaleX;
-    let y = (event.clientY - rect.top) * scaleY;
+    let { x, y } = getCanvasCoordinates(event, canvas);
 
     // If Shift is pressed, constrain to horizontal or vertical
     if (event.shiftKey) {
-      const dx = Math.abs(x - this.startPoint.x);
-      const dy = Math.abs(y - this.startPoint.y);
-
-      // Snap to the direction with more movement
-      if (dx > dy) {
-        // Horizontal line
-        y = this.startPoint.y;
-      } else {
-        // Vertical line
-        x = this.startPoint.x;
-      }
+      ({ x, y } = this.applyLineConstraint(x, y, this.startPoint));
     }
 
     // Redraw with preview line
@@ -78,25 +60,11 @@ export class LineTool implements Tool {
     // Handle finishing new line drawing
     if (!this.isDrawing || !this.startPoint) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    let x = (event.clientX - rect.left) * scaleX;
-    let y = (event.clientY - rect.top) * scaleY;
+    let { x, y } = getCanvasCoordinates(event, canvas);
 
     // If Shift is pressed, constrain to horizontal or vertical
     if (event.shiftKey) {
-      const dx = Math.abs(x - this.startPoint.x);
-      const dy = Math.abs(y - this.startPoint.y);
-
-      // Snap to the direction with more movement
-      if (dx > dy) {
-        // Horizontal line
-        y = this.startPoint.y;
-      } else {
-        // Vertical line
-        x = this.startPoint.x;
-      }
+      ({ x, y } = this.applyLineConstraint(x, y, this.startPoint));
     }
 
     // Check if line is too short (prevent zero-length lines from single clicks)
@@ -145,6 +113,27 @@ export class LineTool implements Tool {
       document.removeEventListener('keydown', this.keydownHandler);
       this.keydownHandler = null;
     }
+  }
+
+  protected applyLineConstraint(
+    x: number,
+    y: number,
+    startPoint: { x: number; y: number }
+  ): { x: number; y: number } {
+    const dx = Math.abs(x - startPoint.x);
+    const dy = Math.abs(y - startPoint.y);
+
+    if (dx > dy) {
+      // Horizontal line
+      return { x, y: startPoint.y };
+    } else {
+      // Vertical line
+      return { x: startPoint.x, y };
+    }
+  }
+
+  deactivate(): void {
+    this.cancelDrawing();
   }
 
   protected shouldHaveArrowhead(): boolean {

@@ -3,6 +3,8 @@ import { customElement, state } from 'lit/decorators.js';
 import '../../components/hb-toolbar/hb-toolbar';
 import '../../components/hb-canvas/hb-canvas';
 import type { HBCanvas } from '../../components/hb-canvas/hb-canvas';
+import { getDateTimeForFilename } from '../../utils/get-date-time-for-filename';
+import type { ActiveTool } from '../../types/active-tool.type';
 import styles from './hb-annotation.scss';
 
 @customElement('hb-annotation')
@@ -13,7 +15,7 @@ export class HBAnnotation extends LitElement {
   private dataUrl: string = '';
 
   @state()
-  private activeTool: string | null = null;
+  private activeTool: ActiveTool | null = null;
 
   render() {
     if (!this.dataUrl) {
@@ -38,7 +40,7 @@ export class HBAnnotation extends LitElement {
       <div class="canvas-container">
         <hb-canvas
           .dataUrl=${this.dataUrl}
-          .drawingMode=${this.activeTool}
+          .activeTool=${this.activeTool}
           @tool-change=${this.handleToolChange}
         ></hb-canvas>
       </div>
@@ -69,10 +71,7 @@ export class HBAnnotation extends LitElement {
 
   private handleDownload() {
     const canvas = this.shadowRoot?.querySelector('hb-canvas') as HBCanvas;
-    const now = new Date();
-    const date = now.toISOString().slice(0, 10);
-    const time = now.toTimeString().slice(0, 8).replace(/:/g, '-');
-    canvas?.download(`bug ${date} at ${time}.jpg`);
+    canvas?.download(`bug ${getDateTimeForFilename()}.jpg`);
   }
 }
 

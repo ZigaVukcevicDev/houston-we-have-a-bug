@@ -1,7 +1,7 @@
 import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import styles from './hb-canvas.scss';
-import type { DrawingMode } from '../../types/drawing-mode.type';
+import type { ActiveTool } from '../../types/active-tool.type';
 import type { Tool } from '../../interfaces/tool.interface';
 import type { LineAnnotation, TextAnnotation, RectangleAnnotation } from '../../interfaces/annotation.interface';
 import { TextTool } from './tools/text-tool';
@@ -19,14 +19,14 @@ export class HBCanvas extends LitElement {
   dataUrl: string = '';
 
   @property({ type: String })
-  drawingMode: DrawingMode = 'text';
+  activeTool: ActiveTool = 'text';
 
   @query('canvas')
   private canvas!: HTMLCanvasElement;
 
   private ctx!: CanvasRenderingContext2D;
   private originalImage: HTMLImageElement | null = null;
-  private tools: Map<DrawingMode, Tool> = new Map();
+  private tools: Map<ActiveTool, Tool> = new Map();
 
   // Centralized annotation storage
   private lineAnnotations: LineAnnotation[] = [];
@@ -38,12 +38,12 @@ export class HBCanvas extends LitElement {
     this.initializeTools();
   }
 
-  private get activeTool(): Tool | undefined {
-    return this.tools.get(this.drawingMode);
+  private get currentTool(): Tool | undefined {
+    return this.tools.get(this.activeTool);
   }
 
   render() {
-    const modeClass = this.drawingMode ? `mode-${this.drawingMode}` : 'mode-default';
+    const modeClass = this.activeTool ? `mode-${this.activeTool}` : 'mode-default';
 
     return html`<canvas 
       class="${modeClass}"
@@ -59,7 +59,7 @@ export class HBCanvas extends LitElement {
     this.loadImage();
 
     // Activate the initial tool
-    this.activeTool?.activate?.();
+    this.currentTool?.activate?.();
   }
 
   protected updated(changedProperties: Map<string, unknown>) {
@@ -68,16 +68,16 @@ export class HBCanvas extends LitElement {
     }
 
     // Handle tool switching
-    if (changedProperties.has('drawingMode')) {
+    if (changedProperties.has('activeTool')) {
       // Deactivate previous tool
-      const previousMode = changedProperties.get('drawingMode') as DrawingMode | undefined;
+      const previousMode = changedProperties.get('activeTool') as ActiveTool | undefined;
       if (previousMode) {
         const prevTool = this.tools.get(previousMode);
         prevTool?.deactivate?.();
       }
 
       // Deselect all annotations when switching to crop tool
-      if (this.drawingMode === 'crop') {
+      if (this.activeTool === 'crop') {
         const selectTool = this.tools.get('select') as SelectTool;
         if (selectTool) {
           selectTool.deselectAll();
@@ -85,7 +85,7 @@ export class HBCanvas extends LitElement {
       }
 
       // Activate new tool
-      this.activeTool?.activate?.();
+      this.currentTool?.activate?.();
     }
   }
 
@@ -174,19 +174,19 @@ export class HBCanvas extends LitElement {
   }
 
   private handleCanvasClick(event: MouseEvent) {
-    this.activeTool?.handleClick?.(event, this.canvas);
+    this.currentTool?.handleClick?.(event, this.canvas);
   }
 
   private handleMouseDown(event: MouseEvent) {
-    this.activeTool?.handleMouseDown?.(event, this.canvas);
+    this.currentTool?.handleMouseDown?.(event, this.canvas);
   }
 
   private handleMouseMove(event: MouseEvent) {
-    this.activeTool?.handleMouseMove?.(event, this.canvas, this.ctx);
+    this.currentTool?.handleMouseMove?.(event, this.canvas, this.ctx);
   }
 
   private handleMouseUp(event: MouseEvent) {
-    this.activeTool?.handleMouseUp?.(event, this.canvas);
+    this.currentTool?.handleMouseUp?.(event, this.canvas);
   }
 
   public download(filename: string = 'screenshot.jpg', quality: number = 0.85) {

@@ -32,7 +32,7 @@ describe('getVisibleArea', () => {
     mockChrome.scripting.executeScript.mockResolvedValue([]);
 
     const result = await getVisibleArea(123);
-    expect(result).toBe('Unknown');
+    expect(result).toBe('N/A');
   });
 
   it('should return error message when exception occurs', async () => {

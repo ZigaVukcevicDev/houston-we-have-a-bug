@@ -1,4 +1,5 @@
 export const handleSize = 8; // Base size in CSS pixels (will be scaled by DPR)
+export const handleHitThreshold = 2; // Extra pixels for easier clicking
 
 export function renderHandle(
   ctx: CanvasRenderingContext2D,

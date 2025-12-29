@@ -1,6 +1,7 @@
 import type { Tool } from '../../../interfaces/tool.interface';
 import type { RectangleAnnotation } from '../../../interfaces/annotation.interface';
 import { toolStyles } from './tool-styles';
+import { getCanvasCoordinates } from '../../../utils/get-canvas-coordinates';
 
 export class RectangleTool implements Tool {
   private rectangleAnnotations: RectangleAnnotation[];
@@ -19,11 +20,7 @@ export class RectangleTool implements Tool {
   }
 
   handleMouseDown(event: MouseEvent, canvas: HTMLCanvasElement): void {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const x = (event.clientX - rect.left) * scaleX;
-    const y = (event.clientY - rect.top) * scaleY;
+    const { x, y } = getCanvasCoordinates(event, canvas);
 
     this.isDrawing = true;
     this.startPoint = { x, y };
@@ -39,20 +36,14 @@ export class RectangleTool implements Tool {
   handleMouseMove(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
     if (!this.isDrawing || !this.startPoint) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    let x = (event.clientX - rect.left) * scaleX;
-    let y = (event.clientY - rect.top) * scaleY;
+    const { x, y } = getCanvasCoordinates(event, canvas);
 
     let width = x - this.startPoint.x;
     let height = y - this.startPoint.y;
 
     // If Shift is pressed, constrain to square
     if (event.shiftKey) {
-      const size = Math.max(Math.abs(width), Math.abs(height));
-      width = width >= 0 ? size : -size;
-      height = height >= 0 ? size : -size;
+      ({ width, height } = this.applySquareConstraint(width, height));
     }
 
     // Redraw with preview rectangle
@@ -69,20 +60,14 @@ export class RectangleTool implements Tool {
   handleMouseUp(event: MouseEvent, canvas: HTMLCanvasElement): void {
     if (!this.isDrawing || !this.startPoint) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    let x = (event.clientX - rect.left) * scaleX;
-    let y = (event.clientY - rect.top) * scaleY;
+    const { x, y } = getCanvasCoordinates(event, canvas);
 
     let width = x - this.startPoint.x;
     let height = y - this.startPoint.y;
 
     // If Shift is pressed, constrain to square
     if (event.shiftKey) {
-      const size = Math.max(Math.abs(width), Math.abs(height));
-      width = width >= 0 ? size : -size;
-      height = height >= 0 ? size : -size;
+      ({ width, height } = this.applySquareConstraint(width, height));
     }
 
     // Normalize to ensure positive width/height
@@ -94,7 +79,7 @@ export class RectangleTool implements Tool {
     // Only create rectangle if it has some size
     if (finalWidth > 1 && finalHeight > 1) {
       this.rectangleAnnotations.push({
-        id: `rect-${Date.now()}`,
+        id: crypto.randomUUID(),
         x: finalX,
         y: finalY,
         width: finalWidth,
@@ -112,10 +97,6 @@ export class RectangleTool implements Tool {
     } else {
       this.cancelDrawing();
     }
-  }
-
-  activate(): void {
-    // No setup needed
   }
 
   deactivate(): void {
@@ -137,6 +118,17 @@ export class RectangleTool implements Tool {
       document.removeEventListener('keydown', this.keydownHandler);
       this.keydownHandler = null;
     }
+  }
+
+  private applySquareConstraint(
+    width: number,
+    height: number
+  ): { width: number; height: number } {
+    const size = Math.max(Math.abs(width), Math.abs(height));
+    return {
+      width: width >= 0 ? size : -size,
+      height: height >= 0 ? size : -size,
+    };
   }
 
   render(ctx: CanvasRenderingContext2D): void {

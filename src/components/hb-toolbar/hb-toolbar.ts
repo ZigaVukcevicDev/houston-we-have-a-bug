@@ -2,7 +2,7 @@ import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import styles from './hb-toolbar.scss';
 import '../hb-toolbar-tool/hb-toolbar-tool';
-import type { ToolType } from '../../types/tool-type.type';
+import type { ActiveTool } from '../../types/active-tool.type';
 
 
 @customElement('hb-toolbar')
@@ -10,7 +10,7 @@ export class HBToolbar extends LitElement {
   static styles = unsafeCSS(styles);
 
   @property({ type: String })
-  activeTool: ToolType | null = null;
+  activeTool: ActiveTool | null = null;
 
   render() {
     return html`
@@ -35,7 +35,7 @@ export class HBToolbar extends LitElement {
     `;
   }
 
-  private handleToolClick(tool: ToolType) {
+  private handleToolClick(tool: ActiveTool) {
     this.activeTool = tool;
 
     this.dispatchEvent(new CustomEvent('tool-change', {
