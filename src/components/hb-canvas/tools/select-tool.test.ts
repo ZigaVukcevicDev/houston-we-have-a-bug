@@ -1227,4 +1227,84 @@ describe('SelectTool', () => {
       expect(selectTool['keydownHandler']).toBeNull();
     });
   });
+
+  describe('zero-length line detection', () => {
+    it('should detect hover on zero-length line', () => {
+      lineAnnotations.push({
+        id: 'point-1',
+        x1: 200,
+        y1: 200,
+        x2: 200,
+        y2: 200,
+        color: '#E74C3C',
+        width: 3,
+      });
+
+      selectTool = new SelectTool(lineAnnotations, rectangleAnnotations, mockRedraw);
+
+      selectTool.handleMouseMove(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBe('point-1');
+    });
+
+    it('should not detect hover far from zero-length line', () => {
+      lineAnnotations.push({
+        id: 'point-2',
+        x1: 200,
+        y1: 200,
+        x2: 200,
+        y2: 200,
+        color: '#E74C3C',
+        width: 3,
+      });
+
+      selectTool = new SelectTool(lineAnnotations, rectangleAnnotations, mockRedraw);
+
+      selectTool.handleMouseMove(
+        { clientX: 250, clientY: 250 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBeNull();
+    });
+  });
+
+  describe('arrow hover rendering', () => {
+    it('should call renderArrowhead when hovering over arrow', () => {
+      lineAnnotations.push({
+        id: 'arrow-1',
+        x1: 100,
+        y1: 100,
+        x2: 200,
+        y2: 200,
+        color: '#E74C3C',
+        width: 3,
+        hasArrowhead: true,
+      });
+
+      selectTool = new SelectTool(lineAnnotations, rectangleAnnotations, mockRedraw);
+
+      // Hover over the arrow
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      // Render should be called with the arrow hovered
+      selectTool.render(mockCtx);
+
+      // Should have called rendering methods for arrowhead
+      expect(mockCtx.save).toHaveBeenCalled();
+      expect(mockCtx.restore).toHaveBeenCalled();
+      expect(mockCtx.moveTo).toHaveBeenCalled();
+      expect(mockCtx.lineTo).toHaveBeenCalled();
+      expect(mockCtx.stroke).toHaveBeenCalled();
+    });
+  });
 });

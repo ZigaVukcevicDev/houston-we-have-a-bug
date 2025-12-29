@@ -48,4 +48,26 @@ describe('getDevicePixelRatio', () => {
     const result = await getDevicePixelRatio(123);
     expect(result).toBe('N/A');
   });
+
+  it('should execute inline function to get device pixel ratio', async () => {
+    // Capture and execute the function
+    let capturedFunc: (() => string) | null = null;
+    mockChrome.scripting.executeScript.mockImplementation((config: any) => {
+      capturedFunc = config.func;
+      return Promise.resolve([{ result: '2' }]);
+    });
+
+    await getDevicePixelRatio(456);
+
+    // Execute the captured function with mocked window.devicePixelRatio
+    expect(capturedFunc).toBeTruthy();
+    Object.defineProperty(window, 'devicePixelRatio', {
+      value: 2,
+      writable: true,
+      configurable: true
+    });
+
+    const ratio = capturedFunc!();
+    expect(ratio).toBe('2');
+  });
 });

@@ -43,4 +43,26 @@ describe('getVisibleArea', () => {
     const result = await getVisibleArea(123);
     expect(result).toBe('N/A');
   });
+
+  it('should execute inline function to get dimensions', async () => {
+    // Capture the function that's passed to executeScript
+    let capturedFunc: (() => string) | null = null;
+    mockChrome.scripting.executeScript.mockImplementation((config: any) => {
+      capturedFunc = config.func;
+      return Promise.resolve([{ result: '800 x 600 px' }]);
+    });
+
+    await getVisibleArea(456);
+
+    // Verify the function was captured and can be executed
+    expect(capturedFunc).toBeTruthy();
+
+    // Mock window dimensions for the test
+    Object.defineProperty(window, 'innerWidth', { value: 800, writable: true });
+    Object.defineProperty(window, 'innerHeight', { value: 600, writable: true });
+
+    // Execute the captured function
+    const dimensions = capturedFunc!();
+    expect(dimensions).toBe('800 x 600 px');
+  });
 });

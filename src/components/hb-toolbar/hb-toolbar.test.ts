@@ -47,4 +47,62 @@ describe('HBToolbar', () => {
       expect(capturedEvent!.composed).toBe(true);
     });
   });
+
+  describe('handleToolClick', () => {
+    it('should update activeTool when tool is clicked', () => {
+      toolbar['handleToolClick']('text');
+
+      expect(toolbar.activeTool).toBe('text');
+    });
+
+    it('should dispatch tool-change event with correct detail', () => {
+      let capturedEvent: CustomEvent | null = null;
+      toolbar.addEventListener('tool-change', (e) => {
+        capturedEvent = e as CustomEvent;
+      });
+
+      toolbar['handleToolClick']('line');
+
+      expect(capturedEvent).not.toBeNull();
+      expect(capturedEvent!.detail.tool).toBe('line');
+    });
+
+    it('should dispatch event with bubbles enabled', () => {
+      let capturedEvent: CustomEvent | null = null;
+      toolbar.addEventListener('tool-change', (e) => {
+        capturedEvent = e as CustomEvent;
+      });
+
+      toolbar['handleToolClick']('select');
+
+      expect(capturedEvent!.bubbles).toBe(true);
+    });
+
+    it('should dispatch event with composed enabled', () => {
+      let capturedEvent: CustomEvent | null = null;
+      toolbar.addEventListener('tool-change', (e) => {
+        capturedEvent = e as CustomEvent;
+      });
+
+      toolbar['handleToolClick']('rectangle');
+
+      expect(capturedEvent!.composed).toBe(true);
+    });
+  });
+
+  describe('render', () => {
+    it('should render toolbar element', () => {
+      document.body.appendChild(toolbar);
+
+      expect(toolbar.shadowRoot).toBeDefined();
+    });
+
+    it('should mark active tool with isActive property', async () => {
+      toolbar.activeTool = 'text';
+      document.body.appendChild(toolbar);
+      await toolbar.updateComplete;
+
+      expect(toolbar.activeTool).toBe('text');
+    });
+  });
 });

@@ -98,5 +98,84 @@ describe('render-handle utility', () => {
       expect(isPointOnHandle(-103, -100, -100, -100)).toBe(true);
       expect(isPointOnHandle(-105, -100, -100, -100)).toBe(false);
     });
+
+    it('should use fallback DPR when devicePixelRatio is undefined', () => {
+      // Mock devicePixelRatio as undefined
+      Object.defineProperty(window, 'devicePixelRatio', {
+        writable: true,
+        configurable: true,
+        value: undefined,
+      });
+
+      // Should still work with fallback value of 1
+      expect(isPointOnHandle(100, 100, 100, 100)).toBe(true);
+      expect(isPointOnHandle(104, 100, 100, 100)).toBe(true);
+      expect(isPointOnHandle(105, 100, 100, 100)).toBe(false);
+
+      // Reset
+      Object.defineProperty(window, 'devicePixelRatio', {
+        writable: true,
+        configurable: true,
+        value: 1,
+      });
+    });
+  });
+
+  describe('renderHandle with DPR edge cases', () => {
+    let mockCtx: CanvasRenderingContext2D;
+
+    beforeEach(() => {
+      mockCtx = {
+        save: vi.fn(),
+        restore: vi.fn(),
+        fillRect: vi.fn(),
+        strokeRect: vi.fn(),
+        fillStyle: '',
+        strokeStyle: '',
+        lineWidth: 0,
+      } as unknown as CanvasRenderingContext2D;
+    });
+
+    it('should use fallback DPR of 1 when devicePixelRatio is undefined', () => {
+      // Mock devicePixelRatio as undefined
+      Object.defineProperty(window, 'devicePixelRatio', {
+        writable: true,
+        configurable: true,
+        value: undefined,
+      });
+
+      renderHandle(mockCtx, 100, 100);
+
+      // With DPR=1, handle size is 8, so centered rectangle starts at 96,96
+      expect(mockCtx.fillRect).toHaveBeenCalledWith(96, 96, handleSize, handleSize);
+
+      // Reset
+      Object.defineProperty(window, 'devicePixelRatio', {
+        writable: true,
+        configurable: true,
+        value: 1,
+      });
+    });
+
+    it('should use fallback DPR of 1 when devicePixelRatio is 0', () => {
+      // Mock devicePixelRatio as 0 (falsy)
+      Object.defineProperty(window, 'devicePixelRatio', {
+        writable: true,
+        configurable: true,
+        value: 0,
+      });
+
+      renderHandle(mockCtx, 100, 100);
+
+      // With DPR=1 (fallback), handle size is 8
+      expect(mockCtx.fillRect).toHaveBeenCalledWith(96, 96, handleSize, handleSize);
+
+      // Reset
+      Object.defineProperty(window, 'devicePixelRatio', {
+        writable: true,
+        configurable: true,
+        value: 1,
+      });
+    });
   });
 });

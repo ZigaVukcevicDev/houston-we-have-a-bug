@@ -103,4 +103,65 @@ describe('HBAnnotation', () => {
       expect(() => annotation['handleDownload']()).not.toThrow();
     });
   });
+
+  describe('handleToolChange', () => {
+    it('should update activeTool when tool-change event is fired', () => {
+      const event = new CustomEvent('tool-change', {
+        detail: { tool: 'line' },
+      });
+
+      annotation['handleToolChange'](event);
+
+      expect(annotation['activeTool']).toBe('line');
+    });
+
+    it('should handle different tool types', () => {
+      const textEvent = new CustomEvent('tool-change', {
+        detail: { tool: 'text' },
+      });
+
+      annotation['handleToolChange'](textEvent);
+      expect(annotation['activeTool']).toBe('text');
+
+      const rectangleEvent = new CustomEvent('tool-change', {
+        detail: { tool: 'rectangle' },
+      });
+
+      annotation['handleToolChange'](rectangleEvent);
+      expect(annotation['activeTool']).toBe('rectangle');
+    });
+  });
+
+  describe('render', () => {
+    it('should render toolbar and canvas when dataUrl is set', async () => {
+      annotation['dataUrl'] = 'data:image/png;base64,test';
+      document.body.appendChild(annotation);
+      await annotation.updateComplete;
+
+      expect(annotation.shadowRoot).toBeDefined();
+      const toolbar = annotation.shadowRoot?.querySelector('hb-toolbar');
+      const canvas = annotation.shadowRoot?.querySelector('hb-canvas');
+
+      expect(toolbar).toBeTruthy();
+      expect(canvas).toBeTruthy();
+    });
+
+    it('should render loading message when dataUrl is empty', async () => {
+      annotation['dataUrl'] = '';
+      document.body.appendChild(annotation);
+      await annotation.updateComplete;
+
+      const content = annotation.shadowRoot?.textContent;
+      expect(content).toContain('No screenshot loaded');
+    });
+  });
+
+  describe('connectedCallback', () => {
+    it('should call loadScreenshotFromStorage when connected', () => {
+      const spy = vi.spyOn(annotation as any, 'loadScreenshotFromStorage');
+      document.body.appendChild(annotation);
+
+      expect(spy).toHaveBeenCalled();
+    });
+  });
 });

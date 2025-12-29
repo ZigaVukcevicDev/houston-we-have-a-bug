@@ -415,4 +415,62 @@ describe('TextTool', () => {
       expect(textTool['annotations'][0].text).toBe('Blur test');
     });
   });
+
+  describe('dataset fallback handling', () => {
+    it('should use fallback values when dataset is missing', () => {
+      textTool.handleClick(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+
+      const input = getTextInput()!;
+      input.value = 'Test with defaults';
+
+      // Remove dataset values to trigger fallbacks
+      delete input.dataset.canvasX;
+      delete input.dataset.canvasY;
+      delete input.dataset.color;
+      delete input.dataset.fontSize;
+
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+
+      const annotation = textTool['annotations'][0];
+      expect(annotation.x).toBe(0); // Fallback for canvasX
+      expect(annotation.y).toBe(0); // Fallback for canvasY
+      expect(annotation.color).toBe('#E74C3C'); // Fallback for color
+      expect(annotation.fontSize).toBe(20); // Fallback for fontSize
+    });
+
+    it('should use fallback when canvasX is empty string', () => {
+      textTool.handleClick(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+
+      const input = getTextInput()!;
+      input.value = 'Test';
+      input.dataset.canvasX = '';
+      input.dataset.canvasY = '50';
+
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+
+      expect(textTool['annotations'][0].x).toBe(0);
+      expect(textTool['annotations'][0].y).toBe(50);
+    });
+
+    it('should use fallback when fontSize is empty string', () => {
+      textTool.handleClick(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+
+      const input = getTextInput()!;
+      input.value = 'Test';
+      input.dataset.fontSize = '';
+
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+
+      expect(textTool['annotations'][0].fontSize).toBe(20); // Fallback
+    });
+  });
 });

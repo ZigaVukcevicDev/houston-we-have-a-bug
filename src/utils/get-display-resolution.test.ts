@@ -43,4 +43,26 @@ describe('getDisplayResolution', () => {
     const result = await getDisplayResolution(123);
     expect(result).toBe('N/A');
   });
+
+  it('should execute inline function to get screen dimensions', async () => {
+    // Capture and execute the function
+    let capturedFunc: (() => string) | null = null;
+    mockChrome.scripting.executeScript.mockImplementation((config: any) => {
+      capturedFunc = config.func;
+      return Promise.resolve([{ result: '1920 x 1080 px' }]);
+    });
+
+    await getDisplayResolution(456);
+
+    // Execute the captured function
+    expect(capturedFunc).toBeTruthy();
+    Object.defineProperty(window, 'screen', {
+      value: { width: 1920, height: 1080 },
+      writable: true,
+      configurable: true
+    });
+
+    const dimensions = capturedFunc!();
+    expect(dimensions).toBe('1920 x 1080 px');
+  });
 });
