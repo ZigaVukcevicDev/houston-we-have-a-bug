@@ -187,7 +187,7 @@ describe('RectangleTool', () => {
         y: 100,
         width: 100,
         height: 100,
-        color: '#BD2D1E',
+        color: '#E74C3C',
         strokeWidth: 5,
       });
       expect(rectangleAnnotations[0].id).toMatch(/^rect-/);
@@ -317,7 +317,7 @@ describe('RectangleTool', () => {
           y: 50,
           width: 100,
           height: 80,
-          color: '#BD2D1E',
+          color: '#E74C3C',
           strokeWidth: 5,
         },
         {
@@ -326,7 +326,7 @@ describe('RectangleTool', () => {
           y: 100,
           width: 150,
           height: 120,
-          color: '#BD2D1E',
+          color: '#E74C3C',
           strokeWidth: 5,
         }
       );
@@ -352,7 +352,7 @@ describe('RectangleTool', () => {
         y: 50,
         width: 100,
         height: 80,
-        color: '#BD2D1E',
+        color: '#E74C3C',
         strokeWidth: 5,
       });
 
@@ -368,7 +368,7 @@ describe('RectangleTool', () => {
         y: 50,
         width: 100,
         height: 80,
-        color: '#BD2D1E',
+        color: '#E74C3C',
         strokeWidth: 5,
       });
 
@@ -385,7 +385,7 @@ describe('RectangleTool', () => {
         y: 50,
         width: 100,
         height: 80,
-        color: '#BD2D1E',
+        color: '#E74C3C',
         strokeWidth: 5,
       });
 

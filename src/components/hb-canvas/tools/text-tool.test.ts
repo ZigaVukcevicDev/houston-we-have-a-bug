@@ -105,7 +105,7 @@ describe('TextTool', () => {
 
       const input = getTextInput()!;
       expect(input.style.position).toBe('fixed');
-      expect(input.style.color).toBe('#BD2D1E');
+      expect(input.style.color).toBe('#E74C3C');
       expect(input.style.fontWeight).toBe('bold');
       expect(input.style.fontFamily).toContain('Arial');
     });
@@ -188,8 +188,8 @@ describe('TextTool', () => {
         x: 150,
         y: 200,
         text: 'Test annotation',
-        color: '#BD2D1E',
-        fontSize: 24,
+        color: '#E74C3C',
+        fontSize: 20,
       });
     });
 
@@ -283,8 +283,8 @@ describe('TextTool', () => {
     it('should apply correct text styling', () => {
       textTool.render(mockCtx);
 
-      expect(mockCtx.font).toBe('bold 24px Arial, sans-serif');
-      expect(mockCtx.fillStyle).toBe('#BD2D1E');
+      expect(mockCtx.font).toBe('bold 20px Arial, sans-serif');
+      expect(mockCtx.fillStyle).toBe('#E74C3C');
       expect(mockCtx.textBaseline).toBe('middle');
     });
 

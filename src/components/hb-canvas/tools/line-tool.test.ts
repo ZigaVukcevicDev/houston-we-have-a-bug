@@ -148,7 +148,7 @@ describe('LineTool', () => {
         mockCtx
       );
 
-      expect(mockCtx.strokeStyle).toBe('#BD2D1E');
+      expect(mockCtx.strokeStyle).toBe('#E74C3C');
       expect(mockCtx.lineWidth).toBe(5);
       expect(mockCtx.lineCap).toBe('round');
     });
@@ -178,7 +178,7 @@ describe('LineTool', () => {
         y1: 100,
         x2: 200,
         y2: 250,
-        color: '#BD2D1E',
+        color: '#E74C3C',
         width: 5,
       });
       expect(lineTool['isDrawing']).toBe(false);
@@ -200,7 +200,7 @@ describe('LineTool', () => {
         y1: 100,
         x2: 300,
         y2: 100, // Y constrained to start point
-        color: '#BD2D1E',
+        color: '#E74C3C',
         width: 5,
       });
     });
@@ -219,7 +219,7 @@ describe('LineTool', () => {
         y1: 100,
         x2: 100, // X constrained to start point
         y2: 300,
-        color: '#BD2D1E',
+        color: '#E74C3C',
         width: 5,
       });
     });
@@ -247,7 +247,7 @@ describe('LineTool', () => {
         y1: 250,
         x2: 350,
         y2: 350,
-        color: '#BD2D1E',
+        color: '#E74C3C',
         width: 5,
       });
     });
@@ -315,7 +315,7 @@ describe('LineTool', () => {
     it('should apply correct styling to rendered lines', () => {
       lineTool.render(mockCtx);
 
-      expect(mockCtx.strokeStyle).toBe('#BD2D1E');
+      expect(mockCtx.strokeStyle).toBe('#E74C3C');
       expect(mockCtx.lineWidth).toBe(5);
       expect(mockCtx.lineCap).toBe('round');
     });

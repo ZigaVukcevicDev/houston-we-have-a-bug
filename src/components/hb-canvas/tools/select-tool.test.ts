@@ -19,7 +19,7 @@ describe('SelectTool', () => {
         y1: 100,
         x2: 200,
         y2: 200,
-        color: '#BD2D1E',
+        color: '#E74C3C',
         width: 3,
       },
       {
@@ -28,7 +28,7 @@ describe('SelectTool', () => {
         y1: 100,
         x2: 400,
         y2: 200,
-        color: '#BD2D1E',
+        color: '#E74C3C',
         width: 3,
       },
     ];
@@ -39,7 +39,7 @@ describe('SelectTool', () => {
         y: 300,
         width: 100,
         height: 50,
-        color: '#BD2D1E',
+        color: '#E74C3C',
         strokeWidth: 5,
       },
       {
@@ -48,7 +48,7 @@ describe('SelectTool', () => {
         y: 300,
         width: 80,
         height: 60,
-        color: '#BD2D1E',
+        color: '#E74C3C',
         strokeWidth: 5,
       },
     ];
@@ -162,7 +162,7 @@ describe('SelectTool', () => {
         y1: 100,
         x2: 200,
         y2: 200,
-        color: '#BD2D1E',
+        color: '#E74C3C',
         width: 3,
       });
 
@@ -577,7 +577,7 @@ describe('SelectTool', () => {
         y1: 100,
         x2: 200,
         y2: 200,
-        color: '#BD2D1E',
+        color: '#E74C3C',
         width: 5,
       });
 
@@ -632,7 +632,7 @@ describe('SelectTool', () => {
         y: 300,
         width: 100,
         height: 50,
-        color: '#BD2D1E',
+        color: '#E74C3C',
         strokeWidth: 5,
       });
 

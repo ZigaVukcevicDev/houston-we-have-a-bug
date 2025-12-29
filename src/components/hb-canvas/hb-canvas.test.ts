@@ -561,7 +561,7 @@ describe('HBCanvas', () => {
         y1: 100,
         x2: 200,
         y2: 200,
-        color: '#BD2D1E',
+        color: '#E74C3C',
         width: 5,
       });
 
@@ -620,7 +620,7 @@ describe('HBCanvas', () => {
         y1: 100,
         x2: 200,
         y2: 200,
-        color: '#BD2D1E',
+        color: '#E74C3C',
         width: 5,
       });
 

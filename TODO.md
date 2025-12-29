@@ -41,9 +41,11 @@
 
 ## Extra
 
-- [ ] change color of annotations to use light red
+- [x] change color of annotations to use color E74C3C
 - [ ] screenshot has some unnecessary space
 - [ ] style "No screenshot loaded. Please capture a screenshot from the extension popup."
 - [x] add shadow to toolbar
 - [ ] exclude extension-presentation from build
 - [ ] change "environment details" to "system info"
+- [ ] when hovering over rectangle, highlight is visible only when hover over horizontal parts
+```
