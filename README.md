@@ -8,7 +8,7 @@ A Chrome extension for quick bug capture with annotation and context.
 ## Key capabilities
 
 - 📸 **Screenshot with annotations** - Capture visible tab with annotations
-- 📋 **Environment details** - Gather current date and time, URL, display settings, browser, and OS information
+- 📋 **System info** - Gather current date and time, URL, display settings, browser, and OS information
 - 🗺️ **[Roadmap](ROADMAP.md)** - Planned features, and evolution
 
 ## Tech stack & tooling

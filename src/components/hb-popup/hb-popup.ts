@@ -6,7 +6,7 @@ import { getDevicePixelRatio } from '../../utils/get-device-pixel-ratio';
 import { getDisplayResolution } from '../../utils/get-display-resolution';
 import { getOS } from '../../utils/get-os';
 import { getVisibleArea } from '../../utils/get-visible-area';
-import type { EnvironmentDetails } from '../../interfaces/environment-details.interface';
+import type { SystemInfo } from '../../interfaces/system-info.interface';
 import styles from './hb-popup.scss';
 
 @customElement('hb-popup')
@@ -14,7 +14,7 @@ export class HBPopup extends LitElement {
   static styles = unsafeCSS(styles);
 
   @state()
-  private systemInfo: EnvironmentDetails | null = null;
+  private systemInfo: SystemInfo | null = null;
 
   @state()
   private isCopyingDisabled = false;

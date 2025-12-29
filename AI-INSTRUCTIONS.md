@@ -5,7 +5,7 @@ You must follow these rules when working on this repository.
 ## 1. Testing is mandatory
 - **Run tests**: You must run `npm run test` after every change to logic, components, or styles that could affect functionality.
 - **Fix immediately**: If a test fails, fixing it is your top priority. Do not proceed with new features until tests pass.
-- **No regressions**: Ensure that existing features (like the Screenshot or Environment Details) continue to work.
+- **No regressions**: Ensure that existing features (like the Screenshot or System info) continue to work.
 - **Comprehensive coverage required**: When creating new functionality or updating existing functionality, you MUST write comprehensive tests that cover:
   - All major code paths and functionality
   - Edge cases and error handling
@@ -52,8 +52,8 @@ You must follow these rules when working on this repository.
 - **SCSS modules**: Use `@use` to import variables.
 - **Variables**: Always use variables from `_variables.scss` (e.g., `$color-red-500`, `$spacing-md`) instead of hardcoded values.
 - **Text capitalization**: Use European-style capitalization (sentence case) for **all text** including UI, test data, test descriptions, and documentation
-  - ✅ Correct: "Copy to clipboard", "Test text", "should gather environment details"
-  - ❌ Incorrect: "Copy to Clipboard", "Test Text", "Should Gather Environment Details"
+  - ✅ Correct: "Copy to clipboard", "Test text", "should gather system info"
+  - ❌ Incorrect: "Copy to Clipboard", "Test Text", "Should Gather System Info"
   - Only capitalize the first word and proper nouns
   - This applies to:
     - UI labels and buttons

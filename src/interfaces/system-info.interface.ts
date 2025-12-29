@@ -1,4 +1,4 @@
-export interface EnvironmentDetails {
+export interface SystemInfo {
   dateAndTime: string;
   url: string;
   visibleArea: string;

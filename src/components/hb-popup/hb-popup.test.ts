@@ -51,7 +51,7 @@ describe('HBPopup', () => {
   });
 
   describe('gatherSystemInfo', () => {
-    it('should gather environment details from active tab', async () => {
+    it('should gather system info from active tab', async () => {
       const mockTab = {
         id: 123,
         url: 'https://example.com',
@@ -94,7 +94,7 @@ describe('HBPopup', () => {
   });
 
   describe('copyToClipboard', () => {
-    it('should copy environment details to clipboard', async () => {
+    it('should copy system info to clipboard', async () => {
       popup['systemInfo'] = {
         dateAndTime: '2025-12-15 21:00:00',
         url: 'https://example.com',
@@ -115,7 +115,7 @@ describe('HBPopup', () => {
       );
     });
 
-    it('should not copy if no environment details', async () => {
+    it('should not copy if no system info', async () => {
       popup['systemInfo'] = null;
 
       await popup['copyToClipboard']();

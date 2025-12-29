@@ -15,7 +15,7 @@ The focus is on keeping the tool **simple, fast, and genuinely useful for bug re
 The goal is to cover **real-world bug reporting needs** with a small, reliable toolset.
 
 ### Core actions
-- Automatic environment details
+- Automatic system info
 - Screenshot capture
 - Download annotated image
 
