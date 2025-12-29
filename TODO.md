@@ -47,7 +47,16 @@
   - [x] without selection
   - [x] with selection
 
-5. Download
+5. Crop tool
+
+- draw crop rectangle
+  - [x] free
+  - [x] with shift
+- deselect crop rectangle
+  - [x] selecting any other tool
+  - [x] pressing escape (then switch to select tool automatically)
+
+6. Download
 
 - [x] deselect annotaions when downloading
 

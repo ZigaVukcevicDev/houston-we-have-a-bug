@@ -9,6 +9,7 @@ import { LineTool } from './tools/line-tool';
 import { ArrowTool } from './tools/arrow-tool';
 import { RectangleTool } from './tools/rectangle-tool';
 import { SelectTool } from './tools/select-tool';
+import { CropTool } from './tools/crop-tool';
 
 @customElement('hb-canvas')
 export class HBCanvas extends LitElement {
@@ -105,6 +106,10 @@ export class HBCanvas extends LitElement {
       this.lineAnnotations,
       this.rectangleAnnotations,
       () => this.redraw()
+    ));
+    this.tools.set('crop', new CropTool(
+      () => this.redraw(),
+      (tool: string) => this.handleToolChange(tool)
     ));
   }
 

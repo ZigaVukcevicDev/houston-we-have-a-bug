@@ -30,4 +30,8 @@ canvas {
   &.mode-rectangle {
     cursor: crosshair;
   }
+
+  &.mode-crop {
+    cursor: crosshair;
+  }
 }

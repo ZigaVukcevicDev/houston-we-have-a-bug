@@ -26,14 +26,15 @@ describe('HBCanvas', () => {
       expect(canvas.drawingMode).toBe('text');
     });
 
-    it('should initialize tools map with select, text, line, arrow, and rectangle tools', () => {
+    it('should initialize tools map with select, text, line, arrow, rectangle, and crop tools', () => {
       const tools = canvas['tools'];
-      expect(tools.size).toBe(5);
+      expect(tools.size).toBe(6);
       expect(tools.get('select')).toBeDefined();
       expect(tools.get('text')).toBeDefined();
       expect(tools.get('line')).toBeDefined();
       expect(tools.get('arrow')).toBeDefined();
       expect(tools.get('rectangle')).toBeDefined();
+      expect(tools.get('crop')).toBeDefined();
     });
 
     it('should create tools with render method', () => {
