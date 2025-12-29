@@ -2,6 +2,9 @@
 
 Thank you for contributing to **Houston, we have a bug**!
 
+> ⚠️ Note: This project is still under active development and is not yet published.
+> Please open an issue before starting work on larger changes or new features.
+
 ## Quick start
 
 1. **Install**: `npm install`

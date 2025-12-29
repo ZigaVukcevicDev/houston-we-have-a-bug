@@ -5,7 +5,10 @@
 
 A Chrome extension that helps you annotate screenshots and gather system info for quick bug reporting.
 
-> 🚧 **Status: in development — not yet published**
+> 🚧 **Status: Work in progress — not published**
+>
+> This Chrome extension is under active development and has **not been published
+> to the Chrome Web Store yet**. Features, UX, and behavior may change.
 
 ## Key capabilities
 
