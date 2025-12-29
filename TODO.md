@@ -24,14 +24,14 @@
 3. Arrow tool
 
 - draw arrow
-  - [ ] free
-  - [ ] with shift
+  - [x] free
+  - [x] with shift
 - move endpoint
   - [ ] start endpoint
   - [ ] end endpoint
 - move arrow
-  - [ ] without selection
-  - [ ] with selection
+  - [x] without selection
+  - [x] with selection
 
 4. Rectangle tool
 
@@ -53,6 +53,7 @@
 
 ## Extra
 
+- [ ] when moving array via endpoint (start or end), it sometimes goes to select tool when release mouse button
 - [x] change color of annotations to use color E74C3C
 - [ ] screenshot has some unnecessary space
 - [ ] style "No screenshot loaded. Please capture a screenshot from the extension popup."
