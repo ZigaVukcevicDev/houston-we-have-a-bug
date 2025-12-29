@@ -290,4 +290,30 @@ describe('ArrowTool', () => {
       expect((mockCtx.stroke as any).mock.calls.length).toBeGreaterThan(2);
     });
   });
+
+  describe('DPR fallback', () => {
+    it('should use fallback DPR of 1 when devicePixelRatio is undefined', () => {
+      const originalDPR = window.devicePixelRatio;
+      Object.defineProperty(window, 'devicePixelRatio', {
+        writable: true,
+        configurable: true,
+        value: undefined,
+      });
+
+      (mockCtx.moveTo as any).mockClear();
+      (mockCtx.lineTo as any).mockClear();
+
+      arrowTool.render(mockCtx);
+
+      expect(mockCtx.moveTo).toHaveBeenCalled();
+      expect(mockCtx.lineTo).toHaveBeenCalled();
+
+      // Restore
+      Object.defineProperty(window, 'devicePixelRatio', {
+        writable: true,
+        configurable: true,
+        value: originalDPR,
+      });
+    });
+  });
 });
