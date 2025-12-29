@@ -5,6 +5,7 @@
 ![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Chrome_extension-blue)
 ![TypeScript](https://img.shields.io/badge/language-TypeScript-blue)
+![SCSS](https://img.shields.io/badge/style-SCSS-CC6699)
 ![Build](https://img.shields.io/badge/build-esbuild-lightgrey)
 
 A Chrome extension that helps you annotate screenshots and gather system info for quick bug reporting.
