@@ -225,6 +225,50 @@ describe('ArrowTool', () => {
 
       expect(mockRedraw).toHaveBeenCalled();
     });
+
+    it('should constrain arrowhead preview to horizontal when shift is held', () => {
+      arrowTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+
+      // Move mouse with shift key - more horizontal movement
+      arrowTool.handleMouseMove(
+        { clientX: 200, clientY: 120, shiftKey: true } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      // Render to trigger preview with arrowhead
+      (mockCtx.moveTo as any).mockClear();
+      (mockCtx.lineTo as any).mockClear();
+      arrowTool.render(mockCtx);
+
+      // Arrowhead should be at (200, 100) - Y constrained to 100
+      const moveToCall = (mockCtx.moveTo as any).mock.calls.find(
+        (call: number[]) => call[0] === 200 && call[1] === 100
+      );
+      expect(moveToCall).toBeDefined();
+    });
+
+    it('should constrain arrowhead preview to vertical when shift is held', () => {
+      arrowTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+
+      // Move mouse with shift key - more vertical movement
+      arrowTool.handleMouseMove(
+        { clientX: 120, clientY: 200, shiftKey: true } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      // Render to trigger preview with arrowhead
+      (mockCtx.moveTo as any).mockClear();
+      (mockCtx.lineTo as any).mockClear();
+      arrowTool.render(mockCtx);
+
+      // Arrowhead should be at (100, 200) - X constrained to 100
+      const moveToCall = (mockCtx.moveTo as any).mock.calls.find(
+        (call: number[]) => call[0] === 100 && call[1] === 200
+      );
+      expect(moveToCall).toBeDefined();
+    });
   });
 
   describe('multiple arrows', () => {

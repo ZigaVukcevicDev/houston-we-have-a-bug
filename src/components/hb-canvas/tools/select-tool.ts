@@ -410,6 +410,11 @@ export class SelectTool implements Tool {
           ctx.lineTo(hoveredLine.x2, hoveredLine.y2);
           ctx.stroke();
           ctx.restore();
+
+          // Also render arrowhead if this is an arrow
+          if (hoveredLine.hasArrowhead) {
+            this.renderArrowhead(ctx, hoveredLine, dpr, '#FAC021'); // Use the same hover color
+          }
         }
       } else if (this.hoveredAnnotationType === 'rectangle') {
         const hoveredRect = this.rectangleAnnotations.find(r => r.id === this.hoveredAnnotationId);
@@ -445,6 +450,48 @@ export class SelectTool implements Tool {
         renderHandle(ctx, selectedRect.x + selectedRect.width, selectedRect.y + selectedRect.height); // bottom-right
       }
     }
+  }
+
+  private renderArrowhead(
+    ctx: CanvasRenderingContext2D,
+    arrow: LineAnnotation,
+    dpr: number,
+    color: string
+  ): void {
+    const { x1, y1, x2, y2 } = arrow;
+
+    // Calculate angle of the arrow
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+
+    // Arrowhead dimensions (same as in ArrowTool)
+    const headLength = 16 * dpr;
+    const arrowAngle = Math.PI / 4; // 45 degrees
+
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1 * dpr; // Use 1px for hover, not the arrow's width
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // Draw first line of arrowhead (upper line)
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(
+      x2 - headLength * Math.cos(angle - arrowAngle),
+      y2 - headLength * Math.sin(angle - arrowAngle)
+    );
+    ctx.stroke();
+
+    // Draw second line of arrowhead (lower line)
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(
+      x2 - headLength * Math.cos(angle + arrowAngle),
+      y2 - headLength * Math.sin(angle + arrowAngle)
+    );
+    ctx.stroke();
+
+    ctx.restore();
   }
 
   private isPointOnLine(px: number, py: number, line: LineAnnotation): boolean {

@@ -9,8 +9,25 @@ export class ArrowTool extends LineTool {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-    this.currentPreviewX = (event.clientX - rect.left) * scaleX;
-    this.currentPreviewY = (event.clientY - rect.top) * scaleY;
+    let x = (event.clientX - rect.left) * scaleX;
+    let y = (event.clientY - rect.top) * scaleY;
+
+    // Apply shift-key constraints (same logic as parent)
+    const startPoint = (this as any).startPoint as { x: number; y: number } | null;
+    if (event.shiftKey && startPoint) {
+      const dx = Math.abs(x - startPoint.x);
+      const dy = Math.abs(y - startPoint.y);
+
+      if (dx > dy) {
+        y = startPoint.y; // Horizontal
+      } else {
+        x = startPoint.x; // Vertical
+      }
+    }
+
+    // Store constrained coordinates for preview
+    this.currentPreviewX = x;
+    this.currentPreviewY = y;
 
     // Call parent implementation
     super.handleMouseMove(event, canvas, ctx);
