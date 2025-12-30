@@ -764,3 +764,4 @@ describe('HBCanvas', () => {
     });
   });
 });
+
