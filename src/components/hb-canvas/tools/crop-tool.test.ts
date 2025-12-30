@@ -505,14 +505,263 @@ describe('CropTool', () => {
       expect(createCanvasSpy).toHaveBeenCalledWith('canvas');
     });
 
+    it('should return null if crop rectangle does not exist', () => {
+      expect(cropTool.confirmCrop(mockCanvas, mockImage)).toBeNull();
+    });
+
     it('should return null if canvas context is not available', () => {
-      cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
       const mockGetContext = vi.fn().mockReturnValue(null);
       vi.spyOn(document, 'createElement').mockReturnValue({
         getContext: mockGetContext,
       } as any);
       const result = cropTool.confirmCrop(mockCanvas, mockImage);
       expect(result).toBeNull();
+    });
+  });
+
+  describe('Handle dragging', () => {
+    beforeEach(() => {
+      cropTool['cropRect'] = { x: 200, y: 150, width: 400, height: 300 };
+    });
+
+    it('should resize from top-left handle', () => {
+      cropTool.handleMouseDown({ clientX: 200, clientY: 150 } as MouseEvent, mockCanvas);
+      expect(cropTool['draggedHandle']).toBe('top-left');
+
+      cropTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(cropTool['cropRect']?.x).toBeGreaterThan(200);
+      expect(cropTool['cropRect']?.y).toBeGreaterThan(150);
+      expect(cropTool['cropRect']?.width).toBeLessThan(400);
+      expect(cropTool['cropRect']?.height).toBeLessThan(300);
+    });
+
+    it('should resize from bottom-right handle', () => {
+      cropTool.handleMouseDown({ clientX: 600, clientY: 450 } as MouseEvent, mockCanvas);
+      expect(cropTool['draggedHandle']).toBe('bottom-right');
+
+      cropTool.handleMouseMove({ clientX: 650, clientY: 500 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(cropTool['cropRect']?.width).toBeGreaterThan(400);
+      expect(cropTool['cropRect']?.height).toBeGreaterThan(300);
+    });
+
+    it('should resize from left edge handle', () => {
+      cropTool.handleMouseDown({ clientX: 200, clientY: 300 } as MouseEvent, mockCanvas);
+      expect(cropTool['draggedHandle']).toBe('left');
+
+      cropTool.handleMouseMove({ clientX: 220, clientY: 300 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(cropTool['cropRect']?.x).toBe(220);
+      expect(cropTool['cropRect']?.width).toBeLessThan(400);
+    });
+
+    it('should enforce minimum size when resizing', () => {
+      const dpr = window.devicePixelRatio || 1;
+      const minWidth = 61 * dpr;
+      const minHeight = 34 * dpr;
+
+      cropTool.handleMouseDown({ clientX: 600, clientY: 450 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseMove({ clientX: 210, clientY: 160 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(cropTool['cropRect']?.width).toBeGreaterThanOrEqual(minWidth);
+      expect(cropTool['cropRect']?.height).toBeGreaterThanOrEqual(minHeight);
+    });
+
+    it('should finalize handle drag on mouseUp', () => {
+      cropTool.handleMouseDown({ clientX: 200, clientY: 150 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseUp({} as MouseEvent, mockCanvas);
+
+      expect(cropTool['draggedHandle']).toBeNull();
+      expect(cropTool['dragStartPoint']).toBeNull();
+      expect(mockRedraw).toHaveBeenCalled();
+    });
+  });
+
+  describe('Crop rectangle moving', () => {
+    beforeEach(() => {
+      cropTool['cropRect'] = { x: 200, y: 150, width: 400, height: 300 };
+    });
+
+    it('should move crop rectangle when dragging inside', () => {
+      cropTool.handleMouseDown({ clientX: 400, clientY: 300 } as MouseEvent, mockCanvas);
+      expect(cropTool['isDraggingCrop']).toBe(true);
+
+      cropTool.handleMouseMove({ clientX: 450, clientY: 350 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(cropTool['cropRect']?.x).toBe(250);
+      expect(cropTool['cropRect']?.y).toBe(200);
+    });
+
+    it('should preserve size when moving', () => {
+      cropTool.handleMouseDown({ clientX: 400, clientY: 300 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseMove({ clientX: 450, clientY: 350 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(cropTool['cropRect']?.width).toBe(400);
+      expect(cropTool['cropRect']?.height).toBe(300);
+    });
+
+    it('should finalize move on mouseUp', () => {
+      cropTool.handleMouseDown({ clientX: 400, clientY: 300 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseMove({ clientX: 450, clientY: 350 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseUp({} as MouseEvent, mockCanvas);
+
+      expect(cropTool['isDraggingCrop']).toBe(false);
+      expect(cropTool['dragStartPoint']).toBeNull();
+    });
+  });
+
+  describe('Cursor changes', () => {
+    beforeEach(() => {
+      cropTool['cropRect'] = { x: 200, y: 150, width: 400, height: 300 };
+      cropTool['isDrawing'] = false;
+    });
+
+    it('should change cursor to resize on handle hover', () => {
+      cropTool.handleMouseMove({ clientX: 200, clientY: 150 } as MouseEvent, mockCanvas, mockCtx);
+      expect(mockCanvas.style.cursor).toBe('nwse-resize');
+    });
+
+    it('should change cursor to move when hovering inside crop', () => {
+      cropTool.handleMouseMove({ clientX: 400, clientY: 300 } as MouseEvent, mockCanvas, mockCtx);
+      expect(mockCanvas.style.cursor).toBe('move');
+    });
+
+    it('should change cursor to crosshair when outside crop', () => {
+      cropTool.handleMouseMove({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas, mockCtx);
+      expect(mockCanvas.style.cursor).toBe('crosshair');
+    });
+
+    it('should get correct cursor for each handle type', () => {
+      expect(cropTool['getCursorForHandle']('top-left')).toBe('nwse-resize');
+      expect(cropTool['getCursorForHandle']('top-right')).toBe('nesw-resize');
+      expect(cropTool['getCursorForHandle']('left')).toBe('ew-resize');
+      expect(cropTool['getCursorForHandle']('top')).toBe('ns-resize');
+    });
+  });
+
+  describe('deactivate', () => {
+    it('should clear crop state', () => {
+      cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
+      cropTool['isDrawing'] = true;
+
+      cropTool.deactivate();
+
+      expect(cropTool['cropRect']).toBeNull();
+      expect(cropTool['isDrawing']).toBe(false);
+      expect(cropTool['startPoint']).toBeNull();
+    });
+
+    it('should remove keyboard listener', () => {
+      const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
+      cropTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+
+      cropTool.deactivate();
+
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+      expect(cropTool['keydownHandler']).toBeNull();
+    });
+
+    it('should trigger redraw', () => {
+      cropTool.deactivate();
+      expect(mockRedraw).toHaveBeenCalled();
+    });
+  });
+
+  describe('render', () => {
+    it('should not render if no crop rectangle', () => {
+      cropTool.render(mockCtx);
+      expect(mockCtx.fillRect).not.toHaveBeenCalled();
+    });
+
+    it('should draw overlay and handles when crop exists', () => {
+      cropTool['cropRect'] = { x: 200, y: 150, width: 400, height: 300 };
+      cropTool.render(mockCtx);
+
+      expect(mockCtx.fillRect).toHaveBeenCalled();
+      expect(mockCtx.strokeRect).toHaveBeenCalledWith(200, 150, 400, 300);
+      expect(mockCtx.save).toHaveBeenCalled();
+      expect(mockCtx.restore).toHaveBeenCalled();
+    });
+  });
+
+  describe('Edge cases for maximum coverage', () => {
+    it('should adjust position when drawing small crop right-to-left', () => {
+      cropTool.handleMouseDown({ clientX: 300, clientY: 200 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseMove({ clientX: 295, clientY: 195 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseUp({ clientX: 295, clientY: 195 } as MouseEvent, mockCanvas);
+
+      const dpr = window.devicePixelRatio || 1;
+      const minWidth = 61 * dpr;
+      expect(cropTool['cropRect']?.width).toBe(minWidth);
+      expect(cropTool['cropRect']?.x).toBe(300 - minWidth);
+    });
+
+    it('should adjust position when drawing small crop bottom-to-top', () => {
+      cropTool.handleMouseDown({ clientX: 200, clientY: 300 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseMove({ clientX: 195, clientY: 295 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseUp({ clientX: 195, clientY: 295 } as MouseEvent, mockCanvas);
+
+      const dpr = window.devicePixelRatio || 1;
+      const minHeight = 34 * dpr;
+      expect(cropTool['cropRect']?.height).toBe(minHeight);
+      expect(cropTool['cropRect']?.y).toBe(300 - minHeight);
+    });
+
+    it('should adjust position when resizing from left to minimum width', () => {
+      cropTool['cropRect'] = { x: 200, y: 150, width: 400, height: 300 };
+      const dpr = window.devicePixelRatio || 1;
+      const minWidth = 61 * dpr;
+
+      cropTool.handleMouseDown({ clientX: 200, clientY: 300 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseMove({ clientX: 590, clientY: 300 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(cropTool['cropRect']?.width).toBe(minWidth);
+      expect(cropTool['cropRect']?.x).toBe(200 + 400 - minWidth);
+    });
+
+    it('should adjust position when resizing from top to minimum height', () => {
+      cropTool['cropRect'] = { x: 200, y: 150, width: 400, height: 300 };
+      const dpr = window.devicePixelRatio || 1;
+      const minHeight = 34 * dpr;
+
+      cropTool.handleMouseDown({ clientX: 400, clientY: 150 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseMove({ clientX: 400, clientY: 440 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(cropTool['cropRect']?.height).toBe(minHeight);
+      expect(cropTool['cropRect']?.y).toBe(150 + 300 - minHeight);
+    });
+
+    it('should call onToolChange when cancelCrop with switchTool=true', () => {
+      cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
+      cropTool.cancelCrop(true);
+
+      expect(mockToolChange).toHaveBeenCalledWith('select');
+    });
+
+    it('should return isDrawing state', () => {
+      cropTool['isDrawing'] = true;
+      expect(cropTool.getIsDrawing()).toBe(true);
+
+      cropTool['isDrawing'] = false;
+      expect(cropTool.getIsDrawing()).toBe(false);
+    });
+
+    it('should return true when dragging handle', () => {
+      cropTool['draggedHandle'] = 'top-left';
+      expect(cropTool.getIsDragging()).toBe(true);
+    });
+
+    it('should return true when dragging crop', () => {
+      cropTool['isDraggingCrop'] = true;
+      expect(cropTool.getIsDragging()).toBe(true);
+    });
+
+    it('should return false when not dragging', () => {
+      cropTool['draggedHandle'] = null;
+      cropTool['isDraggingCrop'] = false;
+      expect(cropTool.getIsDragging()).toBe(false);
     });
   });
 });
