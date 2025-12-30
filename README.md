@@ -8,15 +8,13 @@
 ![SCSS](https://img.shields.io/badge/style-SCSS-CC6699)
 ![Build](https://img.shields.io/badge/build-esbuild-lightgrey)
 
-A Chrome extension that helps you annotate screenshots and gather system info for quick bug reporting.
-
-![Houston, we have a bug](src/images/extension-presentation/hb-small-promo-tile-440x280.jpg)
-
 <img
   src="src/images/extension-presentation/hb-small-promo-tile-440x280@2x.jpg"
   width="440"
   alt="Houston, we have a bug"
 />
+
+A Chrome extension that helps you annotate screenshots and gather system info for quick bug reporting.
 
 > 🚧 **Status: Work in progress — not published**
 >
