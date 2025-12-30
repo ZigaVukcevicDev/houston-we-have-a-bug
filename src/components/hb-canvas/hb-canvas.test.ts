@@ -445,8 +445,6 @@ describe('HBCanvas', () => {
     });
   });
 
-
-
   describe('edge cases', () => {
     it('should handle rapid mode switches', () => {
       expect(() => {

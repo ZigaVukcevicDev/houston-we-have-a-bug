@@ -32,6 +32,7 @@ You must follow these rules when working on this repository.
 - **Consistent spacing**: Use exactly one empty line between methods, functions, and major code blocks
   - ✅ Correct: Single empty line between methods
   - ❌ Incorrect: Two or more empty lines between methods
+  - **IMPORTANT**: When creating or editing files, you (the AI) must NEVER create two or more consecutive empty lines
 - **Strict types**: Use TypeScript interfaces properly. Avoid `any`.
 
 ## Code organization
@@ -71,7 +72,6 @@ You must follow these rules when working on this repository.
     - Test data strings (e.g., `input.value = 'Test text'`)
     - Test descriptions (e.g., `it('should handle errors gracefully')`)
     - Documentation headings and content
-
 
 ## 5. Icons & assets
 - **Icon swapping**: Use the CSS 3-state toggle pattern (Default/Hover/Active) with hidden `img` classes (`.icon-default`, `.icon-hover`, `.icon-active`) instead of SVGs filters or inline SVGs.

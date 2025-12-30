@@ -502,7 +502,6 @@ describe('LineTool', () => {
     });
   });
 
-
   describe('tool change callback', () => {
     it('should call onToolChange with "select" after drawing a line', () => {
       const mockToolChange = vi.fn();

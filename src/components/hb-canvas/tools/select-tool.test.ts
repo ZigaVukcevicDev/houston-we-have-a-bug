@@ -850,7 +850,6 @@ describe('SelectTool', () => {
     });
   });
 
-
   describe('rectangle hover detection', () => {
     it('should track hovered rectangle on mouse move', () => {
       expect(selectTool['hoveredAnnotationId']).toBeNull();

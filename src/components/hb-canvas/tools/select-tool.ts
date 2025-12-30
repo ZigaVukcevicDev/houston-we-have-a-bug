@@ -84,7 +84,6 @@ export class SelectTool implements Tool {
     this.onRedraw();
   }
 
-
   handleClick(event: MouseEvent, canvas: HTMLCanvasElement): void {
     const { x, y } = getCanvasCoordinates(event, canvas);
 
@@ -440,8 +439,6 @@ export class SelectTool implements Tool {
       }
     }
   }
-
-
 
   private isPointOnLine(px: number, py: number, line: LineAnnotation): boolean {
     const { x1, y1, x2, y2, width } = line;
