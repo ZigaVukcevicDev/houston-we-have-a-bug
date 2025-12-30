@@ -75,6 +75,7 @@
 - cancel crop
   - [x] clicking button
   - [x] with escape
+  - [ ] by selecting other tool 
 - [ ] croping through annotations
  
 6. Download
