@@ -6,8 +6,10 @@
 ![Tests](https://img.shields.io/badge/tests-391%20passing-success)
 ![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Chrome_extension-blue)
+![Lit](https://img.shields.io/badge/framework-Lit-324FFF?logo=lit)
 ![TypeScript](https://img.shields.io/badge/language-TypeScript-blue)
 ![SCSS](https://img.shields.io/badge/style-SCSS-CC6699)
+![Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)
 ![Build](https://img.shields.io/badge/build-esbuild-lightgrey)
 
 <img
