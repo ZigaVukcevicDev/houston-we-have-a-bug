@@ -44,7 +44,8 @@ export class HBCanvas extends LitElement {
 
   render() {
     const modeClass = this.activeTool ? `mode-${this.activeTool}` : 'mode-default';
-    const showCropButtons = this.activeTool === 'crop' && this.getCropButtonsPosition();
+    const cropTool = this.tools.get('crop') as CropTool;
+    const showCropButtons = this.activeTool === 'crop' && cropTool && !cropTool.getIsDrawing() && this.getCropButtonsPosition();
     return html`<canvas 
       class="${modeClass}"
       @click=${this.handleCanvasClick}

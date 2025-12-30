@@ -188,7 +188,7 @@ describe('CropTool', () => {
     });
 
     it('should keep crop rectangle if size is sufficient', () => {
-      cropTool.handleMouseUp({ clientX: 105, clientY: 105 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseUp({ clientX: 160, clientY: 135 } as MouseEvent, mockCanvas);
 
       expect(cropTool['cropRect']).not.toBeNull();
     });

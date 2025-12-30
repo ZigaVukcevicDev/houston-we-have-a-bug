@@ -167,8 +167,9 @@ export class CropTool implements Tool {
     const rectWidth = Math.abs(x - this.startPoint.x);
     const rectHeight = Math.abs(y - this.startPoint.y);
 
-    // Only keep rectangle if it has some size
-    if (rectWidth > 2 && rectHeight > 2) {
+    const minWidth = 56;
+    const minHeight = 29;
+    if (rectWidth > minWidth && rectHeight > minHeight) {
       this.cropRect = { x: rectX, y: rectY, width: rectWidth, height: rectHeight };
     } else {
       this.cropRect = null;
@@ -383,6 +384,10 @@ export class CropTool implements Tool {
 
   getCropRect(): { x: number; y: number; width: number; height: number } | null {
     return this.cropRect;
+  }
+
+  getIsDrawing(): boolean {
+    return this.isDrawing;
   }
 
   confirmCrop(canvas: HTMLCanvasElement, originalImage: HTMLImageElement): HTMLImageElement | null {
