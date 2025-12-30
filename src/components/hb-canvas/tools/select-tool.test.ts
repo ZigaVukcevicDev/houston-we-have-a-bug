@@ -1005,6 +1005,26 @@ describe('SelectTool', () => {
       expect(selectTool['hoveredAnnotationId']).toBeNull();
     });
 
+    it('should detect zero-length line (point) correctly', () => {
+      // Clear all lines and add only a zero-length line
+      lineAnnotations.length = 0;
+      lineAnnotations.push({
+        id: 'point-line',
+        x1: 200,
+        y1: 200,
+        x2: 200,
+        y2: 200,
+        color: '#E74C3C',
+        width: 5,
+      });
+      selectTool = new SelectTool(lineAnnotations, rectangleAnnotations, mockRedraw);
+
+      // Hover exactly on the point to trigger lengthSquared === 0 case
+      selectTool.handleMouseMove({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(selectTool['hoveredAnnotationId']).toBe('point-line');
+    });
+
     it('should work with diagonal arrows', () => {
       // Add a diagonal arrow
       lineAnnotations.push({
@@ -1331,9 +1351,9 @@ describe('SelectTool', () => {
     it('should remove keyboard listener', () => {
       const removeListenerSpy = vi.spyOn(document, 'removeEventListener');
       selectTool['keydownHandler'] = vi.fn();
-      
+
       selectTool.deactivate();
-      
+
       expect(removeListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
       expect(selectTool['keydownHandler']).toBeNull();
     });
