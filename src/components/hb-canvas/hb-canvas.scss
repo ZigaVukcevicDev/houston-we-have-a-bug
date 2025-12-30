@@ -2,6 +2,7 @@
 
 :host {
   display: block;
+  position: relative;
 }
 
 canvas {
@@ -33,5 +34,42 @@ canvas {
 
   &.mode-crop {
     cursor: crosshair;
+  }
+}
+
+.crop-buttons {
+  position: absolute;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.crop-button {
+  width: 32px;
+  height: 32px;
+  border: 2px solid $color-white;
+  border-radius: 4px;
+  background: $color-black;
+  color: $color-white;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  &.confirm {
+    &:hover {
+      background: $color-red-500;
+      border-color: $color-red-500;
+    }
+  }
+
+  &.cancel {
+    &:hover {
+      background: $color-red-400;
+      border-color: $color-red-400;
+    }
   }
 }

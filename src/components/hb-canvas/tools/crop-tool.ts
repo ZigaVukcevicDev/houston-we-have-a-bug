@@ -301,10 +301,12 @@ export class CropTool implements Tool {
     return cursorMap[handle];
   }
 
-  private cancelCrop(): void {
+  cancelCrop(): void {
     this.cropRect = null;
     this.isDrawing = false;
     this.startPoint = null;
+    this.draggedHandle = null;
+    this.isDraggingCrop = false;
 
     // Remove keyboard listener
     if (this.keydownHandler) {
@@ -377,5 +379,32 @@ export class CropTool implements Tool {
     renderHandle(ctx, x + width, y + height / 2); // Right-center
 
     ctx.restore();
+  }
+
+  getCropRect(): { x: number; y: number; width: number; height: number } | null {
+    return this.cropRect;
+  }
+
+  confirmCrop(canvas: HTMLCanvasElement, originalImage: HTMLImageElement): HTMLImageElement | null {
+    if (!this.cropRect) return null;
+    const croppedCanvas = document.createElement('canvas');
+    croppedCanvas.width = this.cropRect.width;
+    croppedCanvas.height = this.cropRect.height;
+    const croppedCtx = croppedCanvas.getContext('2d');
+    if (!croppedCtx) return null;
+    croppedCtx.drawImage(
+      originalImage,
+      this.cropRect.x,
+      this.cropRect.y,
+      this.cropRect.width,
+      this.cropRect.height,
+      0,
+      0,
+      this.cropRect.width,
+      this.cropRect.height
+    );
+    const croppedImage = new Image();
+    croppedImage.src = croppedCanvas.toDataURL();
+    return croppedImage;
   }
 }

@@ -44,14 +44,28 @@ export class HBCanvas extends LitElement {
 
   render() {
     const modeClass = this.activeTool ? `mode-${this.activeTool}` : 'mode-default';
-
+    const showCropButtons = this.activeTool === 'crop' && this.getCropButtonsPosition();
     return html`<canvas 
       class="${modeClass}"
       @click=${this.handleCanvasClick}
       @mousedown=${this.handleMouseDown}
       @mousemove=${this.handleMouseMove}
       @mouseup=${this.handleMouseUp}
-    ></canvas>`;
+    ></canvas>
+    ${showCropButtons ? html`
+      <div class="crop-buttons" style="${this.getCropButtonsStyle()}">
+        <button
+          class="crop-button confirm"
+          @click=${this.handleCropConfirm}
+          title="Confirm crop"
+        >✓</button>
+        <button
+          class="crop-button cancel"
+          @click=${this.handleCropCancel}
+          title="Cancel crop"
+        >✕</button>
+      </div>
+    ` : ''}`;
   }
 
   protected firstUpdated() {
@@ -171,6 +185,7 @@ export class HBCanvas extends LitElement {
     this.tools.forEach((tool) => {
       tool.render(this.ctx);
     });
+    this.requestUpdate();
   }
 
   private handleCanvasClick(event: MouseEvent) {
@@ -210,6 +225,51 @@ export class HBCanvas extends LitElement {
     if (selectTool) {
       selectTool.deselectAll();
       this.redraw();
+    }
+  }
+  private getCropButtonsPosition(): { x: number; y: number } | null {
+    const cropTool = this.tools.get('crop') as CropTool;
+    if (!cropTool) return null;
+    const cropRect = cropTool.getCropRect();
+    if (!cropRect) return null;
+    const dpr = window.devicePixelRatio || 1;
+    const buttonWidth = 72;
+    const buttonHeight = 32;
+    const padding = 8;
+    return {
+      x: cropRect.x + cropRect.width - (buttonWidth + padding) * dpr,
+      y: cropRect.y + cropRect.height - (buttonHeight + padding) * dpr
+    };
+  }
+  private getCropButtonsStyle(): string {
+    const pos = this.getCropButtonsPosition();
+    if (!pos) return '';
+    const dpr = window.devicePixelRatio || 1;
+    const x = pos.x / dpr;
+    const y = pos.y / dpr;
+    return `left: ${x}px; top: ${y}px;`;
+  }
+  private handleCropCancel(): void {
+    const cropTool = this.tools.get('crop') as CropTool;
+    if (cropTool) {
+      cropTool.cancelCrop();
+    }
+  }
+  private handleCropConfirm(): void {
+    const cropTool = this.tools.get('crop') as CropTool;
+    if (!cropTool || !this.originalImage) return;
+    const croppedImage = cropTool.confirmCrop(this.canvas, this.originalImage);
+    if (croppedImage) {
+      croppedImage.onload = () => {
+        this.originalImage = croppedImage;
+        const dpr = window.devicePixelRatio || 1;
+        this.canvas.width = croppedImage.width;
+        this.canvas.height = croppedImage.height;
+        this.canvas.style.width = `${croppedImage.width / dpr}px`;
+        this.canvas.style.height = `${croppedImage.height / dpr}px`;
+        cropTool.cancelCrop();
+        this.redraw();
+      };
     }
   }
 }

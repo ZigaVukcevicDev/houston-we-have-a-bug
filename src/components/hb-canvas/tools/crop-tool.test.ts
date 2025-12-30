@@ -376,4 +376,107 @@ describe('CropTool', () => {
       });
     });
   });
+
+  describe('getCropRect', () => {
+    it('should return null when no crop rectangle exists', () => {
+      expect(cropTool.getCropRect()).toBeNull();
+    });
+
+    it('should return crop rectangle when it exists', () => {
+      cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
+      const rect = cropTool.getCropRect();
+      expect(rect).toEqual({ x: 100, y: 100, width: 200, height: 150 });
+    });
+  });
+
+  describe('cancelCrop', () => {
+    it('should clear crop rectangle', () => {
+      cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
+      cropTool.cancelCrop();
+      expect(cropTool['cropRect']).toBeNull();
+    });
+
+    it('should reset drawing state', () => {
+      cropTool['isDrawing'] = true;
+      cropTool['startPoint'] = { x: 100, y: 100 };
+      cropTool.cancelCrop();
+      expect(cropTool['isDrawing']).toBe(false);
+      expect(cropTool['startPoint']).toBeNull();
+    });
+
+    it('should reset drag state', () => {
+      cropTool['draggedHandle'] = 'top-left';
+      cropTool['isDraggingCrop'] = true;
+      cropTool.cancelCrop();
+      expect(cropTool['draggedHandle']).toBeNull();
+      expect(cropTool['isDraggingCrop']).toBe(false);
+    });
+
+    it('should remove keyboard listener', () => {
+      const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
+      cropTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      cropTool.cancelCrop();
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+      expect(cropTool['keydownHandler']).toBeNull();
+    });
+
+    it('should call redraw', () => {
+      mockRedraw.mockClear();
+      cropTool.cancelCrop();
+      expect(mockRedraw).toHaveBeenCalled();
+    });
+
+    it('should switch to select tool', () => {
+      cropTool.cancelCrop();
+      expect(mockToolChange).toHaveBeenCalledWith('select');
+    });
+  });
+
+  describe('confirmCrop', () => {
+    let mockImage: HTMLImageElement;
+
+    beforeEach(() => {
+      mockImage = {
+        width: 800,
+        height: 600,
+      } as HTMLImageElement;
+    });
+
+    it('should return null when no crop rectangle exists', () => {
+      const result = cropTool.confirmCrop(mockCanvas, mockImage);
+      expect(result).toBeNull();
+    });
+
+    it('should create cropped image when crop rectangle exists', () => {
+      cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
+      const mockCreatedCanvas = {
+        width: 0,
+        height: 0,
+        getContext: vi.fn().mockReturnValue({
+          drawImage: vi.fn(),
+        }),
+        toDataURL: vi.fn().mockReturnValue('data:image/png;base64,mock'),
+      };
+      vi.spyOn(document, 'createElement').mockReturnValue(mockCreatedCanvas as any);
+      const result = cropTool.confirmCrop(mockCanvas, mockImage);
+      expect(result).toBeInstanceOf(HTMLImageElement);
+    });
+
+    it('should create canvas with correct crop dimensions', () => {
+      cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
+      const createCanvasSpy = vi.spyOn(document, 'createElement');
+      cropTool.confirmCrop(mockCanvas, mockImage);
+      expect(createCanvasSpy).toHaveBeenCalledWith('canvas');
+    });
+
+    it('should return null if canvas context is not available', () => {
+      cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
+      const mockGetContext = vi.fn().mockReturnValue(null);
+      vi.spyOn(document, 'createElement').mockReturnValue({
+        getContext: mockGetContext,
+      } as any);
+      const result = cropTool.confirmCrop(mockCanvas, mockImage);
+      expect(result).toBeNull();
+    });
+  });
 });
