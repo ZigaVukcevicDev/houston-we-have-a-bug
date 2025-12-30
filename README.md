@@ -13,7 +13,7 @@ A Chrome extension that helps you annotate screenshots and gather system info fo
 ![Houston, we have a bug](src/images/extension-presentation/hb-small-promo-tile-440x280.png)
 
 <img
-  src="src/images/extension-presentation/hb-small-promo-tile-440x280.jpg"
+  src="src/images/extension-presentation/hb-small-promo-tile-440x280@2x.jpg"
   width="440"
   alt="Houston, we have a bug"
 />
