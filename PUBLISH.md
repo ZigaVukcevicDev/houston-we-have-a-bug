@@ -14,7 +14,7 @@ Houston, we have a bug
 
 **Summary from package**
 
-Annotate screenshots, and gather system info for quick bug reporting.
+Annotate screenshots and gather system info for quick bug reporting.
 
 **Description**
 
@@ -48,7 +48,7 @@ English
 
 **Store icon**
 
-Use image `src/images/extension-presentation/icon-128.png`
+Use image `src/images/extension-presentation/hb-icon-128x128.png`
 
 #### 1.1.3 Additional fields
 

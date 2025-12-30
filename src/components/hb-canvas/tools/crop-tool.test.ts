@@ -181,10 +181,12 @@ describe('CropTool', () => {
       });
     });
 
-    it('should discard tiny crop rectangles', () => {
+    it('should expand tiny crop rectangles to minimum dimensions', () => {
       cropTool.handleMouseUp({ clientX: 101, clientY: 101 } as MouseEvent, mockCanvas);
 
-      expect(cropTool['cropRect']).toBeNull();
+      expect(cropTool['cropRect']).not.toBeNull();
+      expect(cropTool['cropRect']!.width).toBeGreaterThanOrEqual(61);
+      expect(cropTool['cropRect']!.height).toBeGreaterThanOrEqual(34);
     });
 
     it('should keep crop rectangle if size is sufficient', () => {

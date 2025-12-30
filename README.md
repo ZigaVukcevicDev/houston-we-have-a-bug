@@ -10,6 +10,8 @@
 
 A Chrome extension that helps you annotate screenshots and gather system info for quick bug reporting.
 
+![Houston, we have a bug](src/images/extension-presentation/hb-small-promo-tile-440x280.jpg)
+
 > 🚧 **Status: Work in progress — not published**
 >
 > This Chrome extension is under active development and has **not been published

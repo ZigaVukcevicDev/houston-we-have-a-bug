@@ -167,13 +167,25 @@ export class CropTool implements Tool {
     const rectWidth = Math.abs(x - this.startPoint.x);
     const rectHeight = Math.abs(y - this.startPoint.y);
 
-    const minWidth = 56;
-    const minHeight = 29;
-    if (rectWidth > minWidth && rectHeight > minHeight) {
-      this.cropRect = { x: rectX, y: rectY, width: rectWidth, height: rectHeight };
-    } else {
-      this.cropRect = null;
+    const dpr = window.devicePixelRatio || 1;
+    const minWidth = 61 * dpr;
+    const minHeight = 34 * dpr;
+
+    // Expand to minimum dimensions if too small
+    let finalWidth = Math.max(rectWidth, minWidth);
+    let finalHeight = Math.max(rectHeight, minHeight);
+    let finalX = rectX;
+    let finalY = rectY;
+
+    // Adjust position if we expanded
+    if (finalWidth > rectWidth && x < this.startPoint.x) {
+      finalX = this.startPoint.x - minWidth;
     }
+    if (finalHeight > rectHeight && y < this.startPoint.y) {
+      finalY = this.startPoint.y - minHeight;
+    }
+
+    this.cropRect = { x: finalX, y: finalY, width: finalWidth, height: finalHeight };
 
     this.isDrawing = false;
     this.startPoint = null;
@@ -233,16 +245,19 @@ export class CropTool implements Tool {
         break;
     }
 
-    // Ensure minimum size
-    if (newWidth < 10) newWidth = 10;
-    if (newHeight < 10) newHeight = 10;
+    // Ensure minimum size to fit buttons (accounting for DPR)
+    const dpr = window.devicePixelRatio || 1;
+    const minWidth = 61 * dpr;
+    const minHeight = 34 * dpr;
+    if (newWidth < minWidth) newWidth = minWidth;
+    if (newHeight < minHeight) newHeight = minHeight;
 
-    // Adjust position if width/height went negative
-    if (newWidth === 10 && handle.includes('left')) {
-      newX = orig.x + orig.width - 10;
+    // Adjust position if width/height was constrained
+    if (newWidth === minWidth && handle.includes('left')) {
+      newX = orig.x + orig.width - minWidth;
     }
-    if (newHeight === 10 && handle.includes('top')) {
-      newY = orig.y + orig.height - 10;
+    if (newHeight === minHeight && handle.includes('top')) {
+      newY = orig.y + orig.height - minHeight;
     }
 
     this.cropRect = { x: newX, y: newY, width: newWidth, height: newHeight };
@@ -388,6 +403,10 @@ export class CropTool implements Tool {
 
   getIsDrawing(): boolean {
     return this.isDrawing;
+  }
+
+  getIsDragging(): boolean {
+    return this.draggedHandle !== null || this.isDraggingCrop;
   }
 
   confirmCrop(canvas: HTMLCanvasElement, originalImage: HTMLImageElement): HTMLImageElement | null {

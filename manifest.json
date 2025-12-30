@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Houston, we have a bug",
   "version": "0.0.1",
-  "description": "Annotate screenshots, and gather system info for quick bug reporting.",
+  "description": "Annotate screenshots and gather system info for quick bug reporting.",
   "permissions": [
     "activeTab",
     "tabs",

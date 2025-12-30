@@ -66,6 +66,9 @@
   - [x] bottom endpoint
 - move crop rectangle
   - [x] on hover crop rectangle
+- minimum dimensions
+  - [ ] on init
+  - [ ] on resize
 
 6. Download
 
@@ -86,3 +89,4 @@
 - [x] when hovering over rectangle, highlight is visible only when hover over horizontal parts
 - [ ] find a way to have better hover color for secondary button (as current is too pale)
 - [ ] increase code coverage
+- [ ] figure out how to avoid "tabs" permission
