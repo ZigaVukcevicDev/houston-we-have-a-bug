@@ -729,6 +729,31 @@ describe('HBCanvas', () => {
       expect(confirmSpy).toHaveBeenCalledWith(mockCanvasElement, canvas['originalImage']);
     });
 
+    it('should dispatch tool-change event after confirming crop', () => {
+      canvas.activeTool = 'crop';
+      const cropTool = canvas['tools'].get('crop') as CropTool;
+      cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
+
+      
+      const mockImage = new Image();
+      vi.spyOn(cropTool as any, "confirmCrop").mockReturnValue(mockImage);
+
+      // Listen for the tool-change event
+      let eventFired = false;
+      let eventDetail: any = null;
+      canvas.addEventListener('tool-change', (e: Event) => {
+        eventFired = true;
+        eventDetail = (e as CustomEvent).detail;
+      });
+
+      canvas['handleCropConfirm']();
+
+      mockImage.onload?.({} as Event);
+
+      expect(eventFired).toBe(true);
+      expect(eventDetail?.tool).toBe('select');
+    });
+
     it('should not handle crop confirm without original image', () => {
       canvas.activeTool = 'crop';
       canvas['originalImage'] = null;

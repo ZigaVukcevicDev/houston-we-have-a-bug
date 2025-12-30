@@ -67,7 +67,8 @@ canvas {
       background: $color-red-500;
     }
 
-    img {
+    .icon-default,
+    .icon-hover-and-active {
       width: 16px;
       height: 16px;
       display: block;

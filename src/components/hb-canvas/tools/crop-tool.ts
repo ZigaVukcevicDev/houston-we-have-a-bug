@@ -317,7 +317,7 @@ export class CropTool implements Tool {
     return cursorMap[handle];
   }
 
-  cancelCrop(): void {
+  cancelCrop(canvas?: HTMLCanvasElement): void {
     this.cropRect = null;
     this.isDrawing = false;
     this.startPoint = null;
@@ -331,6 +331,11 @@ export class CropTool implements Tool {
     }
 
     this.onRedraw();
+
+    // Reset cursor to crosshair since there's no crop rectangle
+    if (canvas) {
+      canvas.style.cursor = 'crosshair';
+    }
 
     // Switch to select tool
     this.onToolChange?.('select');

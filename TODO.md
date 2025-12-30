@@ -67,8 +67,14 @@
 - move crop rectangle
   - [x] on hover crop rectangle
 - minimum dimensions
-  - [ ] on init
-  - [ ] on resize
+  - [x] on init
+  - [x] on resize
+- confirm crop
+  - [ ] clicking button
+  - [ ] with enter
+- cancel crop
+  - [ ] clicking button
+  - [ ] with escape
 
 6. Download
 

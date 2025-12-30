@@ -257,7 +257,7 @@ export class HBCanvas extends LitElement {
   private handleCropCancel(): void {
     const cropTool = this.tools.get('crop') as CropTool;
     if (cropTool) {
-      cropTool.cancelCrop();
+      cropTool.cancelCrop(this.canvas);
     }
   }
   private handleCropConfirm(): void {
@@ -274,6 +274,14 @@ export class HBCanvas extends LitElement {
         this.canvas.style.height = `${croppedImage.height / dpr}px`;
         cropTool.cancelCrop();
         this.redraw();
+        this.activeTool = 'select';
+        this.requestUpdate();
+        // Dispatch event so parent component (hb-annotation) knows about the tool change
+        this.dispatchEvent(new CustomEvent('tool-change', {
+          detail: { tool: 'select' },
+          bubbles: true,
+          composed: true
+        }));
       };
     }
   }

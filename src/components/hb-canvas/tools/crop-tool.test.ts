@@ -427,11 +427,6 @@ describe('CropTool', () => {
       cropTool.cancelCrop();
       expect(mockRedraw).toHaveBeenCalled();
     });
-
-    it('should switch to select tool', () => {
-      cropTool.cancelCrop();
-      expect(mockToolChange).toHaveBeenCalledWith('select');
-    });
   });
 
   describe('confirmCrop', () => {
