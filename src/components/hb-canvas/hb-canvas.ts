@@ -55,15 +55,17 @@ export class HBCanvas extends LitElement {
     ${showCropButtons ? html`
       <div class="crop-buttons" style="${this.getCropButtonsStyle()}">
         <button
-          class="crop-button confirm"
           @click=${this.handleCropConfirm}
           title="Confirm crop"
-        >✓</button>
+        >
+          <img src="../images/check-1-white.svg" alt="check" />
+        </button>
         <button
-          class="crop-button cancel"
           @click=${this.handleCropCancel}
           title="Cancel crop"
-        >✕</button>
+        >
+          <img src="../images/cancel-white.svg" alt="cancel" />
+        </button>
       </div>
     ` : ''}`;
   }
@@ -233,9 +235,9 @@ export class HBCanvas extends LitElement {
     const cropRect = cropTool.getCropRect();
     if (!cropRect) return null;
     const dpr = window.devicePixelRatio || 1;
-    const buttonWidth = 72;
-    const buttonHeight = 32;
-    const padding = 8;
+    const buttonWidth = 51;
+    const buttonHeight = 24;
+    const padding = 5;
     return {
       x: cropRect.x + cropRect.width - (buttonWidth + padding) * dpr,
       y: cropRect.y + cropRect.height - (buttonHeight + padding) * dpr

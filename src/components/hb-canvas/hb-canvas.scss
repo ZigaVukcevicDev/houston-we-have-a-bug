@@ -40,36 +40,34 @@ canvas {
 .crop-buttons {
   position: absolute;
   display: flex;
-  gap: 8px;
+  gap: 3px;
   z-index: 10;
-}
 
-.crop-button {
-  width: 32px;
-  height: 32px;
-  border: 2px solid $color-white;
-  border-radius: 4px;
-  background: $color-black;
-  color: $color-white;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
+  button {
+    width: 24px;
+    height: 24px;
+    border: 1px solid $color-white;
+    border-radius: 5px;
+    background: $color-black;
+    color: $color-white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
 
-  &.confirm {
-    &:hover {
-      background: $color-red-500;
-      border-color: $color-red-500;
-    }
-  }
-
-  &.cancel {
     &:hover {
       background: $color-red-400;
-      border-color: $color-red-400;
+    }
+
+    &:active {
+      background: $color-red-500;
+    }
+
+    img {
+      width: 16px;
+      height: 16px;
+      display: block;
     }
   }
 }
