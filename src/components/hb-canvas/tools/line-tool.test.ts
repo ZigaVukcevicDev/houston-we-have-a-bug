@@ -607,4 +607,21 @@ describe('LineTool', () => {
       removeEventListenerSpy.mockRestore();
     });
   });
+
+  describe('deactivate', () => {
+    it('should call cancelDrawing which triggers redraw', () => {
+      const mockRedraw = vi.fn();
+      const lineTool = new LineTool([], mockRedraw);
+
+      // Start drawing
+      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      mockRedraw.mockClear();
+
+      lineTool.deactivate();
+
+      expect(lineTool['isDrawing']).toBe(false);
+      expect(mockRedraw).toHaveBeenCalled();
+    });
+  });
 });
+
