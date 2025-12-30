@@ -10,4 +10,14 @@ describe('HoustonWeHaveABug', () => {
     const element = new HoustonWeHaveABug();
     expect(element).toBeInstanceOf(HoustonWeHaveABug);
   });
+  it('should render hb-popup element', async () => {
+    const element = new HoustonWeHaveABug();
+    document.body.appendChild(element);
+    await element.updateComplete;
+    
+    const popup = element.shadowRoot?.querySelector('hb-popup');
+    expect(popup).toBeTruthy();
+    
+    document.body.removeChild(element);
+  });
 });
