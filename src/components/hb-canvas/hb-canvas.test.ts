@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { HBCanvas } from './hb-canvas';
 import { SelectTool } from './tools/select-tool';
+import { CropTool } from './tools/crop-tool';
 
 describe('HBCanvas', () => {
   let canvas: HBCanvas;
@@ -632,6 +633,109 @@ describe('HBCanvas', () => {
 
       // Should NOT select because tool is not 'select'
       expect(selectAnnotationSpy).not.toHaveBeenCalled();
+    });
+  });
+  describe('crop buttons', () => {
+    let mockCanvasElement: any;
+    let mockCtx: any;
+
+    beforeEach(() => {
+      mockCtx = {
+        clearRect: vi.fn(),
+        drawImage: vi.fn(),
+        strokeStyle: '',
+        lineWidth: 0,
+        lineCap: '',
+        beginPath: vi.fn(),
+        moveTo: vi.fn(),
+        lineTo: vi.fn(),
+        stroke: vi.fn(),
+        save: vi.fn(),
+        restore: vi.fn(),
+        fillRect: vi.fn(),
+        strokeRect: vi.fn(),
+        canvas: {
+          width: 800,
+          height: 600,
+        },
+      };
+      mockCanvasElement = {
+        getBoundingClientRect: vi.fn().mockReturnValue({
+          left: 0,
+          top: 0,
+          width: 800,
+          height: 600,
+        }),
+        width: 800,
+        height: 600,
+        getContext: vi.fn().mockReturnValue(mockCtx),
+        style: {},
+      };
+      Object.defineProperty(canvas, 'canvas', {
+        value: mockCanvasElement,
+        writable: true,
+      });
+      canvas['firstUpdated']();
+      canvas['originalImage'] = { width: 800, height: 600 } as HTMLImageElement;
+    });
+
+    it('should show crop buttons when crop tool is active and crop rectangle exists', () => {
+      canvas.activeTool = 'crop';
+      const cropTool = canvas['tools'].get('crop') as CropTool;
+      cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
+      canvas['redraw']();
+      const hasButtons = canvas['getCropButtonsPosition']();
+      expect(hasButtons).not.toBeNull();
+    });
+
+    it('should not show crop buttons when crop tool is active but no crop rectangle', () => {
+      canvas.activeTool = 'crop';
+      const hasButtons = canvas['getCropButtonsPosition']();
+      expect(hasButtons).toBeNull();
+    });
+
+    it('should not show crop buttons when different tool is active', () => {
+      canvas.activeTool = 'select';
+      const cropTool = canvas['tools'].get('crop') as CropTool;
+      cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
+      const showCropButtons = (canvas.activeTool as string) === 'crop' && canvas['getCropButtonsPosition']();
+      expect(showCropButtons).toBeFalsy();
+    });
+
+    it('should calculate button position inside crop rectangle', () => {
+      canvas.activeTool = 'crop';
+      const cropTool = canvas['tools'].get('crop') as CropTool;
+      cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
+      const pos = canvas['getCropButtonsPosition']();
+      expect(pos).not.toBeNull();
+      expect(pos?.x).toBeLessThan(300);
+      expect(pos?.y).toBeLessThan(250);
+    });
+
+    it('should handle crop cancel', () => {
+      canvas.activeTool = 'crop';
+      const cropTool = canvas['tools'].get('crop')!;
+      const cancelSpy = vi.spyOn(cropTool as any, 'cancelCrop');
+      canvas['handleCropCancel']();
+      expect(cancelSpy).toHaveBeenCalled();
+    });
+
+    it('should handle crop confirm with existing crop', () => {
+      canvas.activeTool = 'crop';
+      const cropTool = canvas['tools'].get('crop') as CropTool;
+      cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
+      const confirmSpy = vi.spyOn(cropTool as any, 'confirmCrop');
+      canvas['handleCropConfirm']();
+      expect(confirmSpy).toHaveBeenCalledWith(mockCanvasElement, canvas['originalImage']);
+    });
+
+    it('should not handle crop confirm without original image', () => {
+      canvas.activeTool = 'crop';
+      canvas['originalImage'] = null;
+      const cropTool = canvas['tools'].get('crop')!;
+      const confirmSpy = vi.spyOn(cropTool as any, 'confirmCrop');
+      canvas['handleCropConfirm']();
+      expect(confirmSpy).not.toHaveBeenCalled();
     });
   });
 });
