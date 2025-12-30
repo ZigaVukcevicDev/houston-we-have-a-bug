@@ -763,5 +763,60 @@ describe('CropTool', () => {
       cropTool['isDraggingCrop'] = false;
       expect(cropTool.getIsDragging()).toBe(false);
     });
+
+    it('should resize from right edge handle', () => {
+      cropTool['cropRect'] = { x: 200, y: 150, width: 400, height: 300 };
+      cropTool.handleMouseDown({ clientX: 600, clientY: 300 } as MouseEvent, mockCanvas);
+      expect(cropTool['draggedHandle']).toBe('right');
+
+      cropTool.handleMouseMove({ clientX: 650, clientY: 300 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(cropTool['cropRect']?.width).toBeGreaterThan(400);
+      expect(cropTool['cropRect']?.x).toBe(200);
+    });
+
+    it('should resize from bottom edge handle', () => {
+      cropTool['cropRect'] = { x: 200, y: 150, width: 400, height: 300 };
+      cropTool.handleMouseDown({ clientX: 400, clientY: 450 } as MouseEvent, mockCanvas);
+      expect(cropTool['draggedHandle']).toBe('bottom');
+
+      cropTool.handleMouseMove({ clientX: 400, clientY: 500 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(cropTool['cropRect']?.height).toBeGreaterThan(300);
+      expect(cropTool['cropRect']?.y).toBe(150);
+    });
+
+    it('should resize from top edge handle', () => {
+      cropTool['cropRect'] = { x: 200, y: 150, width: 400, height: 300 };
+      cropTool.handleMouseDown({ clientX: 400, clientY: 150 } as MouseEvent, mockCanvas);
+      expect(cropTool['draggedHandle']).toBe('top');
+
+      cropTool.handleMouseMove({ clientX: 400, clientY: 100 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(cropTool['cropRect']?.y).toBeLessThan(150);
+      expect(cropTool['cropRect']?.height).toBeGreaterThan(300);
+    });
+
+    it('should resize from top-right handle', () => {
+      cropTool['cropRect'] = { x: 200, y: 150, width: 400, height: 300 };
+      cropTool.handleMouseDown({ clientX: 600, clientY: 150 } as MouseEvent, mockCanvas);
+      expect(cropTool['draggedHandle']).toBe('top-right');
+
+      cropTool.handleMouseMove({ clientX: 650, clientY: 100 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(cropTool['cropRect']?.width).toBeGreaterThan(400);
+      expect(cropTool['cropRect']?.y).toBeLessThan(150);
+    });
+
+    it('should resize from bottom-left handle', () => {
+      cropTool['cropRect'] = { x: 200, y: 150, width: 400, height: 300 };
+      cropTool.handleMouseDown({ clientX: 200, clientY: 450 } as MouseEvent, mockCanvas);
+      expect(cropTool['draggedHandle']).toBe('bottom-left');
+
+      cropTool.handleMouseMove({ clientX: 150, clientY: 500 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(cropTool['cropRect']?.x).toBeLessThan(200);
+      expect(cropTool['cropRect']?.height).toBeGreaterThan(300);
+    });
   });
 });
