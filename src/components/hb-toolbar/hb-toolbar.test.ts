@@ -104,5 +104,29 @@ describe('HBToolbar', () => {
 
       expect(toolbar.activeTool).toBe('text');
     });
+
+    it('should render all tool buttons', async () => {
+      document.body.appendChild(toolbar);
+      await toolbar.updateComplete;
+
+      const toolButtons = toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
+      expect(toolButtons?.length).toBe(6); // select, text, line, arrow, rectangle, crop
+    });
+
+    it('should render download button', async () => {
+      document.body.appendChild(toolbar);
+      await toolbar.updateComplete;
+
+      const downloadButton = toolbar.shadowRoot?.querySelector('.download');
+      expect(downloadButton).toBeTruthy();
+    });
+
+    it('should render logo link', async () => {
+      document.body.appendChild(toolbar);
+      await toolbar.updateComplete;
+
+      const logo = toolbar.shadowRoot?.querySelector('.logo');
+      expect(logo).toBeTruthy();
+    });
   });
 });
