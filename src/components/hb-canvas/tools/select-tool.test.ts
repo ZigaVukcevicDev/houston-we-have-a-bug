@@ -1306,4 +1306,36 @@ describe('SelectTool', () => {
       expect(mockCtx.stroke).toHaveBeenCalled();
     });
   });
+
+  describe('cursor changes on handle hover', () => {
+    it('should set cursor to move when hovering over line handle', () => {
+      selectTool['selectedAnnotationId'] = 'line-1';
+      selectTool['selectedAnnotationType'] = 'line';
+
+      selectTool.handleMouseMove({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(mockCanvas.style.cursor).toBe('move');
+    });
+
+    it('should set cursor to move when hovering over rectangle handle', () => {
+      selectTool['selectedAnnotationId'] = 'rect-1';
+      selectTool['selectedAnnotationType'] = 'rectangle';
+
+      selectTool.handleMouseMove({ clientX: 100, clientY: 300 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(mockCanvas.style.cursor).toBe('move');
+    });
+  });
+
+  describe('deactivate', () => {
+    it('should remove keyboard listener', () => {
+      const removeListenerSpy = vi.spyOn(document, 'removeEventListener');
+      selectTool['keydownHandler'] = vi.fn();
+      
+      selectTool.deactivate();
+      
+      expect(removeListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+      expect(selectTool['keydownHandler']).toBeNull();
+    });
+  });
 });
