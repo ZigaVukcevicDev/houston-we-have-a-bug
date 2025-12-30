@@ -47,10 +47,9 @@ canvas {
   button {
     width: 24px;
     height: 24px;
-    border: 1px solid $color-white;
+    border: 1px solid $color-yellow-500;
     border-radius: 5px;
-    background: $color-black;
-    color: $color-white;
+    background: $color-yellow-500;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -59,10 +58,12 @@ canvas {
     pointer-events: auto;
 
     &:hover {
+      border-color: $color-red-400;
       background: $color-red-400;
     }
 
     &:active {
+      border-color: $color-red-500;
       background: $color-red-500;
     }
 
@@ -70,6 +71,21 @@ canvas {
       width: 16px;
       height: 16px;
       display: block;
+    }
+
+    .icon-hover-and-active {
+      display: none;
+    }
+
+    &:hover,
+    &:active {
+      .icon-default {
+        display: none;
+      }
+
+      .icon-hover-and-active {
+        display: block;
+      }
     }
   }
 }

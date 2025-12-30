@@ -59,13 +59,15 @@ export class HBCanvas extends LitElement {
           @click=${this.handleCropConfirm}
           title="Confirm crop"
         >
-          <img src="../images/check-1-white.svg" alt="check" />
+          <img class="icon-default" src="../images/check-1-black.svg" alt="check" />
+          <img class="icon-hover-and-active" src="../images/check-1-white.svg" alt="check" />
         </button>
         <button
           @click=${this.handleCropCancel}
           title="Cancel crop"
         >
-          <img src="../images/cancel-white.svg" alt="cancel" />
+          <img class="icon-default" src="../images/cancel-black.svg" alt="cancel" />
+          <img class="icon-hover-and-active" src="../images/cancel-white.svg" alt="cancel" />
         </button>
       </div>
     ` : ''}`;
