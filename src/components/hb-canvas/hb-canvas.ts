@@ -136,7 +136,8 @@ export class HBCanvas extends LitElement {
     ));
     this.tools.set('crop', new CropTool(
       () => this.redraw(),
-      (tool: string) => this.handleToolChange(tool)
+      (tool: string) => this.handleToolChange(tool),
+      () => this.handleCropConfirm()
     ));
   }
 
@@ -257,7 +258,7 @@ export class HBCanvas extends LitElement {
   private handleCropCancel(): void {
     const cropTool = this.tools.get('crop') as CropTool;
     if (cropTool) {
-      cropTool.cancelCrop(this.canvas);
+      cropTool.cancelCrop(false, this.canvas);
     }
   }
   private handleCropConfirm(): void {

@@ -70,12 +70,13 @@
   - [x] on init
   - [x] on resize
 - confirm crop
-  - [ ] clicking button
-  - [ ] with enter
+  - [x] clicking button
+  - [x] with enter
 - cancel crop
-  - [ ] clicking button
-  - [ ] with escape
-
+  - [x] clicking button
+  - [x] with escape
+- [ ] croping through annotations
+ 
 6. Download
 
 - [x] deselect annotaions when downloading

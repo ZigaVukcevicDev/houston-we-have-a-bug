@@ -252,24 +252,63 @@ describe('CropTool', () => {
       expect(mockRedraw).toHaveBeenCalled();
     });
 
-    it('should switch to select tool on Escape', () => {
+    it('should cancel crop without switching tools on Escape', () => {
+      // Set up a crop rectangle first
+      cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
       cropTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
 
       const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
       cropTool['keydownHandler']?.(escapeEvent);
 
-      expect(mockToolChange).toHaveBeenCalledWith('select');
+      expect(cropTool['cropRect']).toBeNull();
+      expect(mockToolChange).not.toHaveBeenCalled();
+      expect(mockCanvas.style.cursor).toBe('crosshair');
     });
 
-    it('should remove keyboard listener after escape', () => {
-      const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
-
+    it('should not handle Escape when no crop rectangle exists', () => {
       cropTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      cropTool['cropRect'] = null;
+
       const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
       cropTool['keydownHandler']?.(escapeEvent);
 
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
-      expect(cropTool['keydownHandler']).toBeNull();
+      expect(mockToolChange).not.toHaveBeenCalled();
+    });
+
+    it('should confirm crop on Enter key', () => {
+      const mockConfirmCrop = vi.fn();
+      cropTool = new CropTool(mockRedraw, mockToolChange, mockConfirmCrop);
+      cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
+      cropTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+
+      const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
+      cropTool['keydownHandler']?.(enterEvent);
+
+      expect(mockConfirmCrop).toHaveBeenCalled();
+    });
+
+    it('should not handle Enter when no crop rectangle exists', () => {
+      const mockConfirmCrop = vi.fn();
+      cropTool = new CropTool(mockRedraw, mockToolChange, mockConfirmCrop);
+      cropTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      cropTool['cropRect'] = null;
+
+      const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
+      cropTool['keydownHandler']?.(enterEvent);
+
+      expect(mockConfirmCrop).not.toHaveBeenCalled();
+    });
+
+    it('should not handle Enter when no confirm callback provided', () => {
+      // cropTool created without confirm callback
+      cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
+      cropTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+
+      const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
+      cropTool['keydownHandler']?.(enterEvent);
+
+      // Should not throw error
+      expect(cropTool['cropRect']).not.toBeNull();
     });
   });
 

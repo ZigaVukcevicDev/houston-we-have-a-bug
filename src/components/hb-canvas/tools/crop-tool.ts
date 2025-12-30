@@ -11,15 +11,18 @@ export class CropTool implements Tool {
   private readonly color: string = toolStyles.color;
   private onRedraw: () => void;
   private onToolChange?: (tool: string) => void;
+  private onConfirmCrop?: () => void;
   private keydownHandler: ((event: KeyboardEvent) => void) | null = null;
   private draggedHandle: HandleType | null = null;
   private dragStartPoint: { x: number; y: number } | null = null;
   private originalCropRect: { x: number; y: number; width: number; height: number } | null = null;
   private isDraggingCrop: boolean = false;
+  private canvas: HTMLCanvasElement | null = null;
 
-  constructor(onRedraw: () => void, onToolChange?: (tool: string) => void) {
+  constructor(onRedraw: () => void, onToolChange?: (tool: string) => void, onConfirmCrop?: () => void) {
     this.onRedraw = onRedraw;
     this.onToolChange = onToolChange;
+    this.onConfirmCrop = onConfirmCrop;
   }
 
   handleMouseDown(event: MouseEvent, canvas: HTMLCanvasElement): void {
@@ -51,10 +54,15 @@ export class CropTool implements Tool {
       this.isDraggingCrop = false;
     }
 
-    // Add keyboard listener for Escape key
+    // Store canvas reference for keyboard events
+    this.canvas = canvas;
+
+    // Add keyboard listener for Enter and Escape keys
     this.keydownHandler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        this.cancelCrop();
+      if (e.key === 'Escape' && this.cropRect) {
+        this.cancelCrop(false, canvas);
+      } else if (e.key === 'Enter' && this.cropRect && this.onConfirmCrop) {
+        this.onConfirmCrop();
       }
     };
     document.addEventListener('keydown', this.keydownHandler);
@@ -317,7 +325,7 @@ export class CropTool implements Tool {
     return cursorMap[handle];
   }
 
-  cancelCrop(canvas?: HTMLCanvasElement): void {
+  cancelCrop(switchTool: boolean = false, canvas?: HTMLCanvasElement): void {
     this.cropRect = null;
     this.isDrawing = false;
     this.startPoint = null;
@@ -337,8 +345,10 @@ export class CropTool implements Tool {
       canvas.style.cursor = 'crosshair';
     }
 
-    // Switch to select tool
-    this.onToolChange?.('select');
+    // Switch to select tool if requested (e.g., via Escape key)
+    if (switchTool && this.onToolChange) {
+      this.onToolChange('select');
+    }
   }
 
   deactivate(): void {
