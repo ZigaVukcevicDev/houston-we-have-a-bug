@@ -75,7 +75,7 @@
 - cancel crop
   - [x] clicking button
   - [x] with escape
-  - [ ] by selecting other tool 
+  - [x] by selecting other tool 
 - [ ] croping through annotations
  
 6. Download
@@ -84,7 +84,7 @@
 
 ## Extra
 
-- [ ] update crop area border when text tool designed
+- [x] update crop area border when text tool designed
 - [ ] disable buttons "Annotate screenshot" and "Gather system info" when in annotations mode
 - [ ] when moving array via endpoint (start or end), it sometimes goes to select tool when release mouse button
 - [ ] change cursors when moving endpoints or annotations (reference to crop tool - if applicable?)

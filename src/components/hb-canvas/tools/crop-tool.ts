@@ -391,10 +391,23 @@ export class CropTool implements Tool {
     // Right
     ctx.fillRect(x + width, y, canvasWidth - (x + width), height);
 
-    // Draw crop rectangle border
-    ctx.strokeStyle = this.color;
-    ctx.lineWidth = 2 * dpr;
+    // Draw crop rectangle border with dashed style
+    // First pass: black dashes
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 3 * dpr;
+    ctx.setLineDash([6 * dpr, 6 * dpr]);
+    ctx.lineDashOffset = 0;
     ctx.strokeRect(x, y, width, height);
+
+    // Second pass: yellow dashes (offset to fill the gaps)
+    ctx.strokeStyle = '#FAC021';
+    ctx.lineWidth = 3 * dpr;
+    ctx.setLineDash([6 * dpr, 6 * dpr]);
+    ctx.lineDashOffset = 6 * dpr;
+    ctx.strokeRect(x, y, width, height);
+
+    // Reset line dash for handles
+    ctx.setLineDash([]);
 
     // Render 8 handles
     // 4 corners

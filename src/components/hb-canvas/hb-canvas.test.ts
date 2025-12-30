@@ -96,6 +96,7 @@ describe('HBCanvas', () => {
         stroke: vi.fn(),
         fillRect: vi.fn(),
         strokeRect: vi.fn(),
+        setLineDash: vi.fn(),
       };
 
       mockCanvasElement = {
@@ -654,6 +655,7 @@ describe('HBCanvas', () => {
         restore: vi.fn(),
         fillRect: vi.fn(),
         strokeRect: vi.fn(),
+        setLineDash: vi.fn(),
         canvas: {
           width: 800,
           height: 600,
@@ -734,7 +736,7 @@ describe('HBCanvas', () => {
       const cropTool = canvas['tools'].get('crop') as CropTool;
       cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
 
-      
+
       const mockImage = new Image();
       vi.spyOn(cropTool as any, "confirmCrop").mockReturnValue(mockImage);
 
