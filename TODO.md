@@ -84,18 +84,19 @@
 
 ## Extra
 
+- [ ] revisit crop area on white background, it looks too thin
 - [x] update crop area border when text tool designed
 - [ ] disable buttons "Annotate screenshot" and "Gather system info" when in annotations mode
 - [ ] when moving array via endpoint (start or end), it sometimes goes to select tool when release mouse button
 - [ ] change cursors when moving endpoints or annotations (reference to crop tool - if applicable?)
 - [x] change color of annotations to use color E74C3C
-- [ ] screenshot has some unnecessary space
+- [ ] screenshot should start at the bottom of topbar
 - [ ] style "No screenshot loaded. Please capture a screenshot from the extension popup."
 - [x] add shadow to toolbar
 - [x] exclude extension-presentation from build
 - [x] change "environment details" to "system info"
 - [x] when hovering over rectangle, highlight is visible only when hover over horizontal parts
-- [ ] find a way to have better hover color for secondary button (as current is too pale)
+- [x] find a way to have better hover color for secondary button (as current is too pale)
 - [ ] increase code coverage
 - [ ] figure out how to avoid "tabs" permission
 - [ ] integrate Codecov

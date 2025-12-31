@@ -73,7 +73,7 @@ export class HBPopup extends LitElement {
         <h2>System info</h2>
 
         <button
-          class="icon-button"
+          class="action-button tertiary"
           @click=${this.copyToClipboard}
           title="Copy to clipboard"
           ?disabled=${this.isCopyingDisabled}

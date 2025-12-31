@@ -37,6 +37,19 @@ export class HBAnnotation extends LitElement {
           @tool-change=${this.handleToolChange}
         ></hb-toolbar>
       </div>
+      <div class="topbar-container">
+        <button
+          class="action-button primary"
+        >
+          <img src="../images/download-white.svg" alt="download" />
+          Download
+        </button>
+        <button class="action-button secondary ml-md">
+          <img src="../images/info-black.svg" alt="info" class="icon-default" />
+          <img src="../images/info-white.svg" alt="info" class="icon-hover-and-active" />
+          System info
+        </button>
+      </div>
       <div class="canvas-container">
         <hb-canvas
           .dataUrl=${this.dataUrl}

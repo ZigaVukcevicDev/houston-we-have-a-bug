@@ -1,5 +1,6 @@
 @use '../../styles/variables' as *;
 @use '../../styles/buttons';
+@use '../../styles/spacing';
 
 :host,
 :host * {
@@ -17,6 +18,20 @@
   z-index: 1000;
 }
 
+.topbar-container {
+  background-color: $color-yellow-500;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 8px 12px;
+  box-sizing: border-box;
+}
+
 .canvas-container {
   flex: 1;
   overflow: auto;
@@ -24,10 +39,10 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-}
 
-hb-canvas {
-  flex-shrink: 0;
+  hb-canvas {
+    flex-shrink: 0;
+  }
 }
 
 .no-screenshot {

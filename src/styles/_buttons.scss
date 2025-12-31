@@ -32,15 +32,14 @@ button {
     }
 
     &.secondary {
-      font-size: 12px;
       color: $color-black;
       background-color: transparent;
       border: 1px solid $color-black;
       border-radius: 10px;
       padding-left: 8px;
       padding-right: 8px;
-      padding-top: 3px;
-      min-height: 28px;
+      padding-top: 4px;
+      min-height: 34px;
       line-height: 1;
 
       img {
@@ -48,33 +47,88 @@ button {
         margin-right: 0;
         transform: translateY(3px);
 
-        &.icon-hover,
-        &.icon-active {
+        &.icon-hover-and-active {
           display: none;
         }
       }
 
       &:hover {
-        color: $color-red-400;
+        color: $color-white;
         border-color: $color-red-400;
+        background-color: $color-red-400;
 
         img {
 
-          &.icon-default,
-          &.icon-active {
+          &.icon-default {
             display: none;
           }
 
-          &.icon-hover {
+          &.icon-hover-and-active {
             display: inline-block;
           }
         }
       }
 
       &:active {
-        color: $color-red-500;
+        color: $color-white;
         border-color: $color-red-500;
+        background-color: $color-red-500;
 
+        img {
+
+          &.icon-default {
+            display: none;
+          }
+
+          &.icon-hover-and-active {
+            display: inline-block;
+          }
+        }
+      }
+    }
+
+    &.tertiary {
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      padding: 0;
+      min-height: auto;
+      width: 40px;
+      height: 36px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 10px;
+
+      img {
+        display: inline-block;
+        margin: 0;
+
+        &.icon-hover,
+        &.icon-active {
+          display: none;
+        }
+      }
+
+      &:disabled {
+        cursor: default;
+      }
+
+      &:hover:not(:disabled) {
+        img {
+
+          &.icon-default,
+          &.icon-active {
+            display: none;
+          }
+
+          &.icon-hover {
+            display: inline-block;
+          }
+        }
+      }
+
+      &:active:not(:disabled) {
         img {
 
           &.icon-default,
@@ -85,62 +139,6 @@ button {
           &.icon-active {
             display: inline-block;
           }
-        }
-      }
-    }
-  }
-
-  &.icon-button {
-    cursor: pointer;
-    background: transparent;
-    border: none;
-    padding: 0;
-    min-height: auto;
-    width: 40px;
-    height: 36px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 10px;
-
-    img {
-      display: inline-block;
-      margin: 0;
-
-      &.icon-hover,
-      &.icon-active {
-        display: none;
-      }
-    }
-
-    &:disabled {
-      cursor: default;
-    }
-
-    &:hover:not(:disabled) {
-      img {
-
-        &.icon-default,
-        &.icon-active {
-          display: none;
-        }
-
-        &.icon-hover {
-          display: inline-block;
-        }
-      }
-    }
-
-    &:active:not(:disabled) {
-      img {
-
-        &.icon-default,
-        &.icon-hover {
-          display: none;
-        }
-
-        &.icon-active {
-          display: inline-block;
         }
       }
     }
