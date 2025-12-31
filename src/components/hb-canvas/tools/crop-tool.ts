@@ -3,6 +3,7 @@ import type { HandleType } from '../../../types/handle-type.type';
 import { toolStyles } from './tool-styles';
 import { renderHandle, handleSize, handleHitThreshold } from '../../../utils/render-handle';
 import { getCanvasCoordinates } from '../../../utils/get-canvas-coordinates';
+import { drawManualDashes } from '../../../utils/draw-manual-dashes';
 
 export class CropTool implements Tool {
   private cropRect: { x: number; y: number; width: number; height: number } | null = null;
@@ -391,23 +392,16 @@ export class CropTool implements Tool {
     // Right
     ctx.fillRect(x + width, y, canvasWidth - (x + width), height);
 
-    // Draw crop rectangle border with dashed style
-    // First pass: black dashes
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 3 * dpr;
-    ctx.setLineDash([6 * dpr, 6 * dpr]);
-    ctx.lineDashOffset = 0;
-    ctx.strokeRect(x, y, width, height);
-
-    // Second pass: yellow dashes (offset to fill the gaps)
+    // Draw crop rectangle border with manual dashes (stable pattern)
+    const dashSize = 6 * dpr;
     ctx.strokeStyle = '#FAC021';
     ctx.lineWidth = 3 * dpr;
-    ctx.setLineDash([6 * dpr, 6 * dpr]);
-    ctx.lineDashOffset = 6 * dpr;
-    ctx.strokeRect(x, y, width, height);
 
-    // Reset line dash for handles
-    ctx.setLineDash([]);
+    // Draw each edge with manual dashes aligned to canvas grid
+    drawManualDashes(ctx, x, y, x + width, y, dashSize, dashSize, true); // Top
+    drawManualDashes(ctx, x + width, y, x + width, y + height, dashSize, dashSize, false); // Right
+    drawManualDashes(ctx, x, y + height, x + width, y + height, dashSize, dashSize, true); // Bottom
+    drawManualDashes(ctx, x, y, x, y + height, dashSize, dashSize, false); // Left
 
     // Render 8 handles
     // 4 corners
