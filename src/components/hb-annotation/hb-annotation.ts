@@ -50,6 +50,9 @@ export class HBAnnotation extends LitElement {
           System info
         </button>
       </div>
+      <div class="system-info-container">
+        Text goes here
+      </div> 
       <div class="canvas-container">
         <hb-canvas
           .dataUrl=${this.dataUrl}
