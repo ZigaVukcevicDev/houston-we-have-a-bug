@@ -9,7 +9,7 @@
 
 :host {
   display: block;
-  width: 325px;
+  width: 350px;
 
   background: $color-white;
   color: $color-black;
@@ -21,21 +21,21 @@
   background: $color-yellow-500;
   width: 285px;
   height: 100%;
-  padding-bottom: 10px;
+  padding-bottom: 15px;
 
   .logo-with-heading {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: $spacing-md;
-    padding-top: $spacing-lg;
-    padding-left: $spacing-lg;
-    margin-bottom: 20px;
+    padding-top: 15px;
+    padding-left: 15px;
+    margin-bottom: 15px;
 
     img {
       width: 32px;
       height: 32px;
       display: block;
+      margin-right: 10px;
     }
 
     h1 {
@@ -45,5 +45,9 @@
       letter-spacing: 0.5px;
       font-family: 'MomoTrustDisplay', sans-serif;
     }
+  }
+
+  button {
+    margin-left: 45px;
   }
 }
