@@ -26,28 +26,4 @@
     display: flex;
     flex-direction: column;
   }
-
-  .download {
-    width: 34px;
-    height: 34px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: $color-black;
-    border: none;
-    cursor: pointer;
-
-    &:hover {
-      background-color: $color-red-400;
-    }
-
-    &:active {
-      background-color: $color-red-500;
-    }
-
-    img {
-      width: 16px;
-      height: auto;
-    }
-  }
 }
