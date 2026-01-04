@@ -33,13 +33,13 @@ export class HBAnnotation extends LitElement {
       <div class="toolbar-container">
         <hb-toolbar 
           .activeTool=${this.activeTool}
-          @download=${this.handleDownload}
           @tool-change=${this.handleToolChange}
         ></hb-toolbar>
       </div>
       <div class="topbar-container">
         <button
           class="action-button primary"
+          @click=${this.handleDownload}
         >
           <img src="../images/download-white.svg" alt="download" />
           Download

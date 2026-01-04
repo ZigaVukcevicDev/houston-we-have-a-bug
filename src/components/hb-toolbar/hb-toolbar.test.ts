@@ -13,42 +13,7 @@ describe('HBToolbar', () => {
     expect(toolbar).toBeDefined();
   });
 
-  describe('_handleDownload', () => {
-    it('should dispatch a custom download event', () => {
-      const eventSpy = vi.fn();
-      toolbar.addEventListener('download', eventSpy);
-
-      toolbar['handleDownload']();
-
-      expect(eventSpy).toHaveBeenCalled();
-    });
-
-    it('should dispatch event with bubbling enabled', () => {
-      let capturedEvent: CustomEvent | null = null;
-      toolbar.addEventListener('download', (e) => {
-        capturedEvent = e as CustomEvent;
-      });
-
-      toolbar['handleDownload']();
-
-      expect(capturedEvent).not.toBeNull();
-      expect(capturedEvent!.bubbles).toBe(true);
-    });
-
-    it('should dispatch event with composed enabled', () => {
-      let capturedEvent: CustomEvent | null = null;
-      toolbar.addEventListener('download', (e) => {
-        capturedEvent = e as CustomEvent;
-      });
-
-      toolbar['handleDownload']();
-
-      expect(capturedEvent).not.toBeNull();
-      expect(capturedEvent!.composed).toBe(true);
-    });
-  });
-
-  describe('handleToolClick', () => {
+  describe('tool-change events', () => {
     it('should update activeTool when tool is clicked', () => {
       toolbar['handleToolClick']('text');
 
@@ -111,14 +76,6 @@ describe('HBToolbar', () => {
 
       const toolButtons = toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
       expect(toolButtons?.length).toBe(6); // select, text, line, arrow, rectangle, crop
-    });
-
-    it('should render download button', async () => {
-      document.body.appendChild(toolbar);
-      await toolbar.updateComplete;
-
-      const downloadButton = toolbar.shadowRoot?.querySelector('.download');
-      expect(downloadButton).toBeTruthy();
     });
 
     it('should render logo link', async () => {

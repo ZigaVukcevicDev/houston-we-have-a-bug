@@ -26,10 +26,6 @@ export class HBToolbar extends LitElement {
           <hb-toolbar-tool title="Rectangle" icon="rectangle" .isActive=${this.activeTool === 'rectangle'} @click=${() => this.handleToolClick('rectangle')}></hb-toolbar-tool>
           <hb-toolbar-tool title="Crop" icon="crop" .isActive=${this.activeTool === 'crop'} @click=${() => this.handleToolClick('crop')}></hb-toolbar-tool>
         </div>
-
-        <button class="download" title="Download" @click=${this.handleDownload}>
-          <img src="../images/download-white.svg" alt="download" />
-        </button>
       </div> 
     `;
   }
@@ -42,10 +38,6 @@ export class HBToolbar extends LitElement {
       composed: true,
       detail: { tool }
     }));
-  }
-
-  private handleDownload() {
-    this.dispatchEvent(new CustomEvent('download', { bubbles: true, composed: true }));
   }
 }
 
