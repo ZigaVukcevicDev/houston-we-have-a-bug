@@ -1,5 +1,12 @@
 import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import { getChromeVersion } from '../../utils/get-chrome-version';
+import { getDateAndTime } from '../../utils/get-date-and-time';
+import { getDevicePixelRatio } from '../../utils/get-device-pixel-ratio';
+import { getDisplayResolution } from '../../utils/get-display-resolution';
+import { getOS } from '../../utils/get-os';
+import { getVisibleArea } from '../../utils/get-visible-area';
+import type { SystemInfo } from '../../interfaces/system-info.interface';
 import styles from './hb-popup.scss';
 
 @customElement('hb-popup')
@@ -34,14 +41,41 @@ export class HBPopup extends LitElement {
         currentWindow: true,
       });
 
-      if (!tab?.id || !tab.windowId) return;
+      if (!tab?.id || !tab.windowId || !tab.url) return;
+
+      console.log('[Popup] Gathering system info for tab:', tab.url);
+
+      // Gather system info from the actual website tab (not extension page)
+      const systemInfo: SystemInfo = {
+        dateAndTime: getDateAndTime(),
+        url: tab.url,
+        visibleArea: await getVisibleArea(tab.id),
+        displayResolution: await getDisplayResolution(tab.id),
+        devicePixelRatio: await getDevicePixelRatio(tab.id),
+        browser: getChromeVersion(navigator.userAgent),
+        os: getOS(navigator.userAgent),
+      };
+
+      console.log('[Popup] System info gathered:', systemInfo);
 
       const dataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, {
         format: 'png',
       });
 
-      // Store screenshot in background service worker and open editor in new tab
-      await chrome.runtime.sendMessage({ type: 'STORE_SCREENSHOT', dataUrl });
+      console.log('[Popup] Sending to background:', {
+        hasDataUrl: !!dataUrl,
+        hasSystemInfo: !!systemInfo,
+      });
+
+      // Store both screenshot AND system info in background
+      await chrome.runtime.sendMessage({
+        type: 'STORE_SCREENSHOT',
+        dataUrl,
+        systemInfo,
+      });
+
+      console.log('[Popup] Data sent, opening annotation tab');
+
       chrome.tabs.create({ url: chrome.runtime.getURL('tab.html') });
       window.close(); // Close the popup
     } catch (error) {

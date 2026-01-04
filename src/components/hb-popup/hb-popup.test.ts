@@ -39,6 +39,7 @@ describe('HBPopup', () => {
       const mockTab = {
         id: 123,
         windowId: 456,
+        url: 'https://example.com',
       };
 
       mockChrome.tabs.query.mockResolvedValue([mockTab]);
@@ -54,6 +55,9 @@ describe('HBPopup', () => {
       expect(mockChrome.runtime.sendMessage).toHaveBeenCalledWith({
         type: 'STORE_SCREENSHOT',
         dataUrl: 'data:image/png;base64,mock',
+        systemInfo: expect.objectContaining({
+          url: 'https://example.com',
+        }),
       });
       expect(mockChrome.tabs.create).toHaveBeenCalledWith({
         url: 'chrome-extension://mock-id/tab.html',

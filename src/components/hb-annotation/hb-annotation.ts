@@ -88,11 +88,24 @@ export class HBAnnotation extends LitElement {
 
   private async loadScreenshotFromStorage() {
     try {
+      console.log('[Annotation] Requesting screenshot from background');
       const response = await chrome.runtime.sendMessage({
         type: 'GET_SCREENSHOT',
       });
+      console.log('[Annotation] Received response:', {
+        hasDataUrl: !!response?.dataUrl,
+        hasSystemInfo: !!response?.systemInfo,
+        systemInfo: response?.systemInfo,
+      });
+
       if (response?.dataUrl) {
         this.dataUrl = response.dataUrl;
+      }
+      if (response?.systemInfo) {
+        console.log('[Annotation] Setting systemInfo:', response.systemInfo);
+        this.systemInfo = response.systemInfo;
+      } else {
+        console.warn('[Annotation] No systemInfo in response');
       }
     } catch (error) {
       console.error('Failed to load screenshot:', error);
@@ -110,9 +123,7 @@ export class HBAnnotation extends LitElement {
 
   private async toggleSystemInfo() {
     this.showSystemInfo = !this.showSystemInfo;
-    if (this.showSystemInfo && !this.systemInfo) {
-      await this.gatherSystemInfo();
-    }
+    // System info is already loaded from storage, no need to gather
   }
 
   private async gatherSystemInfo() {
@@ -178,7 +189,7 @@ export class HBAnnotation extends LitElement {
 
   private renderSystemInfo() {
     if (!this.systemInfo) {
-      return html`<p style="padding: 16px;">Loading system info...</p>`;
+      return null;
     }
 
     return html`

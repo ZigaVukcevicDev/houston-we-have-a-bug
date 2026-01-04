@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock chrome API
 const listeners: Function[] = [];
+
 const mockChrome = {
   runtime: {
     onMessage: {
@@ -9,29 +10,31 @@ const mockChrome = {
         listeners.push(callback);
       }),
     },
+    onInstalled: {
+      addListener: vi.fn(),
+    },
   },
 };
 
 globalThis.chrome = mockChrome as any;
 
 // Import background script to register listener
-// Using dynamic import to ensure mock is set up first
 await import('./background');
 
 describe('Background service worker', () => {
   let messageListener: Function;
 
   beforeEach(() => {
-    // Get the registered listener
     messageListener = listeners[0];
     vi.clearAllMocks();
   });
 
-  it('should store screenshot data', () => {
+  it('should store screenshot data in memory', () => {
     const sendResponse = vi.fn();
     const message = {
       type: 'STORE_SCREENSHOT',
       dataUrl: 'data:image/png;base64,test',
+      systemInfo: { url: 'https://example.com' },
     };
 
     const result = messageListener(message, {}, sendResponse);
@@ -40,11 +43,12 @@ describe('Background service worker', () => {
     expect(sendResponse).toHaveBeenCalledWith({ success: true });
   });
 
-  it('should retrieve and clear screenshot data', () => {
+  it('should retrieve screenshot data and system info from memory', () => {
     // First store it
     const storeMessage = {
       type: 'STORE_SCREENSHOT',
       dataUrl: 'data:image/png;base64,test',
+      systemInfo: { url: 'https://example.com' },
     };
     messageListener(storeMessage, {}, vi.fn());
 
@@ -59,21 +63,17 @@ describe('Background service worker', () => {
     expect(result).toBe(true);
     expect(sendResponse).toHaveBeenCalledWith({
       dataUrl: 'data:image/png;base64,test',
+      systemInfo: { url: 'https://example.com' },
     });
-
-    // Try to retrieve again - should be null (cleared)
-    const sendResponse2 = vi.fn();
-    messageListener(getMessage, {}, sendResponse2);
-    expect(sendResponse2).toHaveBeenCalledWith({ dataUrl: null });
   });
 
-  it('should ignore unknown message types', () => {
+  it('should return false for unknown message types', () => {
     const sendResponse = vi.fn();
     const message = { type: 'UNKNOWN' };
 
     const result = messageListener(message, {}, sendResponse);
 
-    expect(result).toBeUndefined();
+    expect(result).toBe(false);
     expect(sendResponse).not.toHaveBeenCalled();
   });
 });

@@ -86,6 +86,10 @@ The tabs permission is used to retrieve basic information about the active tab, 
 
 The scripting permission is required to inject scripts into the active tab only when the user activates the extension. This is used to collect page-specific details, such as visible area size and device pixel ratio, and to display temporary UI elements needed for screenshot annotation during bug reporting.
 
+**storage justification**
+
+The storage permission is used to temporarily hold your screenshot and system information while the annotation page loads. This allows the extension to transfer the captured image and technical details (like URL and browser version) from the popup to the editor. The data is automatically deleted after it's transferred and is never saved permanently.
+
 **Are you using remote code?**
 
 No, I am not using remote code

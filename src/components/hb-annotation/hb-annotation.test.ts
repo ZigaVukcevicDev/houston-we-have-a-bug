@@ -48,6 +48,29 @@ describe('HBAnnotation', () => {
       expect(annotation['dataUrl']).toBe(mockDataUrl);
     });
 
+    it('should load systemInfo along with screenshot', async () => {
+      const mockDataUrl = 'data:image/png;base64,mock';
+      const mockSystemInfo = {
+        dateAndTime: '2026-01-04 11:00:00',
+        url: 'https://example.com',
+        visibleArea: '1920 x 1080 px',
+        displayResolution: '1920 x 1080 px',
+        devicePixelRatio: '1',
+        browser: 'Chrome 142',
+        os: 'macOS',
+      };
+
+      mockChrome.runtime.sendMessage.mockResolvedValue({
+        dataUrl: mockDataUrl,
+        systemInfo: mockSystemInfo,
+      });
+
+      await annotation['loadScreenshotFromStorage']();
+
+      expect(annotation['dataUrl']).toBe(mockDataUrl);
+      expect(annotation['systemInfo']).toEqual(mockSystemInfo);
+    });
+
     it('should handle missing dataUrl in response', async () => {
       mockChrome.runtime.sendMessage.mockResolvedValue({});
 
@@ -173,6 +196,55 @@ describe('HBAnnotation', () => {
       document.body.appendChild(annotation);
 
       expect(spy).toHaveBeenCalled();
+    });
+  });
+
+  describe('toggleSystemInfo', () => {
+    it('should toggle showSystemInfo state', async () => {
+      expect(annotation['showSystemInfo']).toBe(false);
+
+      await annotation['toggleSystemInfo']();
+      expect(annotation['showSystemInfo']).toBe(true);
+
+      await annotation['toggleSystemInfo']();
+      expect(annotation['showSystemInfo']).toBe(false);
+    });
+
+    it('should not call gatherSystemInfo when toggling', async () => {
+      const spy = vi.spyOn(annotation as any, 'gatherSystemInfo');
+
+      await annotation['toggleSystemInfo']();
+
+      expect(spy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('renderSystemInfo', () => {
+    it('should return null when systemInfo is not available', () => {
+      annotation['systemInfo'] = null;
+
+      const result = annotation['renderSystemInfo']();
+
+      expect(result).toBeNull();
+    });
+
+    it('should render system info table when data is available', async () => {
+      annotation['systemInfo'] = {
+        dateAndTime: '2026-01-04 11:00:00',
+        url: 'https://example.com',
+        visibleArea: '1920 x 1080 px',
+        displayResolution: '1920 x 1080 px',
+        devicePixelRatio: '1',
+        browser: 'Chrome 142',
+        os: 'macOS',
+      };
+      annotation['dataUrl'] = 'data:image/png;base64,test';
+      document.body.appendChild(annotation);
+      await annotation.updateComplete;
+
+      const result = annotation['renderSystemInfo']();
+
+      expect(result).toBeTruthy();
     });
   });
 
