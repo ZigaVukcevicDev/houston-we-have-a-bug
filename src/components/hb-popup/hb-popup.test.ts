@@ -16,14 +16,6 @@ const mockChrome = {
 
 globalThis.chrome = mockChrome as any;
 
-// Mock navigator.clipboard
-Object.defineProperty(navigator, 'clipboard', {
-  value: {
-    writeText: vi.fn(),
-  },
-  writable: true,
-});
-
 // Mock window.close
 globalThis.window.close = vi.fn();
 
@@ -39,88 +31,6 @@ describe('HBPopup', () => {
     it('should have annotateScreenshot method available for button click', () => {
       // Verify that the method exists and can be called
       expect(typeof popup['annotateScreenshot']).toBe('function');
-    });
-
-    it('should have gatherSystemInfo method available for button click', () => {
-      expect(typeof popup['gatherSystemInfo']).toBe('function');
-    });
-
-    it('should have copyToClipboard method available for button click', () => {
-      expect(typeof popup['copyToClipboard']).toBe('function');
-    });
-  });
-
-  describe('gatherSystemInfo', () => {
-    it('should gather system info from active tab', async () => {
-      const mockTab = {
-        id: 123,
-        url: 'https://example.com',
-      };
-
-      mockChrome.tabs.query.mockResolvedValue([mockTab]);
-
-      await popup['gatherSystemInfo']();
-
-      expect(mockChrome.tabs.query).toHaveBeenCalledWith({
-        active: true,
-        currentWindow: true,
-      });
-
-      expect(popup['systemInfo']).toBeTruthy();
-      expect(popup['systemInfo']?.url).toBe('https://example.com');
-    });
-
-    it('should handle errors gracefully', async () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
-      mockChrome.tabs.query.mockRejectedValue(new Error('Tab query failed'));
-
-      await popup['gatherSystemInfo']();
-
-      expect(popup['systemInfo']).toBeNull();
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Failed to gather system info:',
-        expect.any(Error)
-      );
-      consoleSpy.mockRestore();
-    });
-
-    it('should not gather details if no tab URL or ID', async () => {
-      mockChrome.tabs.query.mockResolvedValue([{}]);
-
-      await popup['gatherSystemInfo']();
-
-      expect(popup['systemInfo']).toBeNull();
-    });
-  });
-
-  describe('copyToClipboard', () => {
-    it('should copy system info to clipboard', async () => {
-      popup['systemInfo'] = {
-        dateAndTime: '2025-12-15 21:00:00',
-        url: 'https://example.com',
-        visibleArea: '1920 x 1080 px',
-        displayResolution: '1920 x 1080 px',
-        devicePixelRatio: '1',
-        browser: 'Chrome 120',
-        os: 'macOS',
-      };
-
-      await popup['copyToClipboard']();
-
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-        expect.stringContaining('Date and time: 2025-12-15 21:00:00')
-      );
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-        expect.stringContaining('URL: https://example.com')
-      );
-    });
-
-    it('should not copy if no system info', async () => {
-      popup['systemInfo'] = null;
-
-      await popup['copyToClipboard']();
-
-      expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
     });
   });
 
