@@ -17,8 +17,8 @@ export class HBPopup extends LitElement {
     return html`
       <div class="popup">
         <div class="logo-with-heading">
-          <img src="../images/rocket.svg" alt="rocket" />
-          <h1>Houston, we have a bug</h1>
+          <img class="logo" src="../images/rocket.svg" alt="rocket" />
+          <img class="heading"src="../images/hb.svg" alt="hb" />
         </div>
 
         <div class="ml-lg">

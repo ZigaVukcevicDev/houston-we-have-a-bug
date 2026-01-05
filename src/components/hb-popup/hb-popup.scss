@@ -31,19 +31,15 @@
     padding-left: 15px;
     margin-bottom: 15px;
 
-    img {
+    .logo {
       width: 32px;
       height: 32px;
       display: block;
       margin-right: 10px;
     }
 
-    h1 {
-      font-size: $font-size-lg;
-      margin: 0;
-      line-height: 1;
-      letter-spacing: 0.5px;
-      font-family: 'MomoTrustDisplay', sans-serif;
+    .heading {
+      transform: translateY(2px);
     }
   }
 

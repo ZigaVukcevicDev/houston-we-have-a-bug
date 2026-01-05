@@ -85,5 +85,89 @@ describe('HBToolbar', () => {
       const logo = toolbar.shadowRoot?.querySelector('.logo');
       expect(logo).toBeTruthy();
     });
+
+    it('should trigger handleToolClick when select tool is clicked', async () => {
+      document.body.appendChild(toolbar);
+      await toolbar.updateComplete;
+
+      const spy = vi.spyOn(toolbar as any, 'handleToolClick');
+      const toolButtons = toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
+      const selectButton = toolButtons?.[0] as HTMLElement;
+
+      selectButton?.click();
+      await toolbar.updateComplete;
+
+      expect(spy).toHaveBeenCalledWith('select');
+    });
+
+    it('should trigger handleToolClick when text tool is clicked', async () => {
+      document.body.appendChild(toolbar);
+      await toolbar.updateComplete;
+
+      const spy = vi.spyOn(toolbar as any, 'handleToolClick');
+      const toolButtons = toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
+      const textButton = toolButtons?.[1] as HTMLElement;
+
+      textButton?.click();
+      await toolbar.updateComplete;
+
+      expect(spy).toHaveBeenCalledWith('text');
+    });
+
+    it('should trigger handleToolClick when line tool is clicked', async () => {
+      document.body.appendChild(toolbar);
+      await toolbar.updateComplete;
+
+      const spy = vi.spyOn(toolbar as any, 'handleToolClick');
+      const toolButtons = toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
+      const lineButton = toolButtons?.[2] as HTMLElement;
+
+      lineButton?.click();
+      await toolbar.updateComplete;
+
+      expect(spy).toHaveBeenCalledWith('line');
+    });
+
+    it('should trigger handleToolClick when arrow tool is clicked', async () => {
+      document.body.appendChild(toolbar);
+      await toolbar.updateComplete;
+
+      const spy = vi.spyOn(toolbar as any, 'handleToolClick');
+      const toolButtons = toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
+      const arrowButton = toolButtons?.[3] as HTMLElement;
+
+      arrowButton?.click();
+      await toolbar.updateComplete;
+
+      expect(spy).toHaveBeenCalledWith('arrow');
+    });
+
+    it('should trigger handleToolClick when rectangle tool is clicked', async () => {
+      document.body.appendChild(toolbar);
+      await toolbar.updateComplete;
+
+      const spy = vi.spyOn(toolbar as any, 'handleToolClick');
+      const toolButtons = toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
+      const rectangleButton = toolButtons?.[4] as HTMLElement;
+
+      rectangleButton?.click();
+      await toolbar.updateComplete;
+
+      expect(spy).toHaveBeenCalledWith('rectangle');
+    });
+
+    it('should trigger handleToolClick when crop tool is clicked', async () => {
+      document.body.appendChild(toolbar);
+      await toolbar.updateComplete;
+
+      const spy = vi.spyOn(toolbar as any, 'handleToolClick');
+      const toolButtons = toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
+      const cropButton = toolButtons?.[5] as HTMLElement;
+
+      cropButton?.click();
+      await toolbar.updateComplete;
+
+      expect(spy).toHaveBeenCalledWith('crop');
+    });
   });
 });
