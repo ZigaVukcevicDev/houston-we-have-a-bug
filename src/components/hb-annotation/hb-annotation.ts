@@ -60,16 +60,16 @@ export class HBAnnotation extends LitElement {
           <img src="../images/download-white.svg" alt="download" />
           Download
         </button>
-        <button class="action-button secondary ml-md" @click=${this.toggleSystemInfo}>
+        <button class="action-button secondary ml-md ${this.showSystemInfo ? 'activated' : ''} js-system-info-button" @click=${(e: Event) => { e.stopPropagation(); this.toggleSystemInfo(); }}>
           <img src="../images/info-black.svg" alt="info" class="icon-default" />
           <img src="../images/info-white.svg" alt="info" class="icon-hover-and-active" />
           System info
         </button>
       </div>
       ${this.showSystemInfo ? html`
-        <div class="system-info-container">
+        <div class="system-info-container js-system-info-container" @click=${(e: Event) => e.stopPropagation()}>
           ${this.renderSystemInfo()}
-        </div>
+          </div>
       ` : ''} 
       <div class="canvas-container">
         <hb-canvas
@@ -84,28 +84,46 @@ export class HBAnnotation extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     this.loadScreenshotFromStorage();
+
+    // Add click listener for closing system info when clicking outside
+    document.addEventListener('click', this.handleClickOutside);
   }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    // Clean up listener
+    document.removeEventListener('click', this.handleClickOutside);
+  }
+
+  private handleClickOutside = (event: MouseEvent) => {
+    if (!this.showSystemInfo) return;
+
+    const target = event.target as HTMLElement;
+    const systemInfoContainer = this.shadowRoot?.querySelector('.js-system-info-container');
+    const systemInfoButton = this.shadowRoot?.querySelector('.js-system-info-button');
+
+    // Check if click is outside both the button and the container
+    if (systemInfoContainer && systemInfoButton) {
+      const clickedInsideContainer = systemInfoContainer.contains(target);
+      const clickedButton = systemInfoButton.contains(target) || target === systemInfoButton;
+
+      if (!clickedInsideContainer && !clickedButton) {
+        this.showSystemInfo = false;
+      }
+    }
+  };
 
   private async loadScreenshotFromStorage() {
     try {
-      console.log('[Annotation] Requesting screenshot from background');
       const response = await chrome.runtime.sendMessage({
         type: 'GET_SCREENSHOT',
-      });
-      console.log('[Annotation] Received response:', {
-        hasDataUrl: !!response?.dataUrl,
-        hasSystemInfo: !!response?.systemInfo,
-        systemInfo: response?.systemInfo,
       });
 
       if (response?.dataUrl) {
         this.dataUrl = response.dataUrl;
       }
       if (response?.systemInfo) {
-        console.log('[Annotation] Setting systemInfo:', response.systemInfo);
         this.systemInfo = response.systemInfo;
-      } else {
-        console.warn('[Annotation] No systemInfo in response');
       }
     } catch (error) {
       console.error('Failed to load screenshot:', error);
@@ -124,29 +142,6 @@ export class HBAnnotation extends LitElement {
   private async toggleSystemInfo() {
     this.showSystemInfo = !this.showSystemInfo;
     // System info is already loaded from storage, no need to gather
-  }
-
-  private async gatherSystemInfo() {
-    try {
-      const [tab] = await chrome.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-
-      if (tab?.url && tab.id) {
-        this.systemInfo = {
-          dateAndTime: getDateAndTime(),
-          url: tab.url,
-          visibleArea: await getVisibleArea(tab.id),
-          displayResolution: await getDisplayResolution(tab.id),
-          devicePixelRatio: await getDevicePixelRatio(tab.id),
-          browser: getChromeVersion(navigator.userAgent),
-          os: getOS(navigator.userAgent),
-        };
-      }
-    } catch (error) {
-      console.error('Failed to gather system info:', error);
-    }
   }
 
   private async copyToClipboard() {

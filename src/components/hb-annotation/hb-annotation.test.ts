@@ -210,12 +210,60 @@ describe('HBAnnotation', () => {
       expect(annotation['showSystemInfo']).toBe(false);
     });
 
-    it('should not call gatherSystemInfo when toggling', async () => {
-      const spy = vi.spyOn(annotation as any, 'gatherSystemInfo');
+  });
 
-      await annotation['toggleSystemInfo']();
+  describe('handleClickOutside', () => {
+    beforeEach(() => {
+      annotation['dataUrl'] = 'data:image/png;base64,test';
+      document.body.appendChild(annotation);
+    });
 
-      expect(spy).not.toHaveBeenCalled();
+    it('should close system info when clicking outside', async () => {
+      annotation['showSystemInfo'] = true;
+      await annotation.updateComplete;
+
+      const outsideElement = document.createElement('div');
+      document.body.appendChild(outsideElement);
+
+      const event = new MouseEvent('click', { bubbles: true });
+      Object.defineProperty(event, 'target', { value: outsideElement });
+
+      annotation['handleClickOutside'](event);
+
+      expect(annotation['showSystemInfo']).toBe(false);
+    });
+
+    it('should not close when clicking inside container', async () => {
+      annotation['systemInfo'] = {
+        dateAndTime: '2026-01-04 12:00:00',
+        url: 'https://example.com',
+        visibleArea: '1920 x 1080 px',
+        displayResolution: '1920 x 1080 px',
+        devicePixelRatio: '1',
+        browser: 'Chrome 142',
+        os: 'macOS',
+      };
+      annotation['showSystemInfo'] = true;
+      await annotation.updateComplete;
+
+      const container = annotation.shadowRoot?.querySelector('.system-info-container') as HTMLElement;
+      const event = new MouseEvent('click', { bubbles: true });
+      Object.defineProperty(event, 'target', { value: container });
+
+      annotation['handleClickOutside'](event);
+
+      expect(annotation['showSystemInfo']).toBe(true);
+    });
+
+    it('should do nothing if panel not shown', () => {
+      annotation['showSystemInfo'] = false;
+
+      const event = new MouseEvent('click', { bubbles: true });
+      Object.defineProperty(event, 'target', { value: document.body });
+
+      annotation['handleClickOutside'](event);
+
+      expect(annotation['showSystemInfo']).toBe(false);
     });
   });
 
@@ -248,59 +296,13 @@ describe('HBAnnotation', () => {
     });
   });
 
-  describe('System info functionality', () => {
-    it('should have gatherSystemInfo method', () => {
-      expect(typeof annotation['gatherSystemInfo']).toBe('function');
-    });
 
+  describe('System info functionality', () => {
     it('should have copyToClipboard method', () => {
       expect(typeof annotation['copyToClipboard']).toBe('function');
     });
   });
 
-  describe('gatherSystemInfo', () => {
-
-    it('should gather system info from active tab', async () => {
-      const mockTab = {
-        id: 123,
-        url: 'https://example.com',
-      };
-
-      mockChrome.tabs.query.mockResolvedValue([mockTab]);
-
-      await annotation['gatherSystemInfo']();
-
-      expect(mockChrome.tabs.query).toHaveBeenCalledWith({
-        active: true,
-        currentWindow: true,
-      });
-
-      expect(annotation['systemInfo']).toBeTruthy();
-      expect(annotation['systemInfo']?.url).toBe('https://example.com');
-    });
-
-    it('should handle errors gracefully', async () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
-      mockChrome.tabs.query.mockRejectedValue(new Error('Tab query failed'));
-
-      await annotation['gatherSystemInfo']();
-
-      expect(annotation['systemInfo']).toBeNull();
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Failed to gather system info:',
-        expect.any(Error)
-      );
-      consoleSpy.mockRestore();
-    });
-
-    it('should not gather details if no tab URL or ID', async () => {
-      mockChrome.tabs.query.mockResolvedValue([{}]);
-
-      await annotation['gatherSystemInfo']();
-
-      expect(annotation['systemInfo']).toBeNull();
-    });
-  });
 
   describe('copyToClipboard', () => {
     it('should copy system info to clipboard', async () => {

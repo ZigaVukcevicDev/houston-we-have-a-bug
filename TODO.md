@@ -99,4 +99,5 @@
 - [x] find a way to have better hover color for secondary button (as current is too pale)
 - [ ] increase code coverage
 - [ ] figure out how to avoid "tabs" permission
+- [ ] revisit toolbar - last tool perhaps needs more optical padding
 - [ ] integrate Codecov

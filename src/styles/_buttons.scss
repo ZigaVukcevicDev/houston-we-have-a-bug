@@ -69,7 +69,8 @@ button {
         }
       }
 
-      &:active {
+      &:active,
+      &.activated {
         color: $color-white;
         border-color: $color-red-500;
         background-color: $color-red-500;

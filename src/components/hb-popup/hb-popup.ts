@@ -43,8 +43,6 @@ export class HBPopup extends LitElement {
 
       if (!tab?.id || !tab.windowId || !tab.url) return;
 
-      console.log('[Popup] Gathering system info for tab:', tab.url);
-
       // Gather system info from the actual website tab (not extension page)
       const systemInfo: SystemInfo = {
         dateAndTime: getDateAndTime(),
@@ -56,15 +54,8 @@ export class HBPopup extends LitElement {
         os: getOS(navigator.userAgent),
       };
 
-      console.log('[Popup] System info gathered:', systemInfo);
-
       const dataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, {
         format: 'png',
-      });
-
-      console.log('[Popup] Sending to background:', {
-        hasDataUrl: !!dataUrl,
-        hasSystemInfo: !!systemInfo,
       });
 
       // Store both screenshot AND system info in background
@@ -73,8 +64,6 @@ export class HBPopup extends LitElement {
         dataUrl,
         systemInfo,
       });
-
-      console.log('[Popup] Data sent, opening annotation tab');
 
       chrome.tabs.create({ url: chrome.runtime.getURL('tab.html') });
       window.close(); // Close the popup
