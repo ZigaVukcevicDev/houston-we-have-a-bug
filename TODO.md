@@ -84,7 +84,7 @@
 
 ## Extra
 
-- [ ] revisit crop area on white background, it looks too thin
+- [x] revisit crop area on white background, it looks too thin
 - [x] update crop area border when text tool designed
 - [ ] disable buttons "Annotate screenshot" / or show instructionswhen in annotations mode
 - [ ] when moving array via endpoint (start or end), it sometimes goes to select tool when release mouse button

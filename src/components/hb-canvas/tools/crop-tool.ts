@@ -376,7 +376,7 @@ export class CropTool implements Tool {
     ctx.save();
 
     // Draw semi-transparent overlay outside crop area
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.69)';
 
     // Get canvas dimensions
     const canvasWidth = ctx.canvas.width;
@@ -392,8 +392,18 @@ export class CropTool implements Tool {
     // Right
     ctx.fillRect(x + width, y, canvasWidth - (x + width), height);
 
-    // Draw crop rectangle border with manual dashes (stable pattern)
+    // Draw crop rectangle border with layered technique:
+    // 1. Solid black line as base
+    // 2. Yellow dashed line on top (gaps show black underneath)
     const dashSize = 6 * dpr;
+
+    // First layer: solid black line
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 3 * dpr;
+    ctx.setLineDash([]);
+    ctx.strokeRect(x, y, width, height);
+
+    // Second layer: yellow dashed line on top
     ctx.strokeStyle = '#FAC021';
     ctx.lineWidth = 3 * dpr;
 

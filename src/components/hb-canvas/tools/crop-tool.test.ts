@@ -385,13 +385,13 @@ describe('CropTool', () => {
       const fillStyleSetter = vi.fn();
       Object.defineProperty(mockCtx, 'fillStyle', {
         set: fillStyleSetter,
-        get: () => 'rgba(0, 0, 0, 0.7)',
+        get: () => 'rgba(0, 0, 0, 0.69)',
       });
 
       cropTool.render(mockCtx);
 
       // Should set overlay color at some point
-      expect(fillStyleSetter).toHaveBeenCalledWith('rgba(0, 0, 0, 0.7)');
+      expect(fillStyleSetter).toHaveBeenCalledWith('rgba(0, 0, 0, 0.69)');
     });
   });
 
