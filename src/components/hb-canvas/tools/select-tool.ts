@@ -227,6 +227,14 @@ export class SelectTool implements Tool {
           this.onRedraw();
           return;
         }
+
+        // If hovering over selected line body (not handle)
+        if (this.isPointOnLine(x, y, selectedLine)) {
+          canvas.style.cursor = 'move';
+          this.hoveredAnnotationId = null;
+          this.onRedraw();
+          return;
+        }
       }
 
       // Check if hovering over a handle of selected rectangle
@@ -237,10 +245,34 @@ export class SelectTool implements Tool {
         const bottomLeft = { x: selectedRect.x, y: selectedRect.y + selectedRect.height };
         const bottomRight = { x: selectedRect.x + selectedRect.width, y: selectedRect.y + selectedRect.height };
 
-        if (isPointOnHandle(x, y, topLeft.x, topLeft.y) ||
-          isPointOnHandle(x, y, topRight.x, topRight.y) ||
-          isPointOnHandle(x, y, bottomLeft.x, bottomLeft.y) ||
-          isPointOnHandle(x, y, bottomRight.x, bottomRight.y)) {
+        // Check each corner and set appropriate resize cursor
+        if (isPointOnHandle(x, y, topLeft.x, topLeft.y)) {
+          canvas.style.cursor = 'nwse-resize';
+          this.hoveredAnnotationId = null;
+          this.onRedraw();
+          return;
+        }
+        if (isPointOnHandle(x, y, bottomRight.x, bottomRight.y)) {
+          canvas.style.cursor = 'nwse-resize';
+          this.hoveredAnnotationId = null;
+          this.onRedraw();
+          return;
+        }
+        if (isPointOnHandle(x, y, topRight.x, topRight.y)) {
+          canvas.style.cursor = 'nesw-resize';
+          this.hoveredAnnotationId = null;
+          this.onRedraw();
+          return;
+        }
+        if (isPointOnHandle(x, y, bottomLeft.x, bottomLeft.y)) {
+          canvas.style.cursor = 'nesw-resize';
+          this.hoveredAnnotationId = null;
+          this.onRedraw();
+          return;
+        }
+
+        // If hovering over selected rectangle body (not handle)
+        if (this.isPointOnRectangle(x, y, selectedRect)) {
           canvas.style.cursor = 'move';
           this.hoveredAnnotationId = null;
           this.onRedraw();

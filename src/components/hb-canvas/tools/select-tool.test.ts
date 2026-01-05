@@ -1337,13 +1337,66 @@ describe('SelectTool', () => {
       expect(mockCanvas.style.cursor).toBe('move');
     });
 
-    it('should set cursor to move when hovering over rectangle handle', () => {
+    it('should set cursor to move when hovering over line body', () => {
+      selectTool['selectedAnnotationId'] = 'line-1';
+      selectTool['selectedAnnotationType'] = 'line';
+
+      selectTool.handleMouseMove({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(mockCanvas.style.cursor).toBe('move');
+    });
+
+    it('should set cursor to nwse-resize when hovering over rectangle top-left handle', () => {
       selectTool['selectedAnnotationId'] = 'rect-1';
       selectTool['selectedAnnotationType'] = 'rectangle';
 
       selectTool.handleMouseMove({ clientX: 100, clientY: 300 } as MouseEvent, mockCanvas, mockCtx);
 
+      expect(mockCanvas.style.cursor).toBe('nwse-resize');
+    });
+
+    it('should set cursor to nesw-resize when hovering over rectangle top-right handle', () => {
+      selectTool['selectedAnnotationId'] = 'rect-1';
+      selectTool['selectedAnnotationType'] = 'rectangle';
+
+      selectTool.handleMouseMove({ clientX: 200, clientY: 300 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(mockCanvas.style.cursor).toBe('nesw-resize');
+    });
+
+    it('should set cursor to nesw-resize when hovering over rectangle bottom-left handle', () => {
+      selectTool['selectedAnnotationId'] = 'rect-1';
+      selectTool['selectedAnnotationType'] = 'rectangle';
+
+      selectTool.handleMouseMove({ clientX: 100, clientY: 350 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(mockCanvas.style.cursor).toBe('nesw-resize');
+    });
+
+    it('should set cursor to nwse-resize when hovering over rectangle bottom-right handle', () => {
+      selectTool['selectedAnnotationId'] = 'rect-1';
+      selectTool['selectedAnnotationType'] = 'rectangle';
+
+      selectTool.handleMouseMove({ clientX: 200, clientY: 350 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(mockCanvas.style.cursor).toBe('nwse-resize');
+    });
+
+    it('should set cursor to move when hovering over rectangle body', () => {
+      selectTool['selectedAnnotationId'] = 'rect-1';
+      selectTool['selectedAnnotationType'] = 'rectangle';
+
+      selectTool.handleMouseMove({ clientX: 100, clientY: 325 } as MouseEvent, mockCanvas, mockCtx);
+
       expect(mockCanvas.style.cursor).toBe('move');
+    });
+
+    it('should set cursor to pointer when hovering over unselected annotation', () => {
+      expect(selectTool['selectedAnnotationId']).toBeNull();
+
+      selectTool.handleMouseMove({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas, mockCtx);
+
+      expect(mockCanvas.style.cursor).toBe('pointer');
     });
   });
 

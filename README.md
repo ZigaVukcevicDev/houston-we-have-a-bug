@@ -2,8 +2,8 @@
 
 ![Status](https://img.shields.io/badge/status-work_in_progress-orange)
 ![Tests](https://github.com/ZigaVukcevicDev/houston-we-have-a-bug/actions/workflows/test.yml/badge.svg)
-![Coverage](https://img.shields.io/badge/coverage-96%25-brightgreen)
-![Tests](https://img.shields.io/badge/tests-391%20passing-success)
+![Coverage](https://img.shields.io/badge/coverage-97%25-brightgreen)
+![Tests](https://img.shields.io/badge/tests-409%20passing-success)
 ![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Chrome_extension-blue)
 ![Lit](https://img.shields.io/badge/framework-Lit-324FFF?logo=lit)

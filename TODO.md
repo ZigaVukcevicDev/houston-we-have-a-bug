@@ -43,9 +43,11 @@
   - [x] top-right endpoint
   - [x] bottom-left endpoint
   - [x] bottom-right endpoint
+  - [x] has proper cursor
 - move rectangle
   - [x] without selection
   - [x] with selection
+  - [x] has proper cursor
 
 5. Crop tool
 
