@@ -55,13 +55,14 @@
 
   h2 {
     font-size: 16px;
-    margin-left: 20px;
   }
 
   .system-info-heading {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding-left: 20px;
+    padding-right: 10px;
   }
 
   .system-info {

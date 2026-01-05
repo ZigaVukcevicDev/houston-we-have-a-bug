@@ -177,8 +177,7 @@ export class HBAnnotation extends LitElement {
 
     return html`
       <img src="../images/copy-black.svg" alt="copy" class="icon-default" />
-      <img src="../images/copy-red-400.svg" alt="copy" class="icon-hover" />
-      <img src="../images/copy-red-500.svg" alt="copy" class="icon-active" />
+      <img src="../images/copy-white.svg" alt="copy" class="icon-hover-and-active" />
     `;
   }
 
@@ -198,6 +197,7 @@ export class HBAnnotation extends LitElement {
           ?disabled=${this.isCopyingDisabled}
         >
           ${this.renderCopyButtonIcon()}
+          ${this.isCopyingDisabled ? 'Copied' : 'Copy'}
         </button>
       </div>
 
