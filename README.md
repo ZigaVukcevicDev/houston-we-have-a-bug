@@ -44,6 +44,7 @@ A Chrome extension that helps you annotate screenshots and gather system info fo
 ```
 ├── src/
 │   ├── app.ts                    # Main Lit app component
+│   ├── background.ts              # Service worker for screenshot/data handling
 │   ├── entrypoints/
 │   │   ├── popup.html            # Popup HTML entry
 │   │   ├── popup.ts              # Popup TS entry
@@ -55,12 +56,15 @@ A Chrome extension that helps you annotate screenshots and gather system info fo
 │   │   ├── hb-toolbar/           # Annotation toolbar
 │   │   ├── hb-toolbar-tool/      # Annotation toolbar tool
 │   │   └── hb-canvas/            # Canvas for annotations
+│   │       └── tools/            # Drawing tools (text, line, arrow, rectangle, select, crop)
+│   ├── interfaces/               # TypeScript interfaces for annotations
 │   ├── styles/
 │   │   ├── _variables.scss       # Shared design tokens
-│   │   ├── _mixins.scss          # Reusable style mixins
+│   │   ├── _buttons.scss         # Button styles
 │   │   ├── app.scss              # App-level styles
 │   │   └── fonts.css             # Global font-face declarations
-│   ├── fonts/                    # Custom font files
+│   ├── fonts/                    # Custom font files (Inter)
+│   ├── images/                   # Extension icons and assets
 │   ├── utils/                    # Utility functions
 │   └── types/                    # TypeScript declarations
 ├── manifest.json                 # Extension configuration
