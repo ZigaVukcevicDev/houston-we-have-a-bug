@@ -106,8 +106,8 @@ describe('TextTool', () => {
       const input = getTextInput()!;
       expect(input.style.position).toBe('fixed');
       expect(input.style.color).toBe('#E74C3C');
-      expect(input.style.fontWeight).toBe('bold');
-      expect(input.style.fontFamily).toContain('Arial');
+      expect(input.style.fontWeight).toBe('500');
+      expect(input.style.fontFamily).toContain('Inter');
     });
 
     it('should focus text input after creation', () => {
@@ -189,7 +189,7 @@ describe('TextTool', () => {
         y: 200,
         text: 'Test annotation',
         color: '#E74C3C',
-        fontSize: 20,
+        fontSize: 14,
       });
     });
 
@@ -283,7 +283,7 @@ describe('TextTool', () => {
     it('should apply correct text styling', () => {
       textTool.render(mockCtx);
 
-      expect(mockCtx.font).toBe('bold 20px Arial, sans-serif');
+      expect(mockCtx.font).toBe('500 14px Inter');
       expect(mockCtx.fillStyle).toBe('#E74C3C');
       expect(mockCtx.textBaseline).toBe('middle');
     });
@@ -306,7 +306,7 @@ describe('TextTool', () => {
       textTool.render(mockCtx);
 
       // Font should change for each annotation
-      expect(mockCtx.font).toBe('bold 30px Arial, sans-serif'); // Last one
+      expect(mockCtx.font).toBe('500 30px Inter'); // Last one
       expect(mockCtx.fillStyle).toBe('#0000FF'); // Last one
     });
   });
@@ -438,7 +438,7 @@ describe('TextTool', () => {
       expect(annotation.x).toBe(0); // Fallback for canvasX
       expect(annotation.y).toBe(0); // Fallback for canvasY
       expect(annotation.color).toBe('#E74C3C'); // Fallback for color
-      expect(annotation.fontSize).toBe(20); // Fallback for fontSize
+      expect(annotation.fontSize).toBe(14); // Fallback for fontSize
     });
 
     it('should use fallback when canvasX is empty string', () => {
@@ -470,7 +470,7 @@ describe('TextTool', () => {
 
       input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
 
-      expect(textTool['annotations'][0].fontSize).toBe(20); // Fallback
+      expect(textTool['annotations'][0].fontSize).toBe(14); // Fallback
     });
   });
 });

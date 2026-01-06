@@ -30,10 +30,12 @@ export class TextTool implements Tool {
   }
 
   render(ctx: CanvasRenderingContext2D): void {
+    const dpr = window.devicePixelRatio || 1;
     this.annotations.forEach((annotation) => {
-      ctx.font = `bold ${annotation.fontSize}px Arial, sans-serif`;
+      ctx.font = `500 ${annotation.fontSize * dpr}px Inter`;
       ctx.fillStyle = annotation.color;
       ctx.textBaseline = 'middle';
+      ctx.letterSpacing = '0.01em'; // 1% letter spacing
       ctx.fillText(annotation.text, annotation.x, annotation.y);
     });
   }
@@ -51,9 +53,10 @@ export class TextTool implements Tool {
       position: fixed;
       left: ${canvasX / scaleX + rect.left}px;
       top: ${canvasY / scaleY + rect.top - this.fontSize / 2}px;
-      font-size: ${this.fontSize / scaleY}px;
-      font-family: Arial, sans-serif;
-      font-weight: bold;
+      font-size: ${this.fontSize}px;
+      font-family: Inter;
+      font-weight: 500;
+      letter-spacing: 0.01em;
       color: ${this.color};
       background: rgba(255, 255, 255, 0.9);
       border: 2px dashed #333;
