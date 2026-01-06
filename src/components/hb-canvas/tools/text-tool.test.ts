@@ -79,9 +79,9 @@ describe('TextTool', () => {
       // Try to drag left and up
       textTool.handleMouseMove({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
 
-      // Width and height should be 0, not negative
-      expect(textTool['currentBox']?.width).toBe(0);
-      expect(textTool['currentBox']?.height).toBe(0);
+      // Width and height should be minimum size (2px), not 0
+      expect(textTool['currentBox']?.width).toBe(2);
+      expect(textTool['currentBox']?.height).toBe(2);
     });
 
     it('should call redraw during mousemove', () => {
@@ -252,7 +252,6 @@ describe('TextTool', () => {
       textTool.render(mockCtx);
 
       expect(mockCtx.strokeRect).toHaveBeenCalledWith(100, 100, 200, 150);
-      expect(mockCtx.setLineDash).toHaveBeenCalled();
     });
 
     it('should render saved annotations with border', () => {

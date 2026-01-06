@@ -44,9 +44,11 @@ export class TextTool implements Tool {
 
     const { x, y } = getCanvasCoordinates(event, canvas);
 
-    // Constrain to only right and down - no negative dimensions
-    const width = Math.max(0, x - this.startPoint.x);
-    const height = Math.max(0, y - this.startPoint.y);
+    // Constrain to only right and down
+    // Use minimum size (2px) to show user can't go left/up
+    const MIN_SIZE = 2;
+    const width = Math.max(MIN_SIZE, x - this.startPoint.x);
+    const height = Math.max(MIN_SIZE, y - this.startPoint.y);
 
     this.currentBox = {
       x: this.startPoint.x,
@@ -86,7 +88,6 @@ export class TextTool implements Tool {
       ctx.save();
       ctx.strokeStyle = this.color;
       ctx.lineWidth = 2 * dpr;
-      ctx.setLineDash([5 * dpr, 5 * dpr]);
       ctx.strokeRect(
         this.currentBox.x,
         this.currentBox.y,

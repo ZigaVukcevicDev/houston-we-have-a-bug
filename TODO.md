@@ -12,7 +12,7 @@
 2. Text tool
 
 - draw rectangle
-  - [ ] free
+  - [x] free
   - [ ] prevents left and top draw
   - [ ] upon release user is able to type
 - move endpoint
