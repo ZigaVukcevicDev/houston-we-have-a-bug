@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getDisplayResolution } from './get-display-resolution';
 
-// Mock chrome.scripting API
 const mockChrome = {
   scripting: {
     executeScript: vi.fn(),

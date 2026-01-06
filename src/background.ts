@@ -1,6 +1,5 @@
 // Background service worker - Simple in-memory storage with immediate transfer
 
-// Use module-level variables that persist during service worker lifetime
 let pendingScreenshotData: string | null = null;
 let pendingSystemInfo: any = null;
 
@@ -32,7 +31,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return false;
 });
 
-// Keep service worker alive longer
 chrome.runtime.onInstalled.addListener(() => {
   // Service worker installed
 });

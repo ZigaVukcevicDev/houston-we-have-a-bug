@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { HBAnnotation } from './hb-annotation';
 
-// Mock chrome.runtime API
 const mockChrome = {
   runtime: {
     sendMessage: vi.fn(),
@@ -13,7 +12,6 @@ const mockChrome = {
 
 globalThis.chrome = mockChrome as any;
 
-// Mock clipboard
 Object.defineProperty(globalThis.navigator, 'clipboard', {
   value: {
     writeText: vi.fn(),

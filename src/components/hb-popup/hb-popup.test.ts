@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { HBPopup } from './hb-popup';
 
-// Mock chrome APIs
 const mockChrome = {
   tabs: {
     query: vi.fn(),
@@ -16,7 +15,6 @@ const mockChrome = {
 
 globalThis.chrome = mockChrome as any;
 
-// Mock window.close
 globalThis.window.close = vi.fn();
 
 describe('HBPopup', () => {
