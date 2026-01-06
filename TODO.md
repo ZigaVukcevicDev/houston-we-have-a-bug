@@ -27,8 +27,8 @@
   - [x] free
   - [x] with shift
 - move endpoint
-  - [ ] start endpoint
-  - [ ] end endpoint
+  - [x] start endpoint
+  - [x] end endpoint
 - move arrow
   - [x] without selection
   - [x] with selection
@@ -86,11 +86,12 @@
 
 ## Extra
 
+- [ ] crop buttons, green?
 - [x] revisit crop area on white background, it looks too thin
 - [x] update crop area border when text tool designed
 - [ ] disable buttons "Annotate screenshot" / or show instructionswhen in annotations mode
 - [ ] when moving array via endpoint (start or end), it sometimes goes to select tool when release mouse button
-- [ ] change cursors when moving endpoints or annotations (reference to crop tool - if applicable?)
+- [ ] change cursors when moving endpoints or annotations (reference to crop tool - if applicable?) - check only for line and arrow, everything else is fine
 - [x] change color of annotations to use color E74C3C
 - [ ] screenshot should start at the bottom of topbar
 - [ ] style "No screenshot loaded. Please capture a screenshot from the extension popup."

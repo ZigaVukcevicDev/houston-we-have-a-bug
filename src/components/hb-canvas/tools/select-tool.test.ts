@@ -8,6 +8,7 @@ describe('SelectTool', () => {
   let mockCanvas: HTMLCanvasElement;
   let mockCtx: CanvasRenderingContext2D;
   let lineAnnotations: LineAnnotation[];
+  let arrowAnnotations: LineAnnotation[];
   let rectangleAnnotations: RectangleAnnotation[];
 
   beforeEach(() => {
@@ -32,6 +33,7 @@ describe('SelectTool', () => {
         width: 3,
       },
     ];
+    arrowAnnotations = [];
     rectangleAnnotations = [
       {
         id: 'rect-1',
@@ -52,7 +54,7 @@ describe('SelectTool', () => {
         strokeWidth: 5,
       },
     ];
-    selectTool = new SelectTool(lineAnnotations, rectangleAnnotations, mockRedraw);
+    selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, mockRedraw);
 
     // Mock canvas
     mockCanvas = {
@@ -359,7 +361,7 @@ describe('SelectTool', () => {
 
   describe('edge cases', () => {
     it('should handle empty line annotations array', () => {
-      const emptySelectTool = new SelectTool([], [], mockRedraw);
+      const emptySelectTool = new SelectTool([], [], [], mockRedraw);
 
       emptySelectTool.handleClick({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
 
@@ -918,8 +920,8 @@ describe('SelectTool', () => {
 
   describe('arrow hover detection with arrowhead', () => {
     beforeEach(() => {
-      // Add an arrow (line with hasArrowhead: true)
-      lineAnnotations.push({
+      // Add an arrow to arrowAnnotations array
+      arrowAnnotations.push({
         id: 'arrow-1',
         x1: 100,
         y1: 100,
@@ -927,9 +929,8 @@ describe('SelectTool', () => {
         y2: 100, // Horizontal arrow pointing right
         color: '#E74C3C',
         width: 5,
-        hasArrowhead: true,
       });
-      selectTool = new SelectTool(lineAnnotations, rectangleAnnotations, mockRedraw);
+      selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, mockRedraw);
     });
 
     it('should detect hover on arrow line body', () => {
@@ -981,9 +982,10 @@ describe('SelectTool', () => {
     });
 
     it('should not detect hover far from arrow and arrowhead', () => {
-      // Clear existing lines and add only arrow
+      // Clear all annotations and add only arrow to arrow array
       lineAnnotations.length = 0;
-      lineAnnotations.push({
+      arrowAnnotations.length = 0;
+      arrowAnnotations.push({
         id: 'arrow-1',
         x1: 100,
         y1: 100,
@@ -991,9 +993,8 @@ describe('SelectTool', () => {
         y2: 100,
         color: '#E74C3C',
         width: 5,
-        hasArrowhead: true,
       });
-      selectTool = new SelectTool(lineAnnotations, rectangleAnnotations, mockRedraw);
+      selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, mockRedraw);
 
       // Hover way below the arrow
       selectTool.handleMouseMove(
@@ -1017,7 +1018,7 @@ describe('SelectTool', () => {
         color: '#E74C3C',
         width: 5,
       });
-      selectTool = new SelectTool(lineAnnotations, rectangleAnnotations, mockRedraw);
+      selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, mockRedraw);
 
       // Hover exactly on the point to trigger lengthSquared === 0 case
       selectTool.handleMouseMove({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas, mockCtx);
@@ -1027,7 +1028,7 @@ describe('SelectTool', () => {
 
     it('should work with diagonal arrows', () => {
       // Add a diagonal arrow
-      lineAnnotations.push({
+      arrowAnnotations.push({
         id: 'arrow-diag',
         x1: 50,
         y1: 50,
@@ -1035,9 +1036,8 @@ describe('SelectTool', () => {
         y2: 150,
         color: '#E74C3C',
         width: 5,
-        hasArrowhead: true,
       });
-      selectTool = new SelectTool(lineAnnotations, rectangleAnnotations, mockRedraw);
+      selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, mockRedraw);
 
       // Hover near the diagonal arrowhead
       selectTool.handleMouseMove(
@@ -1052,7 +1052,8 @@ describe('SelectTool', () => {
     it('should distinguish between regular lines and arrows', () => {
       // Clear and add only an arrow
       lineAnnotations.length = 0;
-      lineAnnotations.push({
+      // Add an arrow to arrow array
+      arrowAnnotations.push({
         id: 'arrow-only',
         x1: 100,
         y1: 100,
@@ -1060,14 +1061,22 @@ describe('SelectTool', () => {
         y2: 100,
         color: '#E74C3C',
         width: 5,
-        hasArrowhead: true,
       });
 
-      selectTool = new SelectTool(lineAnnotations, rectangleAnnotations, mockRedraw);
+      selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, mockRedraw);
 
-      // Now set hasArrowhead to false to make it a regular line
-      lineAnnotations[0].hasArrowhead = false;
-      selectTool = new SelectTool(lineAnnotations, rectangleAnnotations, mockRedraw);
+      // Now clear arrowAnnotations and add to lineAnnotations to make it a regular line
+      arrowAnnotations.length = 0;
+      lineAnnotations.push({
+        id: 'line-only',
+        x1: 100,
+        y1: 100,
+        x2: 200,
+        y2: 100,
+        color: '#E74C3C',
+        width: 5,
+      });
+      selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, mockRedraw);
 
       // Hover where arrowhead would be - should not detect for regular line  
       // This point is only near arrowhead, not the main line body
@@ -1084,7 +1093,7 @@ describe('SelectTool', () => {
 
   describe('rectangle edge cases', () => {
     it('should handle empty rectangle annotations array', () => {
-      const emptySelectTool = new SelectTool([], [], mockRedraw);
+      const emptySelectTool = new SelectTool([], [], [], mockRedraw);
 
       emptySelectTool.handleClick({ clientX: 150, clientY: 310 } as MouseEvent, mockCanvas);
 
@@ -1259,7 +1268,7 @@ describe('SelectTool', () => {
         width: 3,
       });
 
-      selectTool = new SelectTool(lineAnnotations, rectangleAnnotations, mockRedraw);
+      selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, mockRedraw);
 
       selectTool.handleMouseMove(
         { clientX: 200, clientY: 200 } as MouseEvent,
@@ -1281,7 +1290,7 @@ describe('SelectTool', () => {
         width: 3,
       });
 
-      selectTool = new SelectTool(lineAnnotations, rectangleAnnotations, mockRedraw);
+      selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, mockRedraw);
 
       selectTool.handleMouseMove(
         { clientX: 250, clientY: 250 } as MouseEvent,
@@ -1295,7 +1304,7 @@ describe('SelectTool', () => {
 
   describe('arrow hover rendering', () => {
     it('should call renderArrowhead when hovering over arrow', () => {
-      lineAnnotations.push({
+      arrowAnnotations.push({
         id: 'arrow-1',
         x1: 100,
         y1: 100,
@@ -1303,10 +1312,9 @@ describe('SelectTool', () => {
         y2: 200,
         color: '#E74C3C',
         width: 3,
-        hasArrowhead: true,
       });
 
-      selectTool = new SelectTool(lineAnnotations, rectangleAnnotations, mockRedraw);
+      selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, mockRedraw);
 
       // Hover over the arrow
       selectTool.handleMouseMove(

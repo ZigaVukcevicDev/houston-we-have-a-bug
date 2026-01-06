@@ -30,6 +30,7 @@ export class HBCanvas extends LitElement {
 
   // Centralized annotation storage
   private lineAnnotations: LineAnnotation[] = [];
+  private arrowAnnotations: LineAnnotation[] = [];
   private rectangleAnnotations: RectangleAnnotation[] = [];
   private textAnnotations: TextAnnotation[] = [];
 
@@ -120,7 +121,7 @@ export class HBCanvas extends LitElement {
       (tool: string, annotationId?: string) => this.handleToolChange(tool, annotationId)
     ));
     this.tools.set('arrow', new ArrowTool(
-      this.lineAnnotations,
+      this.arrowAnnotations,
       () => this.redraw(),
       (tool: string, annotationId?: string) => this.handleToolChange(tool, annotationId)
     ));
@@ -131,6 +132,7 @@ export class HBCanvas extends LitElement {
     ));
     this.tools.set('select', new SelectTool(
       this.lineAnnotations,
+      this.arrowAnnotations,
       this.rectangleAnnotations,
       () => this.redraw()
     ));

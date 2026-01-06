@@ -6,6 +6,7 @@ import { renderArrowhead, getArrowheadPoints } from '../../../utils/render-arrow
 
 export class SelectTool implements Tool {
   private lineAnnotations: LineAnnotation[] = [];
+  private arrowAnnotations: LineAnnotation[] = [];
   private rectangleAnnotations: RectangleAnnotation[] = [];
   private selectedAnnotationId: string | null = null;
   private selectedAnnotationType: 'line' | 'rectangle' | null = null;
@@ -18,10 +19,41 @@ export class SelectTool implements Tool {
 
   private onRedraw: () => void;
 
-  constructor(lineAnnotations: LineAnnotation[], rectangleAnnotations: RectangleAnnotation[], onRedraw: () => void) {
+  constructor(lineAnnotations: LineAnnotation[], arrowAnnotations: LineAnnotation[], rectangleAnnotations: RectangleAnnotation[], onRedraw: () => void) {
     this.lineAnnotations = lineAnnotations;
+    this.arrowAnnotations = arrowAnnotations;
     this.rectangleAnnotations = rectangleAnnotations;
     this.onRedraw = onRedraw;
+  }
+
+  // Helper to get all lines (including arrows) for iteration
+  private getAllLines(): LineAnnotation[] {
+    return [...this.lineAnnotations, ...this.arrowAnnotations];
+  }
+
+  // Helper to find line/arrow by ID in either array
+  private findLineById(id: string): LineAnnotation | undefined {
+    return this.lineAnnotations.find(l => l.id === id) || this.arrowAnnotations.find(a => a.id === id);
+  }
+
+  // Helper to remove line/arrow by ID from the correct array
+  private removeLineById(id: string): boolean {
+    let index = this.lineAnnotations.findIndex(l => l.id === id);
+    if (index !== -1) {
+      this.lineAnnotations.splice(index, 1);
+      return true;
+    }
+    index = this.arrowAnnotations.findIndex(a => a.id === id);
+    if (index !== -1) {
+      this.arrowAnnotations.splice(index, 1);
+      return true;
+    }
+    return false;
+  }
+
+  // Helper to check if a line ID belongs to an arrow
+  private isArrow(id: string): boolean {
+    return this.arrowAnnotations.some(a => a.id === id);
   }
 
   activate(): void {
@@ -46,10 +78,7 @@ export class SelectTool implements Tool {
     if (this.selectedAnnotationId === null) return;
 
     if (this.selectedAnnotationType === 'line') {
-      const index = this.lineAnnotations.findIndex(l => l.id === this.selectedAnnotationId);
-      if (index !== -1) {
-        this.lineAnnotations.splice(index, 1);
-      }
+      this.removeLineById(this.selectedAnnotationId);
     } else if (this.selectedAnnotationType === 'rectangle') {
       const index = this.rectangleAnnotations.findIndex(r => r.id === this.selectedAnnotationId);
       if (index !== -1) {
@@ -67,7 +96,7 @@ export class SelectTool implements Tool {
   selectAnnotation(id: string): void {
     this.selectedAnnotationId = id;
     // Determine annotation type
-    if (this.lineAnnotations.find(l => l.id === id)) {
+    if (this.findLineById(id)) {
       this.selectedAnnotationType = 'line';
     } else if (this.rectangleAnnotations.find(r => r.id === id)) {
       this.selectedAnnotationType = 'rectangle';
@@ -98,9 +127,10 @@ export class SelectTool implements Tool {
     }
 
     // Check lines (iterate backwards for most recent)
-    for (let i = this.lineAnnotations.length - 1; i >= 0; i--) {
-      if (this.isPointOnLine(x, y, this.lineAnnotations[i])) {
-        this.selectedAnnotationId = this.lineAnnotations[i].id;
+    const allLines = this.getAllLines();
+    for (let i = allLines.length - 1; i >= 0; i--) {
+      if (this.isPointOnLine(x, y, allLines[i])) {
+        this.selectedAnnotationId = allLines[i].id;
         this.selectedAnnotationType = 'line';
         this.onRedraw();
         return;
@@ -120,7 +150,7 @@ export class SelectTool implements Tool {
     if (this.selectedAnnotationId !== null) {
       // Handle line annotations
       if (this.selectedAnnotationType === 'line') {
-        const line = this.lineAnnotations.find(l => l.id === this.selectedAnnotationId);
+        const line = this.findLineById(this.selectedAnnotationId);
         if (!line) return;
 
         // Check start handle first
@@ -199,9 +229,10 @@ export class SelectTool implements Tool {
     }
 
     // Check lines (iterate backwards for most recent)
-    for (let i = this.lineAnnotations.length - 1; i >= 0; i--) {
-      if (this.isPointOnLine(x, y, this.lineAnnotations[i])) {
-        this.selectedAnnotationId = this.lineAnnotations[i].id;
+    const allLines = this.getAllLines();
+    for (let i = allLines.length - 1; i >= 0; i--) {
+      if (this.isPointOnLine(x, y, allLines[i])) {
+        this.selectedAnnotationId = allLines[i].id;
         this.selectedAnnotationType = 'line';
         this.draggingLine = true;
         this.dragOffset = { x, y };
@@ -218,7 +249,7 @@ export class SelectTool implements Tool {
       const { x, y } = getCanvasCoordinates(event, canvas);
 
       // Check if hovering over a handle of selected line
-      const selectedLine = this.lineAnnotations.find(l => l.id === this.selectedAnnotationId);
+      const selectedLine = this.selectedAnnotationId ? this.findLineById(this.selectedAnnotationId) : null;
       if (selectedLine) {
         if (isPointOnHandle(x, y, selectedLine.x1, selectedLine.y1) ||
           isPointOnHandle(x, y, selectedLine.x2, selectedLine.y2)) {
@@ -281,11 +312,12 @@ export class SelectTool implements Tool {
       }
 
       // Check if hovering over any line (iterate backwards for most recent)
-      for (let i = this.lineAnnotations.length - 1; i >= 0; i--) {
-        if (this.isPointOnLine(x, y, this.lineAnnotations[i])) {
+      const allLines = this.getAllLines();
+      for (let i = allLines.length - 1; i >= 0; i--) {
+        if (this.isPointOnLine(x, y, allLines[i])) {
           canvas.style.cursor = 'pointer';
-          if (this.hoveredAnnotationId !== this.lineAnnotations[i].id) {
-            this.hoveredAnnotationId = this.lineAnnotations[i].id;
+          if (this.hoveredAnnotationId !== allLines[i].id) {
+            this.hoveredAnnotationId = allLines[i].id;
             this.hoveredAnnotationType = 'line';
             this.onRedraw();
           }
@@ -324,7 +356,7 @@ export class SelectTool implements Tool {
       const dy = y - this.dragOffset.y;
 
       if (this.selectedAnnotationType === 'line') {
-        const line = this.lineAnnotations.find(l => l.id === this.selectedAnnotationId);
+        const line = this.selectedAnnotationId ? this.findLineById(this.selectedAnnotationId) : null;
         if (line) {
           // Dragging entire line - move both endpoints
           line.x1 += dx;
@@ -355,7 +387,7 @@ export class SelectTool implements Tool {
       y = y - this.dragOffset.y;
 
       if (this.selectedAnnotationType === 'line') {
-        const line = this.lineAnnotations.find(l => l.id === this.selectedAnnotationId);
+        const line = this.selectedAnnotationId ? this.findLineById(this.selectedAnnotationId) : null;
         if (!line) return;
 
         if (this.draggingHandle === 'start') {
@@ -410,7 +442,7 @@ export class SelectTool implements Tool {
     // Render yellow centerline for hovered annotation (if not selected)
     if (this.hoveredAnnotationId !== null && this.hoveredAnnotationId !== this.selectedAnnotationId) {
       if (this.hoveredAnnotationType === 'line') {
-        const hoveredLine = this.lineAnnotations.find(l => l.id === this.hoveredAnnotationId);
+        const hoveredLine = this.findLineById(this.hoveredAnnotationId!);
         if (hoveredLine) {
           ctx.save();
           ctx.strokeStyle = '#FAC021';
@@ -423,7 +455,7 @@ export class SelectTool implements Tool {
           ctx.restore();
 
           // Also render arrowhead if this is an arrow
-          if (hoveredLine.hasArrowhead) {
+          if (this.hoveredAnnotationId && this.isArrow(this.hoveredAnnotationId)) {
             renderArrowhead(
               ctx,
               hoveredLine.x1,
@@ -455,7 +487,7 @@ export class SelectTool implements Tool {
     if (this.selectedAnnotationId === null) return;
 
     if (this.selectedAnnotationType === 'line') {
-      const selectedLine = this.lineAnnotations.find(l => l.id === this.selectedAnnotationId);
+      const selectedLine = this.findLineById(this.selectedAnnotationId);
       if (selectedLine) {
         renderHandle(ctx, selectedLine.x1, selectedLine.y1);
         renderHandle(ctx, selectedLine.x2, selectedLine.y2);
@@ -500,7 +532,7 @@ export class SelectTool implements Tool {
     }
 
     // If this is an arrow, also check if point is near the arrowhead
-    if (line.hasArrowhead) {
+    if (this.isArrow(line.id)) {
       return this.isPointOnArrowhead(px, py, line);
     }
 

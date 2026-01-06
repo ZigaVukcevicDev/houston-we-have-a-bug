@@ -33,7 +33,7 @@ export class ArrowTool extends LineTool {
     // Access lineAnnotations through array passed to constructor
     const annotations = (this as any).lineAnnotations as LineAnnotation[];
 
-    // Add arrowheads to all existing arrows
+    // Add arrowheads to all annotations (they're all arrows in this array now)
     annotations.forEach(arrow => {
       renderArrowhead(ctx, arrow.x1, arrow.y1, arrow.x2, arrow.y2, arrow.color, arrow.width, dpr);
     });
@@ -56,9 +56,5 @@ export class ArrowTool extends LineTool {
         dpr
       );
     }
-  }
-
-  protected shouldHaveArrowhead(): boolean {
-    return true;
   }
 }

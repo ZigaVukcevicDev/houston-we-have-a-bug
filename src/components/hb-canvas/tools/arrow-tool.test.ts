@@ -4,14 +4,14 @@ import type { LineAnnotation } from '../../../interfaces/annotation.interface';
 
 describe('ArrowTool', () => {
   let arrowTool: ArrowTool;
-  let lineAnnotations: LineAnnotation[];
+  let arrowAnnotations: LineAnnotation[];
   let mockRedraw: Mock;
   let mockToolChange: Mock;
   let mockCanvas: HTMLCanvasElement;
   let mockCtx: CanvasRenderingContext2D;
 
   beforeEach(() => {
-    lineAnnotations = [
+    arrowAnnotations = [
       {
         id: 'arrow-1',
         x1: 100,
@@ -25,7 +25,7 @@ describe('ArrowTool', () => {
 
     mockRedraw = vi.fn();
     mockToolChange = vi.fn();
-    arrowTool = new ArrowTool(lineAnnotations, mockRedraw, mockToolChange);
+    arrowTool = new ArrowTool(arrowAnnotations, mockRedraw, mockToolChange);
 
     // Mock canvas
     mockCanvas = document.createElement('canvas');
@@ -70,7 +70,7 @@ describe('ArrowTool', () => {
       arrowTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
       arrowTool.handleMouseUp({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas);
 
-      expect(lineAnnotations.length).toBe(2); // Original + newly drawn
+      expect(arrowAnnotations.length).toBe(2); // Original + newly drawn
       expect(mockToolChange).toHaveBeenCalledWith('select', expect.any(String));
     });
 
@@ -81,7 +81,7 @@ describe('ArrowTool', () => {
         mockCanvas
       );
 
-      const newArrow = lineAnnotations[lineAnnotations.length - 1];
+      const newArrow = arrowAnnotations[arrowAnnotations.length - 1];
       // Should snap to horizontal (y1 === y2)
       expect(newArrow.y1).toBe(newArrow.y2);
     });
@@ -89,13 +89,13 @@ describe('ArrowTool', () => {
     it('should support escape key cancellation', () => {
       arrowTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
 
-      const initialLength = lineAnnotations.length;
+      const initialLength = arrowAnnotations.length;
 
       // Simulate Escape key
       const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
       document.dispatchEvent(escapeEvent);
 
-      expect(lineAnnotations.length).toBe(initialLength); // No new arrow added
+      expect(arrowAnnotations.length).toBe(initialLength); // No new arrow added
       expect(mockRedraw).toHaveBeenCalled();
     });
   });
@@ -126,7 +126,7 @@ describe('ArrowTool', () => {
         color: '#E74C3C',
         width: 5,
       };
-      lineAnnotations.push(horizontalArrow);
+      arrowAnnotations.push(horizontalArrow);
 
       arrowTool.render(mockCtx);
 
@@ -146,7 +146,7 @@ describe('ArrowTool', () => {
         color: '#E74C3C',
         width: 5,
       };
-      lineAnnotations.push(verticalArrow);
+      arrowAnnotations.push(verticalArrow);
 
       arrowTool.render(mockCtx);
 
@@ -273,7 +273,7 @@ describe('ArrowTool', () => {
 
   describe('multiple arrows', () => {
     it('should render arrowheads for multiple arrows', () => {
-      lineAnnotations.push({
+      arrowAnnotations.push({
         id: 'arrow-2',
         x1: 300,
         y1: 300,
