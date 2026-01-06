@@ -9,7 +9,24 @@
 - [x] if coming from other tool, don't select any annotation
 - [x] delete key deletes selected annotation
 
-2. Line tool
+2. Text tool
+
+- draw rectangle
+  - [ ] free
+  - [ ] prevents left and top draw
+  - [ ] upon release user is able to type
+- move endpoint
+  - [ ] top-left endpoint
+  - [ ] top-right endpoint
+  - [ ] bottom-left endpoint
+  - [ ] bottom-right endpoint
+  - [ ] has proper cursor
+- move rectangle
+  - [ ] without selection
+  - [ ] with selection
+  - [ ] has proper cursor
+
+3. Line tool
 
 - draw line
   - [x] free
@@ -21,7 +38,7 @@
   - [x] without selection
   - [x] with selection
 
-3. Arrow tool
+4. Arrow tool
 
 - draw arrow
   - [x] free
@@ -33,7 +50,7 @@
   - [x] without selection
   - [x] with selection
 
-4. Rectangle tool
+5. Rectangle tool
 
 - draw rectangle
   - [x] free
@@ -49,7 +66,7 @@
   - [x] with selection
   - [x] has proper cursor
 
-5. Crop tool
+6. Crop tool
 
 - draw crop rectangle
   - [x] free
@@ -80,18 +97,17 @@
   - [x] by selecting other tool 
 - [ ] croping through annotations
  
-6. Download
+7. Download
 
 - [x] deselect annotaions when downloading
 
-## Extra
+## Details
 
 - [ ] crop buttons, green?
 - [x] revisit crop area on white background, it looks too thin
 - [x] update crop area border when text tool designed
 - [ ] disable buttons "Annotate screenshot" / or show instructionswhen in annotations mode
-- [ ] when moving array via endpoint (start or end), it sometimes goes to select tool when release mouse button
-- [ ] change cursors when moving endpoints or annotations (reference to crop tool - if applicable?) - check only for line and arrow, everything else is fine
+- [x] change cursors when moving endpoints or annotations (reference to crop tool - if applicable?) - check only for line and arrow, everything else is fine
 - [x] change color of annotations to use color E74C3C
 - [ ] screenshot should start at the bottom of topbar
 - [ ] style "No screenshot loaded. Please capture a screenshot from the extension popup."
@@ -100,7 +116,11 @@
 - [x] change "environment details" to "system info"
 - [x] when hovering over rectangle, highlight is visible only when hover over horizontal parts
 - [x] find a way to have better hover color for secondary button (as current is too pale)
-- [ ] increase code coverage
 - [ ] figure out how to avoid "tabs" permission
 - [ ] revisit toolbar - last tool perhaps needs more optical padding
 - [ ] integrate Codecov
+
+## Ongoing
+
+- [ ] increase code coverage
+- [ ] update badges with coverage
