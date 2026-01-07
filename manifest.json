@@ -24,22 +24,6 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "images/*"
-      ],
-      "matches": [
-        "<all_urls>"
-      ]
-    },
-    {
-      "resources": [
-        "fonts/*"
-      ],
-      "matches": [
-        "<all_urls>"
-      ]
-    },
-    {
-      "resources": [
         "tab.html"
       ],
       "matches": [

@@ -106,7 +106,7 @@
 - [ ] crop buttons, green?
 - [x] revisit crop area on white background, it looks too thin
 - [x] update crop area border when text tool designed
-- [ ] disable buttons "Annotate screenshot" / or show instructionswhen in annotations mode
+- [x] disable button "Annotate screenshot" on annotation page
 - [x] change cursors when moving endpoints or annotations (reference to crop tool - if applicable?) - check only for line and arrow, everything else is fine
 - [x] change color of annotations to use color E74C3C
 - [ ] screenshot should start at the bottom of topbar
@@ -116,7 +116,6 @@
 - [x] change "environment details" to "system info"
 - [x] when hovering over rectangle, highlight is visible only when hover over horizontal parts
 - [x] find a way to have better hover color for secondary button (as current is too pale)
-- [ ] figure out how to avoid "tabs" permission
 - [ ] revisit toolbar - last tool perhaps needs more optical padding
 - [ ] integrate Codecov
 

@@ -1,38 +1,68 @@
-// Background service worker - Simple in-memory storage with immediate transfer
+import type { ScreenshotSession } from './types/screenshot-session.type';
 
-let pendingScreenshotData: string | null = null;
-let pendingSystemInfo: any = null;
+async function storeScreenshotData(dataUrl: string, systemInfo: any): Promise<string> {
+  const sessionId = crypto.randomUUID();
+  const data: ScreenshotSession = {
+    dataUrl,
+    systemInfo,
+    timestamp: Date.now(),
+  };
+
+  await chrome.storage.session.set({ [`screenshot_${sessionId}`]: data });
+  return sessionId;
+}
+
+async function getScreenshotData(sessionId: string): Promise<ScreenshotSession | null> {
+  const key = `screenshot_${sessionId}`;
+  const result = await chrome.storage.session.get(key);
+
+  if (result[key]) {
+    await chrome.storage.session.remove(key);
+    return result[key];
+  }
+
+  return null;
+}
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'STORE_SCREENSHOT') {
-    pendingScreenshotData = message.dataUrl;
-    pendingSystemInfo = message.systemInfo;
-
-    sendResponse({ success: true });
+    storeScreenshotData(message.dataUrl, message.systemInfo)
+      .then(sessionId => {
+        chrome.tabs.create({ url: `tab.html?session=${sessionId}` });
+        sendResponse({ success: true });
+      })
+      .catch(error => {
+        console.error('Failed to store screenshot:', error);
+        sendResponse({ success: false, error: error.message });
+      });
     return true;
   }
 
   if (message.type === 'GET_SCREENSHOT') {
-    const response = {
-      dataUrl: pendingScreenshotData,
-      systemInfo: pendingSystemInfo,
-    };
+    const sessionId = message.sessionId;
+    if (!sessionId) {
+      sendResponse({ dataUrl: null, systemInfo: null });
+      return false;
+    }
 
-    // Don't clear immediately - wait a bit in case of retries
-    setTimeout(() => {
-      pendingScreenshotData = null;
-      pendingSystemInfo = null;
-    }, 5000);
-
-    sendResponse(response);
+    getScreenshotData(sessionId)
+      .then(data => {
+        sendResponse({
+          dataUrl: data?.dataUrl || null,
+          systemInfo: data?.systemInfo || null,
+        });
+      })
+      .catch(error => {
+        console.error('Failed to get screenshot:', error);
+        sendResponse({ dataUrl: null, systemInfo: null });
+      });
     return true;
   }
 
   return false;
 });
 
-chrome.runtime.onInstalled.addListener(() => {
-  // Service worker installed
-});
+chrome.runtime.onInstalled.addListener(() => { });
+
 
 export { };

@@ -1,5 +1,5 @@
 import { LitElement, html, unsafeCSS } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
 import { getChromeVersion } from '../../utils/get-chrome-version';
 import { getDateAndTime } from '../../utils/get-date-and-time';
 import { getDevicePixelRatio } from '../../utils/get-device-pixel-ratio';
@@ -13,6 +13,28 @@ import styles from './hb-popup.scss';
 export class HBPopup extends LitElement {
   static styles = unsafeCSS(styles);
 
+  @state()
+  private isOnAnnotationPage: boolean = false;
+
+  async connectedCallback() {
+    super.connectedCallback();
+    await this.checkIfOnAnnotationPage();
+  }
+
+  private async checkIfOnAnnotationPage() {
+    try {
+      const [tab] = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+
+      const url = tab?.url || '';
+      this.isOnAnnotationPage = url.includes('/tab.html');
+    } catch {
+      this.isOnAnnotationPage = false;
+    }
+  }
+
   render() {
     return html`
       <div class="popup">
@@ -25,6 +47,7 @@ export class HBPopup extends LitElement {
         <button
             class="action-button primary"
             @click=${this.annotateScreenshot}
+            ?disabled=${this.isOnAnnotationPage}
           >
             <img src="../images/pencil-white.svg" alt="pencil" />
             Annotate screenshot
@@ -43,7 +66,6 @@ export class HBPopup extends LitElement {
 
       if (!tab?.id || !tab.windowId || !tab.url) return;
 
-      // Gather system info from the actual website tab (not extension page)
       const systemInfo: SystemInfo = {
         dateAndTime: getDateAndTime(),
         url: tab.url,
@@ -58,15 +80,13 @@ export class HBPopup extends LitElement {
         format: 'png',
       });
 
-      // Store both screenshot AND system info in background
       await chrome.runtime.sendMessage({
         type: 'STORE_SCREENSHOT',
         dataUrl,
         systemInfo,
       });
 
-      chrome.tabs.create({ url: chrome.runtime.getURL('tab.html') });
-      window.close(); // Close the popup
+      window.close();
     } catch (error) {
       console.error('Failed to capture screenshot:', error);
     }

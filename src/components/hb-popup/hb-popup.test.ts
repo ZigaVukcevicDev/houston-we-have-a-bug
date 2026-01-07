@@ -57,9 +57,6 @@ describe('HBPopup', () => {
           url: 'https://example.com',
         }),
       });
-      expect(mockChrome.tabs.create).toHaveBeenCalledWith({
-        url: 'chrome-extension://mock-id/tab.html',
-      });
       expect(window.close).toHaveBeenCalled();
     });
 

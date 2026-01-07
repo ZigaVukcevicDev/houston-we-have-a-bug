@@ -2,6 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { HBAnnotation } from './hb-annotation';
 
 const mockChrome = {
+  storage: {
+    session: {
+      get: vi.fn(),
+      set: vi.fn(),
+      remove: vi.fn(),
+    },
+  },
   runtime: {
     sendMessage: vi.fn(),
   },
@@ -32,18 +39,26 @@ describe('HBAnnotation', () => {
   });
 
   describe('_loadScreenshotFromStorage', () => {
+    beforeEach(() => {
+      delete (globalThis.window as any).location;
+      (globalThis.window as any).location = { search: '?session=test-session-123' };
+    });
+
     it('should load screenshot from storage', async () => {
       const mockDataUrl = 'data:image/png;base64,mock';
-      mockChrome.runtime.sendMessage.mockResolvedValue({
-        dataUrl: mockDataUrl,
+      mockChrome.storage.session.get.mockResolvedValue({
+        'screenshot_test-session-123': {
+          dataUrl: mockDataUrl,
+          systemInfo: null,
+          timestamp: Date.now(),
+        },
       });
 
       await annotation['loadScreenshotFromStorage']();
 
-      expect(mockChrome.runtime.sendMessage).toHaveBeenCalledWith({
-        type: 'GET_SCREENSHOT',
-      });
+      expect(mockChrome.storage.session.get).toHaveBeenCalledWith('screenshot_test-session-123');
       expect(annotation['dataUrl']).toBe(mockDataUrl);
+      expect(mockChrome.storage.session.remove).toHaveBeenCalledWith('screenshot_test-session-123');
     });
 
     it('should load systemInfo along with screenshot', async () => {
@@ -58,9 +73,12 @@ describe('HBAnnotation', () => {
         os: 'macOS',
       };
 
-      mockChrome.runtime.sendMessage.mockResolvedValue({
-        dataUrl: mockDataUrl,
-        systemInfo: mockSystemInfo,
+      mockChrome.storage.session.get.mockResolvedValue({
+        'screenshot_test-session-123': {
+          dataUrl: mockDataUrl,
+          systemInfo: mockSystemInfo,
+          timestamp: Date.now(),
+        },
       });
 
       await annotation['loadScreenshotFromStorage']();
@@ -69,25 +87,28 @@ describe('HBAnnotation', () => {
       expect(annotation['systemInfo']).toEqual(mockSystemInfo);
     });
 
-    it('should handle missing dataUrl in response', async () => {
-      mockChrome.runtime.sendMessage.mockResolvedValue({});
+    it('should handle missing session ID in URL', async () => {
+      (globalThis.window as any).location = { search: '' };
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
 
       await annotation['loadScreenshotFromStorage']();
 
       expect(annotation['dataUrl']).toBe('');
+      expect(consoleSpy).toHaveBeenCalledWith('No session ID found in URL');
+      consoleSpy.mockRestore();
     });
 
     it('should handle errors gracefully', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
-      mockChrome.runtime.sendMessage.mockRejectedValue(
-        new Error('Failed to load screenshot')
+      mockChrome.storage.session.get.mockRejectedValue(
+        new Error('Storage error')
       );
 
       await annotation['loadScreenshotFromStorage']();
 
       expect(annotation['dataUrl']).toBe('');
       expect(consoleSpy).toHaveBeenCalledWith(
-        'Failed to load screenshot:',
+        'Failed to load screenshot from storage:',
         expect.any(Error)
       );
       consoleSpy.mockRestore();
@@ -216,41 +237,53 @@ describe('HBAnnotation', () => {
       document.body.appendChild(annotation);
     });
 
-    it('should close system info when clicking outside', async () => {
+    it('should not close when clicking inside container', () => {
       annotation['showSystemInfo'] = true;
-      await annotation.updateComplete;
+      const container = document.createElement('div');
+      container.className = 'js-system-info-container';
+      vi.spyOn(annotation.shadowRoot!, 'querySelector').mockReturnValue(container);
 
-      const outsideElement = document.createElement('div');
-      document.body.appendChild(outsideElement);
-
-      const event = new MouseEvent('click', { bubbles: true });
-      Object.defineProperty(event, 'target', { value: outsideElement });
-
-      annotation['handleClickOutside'](event);
-
-      expect(annotation['showSystemInfo']).toBe(false);
-    });
-
-    it('should not close when clicking inside container', async () => {
-      annotation['systemInfo'] = {
-        dateAndTime: '2026-01-04 12:00:00',
-        url: 'https://example.com',
-        visibleArea: '1920 x 1080 px',
-        displayResolution: '1920 x 1080 px',
-        devicePixelRatio: '1',
-        browser: 'Chrome 142',
-        os: 'macOS',
-      };
-      annotation['showSystemInfo'] = true;
-      await annotation.updateComplete;
-
-      const container = annotation.shadowRoot?.querySelector('.system-info-container') as HTMLElement;
-      const event = new MouseEvent('click', { bubbles: true });
-      Object.defineProperty(event, 'target', { value: container });
+      const event = {
+        target: container,
+        composedPath: () => [container, document.body, document.documentElement],
+      } as unknown as MouseEvent;
 
       annotation['handleClickOutside'](event);
 
       expect(annotation['showSystemInfo']).toBe(true);
+    });
+
+    it('should not close when clicking button', () => {
+      annotation['showSystemInfo'] = true;
+      const button = document.createElement('button');
+      button.className = 'js-system-info-button';
+      vi.spyOn(annotation.shadowRoot!, 'querySelector').mockReturnValue(button);
+
+      const event = {
+        target: button,
+        composedPath: () => [button, document.body, document.documentElement],
+      } as unknown as MouseEvent;
+
+      annotation['handleClickOutside'](event);
+
+      expect(annotation['showSystemInfo']).toBe(true);
+    });
+
+    it('should close when clicking outside', () => {
+      annotation['showSystemInfo'] = true;
+      const container = document.createElement('div');
+      container.className = 'js-system-info-container';
+      const outsideElement = document.createElement('div');
+      vi.spyOn(annotation.shadowRoot!, 'querySelector').mockReturnValue(container);
+
+      const event = {
+        target: outsideElement,
+        composedPath: () => [outsideElement, document.body, document.documentElement],
+      } as unknown as MouseEvent;
+
+      annotation['handleClickOutside'](event);
+
+      expect(annotation['showSystemInfo']).toBe(false);
     });
 
     it('should do nothing if panel not shown', () => {
@@ -369,7 +402,8 @@ describe('HBAnnotation', () => {
 
       expect(removeEventListenerSpy).toHaveBeenCalledWith(
         'click',
-        annotation['handleClickOutside']
+        annotation['handleClickOutside'],
+        true
       );
 
       removeEventListenerSpy.mockRestore();
@@ -450,4 +484,3 @@ describe('HBAnnotation', () => {
     });
   });
 });
-

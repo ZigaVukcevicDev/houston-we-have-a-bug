@@ -22,12 +22,17 @@ button {
         transform: translateY(3px);
       }
 
-      &:hover {
+      &:hover:not(:disabled) {
         background-color: $color-red-400;
       }
 
-      &:active {
+      &:active:not(:disabled) {
         background-color: $color-red-500;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
     }
 

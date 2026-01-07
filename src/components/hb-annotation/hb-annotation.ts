@@ -86,47 +86,70 @@ export class HBAnnotation extends LitElement {
     this.loadScreenshotFromStorage();
 
     // Add click listener for closing system info when clicking outside
-    document.addEventListener('click', this.handleClickOutside);
+    document.addEventListener('click', this.handleClickOutside, true);
+    document.addEventListener('keydown', this.handleEscapeKey);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     // Clean up listener
-    document.removeEventListener('click', this.handleClickOutside);
+    document.removeEventListener('click', this.handleClickOutside, true);
+    document.removeEventListener('keydown', this.handleEscapeKey);
   }
 
   private handleClickOutside = (event: MouseEvent) => {
     if (!this.showSystemInfo) return;
 
-    const target = event.target as HTMLElement;
-    const systemInfoContainer = this.shadowRoot?.querySelector('.js-system-info-container');
-    const systemInfoButton = this.shadowRoot?.querySelector('.js-system-info-button');
+    const path = event.composedPath();
+    const container = this.shadowRoot?.querySelector('.js-system-info-container');
+    const button = this.shadowRoot?.querySelector('.js-system-info-button');
 
-    // Check if click is outside both the button and the container
-    if (systemInfoContainer && systemInfoButton) {
-      const clickedInsideContainer = systemInfoContainer.contains(target);
-      const clickedButton = systemInfoButton.contains(target) || target === systemInfoButton;
+    const clickedInside = path.some(el => {
+      if (el === container || el === button) return true;
 
-      if (!clickedInsideContainer && !clickedButton) {
-        this.showSystemInfo = false;
+      if (el instanceof Node) {
+        return (container && container.contains(el)) || (button && button.contains(el));
       }
+
+      return false;
+    });
+
+    if (!clickedInside) {
+      this.showSystemInfo = false;
+    }
+  };
+
+  private handleEscapeKey = (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && this.showSystemInfo) {
+      this.showSystemInfo = false;
     }
   };
 
   private async loadScreenshotFromStorage() {
-    try {
-      const response = await chrome.runtime.sendMessage({
-        type: 'GET_SCREENSHOT',
-      });
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session');
 
-      if (response?.dataUrl) {
-        this.dataUrl = response.dataUrl;
+    if (!sessionId) {
+      console.error('No session ID found in URL');
+      return;
+    }
+
+    try {
+      const key = `screenshot_${sessionId}`;
+      const result = await chrome.storage.session.get(key);
+      const data = result[key];
+
+      if (!data) {
+        console.error('Screenshot data not found or expired');
+        return;
       }
-      if (response?.systemInfo) {
-        this.systemInfo = response.systemInfo;
-      }
+
+      this.dataUrl = data.dataUrl;
+      this.systemInfo = data.systemInfo;
+
+      await chrome.storage.session.remove(key);
     } catch (error) {
-      console.error('Failed to load screenshot:', error);
+      console.error('Failed to load screenshot from storage:', error);
     }
   }
 
