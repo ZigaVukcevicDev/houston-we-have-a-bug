@@ -121,4 +121,69 @@ describe('Background service worker', () => {
     expect(result).toBe(false);
     expect(sendResponse).not.toHaveBeenCalled();
   });
+
+  it('should handle errors when storing screenshot', async () => {
+    const sendResponse = vi.fn();
+    const message = {
+      type: 'STORE_SCREENSHOT',
+      dataUrl: 'data:image/png;base64,test',
+      systemInfo: { url: 'https://example.com' },
+    };
+
+    // Simulate storage error
+    mockChrome.storage.session.set.mockRejectedValueOnce(new Error('Storage error'));
+
+    const result = messageListener(message, {}, sendResponse);
+
+    expect(result).toBe(true);
+
+    await vi.waitFor(() => {
+      expect(sendResponse).toHaveBeenCalledWith({
+        success: false,
+        error: 'Storage error',
+      });
+    });
+  });
+
+  it('should handle errors when retrieving screenshot', async () => {
+    const sendResponse = vi.fn();
+    const getMessage = {
+      type: 'GET_SCREENSHOT',
+      sessionId: 'test-session',
+    };
+
+    // Simulate retrieval error
+    mockChrome.storage.session.get.mockRejectedValueOnce(new Error('Retrieval error'));
+
+    const result = messageListener(getMessage, {}, sendResponse);
+
+    expect(result).toBe(true);
+
+    await vi.waitFor(() => {
+      expect(sendResponse).toHaveBeenCalledWith({
+        dataUrl: null,
+        systemInfo: null,
+      });
+    });
+  });
+
+  it('should handle missing screenshot data', async () => {
+    const sendResponse = vi.fn();
+    const getMessage = {
+      type: 'GET_SCREENSHOT',
+      sessionId: 'nonexistent-session',
+    };
+
+    const result = messageListener(getMessage, {}, sendResponse);
+
+    expect(result).toBe(true);
+
+    await vi.waitFor(() => {
+      expect(sendResponse).toHaveBeenCalledWith({
+        dataUrl: null,
+        systemInfo: null,
+      });
+    });
+  });
 });
+

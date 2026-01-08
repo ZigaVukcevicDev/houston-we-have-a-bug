@@ -113,6 +113,19 @@ describe('HBAnnotation', () => {
       );
       consoleSpy.mockRestore();
     });
+
+    it('should handle missing screenshot data', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+      mockChrome.storage.session.get.mockResolvedValue({
+        'screenshot_test-session-123': null, // Data not found
+      });
+
+      await annotation['loadScreenshotFromStorage']();
+
+      expect(annotation['dataUrl']).toBe('');
+      expect(consoleSpy).toHaveBeenCalledWith('Screenshot data not found or expired');
+      consoleSpy.mockRestore();
+    });
   });
 
   describe('_handleDownload', () => {
@@ -295,6 +308,35 @@ describe('HBAnnotation', () => {
       annotation['handleClickOutside'](event);
 
       expect(annotation['showSystemInfo']).toBe(false);
+    });
+  });
+
+  describe('handleEscapeKey', () => {
+    it('should close system info when Escape is pressed and panel is shown', () => {
+      annotation['showSystemInfo'] = true;
+
+      const event = new KeyboardEvent('keydown', { key: 'Escape' });
+      annotation['handleEscapeKey'](event);
+
+      expect(annotation['showSystemInfo']).toBe(false);
+    });
+
+    it('should do nothing when Escape is pressed but panel is not shown', () => {
+      annotation['showSystemInfo'] = false;
+
+      const event = new KeyboardEvent('keydown', { key: 'Escape' });
+      annotation['handleEscapeKey'](event);
+
+      expect(annotation['showSystemInfo']).toBe(false);
+    });
+
+    it('should do nothing when other keys are pressed', () => {
+      annotation['showSystemInfo'] = true;
+
+      const event = new KeyboardEvent('keydown', { key: 'Enter' });
+      annotation['handleEscapeKey'](event);
+
+      expect(annotation['showSystemInfo']).toBe(true);
     });
   });
 

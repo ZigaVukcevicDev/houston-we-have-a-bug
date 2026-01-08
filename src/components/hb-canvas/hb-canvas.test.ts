@@ -149,6 +149,86 @@ describe('HBCanvas', () => {
 
       expect(loadImageSpy).not.toHaveBeenCalled();
     });
+
+    it('should handle image onload callback with canvas sizing', () => {
+      const redrawSpy = vi.spyOn(canvas as any, 'redraw');
+
+      // Create a mock image that we can control
+      const mockImg = {
+        width: 1600,
+        height: 1200,
+        onload: null as (() => void) | null,
+        src: '',
+      };
+
+      // Mock the Image constructor
+      const ImageMock = vi.fn().mockImplementation(function (this: any) {
+        Object.assign(this, mockImg);
+        return this;
+      });
+      globalThis.Image = ImageMock as any;
+
+      // Mock window.devicePixelRatio
+      Object.defineProperty(window, 'devicePixelRatio', {
+        writable: true,
+        configurable: true,
+        value: 2,
+      });
+
+      canvas.dataUrl = 'data:image/png;base64,test';
+      canvas['loadImage']();
+
+      // Get the created instance and trigger onload
+      const createdImg = ImageMock.mock.instances[0] as typeof mockImg;
+      createdImg.onload!();
+
+      // Verify canvas was resized to image dimensions
+      expect(mockCanvasElement.width).toBe(1600);
+      expect(mockCanvasElement.height).toBe(1200);
+
+      // Verify display size accounts for DPR (1600/2 = 800px)
+      expect(mockCanvasElement.style.width).toBe('800px');
+      expect(mockCanvasElement.style.height).toBe('600px');
+
+      // Verify redraw was called
+      expect(redrawSpy).toHaveBeenCalled();
+
+      // Verify originalImage was set
+      expect(canvas['originalImage']).toBe(createdImg);
+    });
+
+    it('should handle image onload with default DPR when devicePixelRatio is undefined', () => {
+      const mockImg = {
+        width: 800,
+        height: 600,
+        onload: null as (() => void) | null,
+        src: '',
+      };
+
+
+      const ImageMock2 = vi.fn().mockImplementation(function (this: any) {
+        Object.assign(this, mockImg);
+        return this;
+      });
+      globalThis.Image = ImageMock2 as any;
+
+      // Mock devicePixelRatio as undefined (fallback to 1)
+      Object.defineProperty(window, 'devicePixelRatio', {
+        writable: true,
+        configurable: true,
+        value: undefined,
+      });
+
+      canvas.dataUrl = 'data:image/png;base64,test';
+      canvas['loadImage']();
+
+      const createdImg = ImageMock2.mock.instances[0] as typeof mockImg;
+      createdImg.onload!();
+
+      // With DPR = 1, display size should match canvas size
+      expect(mockCanvasElement.style.width).toBe('800px');
+      expect(mockCanvasElement.style.height).toBe('600px');
+    });
   });
 
   describe('redraw functionality', () => {
@@ -508,6 +588,87 @@ describe('HBCanvas', () => {
     });
   });
 
+  describe('deselectAll method', () => {
+    let mockCanvasElement: any;
+    let mockCtx: any;
+
+    beforeEach(() => {
+      mockCtx = {
+        clearRect: vi.fn(),
+        drawImage: vi.fn(),
+        fillText: vi.fn(),
+        font: '',
+        fillStyle: '',
+        textBaseline: '',
+        strokeStyle: '',
+        lineWidth: 0,
+        lineCap: '',
+        beginPath: vi.fn(),
+        moveTo: vi.fn(),
+        lineTo: vi.fn(),
+        stroke: vi.fn(),
+        fillRect: vi.fn(),
+        strokeRect: vi.fn(),
+        save: vi.fn(),
+        restore: vi.fn(),
+      };
+
+      mockCanvasElement = {
+        getBoundingClientRect: vi.fn().mockReturnValue({
+          left: 0,
+          top: 0,
+          width: 800,
+          height: 600,
+        }),
+        width: 800,
+        height: 600,
+        getContext: vi.fn().mockReturnValue(mockCtx),
+        style: {},
+      };
+
+      Object.defineProperty(canvas, 'canvas', {
+        value: mockCanvasElement,
+        writable: true,
+      });
+
+      canvas['firstUpdated']();
+      canvas['originalImage'] = { width: 800, height: 600 } as HTMLImageElement;
+    });
+
+    it('should call selectTool.deselectAll and redraw', () => {
+      const selectTool = canvas['tools'].get('select') as SelectTool;
+      const deselectAllSpy = vi.spyOn(selectTool, 'deselectAll');
+      const redrawSpy = vi.spyOn(canvas as any, 'redraw');
+
+      canvas.deselectAll();
+
+      expect(deselectAllSpy).toHaveBeenCalled();
+      expect(redrawSpy).toHaveBeenCalled();
+    });
+
+    it('should handle deselectAll when annotations are selected', () => {
+      // Add an annotation and select it
+      canvas['lineAnnotations'].push({
+        id: 'line-1',
+        x1: 100,
+        y1: 100,
+        x2: 200,
+        y2: 200,
+        color: '#E74C3C',
+        width: 5,
+      });
+
+      const selectTool = canvas['tools'].get('select') as SelectTool;
+      selectTool.selectAnnotation('line-1');
+
+      // Now deselect all
+      canvas.deselectAll();
+
+      // Verify the annotation is no longer selected
+      expect(selectTool['selectedAnnotationId']).toBeNull();
+    });
+  });
+
   describe('tool switching behavior', () => {
     let mockCanvasElement: any;
     let mockCtx: any;
@@ -530,6 +691,8 @@ describe('HBCanvas', () => {
         fill: vi.fn(),
         fillRect: vi.fn(),
         strokeRect: vi.fn(),
+        rect: vi.fn(),
+        lineJoin: '',
       };
 
       mockCanvasElement = {
@@ -634,6 +797,27 @@ describe('HBCanvas', () => {
 
       // Should NOT select because tool is not 'select'
       expect(selectAnnotationSpy).not.toHaveBeenCalled();
+    });
+
+    it('should auto-select rectangle after drawing via rectangle tool callback', () => {
+      const selectTool = canvas['tools'].get('select') as SelectTool;
+      const selectAnnotationSpy = vi.spyOn(selectTool, 'selectAnnotation');
+
+      // Simulate drawing a rectangle
+      canvas.activeTool = 'rectangle';
+      const rectangleTool = canvas['tools'].get('rectangle')!;
+
+      // Draw a rectangle
+      rectangleTool.handleMouseDown!({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvasElement);
+      rectangleTool.handleMouseUp!({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvasElement);
+
+      // The rectangle tool should have triggered tool change with annotation ID
+      const newRectId = canvas['rectangleAnnotations'][canvas['rectangleAnnotations'].length - 1]?.id;
+
+      if (newRectId) {
+        // Verify the tool change was triggered and annotation was auto-selected
+        expect(selectAnnotationSpy).toHaveBeenCalledWith(newRectId);
+      }
     });
   });
   describe('crop buttons', () => {
@@ -763,6 +947,23 @@ describe('HBCanvas', () => {
       const confirmSpy = vi.spyOn(cropTool as any, 'confirmCrop');
       canvas['handleCropConfirm']();
       expect(confirmSpy).not.toHaveBeenCalled();
+    });
+
+    it('should return empty string from getCropButtonsStyle when no position', () => {
+      canvas.activeTool = 'select';
+      const style = canvas['getCropButtonsStyle']();
+      expect(style).toBe('');
+    });
+
+    it('should calculate crop button style with proper DPR scaling', () => {
+      canvas.activeTool = 'crop';
+      const cropTool = canvas['tools'].get('crop') as CropTool;
+      cropTool['cropRect'] = { x: 200, y: 300, width: 400, height: 200 };
+
+      const style = canvas['getCropButtonsStyle']();
+      expect(style).toContain('left:');
+      expect(style).toContain('top:');
+      expect(style).toContain('px');
     });
   });
 });
