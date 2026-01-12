@@ -104,7 +104,6 @@
 ## Details
 
 - [ ] make arrow tool default
-- [ ] crop buttons, green?
 - [x] revisit crop area on white background, it looks too thin
 - [x] update crop area border when text tool designed
 - [x] disable button "Annotate screenshot" on annotation page
