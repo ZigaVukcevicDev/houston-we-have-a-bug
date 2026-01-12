@@ -19,7 +19,7 @@ export class HBCanvas extends LitElement {
   dataUrl: string = '';
 
   @property({ type: String })
-  activeTool: ActiveTool = 'text';
+  activeTool: ActiveTool = 'arrow';
 
   @query('canvas')
   private canvas!: HTMLCanvasElement;

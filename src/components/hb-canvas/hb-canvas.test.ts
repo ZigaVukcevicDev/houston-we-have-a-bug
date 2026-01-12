@@ -23,8 +23,8 @@ describe('HBCanvas', () => {
       expect(canvas.dataUrl).toBe('');
     });
 
-    it('should have default drawing mode as "text"', () => {
-      expect(canvas.activeTool).toBe('text');
+    it('should have default drawing mode as "arrow"', () => {
+      expect(canvas.activeTool).toBe('arrow');
     });
 
     it('should initialize tools map with select, text, line, arrow, rectangle, and crop tools', () => {
@@ -819,94 +819,94 @@ describe('HBCanvas', () => {
         expect(selectAnnotationSpy).toHaveBeenCalledWith(newRectId);
       }
     });
-  describe('tool deactivation on switch', () => {
-    let mockCanvasElement: any;
-    let mockCtx: any;
+    describe('tool deactivation on switch', () => {
+      let mockCanvasElement: any;
+      let mockCtx: any;
 
-    beforeEach(() => {
-      mockCtx = {
-        clearRect: vi.fn(),
-        drawImage: vi.fn(),
-        strokeStyle: '',
-        lineWidth: 0,
-        lineCap: '',
-        beginPath: vi.fn(),
-        moveTo: vi.fn(),
-        lineTo: vi.fn(),
-        stroke: vi.fn(),
-        save: vi.fn(),
-        restore: vi.fn(),
-        fillRect: vi.fn(),
-        strokeRect: vi.fn(),
-        setLineDash: vi.fn(),
-        canvas: {
+      beforeEach(() => {
+        mockCtx = {
+          clearRect: vi.fn(),
+          drawImage: vi.fn(),
+          strokeStyle: '',
+          lineWidth: 0,
+          lineCap: '',
+          beginPath: vi.fn(),
+          moveTo: vi.fn(),
+          lineTo: vi.fn(),
+          stroke: vi.fn(),
+          save: vi.fn(),
+          restore: vi.fn(),
+          fillRect: vi.fn(),
+          strokeRect: vi.fn(),
+          setLineDash: vi.fn(),
+          canvas: {
+            width: 800,
+            height: 600,
+          },
+        };
+        mockCanvasElement = {
+          getBoundingClientRect: vi.fn().mockReturnValue({
+            left: 0,
+            top: 0,
+            width: 800,
+            height: 600,
+          }),
           width: 800,
           height: 600,
-        },
-      };
-      mockCanvasElement = {
-        getBoundingClientRect: vi.fn().mockReturnValue({
-          left: 0,
-          top: 0,
-          width: 800,
-          height: 600,
-        }),
-        width: 800,
-        height: 600,
-        getContext: vi.fn().mockReturnValue(mockCtx),
-        style: {},
-      };
-      Object.defineProperty(canvas, 'canvas', {
-        value: mockCanvasElement,
-        writable: true,
-      });
-      canvas['firstUpdated']();
-      canvas['originalImage'] = { width: 800, height: 600 } as HTMLImageElement;
-    });
-
-    it('should deactivate previous tool when switching tools', () => {
-      canvas.activeTool = 'line';
-      const lineTool = canvas['tools'].get('line')!;
-      const deactivateSpy = vi.spyOn(lineTool, 'deactivate');
-
-      canvas.activeTool = 'text';
-      canvas['updated'](new Map([['activeTool', 'line']]));
-
-      expect(deactivateSpy).toHaveBeenCalled();
-    });
-
-    it('should deselect all annotations when switching to crop tool', () => {
-      canvas['lineAnnotations'].push({
-        id: 'line-1',
-        x1: 100,
-        y1: 100,
-        x2: 200,
-        y2: 200,
-        color: '#E74C3C',
-        width: 5,
+          getContext: vi.fn().mockReturnValue(mockCtx),
+          style: {},
+        };
+        Object.defineProperty(canvas, 'canvas', {
+          value: mockCanvasElement,
+          writable: true,
+        });
+        canvas['firstUpdated']();
+        canvas['originalImage'] = { width: 800, height: 600 } as HTMLImageElement;
       });
 
-      const selectTool = canvas['tools'].get('select') as SelectTool;
-      selectTool.selectAnnotation('line-1');
-      
-      const deselectAllSpy = vi.spyOn(selectTool, 'deselectAll');
+      it('should deactivate previous tool when switching tools', () => {
+        canvas.activeTool = 'line';
+        const lineTool = canvas['tools'].get('line')!;
+        const deactivateSpy = vi.spyOn(lineTool, 'deactivate');
 
-      canvas.activeTool = 'crop';
-      canvas['updated'](new Map([['activeTool', 'select']]));
+        canvas.activeTool = 'text';
+        canvas['updated'](new Map([['activeTool', 'line']]));
 
-      expect(deselectAllSpy).toHaveBeenCalled();
+        expect(deactivateSpy).toHaveBeenCalled();
+      });
+
+      it('should deselect all annotations when switching to crop tool', () => {
+        canvas['lineAnnotations'].push({
+          id: 'line-1',
+          x1: 100,
+          y1: 100,
+          x2: 200,
+          y2: 200,
+          color: '#E74C3C',
+          width: 5,
+        });
+
+        const selectTool = canvas['tools'].get('select') as SelectTool;
+        selectTool.selectAnnotation('line-1');
+
+        const deselectAllSpy = vi.spyOn(selectTool, 'deselectAll');
+
+        canvas.activeTool = 'crop';
+        canvas['updated'](new Map([['activeTool', 'select']]));
+
+        expect(deselectAllSpy).toHaveBeenCalled();
+      });
+
+      it('should not call deselect when switching to non-crop tool', () => {
+        const selectTool = canvas['tools'].get('select') as SelectTool;
+        const deselectAllSpy = vi.spyOn(selectTool, 'deselectAll');
+
+        canvas.activeTool = 'line';
+        canvas['updated'](new Map([['activeTool', 'text']]));
+
+        expect(deselectAllSpy).not.toHaveBeenCalled();
+      });
     });
-
-    it('should not call deselect when switching to non-crop tool', () => {
-      const selectTool = canvas['tools'].get('select') as SelectTool;
-      const deselectAllSpy = vi.spyOn(selectTool, 'deselectAll');
-
-      canvas.activeTool = 'line';
-      canvas['updated'](new Map([['activeTool', 'text']]));
-
-      expect(deselectAllSpy).not.toHaveBeenCalled();
-    });
-  });
   });
   describe('crop buttons', () => {
     let mockCanvasElement: any;

@@ -103,7 +103,7 @@
 
 ## Details
 
-- [ ] make arrow tool default
+- [x] make arrow tool default
 - [x] revisit crop area on white background, it looks too thin
 - [x] update crop area border when text tool designed
 - [x] disable button "Annotate screenshot" on annotation page
