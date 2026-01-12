@@ -111,7 +111,7 @@
 - [x] change cursors when moving endpoints or annotations (reference to crop tool - if applicable?) - check only for line and arrow, everything else is fine
 - [x] change color of annotations to use color E74C3C
 - [ ] screenshot should start at the bottom of topbar
-- [ ] style "No screenshot loaded. Please capture a screenshot from the extension popup."
+- [x] style "Uh-oh, there's no screenshot to annotate!" page
 - [x] add shadow to toolbar
 - [x] exclude extension-presentation from build
 - [x] change "environment details" to "system info"

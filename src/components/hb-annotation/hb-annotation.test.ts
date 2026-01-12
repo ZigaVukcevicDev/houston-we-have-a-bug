@@ -229,7 +229,7 @@ describe('HBAnnotation', () => {
       await annotation.updateComplete;
 
       const content = annotation.shadowRoot?.textContent;
-      expect(content).toContain('No screenshot loaded');
+      expect(content).toContain('Uh-oh, there\'s no screenshot to annotate!');
       consoleSpy.mockRestore();
     });
   });

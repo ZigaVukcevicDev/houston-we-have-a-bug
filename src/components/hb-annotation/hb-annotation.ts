@@ -37,10 +37,14 @@ export class HBAnnotation extends LitElement {
     if (!this.dataUrl) {
       return html`
         <div class="no-screenshot">
-          <p>
-            No screenshot loaded. Please capture a screenshot from the extension
-            popup.
-          </p>
+          <img src="../images/rocket.svg" alt="Rocket" class="rocket-icon" />
+          <h2>Uh-oh, there's no screenshot to annotate!</h2>
+          <p>To annotate a page:</p>
+          <ol>
+            <li>Navigate to the page you want to capture</li>
+            <li>Click the "Houston, we have a bug" extension icon in your toolbar</li>
+            <li>Click "Annotate screenshot"</li>
+          </ol>
         </div>
       `;
     }

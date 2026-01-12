@@ -144,9 +144,41 @@
   align-items: center;
   justify-content: center;
   height: 100%;
+  background-color: $color-yellow-500;
+
+  .rocket-icon {
+    width: 40px;
+    height: auto;
+    margin-bottom: 32px;
+  }
 
   p {
     margin-top: $spacing-md;
     font-size: $font-size-base;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  h2 {
+    font-size: 24px;
+    margin: 0 0 $spacing-md 0;
+    font-weight: 600;
+  }
+
+  ol {
+    margin: $spacing-md 0;
+    padding-left: 24px;
+    text-align: left;
+    font-size: $font-size-base;
+
+    li {
+      margin-bottom: $spacing-sm;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
   }
 }
