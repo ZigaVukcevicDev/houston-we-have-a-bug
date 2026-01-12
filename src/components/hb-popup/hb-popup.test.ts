@@ -84,4 +84,30 @@ describe('HBPopup', () => {
       expect(mockChrome.tabs.captureVisibleTab).not.toHaveBeenCalled();
     });
   });
+
+  describe('checkIfOnAnnotationPage', () => {
+    it('should handle undefined tab gracefully', async () => {
+      mockChrome.tabs.query.mockResolvedValue([undefined]);
+
+      await popup['checkIfOnAnnotationPage']();
+
+      expect(popup['isOnAnnotationPage']).toBe(false);
+    });
+
+    it('should detect annotation page when on tab.html', async () => {
+      mockChrome.tabs.query.mockResolvedValue([{ url: 'chrome-extension://id/tab.html' }]);
+
+      await popup['checkIfOnAnnotationPage']();
+
+      expect(popup['isOnAnnotationPage']).toBe(true);
+    });
+
+    it('should not detect annotation page when on other page', async () => {
+      mockChrome.tabs.query.mockResolvedValue([{ url: 'https://example.com' }]);
+
+      await popup['checkIfOnAnnotationPage']();
+
+      expect(popup['isOnAnnotationPage']).toBe(false);
+    });
+  });
 });
