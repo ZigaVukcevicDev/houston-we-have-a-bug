@@ -117,9 +117,8 @@
 - [x] change "environment details" to "system info"
 - [x] when hovering over rectangle, highlight is visible only when hover over horizontal parts
 - [x] find a way to have better hover color for secondary button (as current is too pale)
-- [ ] integrate Codecov
 
 ## Ongoing
 
 - [ ] increase code coverage
-- [ ] update badges with coverage
+- [ ] update badges with coverage (or integrate Codecov)
