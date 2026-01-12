@@ -13,8 +13,8 @@
 ![Build](https://img.shields.io/badge/build-esbuild-lightgrey)
 
 <img
-  src="src/images/extension-presentation/hb-small-promo-tile-440x280@2x.png?v=7"
-  width="440"
+  src="src/images/extension-presentation/hb-screenshot-1-1280x800@2x.png?v=8"
+  width="1280"
   alt="Houston, we have a bug"
 />
 
