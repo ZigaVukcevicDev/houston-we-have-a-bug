@@ -46,7 +46,7 @@ describe('getDisplayResolution', () => {
   it('should execute inline function to get screen dimensions', async () => {
     // Capture and execute the function
     let capturedFunc: (() => string) | null = null;
-    mockChrome.scripting.executeScript.mockImplementation((config: any) => {
+    mockChrome.scripting.executeScript.mockImplementation((config: { func: () => string }) => {
       capturedFunc = config.func;
       return Promise.resolve([{ result: '1920 x 1080 px' }]);
     });

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { HBAnnotation } from './hb-annotation';
 
 const mockChrome = {
@@ -30,6 +30,10 @@ describe('HBAnnotation', () => {
   let annotation: HBAnnotation;
 
   beforeEach(() => {
+    // Set up window.location with a valid session ID to prevent console errors
+    delete (globalThis.window as any).location;
+    (globalThis.window as any).location = { search: '?session=test-session-123' };
+
     annotation = new HBAnnotation();
     vi.clearAllMocks();
   });
@@ -200,6 +204,7 @@ describe('HBAnnotation', () => {
 
   describe('render', () => {
     it('should render toolbar and canvas when dataUrl is set', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
       annotation['dataUrl'] = 'data:image/png;base64,test';
       document.body.appendChild(annotation);
       await annotation.updateComplete;
@@ -210,24 +215,29 @@ describe('HBAnnotation', () => {
 
       expect(toolbar).toBeTruthy();
       expect(canvas).toBeTruthy();
+      consoleSpy.mockRestore();
     });
 
     it('should render loading message when dataUrl is empty', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
       annotation['dataUrl'] = '';
       document.body.appendChild(annotation);
       await annotation.updateComplete;
 
       const content = annotation.shadowRoot?.textContent;
       expect(content).toContain('No screenshot loaded');
+      consoleSpy.mockRestore();
     });
   });
 
   describe('connectedCallback', () => {
     it('should call loadScreenshotFromStorage when connected', () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
       const spy = vi.spyOn(annotation as any, 'loadScreenshotFromStorage');
       document.body.appendChild(annotation);
 
       expect(spy).toHaveBeenCalled();
+      consoleSpy.mockRestore();
     });
   });
 
@@ -245,9 +255,16 @@ describe('HBAnnotation', () => {
   });
 
   describe('handleClickOutside', () => {
+    let consoleSpy: ReturnType<typeof vi.spyOn>;
+
     beforeEach(() => {
+      consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
       annotation['dataUrl'] = 'data:image/png;base64,test';
       document.body.appendChild(annotation);
+    });
+
+    afterEach(() => {
+      consoleSpy.mockRestore();
     });
 
     it('should not close when clicking inside container', () => {
@@ -350,6 +367,7 @@ describe('HBAnnotation', () => {
     });
 
     it('should render system info table when data is available', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
       annotation['systemInfo'] = {
         dateAndTime: '2026-01-04 11:00:00',
         url: 'https://example.com',
@@ -366,6 +384,7 @@ describe('HBAnnotation', () => {
       const result = annotation['renderSystemInfo']();
 
       expect(result).toBeTruthy();
+      consoleSpy.mockRestore();
     });
   });
 
@@ -437,6 +456,7 @@ describe('HBAnnotation', () => {
 
   describe('disconnectedCallback', () => {
     it('should remove click event listener when disconnected', () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
       const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
 
       document.body.appendChild(annotation);
@@ -448,6 +468,7 @@ describe('HBAnnotation', () => {
         true
       );
 
+      consoleSpy.mockRestore();
       removeEventListenerSpy.mockRestore();
     });
   });
@@ -471,7 +492,10 @@ describe('HBAnnotation', () => {
   });
 
   describe('inline event handlers', () => {
+    let consoleSpy: ReturnType<typeof vi.spyOn>;
+
     beforeEach(async () => {
+      consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
       annotation['dataUrl'] = 'data:image/png;base64,test';
       annotation['systemInfo'] = {
         dateAndTime: '2026-01-05 18:00:00',
@@ -485,6 +509,10 @@ describe('HBAnnotation', () => {
       annotation['showSystemInfo'] = true;
       document.body.appendChild(annotation);
       await annotation.updateComplete;
+    });
+
+    afterEach(() => {
+      consoleSpy.mockRestore();
     });
 
     it('should call stopPropagation when clicking system info button', async () => {

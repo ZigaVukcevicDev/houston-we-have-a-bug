@@ -123,6 +123,7 @@ describe('Background service worker', () => {
   });
 
   it('should handle errors when storing screenshot', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
     const sendResponse = vi.fn();
     const message = {
       type: 'STORE_SCREENSHOT',
@@ -143,9 +144,11 @@ describe('Background service worker', () => {
         error: 'Storage error',
       });
     });
+    consoleSpy.mockRestore();
   });
 
   it('should handle errors when retrieving screenshot', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
     const sendResponse = vi.fn();
     const getMessage = {
       type: 'GET_SCREENSHOT',
@@ -165,6 +168,7 @@ describe('Background service worker', () => {
         systemInfo: null,
       });
     });
+    consoleSpy.mockRestore();
   });
 
   it('should handle missing screenshot data', async () => {

@@ -51,7 +51,7 @@ describe('getDevicePixelRatio', () => {
   it('should execute inline function to get device pixel ratio', async () => {
     // Capture and execute the function
     let capturedFunc: (() => string) | null = null;
-    mockChrome.scripting.executeScript.mockImplementation((config: any) => {
+    mockChrome.scripting.executeScript.mockImplementation((config: { func: () => string }) => {
       capturedFunc = config.func;
       return Promise.resolve([{ result: '2' }]);
     });

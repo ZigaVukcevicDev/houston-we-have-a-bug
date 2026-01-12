@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('tab entrypoint', () => {
   beforeEach(() => {
@@ -15,6 +15,7 @@ describe('tab entrypoint', () => {
   });
 
   it('should register hb-annotation custom element', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
     // Import the entrypoint (which imports the component)
     await import('../entrypoints/tab');
 
@@ -25,5 +26,6 @@ describe('tab entrypoint', () => {
     // Should be able to append to DOM
     document.body.appendChild(element);
     expect(document.querySelector('hb-annotation')).toBeTruthy();
+    consoleSpy.mockRestore();
   });
 });

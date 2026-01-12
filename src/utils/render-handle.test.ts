@@ -43,7 +43,7 @@ describe('render-handle utility', () => {
     it('should save and restore context', () => {
       renderHandle(mockCtx, 0, 0);
 
-      expect(mockCtx.save).toHaveBeenCalledBefore(mockCtx.fillRect as any);
+      expect(mockCtx.save).toHaveBeenCalledBefore(mockCtx.fillRect as never);
       expect(mockCtx.restore).toHaveBeenCalled();
     });
 

@@ -46,7 +46,7 @@ describe('getVisibleArea', () => {
   it('should execute inline function to get dimensions', async () => {
     // Capture the function that's passed to executeScript
     let capturedFunc: (() => string) | null = null;
-    mockChrome.scripting.executeScript.mockImplementation((config: any) => {
+    mockChrome.scripting.executeScript.mockImplementation((config: { func: () => string }) => {
       capturedFunc = config.func;
       return Promise.resolve([{ result: '800 x 600 px' }]);
     });
