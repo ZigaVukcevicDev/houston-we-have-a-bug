@@ -1254,6 +1254,32 @@ describe('SelectTool', () => {
       expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
       expect(selectTool['keydownHandler']).toBeNull();
     });
+
+    it('should delete selected arrow when Delete key is pressed', () => {
+      arrowAnnotations.push({
+        id: 'arrow-1',
+        x1: 400,
+        y1: 400,
+        x2: 500,
+        y2: 500,
+        color: '#E74C3C',
+        width: 3,
+      });
+
+      selectTool.deactivate();
+      selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, mockRedraw);
+      selectTool.activate();
+
+      selectTool.selectAnnotation('arrow-1');
+      const initialLength = arrowAnnotations.length;
+
+      const deleteEvent = new KeyboardEvent('keydown', { key: 'Delete' });
+      document.dispatchEvent(deleteEvent);
+
+      expect(arrowAnnotations.length).toBe(initialLength - 1);
+      expect(arrowAnnotations.find(a => a.id === 'arrow-1')).toBeUndefined();
+      expect(selectTool['selectedAnnotationId']).toBeNull();
+    });
   });
 
   describe('zero-length line detection', () => {
