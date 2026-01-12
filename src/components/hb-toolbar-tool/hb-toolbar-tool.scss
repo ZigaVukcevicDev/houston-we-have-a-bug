@@ -33,3 +33,7 @@ button {
     background-color: $color-red-500;
   }
 }
+
+:host(:last-child) button {
+  padding-bottom: 3px;
+}

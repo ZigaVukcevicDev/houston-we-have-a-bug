@@ -42,6 +42,10 @@ describe('HBAnnotation', () => {
     expect(annotation['dataUrl']).toBe('');
   });
 
+  it('should have arrow as default activeTool', () => {
+    expect(annotation['activeTool']).toBe('arrow');
+  });
+
   describe('_loadScreenshotFromStorage', () => {
     beforeEach(() => {
       delete (globalThis.window as any).location;

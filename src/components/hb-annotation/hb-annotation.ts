@@ -22,7 +22,7 @@ export class HBAnnotation extends LitElement {
   private dataUrl: string = '';
 
   @state()
-  private activeTool: ActiveTool | null = null;
+  private activeTool: ActiveTool | null = 'arrow';
 
   @state()
   private systemInfo: SystemInfo | null = null;

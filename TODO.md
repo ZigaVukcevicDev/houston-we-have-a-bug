@@ -103,6 +103,7 @@
 
 ## Details
 
+- [x] make more padding to last tool
 - [x] make arrow tool default
 - [x] revisit crop area on white background, it looks too thin
 - [x] update crop area border when text tool designed
