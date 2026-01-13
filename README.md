@@ -27,7 +27,7 @@ A Chrome extension to capture bugs clearly. Annotate screenshots and gather syst
 
 ## Key capabilities
 
-- 📸 **Screenshot with annotations** - Capture visible tab with annotations
+- 📸 **Screenshot with annotations** - Capture visible tab and add annotations
 - 📋 **System info** - Gather current date and time, URL, display settings, browser, and OS information
 - 🗺️ **[Roadmap](ROADMAP.md)** - Planned features, and evolution
 
