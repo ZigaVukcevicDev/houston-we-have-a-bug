@@ -35,5 +35,7 @@ button {
 }
 
 :host(:last-child) button {
-  padding-bottom: 3px;
+  align-items: none;
+  padding-top: 17px;
+  padding-bottom: 19px;
 }
