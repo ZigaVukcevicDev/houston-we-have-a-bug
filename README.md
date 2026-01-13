@@ -20,6 +20,17 @@
 
 A Chrome extension to capture bugs clearly. Annotate screenshots and gather system info.
 
+<details>
+  <summary>See example screenshots</summary>
+
+  <p align="center">
+    <img src="src/images/extension-presentation/hb-screenshot-2-1280x800.png" width="640">
+    <img src="src/images/extension-presentation/hb-screenshot-3-1280x800.png" width="640">
+    <img src="src/images/extension-presentation/hb-screenshot-4-1280x800.png" width="640">
+    <img src="src/images/extension-presentation/hb-screenshot-5-1280x800.png" width="640">
+  </p>
+</details>
+
 > 🚧 **Status: Work in progress — not published**
 >
 > This Chrome extension is under active development and has **not been published
