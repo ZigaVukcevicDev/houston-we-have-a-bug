@@ -383,4 +383,67 @@ describe('TextTool', () => {
       expect(mockToolChange).toHaveBeenCalledWith('select');
     });
   });
+
+  describe('textarea positioning to match strokeRect', () => {
+    it('should offset textarea position by borderWidth/2 to match strokeRect visual rendering', () => {
+      // Draw a box
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 300, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 300, clientY: 200 } as MouseEvent, mockCanvas);
+
+      const textarea = getTextArea();
+      expect(textarea).toBeTruthy();
+
+      if (textarea) {
+        // strokeRect with 2px lineWidth centers 1px inside and 1px outside the path
+        // For a box at (100, 100), the visual border extends from (99, 99) to (301, 201)
+        // Textarea should be positioned to match this, offset by borderWidth/2 = 1px
+        const borderOffset = 1; // 2px border / 2
+
+        // Extract numeric values from position strings
+        const leftPx = parseFloat(textarea.style.left);
+        const topPx = parseFloat(textarea.style.top);
+        const widthPx = parseFloat(textarea.style.width);
+        const heightPx = parseFloat(textarea.style.height);
+
+        // Expected: box.x=100, offset by -1px -> 99px
+        expect(leftPx).toBe(100 - borderOffset);
+        expect(topPx).toBe(100 - borderOffset);
+
+        // Expected: box.width=200, expanded by 2*1px -> 202px
+        expect(widthPx).toBe(200 + borderOffset * 2);
+        expect(heightPx).toBe(100 + borderOffset * 2);
+      }
+    });
+
+    it('should ensure textarea border visually aligns with rendered rectangle preview', () => {
+      // This test verifies that the border doesn't "jump" when transitioning
+      // from drawing preview (strokeRect) to textarea input
+      textTool.handleMouseDown({ clientX: 50, clientY: 50 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 250, clientY: 150 } as MouseEvent, mockCanvas);
+
+      // Before mouseup, currentBox is rendered with strokeRect
+      expect(textTool['currentBox']).toEqual({
+        x: 50,
+        y: 50,
+        width: 200,
+        height: 100,
+      });
+
+      textTool.handleMouseUp({ clientX: 250, clientY: 150 } as MouseEvent, mockCanvas);
+
+      const textarea = getTextArea();
+      expect(textarea).toBeTruthy();
+
+      if (textarea) {
+        // Textarea outer border should align with strokeRect outer edge
+        // strokeRect(50, 50, 200, 100) with 2px stroke -> outer edge at (49, 49, 202, 102)
+        // textarea at (49, 49) with size (202, 102) -> outer edge at (49, 49, 202, 102)
+        expect(parseFloat(textarea.style.left)).toBe(49);
+        expect(parseFloat(textarea.style.top)).toBe(49);
+        expect(parseFloat(textarea.style.width)).toBe(202);
+        expect(parseFloat(textarea.style.height)).toBe(102);
+      }
+    });
+  });
 });

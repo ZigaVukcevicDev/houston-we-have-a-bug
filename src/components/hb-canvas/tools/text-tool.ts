@@ -172,10 +172,10 @@ export class TextTool implements Tool {
     this.textArea.style.cssText = `
       position: fixed;
       box-sizing: border-box;
-      left: ${box.x / scaleX + rect.left}px;
-      top: ${box.y / scaleY + rect.top}px;
-      width: ${box.width / scaleX}px;
-      height: ${box.height / scaleY}px;
+      left: ${(box.x - borderOffset) / scaleX + rect.left}px;
+      top: ${(box.y - borderOffset) / scaleY + rect.top}px;
+      width: ${(box.width + borderOffset * 2) / scaleX}px;
+      height: ${(box.height + borderOffset * 2) / scaleY}px;
       font-size: ${this.fontSize}px;
       font-family: Inter;
       font-weight: 500;
