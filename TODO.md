@@ -104,6 +104,7 @@
 
 ## Details
 
+- [ ] text rect should have transparent background 
 - [x] make more padding to last tool
 - [x] make arrow tool default
 - [x] revisit crop area on white background, it looks too thin
