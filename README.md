@@ -24,10 +24,10 @@ A Chrome extension to capture bugs clearly. Annotate screenshots and gather syst
   <summary>See example screenshots</summary>
 
   <p align="center">
-    <img src="src/images/extension-presentation/hb-screenshot-2-1280x800.png" width="640">
-    <img src="src/images/extension-presentation/hb-screenshot-3-1280x800.png" width="640">
-    <img src="src/images/extension-presentation/hb-screenshot-4-1280x800.png" width="640">
-    <img src="src/images/extension-presentation/hb-screenshot-5-1280x800.png" width="640">
+    <img src="src/images/extension-presentation/hb-screenshot-2-1280x800@2x.png" width="1280">
+    <img src="src/images/extension-presentation/hb-screenshot-3-1280x800@2x.png" width="1280">
+    <img src="src/images/extension-presentation/hb-screenshot-4-1280x800@2x.png" width="1280">
+    <img src="src/images/extension-presentation/hb-screenshot-5-1280x800@2x.png" width="1280">
   </p>
 </details>
 
