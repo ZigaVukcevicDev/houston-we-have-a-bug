@@ -18,7 +18,7 @@
   alt="Houston, we have a bug"
 />
 
-A Chrome extension that helps you annotate screenshots and gather system info for quick bug reporting.
+A Chrome extension to capture bugs clearly. Annotate screenshots and gather system info.
 
 > 🚧 **Status: Work in progress — not published**
 >

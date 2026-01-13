@@ -14,27 +14,23 @@ Houston, we have a bug
 
 **Summary from package**
 
-Annotate screenshots and gather system info for quick bug reporting.
+Capture bugs clearly. Annotate screenshots and gather system info.
 
 **Description**
 
-Houston, we have a bug is a lightweight Chrome extension for bug reporting that helps you capture, annotate, and share clear bug screenshots in seconds.
+Houston, we have a bug is a lightweight Chrome extension for bug reporting that helps you capture, annotate, and share clear bug screenshots with proper context.
 
-The extension lets you take screenshots of the current page, add visual annotations, and automatically collect system info useful for debugging — all in one place. This includes details such as the page URL, date and time, visible area size, display resolution, device pixel ratio, browser version, and operating system.
+The extension allows you to take screenshots of the current page, add visual annotations, and automatically collect system information useful for debugging, all in one place. This includes details such as the page URL, date and time, visible area size, display resolution, device pixel ratio, browser version, and operating system.
 
-Extension is built for QA engineers, testers, developers, product managers, and business analysts who need a fast and reliable way to document issues while preserving technical context.
+The extension is built for QA engineers, testers, developers, product managers, and business analysts who need a clear and structured way to document issues while preserving technical context.
 
-Use the extension to:
-- Capture and annotate screenshots directly in the browser
-- Collect system info alongside visual bug evidence
-- Transfer screenshots and system info into tools like Jira, Azure DevOps, GitHub Issues, or Slack as part of your existing workflow
+Use the extension to capture and annotate screenshots directly in the browser, collect system information alongside visual bug evidence, and transfer screenshots and system information into tools like Jira, Azure DevOps, GitHub Issues, or Slack as part of your existing workflow.
 
-The focus is on speed and clarity:
-- No accounts
-- No clutter
-- No unnecessary steps
+Designed to keep bug reporting focused and straightforward, without accounts, setup, or unnecessary steps.
 
-Just capture, annotate, and report bugs more efficiently.
+Capture, annotate, and document bugs more clearly.
+
+Screenshots and system information are captured only when the user explicitly activates the extension.
 
 **Category**
 
@@ -58,7 +54,7 @@ None
 
 **Homepage URL**
 
-https://github.com/ZigaVukcevicDev/houston-we-have-a-bug/blob/main/README.md
+https://github.com/ZigaVukcevicDev/houston-we-have-a-bug
 
 **Support URL**
 
@@ -115,5 +111,7 @@ No login or authentication is required.
 To test the extension:
 
 1. Open any webpage.
-2. Click the extension icon in the Chrome toolbar.
-3. Gather system info, capture a screenshot, add annotations, and download the image.
+2. Click the extension icon in the Chrome toolbar to activate it.
+3. Capture a screenshot of the current page, add annotations, review the collected system information, and download the annotated image.
+
+All screenshots and system information are processed locally and are created only when the user explicitly activates the extension. No data is transmitted externally.
