@@ -12,22 +12,22 @@
 ![Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)
 ![Build](https://img.shields.io/badge/build-esbuild-lightgrey)
 
+A Chrome extension to capture bugs clearly. Annotate screenshots and gather system info.
+
 <img
   src="src/images/extension-presentation/hb-screenshot-1-1280x800@2x.png?v=8"
   width="1280"
   alt="Houston, we have a bug"
 />
 
-A Chrome extension to capture bugs clearly. Annotate screenshots and gather system info.
-
 <details>
   <summary>See example screenshots</summary>
 
   <p align="center">
-    <img src="src/images/extension-presentation/hb-screenshot-2-1280x800.png" width="640">
-    <img src="src/images/extension-presentation/hb-screenshot-3-1280x800.png" width="640">
-    <img src="src/images/extension-presentation/hb-screenshot-4-1280x800.png" width="640">
-    <img src="src/images/extension-presentation/hb-screenshot-5-1280x800.png" width="640">
+    <img src="src/images/extension-presentation/hb-screenshot-2-1280x800.png" width="1280">
+    <img src="src/images/extension-presentation/hb-screenshot-3-1280x800.png" width="1280">
+    <img src="src/images/extension-presentation/hb-screenshot-4-1280x800.png" width="1280">
+    <img src="src/images/extension-presentation/hb-screenshot-5-1280x800.png" width="1280">
   </p>
 </details>
 
