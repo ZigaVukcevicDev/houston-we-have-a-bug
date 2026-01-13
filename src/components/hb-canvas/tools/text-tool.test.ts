@@ -9,12 +9,14 @@ const getTextArea = (): HTMLTextAreaElement | null => {
 describe('TextTool', () => {
   let textTool: TextTool;
   let mockRedraw: Mock;
+  let mockToolChange: Mock;
   let mockCanvas: HTMLCanvasElement;
   let mockCtx: CanvasRenderingContext2D;
 
   beforeEach(() => {
     mockRedraw = vi.fn();
-    textTool = new TextTool([], mockRedraw);
+    mockToolChange = vi.fn();
+    textTool = new TextTool([], mockRedraw, mockToolChange);
 
     // Mock canvas
     mockCanvas = {
@@ -332,6 +334,53 @@ describe('TextTool', () => {
         width: 200,
         height: 150,
       });
+    });
+  });
+
+  describe('tool switching', () => {
+    it('should call onToolChange with "select" after creating textarea', () => {
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      mockToolChange.mockClear();
+
+      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+
+      expect(mockToolChange).toHaveBeenCalledWith('select');
+      expect(mockToolChange).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not call onToolChange if box is too small', () => {
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 105, clientY: 105 } as MouseEvent, mockCanvas);
+
+      textTool.handleMouseUp({ clientX: 105, clientY: 105 } as MouseEvent, mockCanvas);
+
+      expect(mockToolChange).not.toHaveBeenCalled();
+    });
+
+    it('should call onToolChange before finalizing textarea', () => {
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      mockToolChange.mockClear();
+
+      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+
+      // Tool change should be called
+      expect(mockToolChange).toHaveBeenCalledWith('select');
+
+      // Textarea should still be created
+      const textarea = getTextArea();
+      expect(textarea).toBeTruthy();
+    });
+
+    it('should switch to select tool even if user does not enter text', () => {
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+
+      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+
+      // Should switch to select tool regardless of text input
+      expect(mockToolChange).toHaveBeenCalledWith('select');
     });
   });
 });

@@ -1054,5 +1054,42 @@ describe('HBCanvas', () => {
       expect(style).toContain('px');
     });
   });
+
+  describe('text annotation integration', () => {
+    it('should initialize SelectTool with textAnnotations array', () => {
+      const selectTool = canvas['tools'].get('select') as SelectTool;
+
+      // SelectTool should have access to textAnnotations
+      expect(selectTool).toBeDefined();
+
+      // Verify that textAnnotations is passed by adding a text annotation and checking selection
+      canvas['textAnnotations'].push({
+        id: 'text-1',
+        x: 100,
+        y: 100,
+        width: 200,
+        height: 100,
+        text: 'Test',
+        color: '#E74C3C',
+        fontSize: 14,
+      });
+
+      // Verify SelectTool can select text annotations
+      selectTool.selectAnnotation('text-1');
+      expect(selectTool['selectedAnnotationId']).toBe('text-1');
+      expect(selectTool['selectedAnnotationType']).toBe('text');
+    });
+
+    it('should allow text tool to switch to select tool', () => {
+      const eventSpy = vi.fn();
+      canvas.addEventListener('tool-change', eventSpy);
+
+      // Simulate text tool triggering tool change
+      canvas['handleToolChange']('select');
+
+      expect(eventSpy).toHaveBeenCalled();
+      expect(eventSpy.mock.calls[0][0].detail.tool).toBe('select');
+    });
+  });
 });
 

@@ -113,7 +113,8 @@ export class HBCanvas extends LitElement {
     // Initialize tools with shared annotations and callbacks
     this.tools.set('text', new TextTool(
       this.textAnnotations,
-      () => this.redraw()
+      () => this.redraw(),
+      (tool: string) => this.handleToolChange(tool)
     ));
     this.tools.set('line', new LineTool(
       this.lineAnnotations,
@@ -134,6 +135,7 @@ export class HBCanvas extends LitElement {
       this.lineAnnotations,
       this.arrowAnnotations,
       this.rectangleAnnotations,
+      this.textAnnotations,
       () => this.redraw()
     ));
     this.tools.set('crop', new CropTool(
@@ -235,6 +237,7 @@ export class HBCanvas extends LitElement {
       this.redraw();
     }
   }
+
   private getCropButtonsPosition(): { x: number; y: number } | null {
     const cropTool = this.tools.get('crop') as CropTool;
     if (!cropTool) return null;
@@ -249,6 +252,7 @@ export class HBCanvas extends LitElement {
       y: cropRect.y + cropRect.height - (buttonHeight + padding) * dpr
     };
   }
+
   private getCropButtonsStyle(): string {
     const pos = this.getCropButtonsPosition();
     if (!pos) return '';
@@ -257,12 +261,14 @@ export class HBCanvas extends LitElement {
     const y = pos.y / dpr;
     return `left: ${x}px; top: ${y}px;`;
   }
+
   private handleCropCancel(): void {
     const cropTool = this.tools.get('crop') as CropTool;
     if (cropTool) {
       cropTool.cancelCrop(false, this.canvas);
     }
   }
+
   private handleCropConfirm(): void {
     const cropTool = this.tools.get('crop') as CropTool;
     if (!cropTool || !this.originalImage) return;

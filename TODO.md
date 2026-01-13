@@ -14,7 +14,8 @@
 - draw rectangle
   - [x] free
   - [ ] prevents left and top draw
-  - [ ] upon release user is able to type
+  - [x] upon release user is able to type and select tool is being selected
+  - [x] when rect is drawn, mouse released and user clicks outside of rect, four handlebars should appear
 - move endpoint
   - [ ] top-left endpoint
   - [ ] top-right endpoint

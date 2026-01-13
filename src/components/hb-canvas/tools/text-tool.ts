@@ -2,7 +2,6 @@ import type { Tool } from '../../../interfaces/tool.interface';
 import type { TextAnnotation } from '../../../interfaces/annotation.interface';
 import { toolStyles } from './tool-styles';
 import { getCanvasCoordinates } from '../../../utils/get-canvas-coordinates';
-import { renderHandle } from '../../../utils/render-handle';
 
 export class TextTool implements Tool {
   private annotations: TextAnnotation[];
@@ -10,15 +9,17 @@ export class TextTool implements Tool {
   private readonly color: string = toolStyles.color;
   private readonly fontSize: number = toolStyles.fontSize;
   private onRedraw: () => void;
+  private onToolChange: (tool: string) => void;
 
   // Drawing state
   private isDrawing: boolean = false;
   private startPoint: { x: number; y: number } | null = null;
   private currentBox: { x: number; y: number; width: number; height: number } | null = null;
 
-  constructor(annotations: TextAnnotation[], onRedraw: () => void) {
+  constructor(annotations: TextAnnotation[], onRedraw: () => void, onToolChange: (tool: string) => void) {
     this.annotations = annotations;
     this.onRedraw = onRedraw;
+    this.onToolChange = onToolChange;
   }
 
   handleClick(_event: MouseEvent, _canvas: HTMLCanvasElement): void {
@@ -68,6 +69,8 @@ export class TextTool implements Tool {
     // Only create textarea if box has minimum size
     if (this.currentBox.width > 10 && this.currentBox.height > 10) {
       this.createTextArea(canvas, this.currentBox);
+      // Switch to select tool after creating textarea
+      this.onToolChange('select');
     }
 
     this.currentBox = null;
@@ -105,17 +108,6 @@ export class TextTool implements Tool {
     ctx.lineWidth = 2 * dpr;
     ctx.strokeRect(annotation.x, annotation.y, annotation.width, annotation.height);
     ctx.restore();
-
-    // Draw corner handles
-    const topLeft = { x: annotation.x, y: annotation.y };
-    const topRight = { x: annotation.x + annotation.width, y: annotation.y };
-    const bottomLeft = { x: annotation.x, y: annotation.y + annotation.height };
-    const bottomRight = { x: annotation.x + annotation.width, y: annotation.y + annotation.height };
-
-    renderHandle(ctx, topLeft.x, topLeft.y);
-    renderHandle(ctx, topRight.x, topRight.y);
-    renderHandle(ctx, bottomLeft.x, bottomLeft.y);
-    renderHandle(ctx, bottomRight.x, bottomRight.y);
 
     // Render text with wrapping
     if (annotation.text) {
@@ -171,17 +163,19 @@ export class TextTool implements Tool {
     const scaleY = canvas.height / rect.height;
 
     // Border width adjustment: CSS border is applied outside the box,
-    // but strokeRect centers the stroke on the path. We need to adjust
-    // position and size to match the visual appearance exactly.
+    // but strokeRect centers the stroke on the path (half inside, half outside).
+    // We need to adjust position and size to match the visual appearance exactly.
     const borderWidth = 2;
+    const borderOffset = borderWidth / 2; // strokeRect centers the stroke
 
     this.textArea = document.createElement('textarea');
     this.textArea.style.cssText = `
       position: fixed;
-      left: ${(box.x - borderWidth) / scaleX + rect.left}px;
-      top: ${(box.y - borderWidth) / scaleY + rect.top}px;
-      width: ${(box.width + borderWidth * 2) / scaleX}px;
-      height: ${(box.height + borderWidth * 2) / scaleY}px;
+      box-sizing: border-box;
+      left: ${box.x / scaleX + rect.left}px;
+      top: ${box.y / scaleY + rect.top}px;
+      width: ${box.width / scaleX}px;
+      height: ${box.height / scaleY}px;
       font-size: ${this.fontSize}px;
       font-family: Inter;
       font-weight: 500;

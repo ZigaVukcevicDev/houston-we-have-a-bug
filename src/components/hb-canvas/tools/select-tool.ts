@@ -1,5 +1,5 @@
 import type { Tool } from '../../../interfaces/tool.interface';
-import type { LineAnnotation, RectangleAnnotation } from '../../../interfaces/annotation.interface';
+import type { LineAnnotation, RectangleAnnotation, TextAnnotation } from '../../../interfaces/annotation.interface';
 import { renderHandle, isPointOnHandle } from '../../../utils/render-handle';
 import { getCanvasCoordinates } from '../../../utils/get-canvas-coordinates';
 import { renderArrowhead, getArrowheadPoints } from '../../../utils/render-arrowhead';
@@ -8,10 +8,11 @@ export class SelectTool implements Tool {
   private lineAnnotations: LineAnnotation[] = [];
   private arrowAnnotations: LineAnnotation[] = [];
   private rectangleAnnotations: RectangleAnnotation[] = [];
+  private textAnnotations: TextAnnotation[] = [];
   private selectedAnnotationId: string | null = null;
-  private selectedAnnotationType: 'line' | 'rectangle' | null = null;
+  private selectedAnnotationType: 'line' | 'rectangle' | 'text' | null = null;
   private hoveredAnnotationId: string | null = null;
-  private hoveredAnnotationType: 'line' | 'rectangle' | null = null;
+  private hoveredAnnotationType: 'line' | 'rectangle' | 'text' | null = null;
   private draggingHandle: 'start' | 'end' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | null = null;
   private draggingLine: boolean = false;
   private dragOffset: { x: number; y: number } = { x: 0, y: 0 };
@@ -19,10 +20,11 @@ export class SelectTool implements Tool {
 
   private onRedraw: () => void;
 
-  constructor(lineAnnotations: LineAnnotation[], arrowAnnotations: LineAnnotation[], rectangleAnnotations: RectangleAnnotation[], onRedraw: () => void) {
+  constructor(lineAnnotations: LineAnnotation[], arrowAnnotations: LineAnnotation[], rectangleAnnotations: RectangleAnnotation[], textAnnotations: TextAnnotation[], onRedraw: () => void) {
     this.lineAnnotations = lineAnnotations;
     this.arrowAnnotations = arrowAnnotations;
     this.rectangleAnnotations = rectangleAnnotations;
+    this.textAnnotations = textAnnotations;
     this.onRedraw = onRedraw;
   }
 
@@ -84,6 +86,11 @@ export class SelectTool implements Tool {
       if (index !== -1) {
         this.rectangleAnnotations.splice(index, 1);
       }
+    } else if (this.selectedAnnotationType === 'text') {
+      const index = this.textAnnotations.findIndex(t => t.id === this.selectedAnnotationId);
+      if (index !== -1) {
+        this.textAnnotations.splice(index, 1);
+      }
     }
 
     // Clear selection after deletion
@@ -100,6 +107,8 @@ export class SelectTool implements Tool {
       this.selectedAnnotationType = 'line';
     } else if (this.rectangleAnnotations.find(r => r.id === id)) {
       this.selectedAnnotationType = 'rectangle';
+    } else if (this.textAnnotations.find(t => t.id === id)) {
+      this.selectedAnnotationType = 'text';
     }
     this.onRedraw();
   }
@@ -116,7 +125,17 @@ export class SelectTool implements Tool {
   handleClick(event: MouseEvent, canvas: HTMLCanvasElement): void {
     const { x, y } = getCanvasCoordinates(event, canvas);
 
-    // Check rectangles first (iterate backwards for most recent)
+    // Check text annotations first (iterate backwards for most recent)
+    for (let i = this.textAnnotations.length - 1; i >= 0; i--) {
+      if (this.isPointOnTextBox(x, y, this.textAnnotations[i])) {
+        this.selectedAnnotationId = this.textAnnotations[i].id;
+        this.selectedAnnotationType = 'text';
+        this.onRedraw();
+        return;
+      }
+    }
+
+    // Check rectangles (iterate backwards for most recent)
     for (let i = this.rectangleAnnotations.length - 1; i >= 0; i--) {
       if (this.isPointOnRectangle(x, y, this.rectangleAnnotations[i])) {
         this.selectedAnnotationId = this.rectangleAnnotations[i].id;
@@ -209,6 +228,45 @@ export class SelectTool implements Tool {
         // Check if clicking on the rectangle body (to drag entire rectangle)
         if (this.isPointOnRectangle(x, y, rectangle)) {
           this.draggingLine = true; // Reusing draggingLine flag for rectangle dragging
+          this.dragOffset = { x, y };
+          return;
+        }
+      }
+      // Handle text annotations
+      else if (this.selectedAnnotationType === 'text') {
+        const textBox = this.textAnnotations.find(t => t.id === this.selectedAnnotationId);
+        if (!textBox) return;
+
+        // Check corner handles first (top-left, top-right, bottom-left, bottom-right)
+        const topLeft = { x: textBox.x, y: textBox.y };
+        const topRight = { x: textBox.x + textBox.width, y: textBox.y };
+        const bottomLeft = { x: textBox.x, y: textBox.y + textBox.height };
+        const bottomRight = { x: textBox.x + textBox.width, y: textBox.y + textBox.height };
+
+        if (isPointOnHandle(x, y, topLeft.x, topLeft.y)) {
+          this.draggingHandle = 'top-left';
+          this.dragOffset = { x: x - topLeft.x, y: y - topLeft.y };
+          return;
+        }
+        if (isPointOnHandle(x, y, topRight.x, topRight.y)) {
+          this.draggingHandle = 'top-right';
+          this.dragOffset = { x: x - topRight.x, y: y - topRight.y };
+          return;
+        }
+        if (isPointOnHandle(x, y, bottomLeft.x, bottomLeft.y)) {
+          this.draggingHandle = 'bottom-left';
+          this.dragOffset = { x: x - bottomLeft.x, y: y - bottomLeft.y };
+          return;
+        }
+        if (isPointOnHandle(x, y, bottomRight.x, bottomRight.y)) {
+          this.draggingHandle = 'bottom-right';
+          this.dragOffset = { x: x - bottomRight.x, y: y - bottomRight.y };
+          return;
+        }
+
+        // Check if clicking on the text box border (to drag entire text box)
+        if (this.isPointOnTextBox(x, y, textBox)) {
+          this.draggingLine = true; // Reusing draggingLine flag for text box dragging
           this.dragOffset = { x, y };
           return;
         }
@@ -371,6 +429,13 @@ export class SelectTool implements Tool {
           rectangle.x += dx;
           rectangle.y += dy;
         }
+      } else if (this.selectedAnnotationType === 'text') {
+        const textBox = this.textAnnotations.find(t => t.id === this.selectedAnnotationId);
+        if (textBox) {
+          // Dragging entire text box
+          textBox.x += dx;
+          textBox.y += dy;
+        }
       }
 
       this.dragOffset = { x, y };
@@ -422,6 +487,32 @@ export class SelectTool implements Tool {
         } else if (this.draggingHandle === 'bottom-right') {
           rectangle.width = x - rectangle.x;
           rectangle.height = y - rectangle.y;
+        }
+      } else if (this.selectedAnnotationType === 'text') {
+        const textBox = this.textAnnotations.find(t => t.id === this.selectedAnnotationId);
+        if (!textBox) return;
+
+        // Store original text box bounds
+        const originalRight = textBox.x + textBox.width;
+        const originalBottom = textBox.y + textBox.height;
+
+        // Resize based on which corner is being dragged
+        if (this.draggingHandle === 'top-left') {
+          textBox.width = originalRight - x;
+          textBox.height = originalBottom - y;
+          textBox.x = x;
+          textBox.y = y;
+        } else if (this.draggingHandle === 'top-right') {
+          textBox.width = x - textBox.x;
+          textBox.height = originalBottom - y;
+          textBox.y = y;
+        } else if (this.draggingHandle === 'bottom-left') {
+          textBox.width = originalRight - x;
+          textBox.height = y - textBox.y;
+          textBox.x = x;
+        } else if (this.draggingHandle === 'bottom-right') {
+          textBox.width = x - textBox.x;
+          textBox.height = y - textBox.y;
         }
       }
 
@@ -500,6 +591,15 @@ export class SelectTool implements Tool {
         renderHandle(ctx, selectedRect.x + selectedRect.width, selectedRect.y); // top-right
         renderHandle(ctx, selectedRect.x, selectedRect.y + selectedRect.height); // bottom-left
         renderHandle(ctx, selectedRect.x + selectedRect.width, selectedRect.y + selectedRect.height); // bottom-right
+      }
+    } else if (this.selectedAnnotationType === 'text') {
+      const selectedText = this.textAnnotations.find(t => t.id === this.selectedAnnotationId);
+      if (selectedText) {
+        // Draw corner handles
+        renderHandle(ctx, selectedText.x, selectedText.y); // top-left
+        renderHandle(ctx, selectedText.x + selectedText.width, selectedText.y); // top-right
+        renderHandle(ctx, selectedText.x, selectedText.y + selectedText.height); // bottom-left
+        renderHandle(ctx, selectedText.x + selectedText.width, selectedText.y + selectedText.height); // bottom-right
       }
     }
   }
@@ -580,6 +680,20 @@ export class SelectTool implements Tool {
   private isPointOnRectangle(px: number, py: number, rectangle: RectangleAnnotation): boolean {
     const { x, y, width, height, strokeWidth } = rectangle;
     const threshold = strokeWidth + 2;
+
+    // Check if point is near any of the four edges
+    const nearLeft = Math.abs(px - x) <= threshold && py >= y - threshold && py <= y + height + threshold;
+    const nearRight = Math.abs(px - (x + width)) <= threshold && py >= y - threshold && py <= y + height + threshold;
+    const nearTop = Math.abs(py - y) <= threshold && px >= x - threshold && px <= x + width + threshold;
+    const nearBottom = Math.abs(py - (y + height)) <= threshold && px >= x - threshold && px <= x + width + threshold;
+
+    return nearLeft || nearRight || nearTop || nearBottom;
+  }
+
+  private isPointOnTextBox(px: number, py: number, textBox: TextAnnotation): boolean {
+    const { x, y, width, height } = textBox;
+    // Use 2px border width + 2px threshold, similar to rectangles
+    const threshold = 4;
 
     // Check if point is near any of the four edges
     const nearLeft = Math.abs(px - x) <= threshold && py >= y - threshold && py <= y + height + threshold;
