@@ -170,20 +170,25 @@ export class TextTool implements Tool {
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
 
+    // Border width adjustment: CSS border is applied outside the box,
+    // but strokeRect centers the stroke on the path. We need to adjust
+    // position and size to match the visual appearance exactly.
+    const borderWidth = 2;
+
     this.textArea = document.createElement('textarea');
     this.textArea.style.cssText = `
       position: fixed;
-      left: ${box.x / scaleX + rect.left}px;
-      top: ${box.y / scaleY + rect.top}px;
-      width: ${box.width / scaleX}px;
-      height: ${box.height / scaleY}px;
+      left: ${(box.x - borderWidth) / scaleX + rect.left}px;
+      top: ${(box.y - borderWidth) / scaleY + rect.top}px;
+      width: ${(box.width + borderWidth * 2) / scaleX}px;
+      height: ${(box.height + borderWidth * 2) / scaleY}px;
       font-size: ${this.fontSize}px;
       font-family: Inter;
       font-weight: 500;
       letter-spacing: 0.01em;
       color: ${this.color};
       background: rgba(255, 255, 255, 0.9);
-      border: 2px solid ${this.color};
+      border: ${borderWidth}px solid ${this.color};
       outline: none;
       padding: 5px;
       resize: none;
