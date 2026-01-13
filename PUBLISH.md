@@ -66,7 +66,7 @@ https://github.com/ZigaVukcevicDev/houston-we-have-a-bug/issues
 
 **Single purpose description**
 
-The purpose of this extension is to capture screenshots, add annotations, and collect basic system information to support bug reporting.
+The purpose of this extension is to capture and annotate screenshots and collect basic system information to support clear bug reporting.
 
 #### 1.2.2 Permission justification
 
