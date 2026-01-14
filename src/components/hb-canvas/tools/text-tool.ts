@@ -79,18 +79,24 @@ export class TextTool implements Tool {
   }
 
   render(ctx: CanvasRenderingContext2D): void {
-    const dpr = window.devicePixelRatio || 1;
+    // Get the scale factor from canvas dimensions
+    // This matches how coordinates are calculated in getCanvasCoordinates
+    // and ensures alignment with textarea positioning
+    const canvas = ctx.canvas;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
 
     // Render saved annotations
     this.annotations.forEach((annotation) => {
-      this.renderTextBox(ctx, annotation, dpr);
+      this.renderTextBox(ctx, annotation, scaleX, scaleY);
     });
 
     // Render current drawing box
     if (this.currentBox && this.currentBox.width > 0 && this.currentBox.height > 0) {
       ctx.save();
       ctx.strokeStyle = this.color;
-      ctx.lineWidth = 2 * dpr;
+      ctx.lineWidth = 2 * scaleX;
       ctx.strokeRect(
         this.currentBox.x,
         this.currentBox.y,
@@ -101,31 +107,44 @@ export class TextTool implements Tool {
     }
   }
 
-  private renderTextBox(ctx: CanvasRenderingContext2D, annotation: TextAnnotation, dpr: number): void {
+  private renderTextBox(ctx: CanvasRenderingContext2D, annotation: TextAnnotation, scaleX: number, scaleY: number): void {
     // Draw rectangle border
     ctx.save();
     ctx.strokeStyle = annotation.color;
-    ctx.lineWidth = 2 * dpr;
+    ctx.lineWidth = 2 * scaleX;
     ctx.strokeRect(annotation.x, annotation.y, annotation.width, annotation.height);
     ctx.restore();
 
     // Render text with wrapping
     if (annotation.text) {
       ctx.save();
-      ctx.font = `500 ${annotation.fontSize * dpr}px Inter`;
+      // Use scaleX for font size to match coordinate system
+      ctx.font = `500 ${annotation.fontSize * scaleX}px Inter`;
       ctx.fillStyle = annotation.color;
       ctx.textBaseline = 'top';
       ctx.letterSpacing = '0.01em';
 
-      const padding = 5 * dpr;
-      const maxWidth = annotation.width - padding * 2;
+      const borderWidth = 2 * scaleX;
+      const borderOffset = borderWidth / 2; // strokeRect centers the stroke
+      const textareaPadding = 5 * scaleX;  // Use scaleX instead of dpr
+
+      // Text starts at: box edge + border inner offset + textarea padding
+      // strokeRect border extends borderOffset inward from the path
+      const textStartOffset = borderOffset + textareaPadding;
+
+      const maxWidth = annotation.width - textStartOffset * 2;
       const lines = this.wrapText(ctx, annotation.text, maxWidth);
 
-      let yOffset = annotation.y + padding;
-      const lineHeight = annotation.fontSize * dpr * 1.2;
+      // Add 1px vertical adjustment to compensate for font metrics difference
+      // between textarea rendering and canvas textBaseline: 'top'
+      let yOffset = annotation.y + textStartOffset + scaleX;
+
+      // Round line-height to prevent sub-pixel accumulation differences
+      // between textarea and canvas rendering in multi-line text
+      const lineHeight = Math.round(annotation.fontSize * scaleX * 1.2);
 
       lines.forEach((line) => {
-        ctx.fillText(line, annotation.x + padding, yOffset);
+        ctx.fillText(line, annotation.x + textStartOffset, yOffset);
         yOffset += lineHeight;
       });
 
@@ -134,27 +153,34 @@ export class TextTool implements Tool {
   }
 
   private wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
-    const words = text.split(' ');
-    const lines: string[] = [];
-    let currentLine = '';
+    // Split by newlines first to preserve multi-line text
+    const paragraphs = text.split('\n');
+    const allLines: string[] = [];
 
-    words.forEach((word) => {
-      const testLine = currentLine ? `${currentLine} ${word}` : word;
-      const metrics = ctx.measureText(testLine);
+    paragraphs.forEach((paragraph) => {
+      // For each paragraph, wrap by word if needed
+      const words = paragraph.split(' ');
+      let currentLine = '';
 
-      if (metrics.width > maxWidth && currentLine) {
-        lines.push(currentLine);
-        currentLine = word;
-      } else {
-        currentLine = testLine;
+      words.forEach((word) => {
+        const testLine = currentLine ? `${currentLine} ${word}` : word;
+        const metrics = ctx.measureText(testLine);
+
+        if (metrics.width > maxWidth && currentLine) {
+          allLines.push(currentLine);
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      });
+
+      if (currentLine || paragraph === '') {
+        // Push even empty lines to preserve blank lines
+        allLines.push(currentLine);
       }
     });
 
-    if (currentLine) {
-      lines.push(currentLine);
-    }
-
-    return lines.length > 0 ? lines : [''];
+    return allLines.length > 0 ? allLines : [''];
   }
 
   private createTextArea(canvas: HTMLCanvasElement, box: { x: number; y: number; width: number; height: number }): void {
@@ -166,20 +192,22 @@ export class TextTool implements Tool {
     // but strokeRect centers the stroke on the path (half inside, half outside).
     // We need to adjust position and size to match the visual appearance exactly.
     const borderWidth = 2;
-    const borderOffset = borderWidth / 2; // strokeRect centers the stroke
+    const borderOffsetCanvas = (borderWidth / 2) * scaleX; // borderOffset in canvas pixels
 
     this.textArea = document.createElement('textarea');
     this.textArea.style.cssText = `
       position: fixed;
       box-sizing: border-box;
-      left: ${(box.x - borderOffset) / scaleX + rect.left}px;
-      top: ${(box.y - borderOffset) / scaleY + rect.top}px;
-      width: ${(box.width + borderOffset * 2) / scaleX}px;
-      height: ${(box.height + borderOffset * 2) / scaleY}px;
+      left: ${(box.x - borderOffsetCanvas) / scaleX + rect.left}px;
+      top: ${(box.y - borderOffsetCanvas) / scaleY + rect.top}px;
+      width: ${(box.width + borderOffsetCanvas * 2) / scaleX}px;
+      height: ${(box.height + borderOffsetCanvas * 2) / scaleY}px;
+      margin: 0;
       font-size: ${this.fontSize}px;
       font-family: Inter;
       font-weight: 500;
       letter-spacing: 0.01em;
+      line-height: 1.2;
       color: ${this.color};
       background: rgba(255, 255, 255, 0.9);
       border: ${borderWidth}px solid ${this.color};

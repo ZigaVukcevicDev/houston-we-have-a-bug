@@ -119,6 +119,7 @@
 - [x] change "environment details" to "system info"
 - [x] when hovering over rectangle, highlight is visible only when hover over horizontal parts
 - [x] find a way to have better hover color for secondary button (as current is too pale)
+- [ ] add disclaimer
 
 ## Ongoing
 

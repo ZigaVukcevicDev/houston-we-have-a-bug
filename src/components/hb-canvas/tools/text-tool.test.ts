@@ -32,6 +32,7 @@ describe('TextTool', () => {
 
     // Mock context
     mockCtx = {
+      canvas: mockCanvas,  // Add reference to canvas for getBoundingClientRect access
       font: '',
       fillStyle: '',
       strokeStyle: '',
@@ -446,4 +447,228 @@ describe('TextTool', () => {
       }
     });
   });
+  describe('text rendering position alignment', () => {
+    it('should calculate text position with borderOffset + padding to prevent jump', () => {
+      // Create a text annotation
+      const annotation = {
+        id: 'test-1',
+        x: 100,
+        y: 100,
+        width: 200,
+        height: 100,
+        text: 'Test text',
+        color: '#E74C3C',
+        fontSize: 14,
+      };
+
+      const annotations = [annotation];
+      const testTool = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      // Render the annotation
+      testTool.render(mockCtx);
+
+      // The text should be rendered with fillText
+      expect(mockCtx.fillText).toHaveBeenCalled();
+
+      // Get the position where text was rendered
+      const fillTextCalls = (mockCtx.fillText as any).mock.calls;
+      const firstCall = fillTextCalls[0];
+      const renderedX = firstCall[1];
+      const renderedY = firstCall[2];
+
+      // Expected position calculation:
+      // strokeRect centers 2px border: inner edge at x + 1
+      // Textarea padding: 5px
+      // Font metrics adjustment: 1px (to align with textarea rendering)
+      // Total X offset: 1 + 5 = 6px
+      // Total Y offset: 1 + 5 + 1 = 7px
+      const borderOffset = 1; // borderWidth(2px) / 2
+      const padding = 5;
+      const fontMetricsAdjustment = 1; // Compensation for textarea vs canvas text rendering
+      const expectedX = annotation.x + borderOffset + padding; // 100 + 6 = 106
+      const expectedY = annotation.y + borderOffset + padding + fontMetricsAdjustment; // 100 + 7 = 107
+
+      expect(renderedX).toBe(expectedX);
+      expect(renderedY).toBe(expectedY);
+    });
+
+    it('should calculate maxWidth accounting for borderOffset on both sides', () => {
+      const annotation = {
+        id: 'test-2',
+        x: 50,
+        y: 50,
+        width: 200,
+        height: 100,
+        text: 'Long text for wrapping test',
+        color: '#E74C3C',
+        fontSize: 14,
+      };
+
+      const annotations = [annotation];
+      const testTool = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      // Spy on wrapText to verify maxWidth calculation
+      const wrapTextSpy = vi.spyOn(testTool as any, 'wrapText');
+
+      testTool.render(mockCtx);
+
+      // Verify wrapText was called
+      expect(wrapTextSpy).toHaveBeenCalled();
+
+      // Get the maxWidth parameter
+      const wrapTextCall = wrapTextSpy.mock.calls[0];
+      const maxWidth = wrapTextCall[2]; // third parameter
+
+      // Expected maxWidth calculation:
+      // width - (borderOffset + padding) * 2
+      // 200 - (1 + 5) * 2 = 200 - 12 = 188
+      const borderOffset = 1;
+      const padding = 5;
+      const expectedMaxWidth = annotation.width - (borderOffset + padding) * 2;
+
+      expect(maxWidth).toBe(expectedMaxWidth);
+    });
+  });
+
+  describe('text jump bug with DPR > 1', () => {
+    it('should render text at the same position as textarea with DPR=2', () => {
+      // Set DPR to 2 to simulate retina display
+      Object.defineProperty(window, 'devicePixelRatio', {
+        writable: true,
+        configurable: true,
+        value: 2,
+      });
+
+      // Configure canvas for retina display BEFORE rendering
+      mockCanvas.getBoundingClientRect = vi.fn().mockReturnValue({
+        left: 0,
+        top: 0,
+        width: 400,  // Displayed at 400px
+        height: 300,
+      });
+      mockCanvas.width = 800;  // Internal canvas size (400 * 2 for retina)
+      mockCanvas.height = 600;
+
+      // Create annotation
+      const annotation = {
+        id: 'test-dpr',
+        x: 100,
+        y: 100,
+        width: 200,
+        height: 100,
+        text: 'Test',
+        color: '#E74C3C',
+        fontSize: 14,
+      };
+
+      textTool['annotations'] = [annotation];
+
+      // Render to canvas (now scaleX will be 2)
+      textTool.render(mockCtx);
+
+      // Get where canvas text was rendered
+      const fillTextCalls = (mockCtx.fillText as any).mock.calls;
+      const canvasTextX = fillTextCalls[0][1];
+      const canvasTextY = fillTextCalls[0][2];
+
+      // Now simulate textarea creation at the same position
+      const box = { x: 100, y: 100, width: 200, height: 100 };
+
+      textTool['createTextArea'](mockCanvas, box);
+
+      const textarea = getTextArea()!;
+      expect(textarea).toBeTruthy();
+
+      // Calculate where textarea text would appear in canvas coordinates
+      const scaleX = mockCanvas.width / 400; // 800 / 400 = 2
+      const textareaLeft = parseFloat(textarea.style.left); // CSS pixels
+      const textareaBorder = 2; // CSS pixels
+      const textareaPadding = 5; // CSS pixels
+      const textareaTextStartCSS = textareaLeft + textareaBorder + textareaPadding;
+      const textareaTextStartCanvas = textareaTextStartCSS * scaleX;
+
+      // Canvas text position (already in canvas pixels)
+      // Expected: both should be at the same position
+      // Canvas renders at: x + (borderOffset + textareaPadding) = 100 + (1*scaleX + 5*scaleX) = 100 + 12 = 112
+      // Textarea text at: see calculation above
+
+      console.log('DPR:', window.devicePixelRatio);
+      console.log('scaleX:', scaleX);
+      console.log('Canvas text X:', canvasTextX);
+      console.log('Textarea left (CSS px):', textareaLeft);
+      console.log('Textarea text start (CSS px):', textareaTextStartCSS);
+      console.log('Textarea text start (canvas px):', textareaTextStartCanvas);
+
+      // They should match!
+      expect(canvasTextX).toBe(textareaTextStartCanvas);
+
+      // Clean up
+      Object.defineProperty(window, 'devicePixelRatio', {
+        writable: true,
+        configurable: true,
+        value: 1,
+      });
+    });
+
+    it('should handle case where scaleX != DPR (common in real browsers)', () => {
+      // Simulate a scenario where canvas scaling doesn't match DPR
+      // E.g., DPR=2 but canvas is 1000px wide displayed at 400px (scaleX=2.5)
+      Object.defineProperty(window, 'devicePixelRatio', {
+        writable: true,
+        configurable: true,
+        value: 2,
+      });
+
+      // Configure canvas with non-standard scaling BEFORE rendering
+      mockCanvas.getBoundingClientRect = vi.fn().mockReturnValue({
+        left: 0,
+        top: 0,
+        width: 400,
+        height: 300,
+      });
+      mockCanvas.width = 1000;  // Not 400*2 = 800, but 1000!
+      mockCanvas.height = 750;
+
+      const annotation = {
+        id: 'test-mismatch',
+        x: 100,
+        y: 100,
+        width: 200,
+        height: 100,
+        text: 'Test',
+        color: '#E74C3C',
+        fontSize: 14,
+      };
+
+      textTool['annotations'] = [annotation];
+      textTool.render(mockCtx);
+
+      const fillTextCalls = (mockCtx.fillText as any).mock.calls;
+      const canvasTextX = fillTextCalls[0][1];
+
+      // Canvas with non-standard scaling
+      const box = { x: 100, y: 100, width: 200, height: 100 };
+
+      textTool['createTextArea'](mockCanvas, box);
+
+      const textarea = getTextArea()!;
+      const scaleX = mockCanvas.width / 400; // 1000 / 400 = 2.5
+      const textareaTextStartCanvas = (parseFloat(textarea.style.left) + 2 + 5) * scaleX;
+
+      console.log('Mismatch test - DPR:', window.devicePixelRatio, 'scaleX:', scaleX);
+      console.log('Canvas text:', canvasTextX, 'Textarea text:', textareaTextStartCanvas);
+      console.log('Difference:', Math.abs(canvasTextX - textareaTextStartCanvas), 'canvas pixels');
+
+      // Now they should match because we're using scaleX consistently!
+      expect(canvasTextX).toBe(textareaTextStartCanvas);
+
+      // Clean up
+      Object.defineProperty(window, 'devicePixelRatio', {
+        writable: true,
+        configurable: true,
+        value: 1,
+      });
+    });
+  });
 });
+

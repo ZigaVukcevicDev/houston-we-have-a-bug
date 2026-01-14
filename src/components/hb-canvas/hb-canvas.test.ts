@@ -83,7 +83,22 @@ describe('HBCanvas', () => {
     let mockCtx: any;
 
     beforeEach(() => {
+      // Create mockCanvasElement first (without getContext method)
+      mockCanvasElement = {
+        getBoundingClientRect: vi.fn().mockReturnValue({
+          left: 0,
+          top: 0,
+          width: 800,
+          height: 600,
+        }),
+        width: 800,
+        height: 600,
+        style: {},
+      };
+
+      // Then create mockCtx with canvas reference
       mockCtx = {
+        canvas: mockCanvasElement,  // Now mockCanvasElement exists
         clearRect: vi.fn(),
         drawImage: vi.fn(),
         fillText: vi.fn(),
@@ -99,18 +114,8 @@ describe('HBCanvas', () => {
         setLineDash: vi.fn(),
       };
 
-      mockCanvasElement = {
-        getBoundingClientRect: vi.fn().mockReturnValue({
-          left: 0,
-          top: 0,
-          width: 800,
-          height: 600,
-        }),
-        width: 800,
-        height: 600,
-        getContext: vi.fn().mockReturnValue(mockCtx),
-        style: {},
-      };
+      // Finally add getContext method
+      mockCanvasElement.getContext = vi.fn().mockReturnValue(mockCtx);
 
       Object.defineProperty(canvas, 'canvas', {
         value: mockCanvasElement,
@@ -237,7 +242,20 @@ describe('HBCanvas', () => {
     let mockImage: HTMLImageElement;
 
     beforeEach(() => {
+      mockCanvasElement = {
+        getBoundingClientRect: vi.fn().mockReturnValue({
+          left: 0,
+          top: 0,
+          width: 800,
+          height: 600,
+        }),
+        width: 800,
+        height: 600,
+        style: {},
+      };
+
       mockCtx = {
+        canvas: mockCanvasElement,
         clearRect: vi.fn(),
         drawImage: vi.fn(),
         fillText: vi.fn(),
@@ -255,18 +273,7 @@ describe('HBCanvas', () => {
         strokeRect: vi.fn(),
       };
 
-      mockCanvasElement = {
-        getBoundingClientRect: vi.fn().mockReturnValue({
-          left: 0,
-          top: 0,
-          width: 800,
-          height: 600,
-        }),
-        width: 800,
-        height: 600,
-        getContext: vi.fn().mockReturnValue(mockCtx),
-        style: {},
-      };
+      mockCanvasElement.getContext = vi.fn().mockReturnValue(mockCtx);
 
       mockImage = { width: 800, height: 600 } as HTMLImageElement;
 
@@ -311,7 +318,20 @@ describe('HBCanvas', () => {
     let mockCtx: any;
 
     beforeEach(() => {
+      mockCanvasElement = {
+        getBoundingClientRect: vi.fn().mockReturnValue({
+          left: 0,
+          top: 0,
+          width: 800,
+          height: 600,
+        }),
+        width: 800,
+        height: 600,
+        style: {},
+      };
+
       mockCtx = {
+        canvas: mockCanvasElement,
         clearRect: vi.fn(),
         drawImage: vi.fn(),
         fillText: vi.fn(),
@@ -326,18 +346,7 @@ describe('HBCanvas', () => {
         strokeRect: vi.fn(),
       };
 
-      mockCanvasElement = {
-        getBoundingClientRect: vi.fn().mockReturnValue({
-          left: 0,
-          top: 0,
-          width: 800,
-          height: 600,
-        }),
-        width: 800,
-        height: 600,
-        getContext: vi.fn().mockReturnValue(mockCtx),
-        style: {},
-      };
+      mockCanvasElement.getContext = vi.fn().mockReturnValue(mockCtx);
 
       Object.defineProperty(canvas, 'canvas', {
         value: mockCanvasElement,
@@ -593,7 +602,20 @@ describe('HBCanvas', () => {
     let mockCtx: any;
 
     beforeEach(() => {
+      mockCanvasElement = {
+        getBoundingClientRect: vi.fn().mockReturnValue({
+          left: 0,
+          top: 0,
+          width: 800,
+          height: 600,
+        }),
+        width: 800,
+        height: 600,
+        style: {},
+      };
+
       mockCtx = {
+        canvas: mockCanvasElement,
         clearRect: vi.fn(),
         drawImage: vi.fn(),
         fillText: vi.fn(),
@@ -613,18 +635,7 @@ describe('HBCanvas', () => {
         restore: vi.fn(),
       };
 
-      mockCanvasElement = {
-        getBoundingClientRect: vi.fn().mockReturnValue({
-          left: 0,
-          top: 0,
-          width: 800,
-          height: 600,
-        }),
-        width: 800,
-        height: 600,
-        getContext: vi.fn().mockReturnValue(mockCtx),
-        style: {},
-      };
+      mockCanvasElement.getContext = vi.fn().mockReturnValue(mockCtx);
 
       Object.defineProperty(canvas, 'canvas', {
         value: mockCanvasElement,
@@ -674,7 +685,20 @@ describe('HBCanvas', () => {
     let mockCtx: any;
 
     beforeEach(() => {
+      mockCanvasElement = {
+        getBoundingClientRect: vi.fn().mockReturnValue({
+          left: 0,
+          top: 0,
+          width: 800,
+          height: 600,
+        }),
+        width: 800,
+        height: 600,
+        style: {},
+      };
+
       mockCtx = {
+        canvas: mockCanvasElement,
         clearRect: vi.fn(),
         drawImage: vi.fn(),
         fillText: vi.fn(),
@@ -695,18 +719,7 @@ describe('HBCanvas', () => {
         lineJoin: '',
       };
 
-      mockCanvasElement = {
-        getBoundingClientRect: vi.fn().mockReturnValue({
-          left: 0,
-          top: 0,
-          width: 800,
-          height: 600,
-        }),
-        width: 800,
-        height: 600,
-        getContext: vi.fn().mockReturnValue(mockCtx),
-        style: {},
-      };
+      mockCanvasElement.getContext = vi.fn().mockReturnValue(mockCtx);
 
       Object.defineProperty(canvas, 'canvas', {
         value: mockCanvasElement,
@@ -824,7 +837,20 @@ describe('HBCanvas', () => {
       let mockCtx: any;
 
       beforeEach(() => {
+        mockCanvasElement = {
+          getBoundingClientRect: vi.fn().mockReturnValue({
+            left: 0,
+            top: 0,
+            width: 800,
+            height: 600,
+          }),
+          width: 800,
+          height: 600,
+          style: {},
+        };
+
         mockCtx = {
+          canvas: mockCanvasElement,
           clearRect: vi.fn(),
           drawImage: vi.fn(),
           strokeStyle: '',
@@ -839,23 +865,10 @@ describe('HBCanvas', () => {
           fillRect: vi.fn(),
           strokeRect: vi.fn(),
           setLineDash: vi.fn(),
-          canvas: {
-            width: 800,
-            height: 600,
-          },
         };
-        mockCanvasElement = {
-          getBoundingClientRect: vi.fn().mockReturnValue({
-            left: 0,
-            top: 0,
-            width: 800,
-            height: 600,
-          }),
-          width: 800,
-          height: 600,
-          getContext: vi.fn().mockReturnValue(mockCtx),
-          style: {},
-        };
+
+        mockCanvasElement.getContext = vi.fn().mockReturnValue(mockCtx);
+
         Object.defineProperty(canvas, 'canvas', {
           value: mockCanvasElement,
           writable: true,
@@ -913,7 +926,22 @@ describe('HBCanvas', () => {
     let mockCtx: any;
 
     beforeEach(() => {
+      // Create mockCanvasElement first
+      mockCanvasElement = {
+        getBoundingClientRect: vi.fn().mockReturnValue({
+          left: 0,
+          top: 0,
+          width: 800,
+          height: 600,
+        }),
+        width: 800,
+        height: 600,
+        style: {},
+      };
+
+      // Create mockCtx with canvas reference
       mockCtx = {
+        canvas: mockCanvasElement,  // Reference to actual mock canvas element
         clearRect: vi.fn(),
         drawImage: vi.fn(),
         strokeStyle: '',
@@ -928,23 +956,11 @@ describe('HBCanvas', () => {
         fillRect: vi.fn(),
         strokeRect: vi.fn(),
         setLineDash: vi.fn(),
-        canvas: {
-          width: 800,
-          height: 600,
-        },
       };
-      mockCanvasElement = {
-        getBoundingClientRect: vi.fn().mockReturnValue({
-          left: 0,
-          top: 0,
-          width: 800,
-          height: 600,
-        }),
-        width: 800,
-        height: 600,
-        getContext: vi.fn().mockReturnValue(mockCtx),
-        style: {},
-      };
+
+      // Add getContext method
+      mockCanvasElement.getContext = vi.fn().mockReturnValue(mockCtx);
+
       Object.defineProperty(canvas, 'canvas', {
         value: mockCanvasElement,
         writable: true,
