@@ -2,6 +2,7 @@ import type { Tool } from '../../../interfaces/tool.interface';
 import type { TextAnnotation } from '../../../interfaces/annotation.interface';
 import { toolStyles } from './tool-styles';
 import { getCanvasCoordinates } from '../../../utils/get-canvas-coordinates';
+import { renderHandle, isPointOnHandle } from '../../../utils/render-handle';
 
 export class TextTool implements Tool {
   private annotations: TextAnnotation[];
@@ -16,6 +17,10 @@ export class TextTool implements Tool {
   private startPoint: { x: number; y: number } | null = null;
   private currentBox: { x: number; y: number; width: number; height: number } | null = null;
 
+  // Resize state for active textarea
+  private resizingHandle: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | null = null;
+  private resizeStartBox: { x: number; y: number; width: number; height: number } | null = null;
+
   constructor(annotations: TextAnnotation[], onRedraw: () => void, onToolChange: (tool: string) => void) {
     this.annotations = annotations;
     this.onRedraw = onRedraw;
@@ -28,22 +33,131 @@ export class TextTool implements Tool {
   }
 
   handleMouseDown(event: MouseEvent, canvas: HTMLCanvasElement): void {
-    // If there's an active textarea, finalize it first
+    const { x, y } = getCanvasCoordinates(event, canvas);
+
+    // If there's an active textarea, check if clicking on resize handles
     if (this.textArea) {
+      // If currentBox exists, check for handle clicks (resize mode)
+      if (this.currentBox) {
+        const topLeft = { x: this.currentBox.x, y: this.currentBox.y };
+        const topRight = { x: this.currentBox.x + this.currentBox.width, y: this.currentBox.y };
+        const bottomLeft = { x: this.currentBox.x, y: this.currentBox.y + this.currentBox.height };
+        const bottomRight = { x: this.currentBox.x + this.currentBox.width, y: this.currentBox.y + this.currentBox.height };
+
+        // Check each corner handle
+        if (isPointOnHandle(x, y, topLeft.x, topLeft.y)) {
+          this.resizingHandle = 'top-left';
+          this.resizeStartBox = { ...this.currentBox };
+          return;
+        }
+        if (isPointOnHandle(x, y, topRight.x, topRight.y)) {
+          this.resizingHandle = 'top-right';
+          this.resizeStartBox = { ...this.currentBox };
+          return;
+        }
+        if (isPointOnHandle(x, y, bottomLeft.x, bottomLeft.y)) {
+          this.resizingHandle = 'bottom-left';
+          this.resizeStartBox = { ...this.currentBox };
+          return;
+        }
+        if (isPointOnHandle(x, y, bottomRight.x, bottomRight.y)) {
+          this.resizingHandle = 'bottom-right';
+          this.resizeStartBox = { ...this.currentBox };
+          return;
+        }
+      }
+
+      // Click outside handles (or no currentBox) - finalize the textarea
       this.finalizeTextArea();
       return;
     }
 
-    const { x, y } = getCanvasCoordinates(event, canvas);
+    // No active textarea - start drawing new text box
     this.isDrawing = true;
     this.startPoint = { x, y };
     this.currentBox = { x, y, width: 0, height: 0 };
   }
 
   handleMouseMove(event: MouseEvent, canvas: HTMLCanvasElement): void {
-    if (!this.isDrawing || !this.startPoint) return;
-
     const { x, y } = getCanvasCoordinates(event, canvas);
+
+    // Handle resizing active textarea
+    if (this.resizingHandle && this.currentBox && this.textArea) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+
+      // Store original bounds for calculation
+      const originalRight = this.currentBox.x + this.currentBox.width;
+      const originalBottom = this.currentBox.y + this.currentBox.height;
+
+      // Minimum size constraints
+      const MIN_SIZE = 50;
+
+      // Resize based on which corner is being dragged
+      if (this.resizingHandle === 'top-left') {
+        this.currentBox.width = Math.max(MIN_SIZE, originalRight - x);
+        this.currentBox.height = Math.max(MIN_SIZE, originalBottom - y);
+        this.currentBox.x = originalRight - this.currentBox.width;
+        this.currentBox.y = originalBottom - this.currentBox.height;
+      } else if (this.resizingHandle === 'top-right') {
+        this.currentBox.width = Math.max(MIN_SIZE, x - this.currentBox.x);
+        this.currentBox.height = Math.max(MIN_SIZE, originalBottom - y);
+        this.currentBox.y = originalBottom - this.currentBox.height;
+      } else if (this.resizingHandle === 'bottom-left') {
+        this.currentBox.width = Math.max(MIN_SIZE, originalRight - x);
+        this.currentBox.height = Math.max(MIN_SIZE, y - this.currentBox.y);
+        this.currentBox.x = originalRight - this.currentBox.width;
+      } else if (this.resizingHandle === 'bottom-right') {
+        this.currentBox.width = Math.max(MIN_SIZE, x - this.currentBox.x);
+        this.currentBox.height = Math.max(MIN_SIZE, y - this.currentBox.y);
+      }
+
+      // Update textarea dimensions in real-time
+      this.updateTextAreaDimensions(canvas, this.currentBox, scaleX, scaleY);
+      this.onRedraw();
+      return;
+    }
+
+    // Provide cursor feedback when textarea is active
+    if (this.textArea && this.currentBox && !this.resizingHandle) {
+      const topLeft = { x: this.currentBox.x, y: this.currentBox.y };
+      const topRight = { x: this.currentBox.x + this.currentBox.width, y: this.currentBox.y };
+      const bottomLeft = { x: this.currentBox.x, y: this.currentBox.y + this.currentBox.height };
+      const bottomRight = { x: this.currentBox.x + this.currentBox.width, y: this.currentBox.y + this.currentBox.height };
+
+      // Check each corner and set appropriate resize cursor
+      if (isPointOnHandle(x, y, topLeft.x, topLeft.y)) {
+        canvas.style.cursor = 'nwse-resize';
+        return;
+      }
+      if (isPointOnHandle(x, y, bottomRight.x, bottomRight.y)) {
+        canvas.style.cursor = 'nwse-resize';
+        return;
+      }
+      if (isPointOnHandle(x, y, topRight.x, topRight.y)) {
+        canvas.style.cursor = 'nesw-resize';
+        return;
+      }
+      if (isPointOnHandle(x, y, bottomLeft.x, bottomLeft.y)) {
+        canvas.style.cursor = 'nesw-resize';
+        return;
+      }
+
+      // Over textarea content area - show text cursor
+      if (x >= this.currentBox.x && x <= this.currentBox.x + this.currentBox.width &&
+        y >= this.currentBox.y && y <= this.currentBox.y + this.currentBox.height) {
+        canvas.style.cursor = 'text';
+        return;
+      }
+
+      // Default cursor
+      canvas.style.cursor = '';
+      return;
+    }
+
+    // Handle drawing new text box
+    if (!this.isDrawing || !this.startPoint) return;
 
     // Constrain to only right and down
     // Use minimum size (2px) to show user can't go left/up
@@ -62,6 +176,15 @@ export class TextTool implements Tool {
   }
 
   handleMouseUp(event: MouseEvent, canvas: HTMLCanvasElement): void {
+    // End resizing
+    if (this.resizingHandle) {
+      this.resizingHandle = null;
+      this.resizeStartBox = null;
+      this.onRedraw();
+      return;
+    }
+
+    // End drawing
     if (!this.isDrawing || !this.currentBox) return;
 
     this.isDrawing = false;
@@ -76,6 +199,27 @@ export class TextTool implements Tool {
     this.currentBox = null;
     this.startPoint = null;
     this.onRedraw();
+  }
+
+  // Helper method to update textarea dimensions during resize
+  private updateTextAreaDimensions(canvas: HTMLCanvasElement, box: { x: number; y: number; width: number; height: number }, scaleX: number, scaleY: number): void {
+    if (!this.textArea) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const borderWidth = 2;
+    const borderOffsetCanvas = (borderWidth / 2) * scaleX;
+
+    // Update textarea position and size
+    this.textArea.style.left = `${(box.x - borderOffsetCanvas) / scaleX + rect.left}px`;
+    this.textArea.style.top = `${(box.y - borderOffsetCanvas) / scaleY + rect.top}px`;
+    this.textArea.style.width = `${(box.width + borderOffsetCanvas * 2) / scaleX}px`;
+    this.textArea.style.height = `${(box.height + borderOffsetCanvas * 2) / scaleY}px`;
+
+    // Update dataset to reflect new dimensions
+    this.textArea.dataset.canvasX = box.x.toString();
+    this.textArea.dataset.canvasY = box.y.toString();
+    this.textArea.dataset.canvasWidth = box.width.toString();
+    this.textArea.dataset.canvasHeight = box.height.toString();
   }
 
   render(ctx: CanvasRenderingContext2D): void {
@@ -104,6 +248,15 @@ export class TextTool implements Tool {
         this.currentBox.height
       );
       ctx.restore();
+    }
+
+    // Render handles when textarea is active (for resizing)
+    if (this.textArea && this.currentBox) {
+      // Render 4 corner handles
+      renderHandle(ctx, this.currentBox.x, this.currentBox.y); // top-left
+      renderHandle(ctx, this.currentBox.x + this.currentBox.width, this.currentBox.y); // top-right
+      renderHandle(ctx, this.currentBox.x, this.currentBox.y + this.currentBox.height); // bottom-left
+      renderHandle(ctx, this.currentBox.x + this.currentBox.width, this.currentBox.y + this.currentBox.height); // bottom-right
     }
   }
 
@@ -279,14 +432,18 @@ export class TextTool implements Tool {
     }
 
     this.removeTextArea();
+    this.currentBox = null;  // Clear drawing box state
   }
 
   private removeTextArea() {
-    if (this.textArea && this.textArea.parentNode) {
+    if (this.textArea) {
       this.textArea.removeEventListener('keydown', this.handleTextAreaKeydown);
       this.textArea.removeEventListener('blur', this.handleTextAreaBlur);
-      this.textArea.parentNode.removeChild(this.textArea);
+      // Use remove() instead of parentNode.removeChild for compatibility
+      if (this.textArea.parentNode) {
+        this.textArea.parentNode.removeChild(this.textArea);
+      }
+      this.textArea = null;
     }
-    this.textArea = null;
   }
 }
