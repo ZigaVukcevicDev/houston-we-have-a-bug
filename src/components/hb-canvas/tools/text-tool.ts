@@ -192,11 +192,14 @@ export class TextTool implements Tool {
     // Only create textarea if box has minimum size
     if (this.currentBox.width > 10 && this.currentBox.height > 10) {
       this.createTextArea(canvas, this.currentBox);
-      // Switch to select tool after creating textarea
-      this.onToolChange('select');
+      // Don't switch tools yet - allow resizing via handles
+      // Tool will switch to select when textarea is finalized
+    } else {
+      // Box too small, clear state
+      this.currentBox = null;
+      this.startPoint = null;
     }
 
-    this.currentBox = null;
     this.startPoint = null;
     this.onRedraw();
   }
@@ -433,6 +436,9 @@ export class TextTool implements Tool {
 
     this.removeTextArea();
     this.currentBox = null;  // Clear drawing box state
+
+    // Switch to select tool after finalizing
+    this.onToolChange('select');
   }
 
   private removeTextArea() {

@@ -28,6 +28,7 @@ describe('TextTool', () => {
       }),
       width: 800,
       height: 600,
+      style: {} as CSSStyleDeclaration,
     } as unknown as HTMLCanvasElement;
 
     // Mock context
@@ -318,6 +319,22 @@ describe('TextTool', () => {
       expect(getTextArea()).toBeNull();
     });
 
+    it('should switch to select tool when finalizing even if user does not enter text', () => {
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+
+      const textarea = getTextArea()!;
+      textarea.value = ''; // Empty text
+      mockToolChange.mockClear();
+
+      // Finalize by clicking outside
+      textTool.handleMouseDown({ clientX: 400, clientY: 400 } as MouseEvent, mockCanvas);
+
+      // Should still switch to select tool even with no text
+      expect(mockToolChange).toHaveBeenCalledWith('select');
+    });
+
     it('should handle canvas offset correctly', () => {
       mockCanvas.getBoundingClientRect = vi.fn().mockReturnValue({
         left: 50,
@@ -339,13 +356,18 @@ describe('TextTool', () => {
   });
 
   describe('tool switching', () => {
-    it('should call onToolChange with "select" after creating textarea', () => {
+    it('should call onToolChange with "select" after finalizing textarea', () => {
       textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
       textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
-      mockToolChange.mockClear();
-
       textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
 
+      // Tool change should NOT happen yet (allow resizing)
+      expect(mockToolChange).not.toHaveBeenCalled();
+
+      // Finalize by clicking outside
+      textTool.handleMouseDown({ clientX: 400, clientY: 400 } as MouseEvent, mockCanvas);
+
+      // Now tool change should happen
       expect(mockToolChange).toHaveBeenCalledWith('select');
       expect(mockToolChange).toHaveBeenCalledTimes(1);
     });
@@ -359,17 +381,17 @@ describe('TextTool', () => {
       expect(mockToolChange).not.toHaveBeenCalled();
     });
 
-    it('should call onToolChange before finalizing textarea', () => {
+    it('should not call onToolChange until finalizing textarea', () => {
       textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
       textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
       mockToolChange.mockClear();
 
       textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
 
-      // Tool change should be called
-      expect(mockToolChange).toHaveBeenCalledWith('select');
+      // Tool change should NOT be called yet
+      expect(mockToolChange).not.toHaveBeenCalled();
 
-      // Textarea should still be created
+      // Textarea should be created
       const textarea = getTextArea();
       expect(textarea).toBeTruthy();
     });
@@ -377,8 +399,13 @@ describe('TextTool', () => {
     it('should switch to select tool even if user does not enter text', () => {
       textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
       textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
-
       textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+
+      // Tool change should not happen yet
+      expect(mockToolChange).not.toHaveBeenCalled();
+
+      // Finalize by clicking outside (without entering text)
+      textTool.handleMouseDown({ clientX: 400, clientY: 400 } as MouseEvent, mockCanvas);
 
       // Should switch to select tool regardless of text input
       expect(mockToolChange).toHaveBeenCalledWith('select');
@@ -668,6 +695,191 @@ describe('TextTool', () => {
         configurable: true,
         value: 1,
       });
+    });
+  });
+
+  describe('resize handles', () => {
+    it('should render 4 corner handles when textarea is active', () => {
+      // Draw and create textarea
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+
+      // Clear previous calls
+      vi.clearAllMocks();
+
+      // Render with textarea active
+      textTool.render(mockCtx);
+
+      // Should render the rectangle border
+      expect(mockCtx.strokeRect).toHaveBeenCalled();
+    });
+
+    it('should detect top-left handle click and start resize', () => {
+      // Create textarea
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+
+      const textarea = getTextArea()!;
+      expect(textarea).not.toBeNull();
+
+      // Click on top-left handle (100, 100)
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+
+      // Textarea should still exist (not finalized)
+      expect(getTextArea()).not.toBeNull();
+    });
+
+    it('should detect bottom-right handle click and start resize', () => {
+      // Create textarea
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+
+      // Click on bottom-right handle (300, 250)
+      textTool.handleMouseDown({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+
+      // Textarea should still exist (not finalized)
+      expect(getTextArea()).not.toBeNull();
+    });
+
+    it('should resize from bottom-right handle', () => {
+      // Create textarea
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+
+      const textarea = getTextArea()!;
+      const initialWidth = textarea.style.width;
+      const initialHeight = textarea.style.height;
+
+      // Start resize from bottom-right
+      textTool.handleMouseDown({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+
+      // Drag to make it larger
+      textTool.handleMouseMove({ clientX: 400, clientY: 350 } as MouseEvent, mockCanvas);
+
+      // Textarea dimensions should have changed
+      expect(textarea.style.width).not.toBe(initialWidth);
+      expect(textarea.style.height).not.toBe(initialHeight);
+    });
+
+    it('should resize from top-left handle', () => {
+      // Create textarea
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+
+      const textarea = getTextArea()!;
+      const initialLeft = textarea.style.left;
+      const initialTop = textarea.style.top;
+
+      // Start resize from top-left
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+
+      // Drag inward
+      textTool.handleMouseMove({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+
+      // Textarea position and size should have changed
+      expect(textarea.style.left).not.toBe(initialLeft);
+      expect(textarea.style.top).not.toBe(initialTop);
+    });
+
+    it('should end resize on mouseup', () => {
+      // Create textarea
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+
+      // Start resize
+      textTool.handleMouseDown({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 400, clientY: 350 } as MouseEvent, mockCanvas);
+
+      // End resize
+      textTool.handleMouseUp({ clientX: 400, clientY: 350 } as MouseEvent, mockCanvas);
+
+      // Should call onRedraw
+      expect(mockRedraw).toHaveBeenCalled();
+
+      // Textarea should still exist (not finalized)
+      expect(getTextArea()).not.toBeNull();
+    });
+
+    it('should enforce minimum size during resize', () => {
+      // Create textarea
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+
+      const textarea = getTextArea()!;
+
+      // Start resize from bottom-right
+      textTool.handleMouseDown({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+
+      // Try to drag to make it very small (less than minimum 50px)
+      textTool.handleMouseMove({ clientX: 110, clientY: 110 } as MouseEvent, mockCanvas);
+
+      // Parse dimensions (remove 'px' and convert to number)
+      const width = parseFloat(textarea.style.width);
+      const height = parseFloat(textarea.style.height);
+
+      // Should be at least minimum size
+      expect(width).toBeGreaterThanOrEqual(50);
+      expect(height).toBeGreaterThanOrEqual(50);
+    });
+
+    it('should set nwse-resize cursor when hovering over top-left handle', () => {
+      // Create textarea
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+
+      // Hover over top-left handle
+      textTool.handleMouseMove({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+
+      expect(mockCanvas.style.cursor).toBe('nwse-resize');
+    });
+
+    it('should set nesw-resize cursor when hovering over top-right handle', () => {
+      // Create textarea
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+
+      // Hover over top-right handle
+      textTool.handleMouseMove({ clientX: 300, clientY: 100 } as MouseEvent, mockCanvas);
+
+      expect(mockCanvas.style.cursor).toBe('nesw-resize');
+    });
+
+    it('should set text cursor when hovering over textarea content', () => {
+      // Create textarea
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+
+      // Hover over center of textarea
+      textTool.handleMouseMove({ clientX: 200, clientY: 175 } as MouseEvent, mockCanvas);
+
+      expect(mockCanvas.style.cursor).toBe('text');
+    });
+
+    it('should update textarea data attributes during resize', () => {
+      // Create textarea
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+
+      const textarea = getTextArea()!;
+      const initialCanvasWidth = textarea.dataset.canvasWidth;
+
+      // Resize from bottom-right
+      textTool.handleMouseDown({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 400, clientY: 350 } as MouseEvent, mockCanvas);
+
+      // Dataset should be updated
+      expect(textarea.dataset.canvasWidth).not.toBe(initialCanvasWidth);
     });
   });
 });
