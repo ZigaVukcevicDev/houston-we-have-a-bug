@@ -365,7 +365,7 @@ export class TextTool implements Tool {
       letter-spacing: 0.01em;
       line-height: 1.2;
       color: ${this.color};
-      background: rgba(255, 255, 255, 0.9);
+      background: transparent;
       border: ${borderWidth}px solid ${this.color};
       outline: none;
       padding: 5px;
