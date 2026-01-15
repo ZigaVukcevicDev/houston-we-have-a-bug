@@ -618,14 +618,6 @@ describe('TextTool', () => {
       // Expected: both should be at the same position
       // Canvas renders at: x + (borderOffset + textareaPadding) = 100 + (1*scaleX + 5*scaleX) = 100 + 12 = 112
       // Textarea text at: see calculation above
-
-      console.log('DPR:', window.devicePixelRatio);
-      console.log('scaleX:', scaleX);
-      console.log('Canvas text X:', canvasTextX);
-      console.log('Textarea left (CSS px):', textareaLeft);
-      console.log('Textarea text start (CSS px):', textareaTextStartCSS);
-      console.log('Textarea text start (canvas px):', textareaTextStartCanvas);
-
       // They should match!
       expect(canvasTextX).toBe(textareaTextStartCanvas);
 
@@ -681,10 +673,6 @@ describe('TextTool', () => {
       const textarea = getTextArea()!;
       const scaleX = mockCanvas.width / 400; // 1000 / 400 = 2.5
       const textareaTextStartCanvas = (parseFloat(textarea.style.left) + 2 + 5) * scaleX;
-
-      console.log('Mismatch test - DPR:', window.devicePixelRatio, 'scaleX:', scaleX);
-      console.log('Canvas text:', canvasTextX, 'Textarea text:', textareaTextStartCanvas);
-      console.log('Difference:', Math.abs(canvasTextX - textareaTextStartCanvas), 'canvas pixels');
 
       // Now they should match because we're using scaleX consistently!
       expect(canvasTextX).toBe(textareaTextStartCanvas);

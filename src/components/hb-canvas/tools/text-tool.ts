@@ -239,7 +239,7 @@ export class TextTool implements Tool {
       this.renderTextBox(ctx, annotation, scaleX, scaleY);
     });
 
-    // Render current drawing box
+    // Render current drawing box border (also when textarea is active, since textarea has no border)
     if (this.currentBox && this.currentBox.width > 0 && this.currentBox.height > 0) {
       ctx.save();
       ctx.strokeStyle = this.color;
@@ -366,7 +366,8 @@ export class TextTool implements Tool {
       line-height: 1.2;
       color: ${this.color};
       background: transparent;
-      border: ${borderWidth}px solid ${this.color};
+      border: none;
+      border-radius: 4px;
       outline: none;
       padding: 5px;
       resize: none;
