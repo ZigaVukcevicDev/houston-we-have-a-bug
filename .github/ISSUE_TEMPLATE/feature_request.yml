@@ -1,33 +1,26 @@
-name: 💡 Feature request
-description: Suggest a focused improvement or enhancement
-title: "[Feature]: "
-labels: ["enhancement"]
+name: 💡 Bug reporting improvement
+description: Propose an improvement to bug reporting
+title: "Improvement: "
+labels: ["improvement"]
 
 body:
   - type: markdown
     attributes:
       value: |
-        ℹ️ Before you continue
+        ⚠️ Read first
 
-        **Houston, we have a bug** is designed for *quick bug reporting*:
-        capturing screenshots, adding simple annotations, and sharing context.
+        This extension is built for **clear and fast bug reporting**.
+        It intentionally stays minimal.
 
-        It is **not** intended to be a full-featured drawing or design tool.
-        Requests for complex illustration workflows, advanced editing,
-        or design-software-level features are out of scope.
+        Requests that significantly increase complexity or turn this into
+        a general drawing or design tool are likely to be closed.
 
   - type: textarea
     id: problem
     attributes:
-      label: What problem are you trying to solve?
-      description: Describe the limitation you are facing while reporting a bug.
+      label: What problem did you encounter?
       placeholder: |
-        Good example:
-        When annotating screenshots, it's hard to keep arrows aligned
-        when pointing to UI elements.
-
-        ❌ Not ideal:
-        I want to freely draw complex shapes like in Figma or Photoshop.
+        Example: Screenshots include sensitive data that should not be shared.
     validations:
       required: true
 
@@ -35,33 +28,15 @@ body:
     id: solution
     attributes:
       label: Proposed solution
-      description: Suggest a simple, focused improvement.
       placeholder: |
-        Good example:
-        Add snap-to-horizontal / snap-to-vertical behavior for arrows
-        when holding a modifier key.
-
-        ❌ Not ideal:
-        Add layers, blending modes, and advanced vector editing.
-    validations:
-      required: true
-
-  - type: textarea
-    id: value
-    attributes:
-      label: Why is this useful for bug reporting?
-      description: Explain how this improves clarity or speed when reporting bugs.
-      placeholder: |
-        Example:
-        This would make it faster to clearly point to misaligned UI elements
-        without spending time adjusting arrows manually.
+        Example: Add a blur tool to hide sensitive data.
     validations:
       required: true
 
   - type: checkboxes
-    id: scope_check
+    id: scope
     attributes:
       label: Scope check
       options:
-        - label: This request focuses on bug reporting, not general drawing or design
+        - label: This request improves bug reporting, not general image editing
           required: true
