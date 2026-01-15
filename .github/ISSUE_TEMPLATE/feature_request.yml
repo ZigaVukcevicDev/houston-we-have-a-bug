@@ -1,6 +1,6 @@
-name: 💡 Improvement
-description: Propose an improvement
-title: "Improvement: "
+name: 💡 Enhancement
+description: Propose an enhancement
+title: "Enhancement: "
 labels: ["enhancement"]
 
 body:
