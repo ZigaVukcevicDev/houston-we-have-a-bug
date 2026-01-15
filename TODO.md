@@ -103,7 +103,7 @@
 
 ## Details
 
-- [ ] text rect should have transparent background 
+- [x] text rect should have transparent background 
 - [x] make more padding to last tool
 - [x] make arrow tool default
 - [x] revisit crop area on white background, it looks too thin
@@ -118,9 +118,17 @@
 - [x] change "environment details" to "system info"
 - [x] when hovering over rectangle, highlight is visible only when hover over horizontal parts
 - [x] find a way to have better hover color for secondary button (as current is too pale)
-- [ ] add disclaimer
 
 ## Ongoing
 
 - [ ] increase code coverage
 - [ ] update badges with coverage (or integrate Codecov)
+
+## Final
+
+- test all annotations
+  - [ ] on non-retina white background
+  - [ ] on non-retina dark background
+  - [ ] on retina white background
+  - [ ] on retina dark background
+  
