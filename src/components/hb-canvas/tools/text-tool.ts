@@ -48,21 +48,25 @@ export class TextTool implements Tool {
         if (isPointOnHandle(x, y, topLeft.x, topLeft.y)) {
           this.resizingHandle = 'top-left';
           this.resizeStartBox = { ...this.currentBox };
+          this.textArea.style.pointerEvents = 'none'; // Disable pointer events during resize
           return;
         }
         if (isPointOnHandle(x, y, topRight.x, topRight.y)) {
           this.resizingHandle = 'top-right';
           this.resizeStartBox = { ...this.currentBox };
+          this.textArea.style.pointerEvents = 'none';
           return;
         }
         if (isPointOnHandle(x, y, bottomLeft.x, bottomLeft.y)) {
           this.resizingHandle = 'bottom-left';
           this.resizeStartBox = { ...this.currentBox };
+          this.textArea.style.pointerEvents = 'none';
           return;
         }
         if (isPointOnHandle(x, y, bottomRight.x, bottomRight.y)) {
           this.resizingHandle = 'bottom-right';
           this.resizeStartBox = { ...this.currentBox };
+          this.textArea.style.pointerEvents = 'none';
           return;
         }
       }
@@ -126,22 +130,24 @@ export class TextTool implements Tool {
       const bottomLeft = { x: this.currentBox.x, y: this.currentBox.y + this.currentBox.height };
       const bottomRight = { x: this.currentBox.x + this.currentBox.width, y: this.currentBox.y + this.currentBox.height };
 
-      // Check each corner and set appropriate resize cursor
-      if (isPointOnHandle(x, y, topLeft.x, topLeft.y)) {
-        canvas.style.cursor = 'nwse-resize';
+      // Check if hovering over any handle
+      const onTopLeft = isPointOnHandle(x, y, topLeft.x, topLeft.y);
+      const onTopRight = isPointOnHandle(x, y, topRight.x, topRight.y);
+      const onBottomLeft = isPointOnHandle(x, y, bottomLeft.x, bottomLeft.y);
+      const onBottomRight = isPointOnHandle(x, y, bottomRight.x, bottomRight.y);
+      const onAnyHandle = onTopLeft || onTopRight || onBottomLeft || onBottomRight;
+
+      // Disable textarea pointer events when over a handle to allow canvas clicks
+      if (onAnyHandle) {
+        this.textArea.style.pointerEvents = 'none';
+        if (onTopLeft || onBottomRight) {
+          canvas.style.cursor = 'nwse-resize';
+        } else {
+          canvas.style.cursor = 'nesw-resize';
+        }
         return;
-      }
-      if (isPointOnHandle(x, y, bottomRight.x, bottomRight.y)) {
-        canvas.style.cursor = 'nwse-resize';
-        return;
-      }
-      if (isPointOnHandle(x, y, topRight.x, topRight.y)) {
-        canvas.style.cursor = 'nesw-resize';
-        return;
-      }
-      if (isPointOnHandle(x, y, bottomLeft.x, bottomLeft.y)) {
-        canvas.style.cursor = 'nesw-resize';
-        return;
+      } else {
+        this.textArea.style.pointerEvents = 'auto';
       }
 
       // Over textarea content area - show text cursor
@@ -154,6 +160,9 @@ export class TextTool implements Tool {
       // Default cursor
       canvas.style.cursor = '';
       return;
+    } else if (this.resizingHandle && this.textArea) {
+      // Keep pointer events disabled during resize
+      this.textArea.style.pointerEvents = 'none';
     }
 
     // Handle drawing new text box
@@ -180,6 +189,10 @@ export class TextTool implements Tool {
     if (this.resizingHandle) {
       this.resizingHandle = null;
       this.resizeStartBox = null;
+      // Re-enable textarea pointer events after resize
+      if (this.textArea) {
+        this.textArea.style.pointerEvents = 'auto';
+      }
       this.onRedraw();
       return;
     }
@@ -374,6 +387,7 @@ export class TextTool implements Tool {
       white-space: pre-wrap;
       word-wrap: break-word;
       z-index: 10000;
+      pointer-events: auto;
     `;
 
     this.textArea.dataset.canvasX = box.x.toString();

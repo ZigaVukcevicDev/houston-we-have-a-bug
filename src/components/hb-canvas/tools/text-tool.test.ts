@@ -868,6 +868,59 @@ describe('TextTool', () => {
       // Dataset should be updated
       expect(textarea.dataset.canvasWidth).not.toBe(initialCanvasWidth);
     });
+
+    it('should disable textarea pointer events when hovering over handles', () => {
+      // Draw and create textarea
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+
+      const textarea = getTextArea()!;
+      expect(textarea).toBeTruthy();
+
+      // Initially pointer events should be auto
+      expect(textarea.style.pointerEvents).toBe('auto');
+
+      // Hover over top-left handle
+      textTool.handleMouseMove({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+
+      // Pointer events should be disabled
+      expect(textarea.style.pointerEvents).toBe('none');
+
+      // Move away from handle
+      textTool.handleMouseMove({ clientX: 200, clientY: 175 } as MouseEvent, mockCanvas);
+
+      // Pointer events should be re-enabled
+      expect(textarea.style.pointerEvents).toBe('auto');
+
+      // Clean up
+      textarea.remove();
+    });
+
+    it('should keep pointer events disabled during resize and restore after', () => {
+      // Draw and create textarea
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+
+      const textarea = getTextArea()!;
+
+      // Start resize
+      textTool.handleMouseDown({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+
+      // During resize, pointer events should be disabled
+      textTool.handleMouseMove({ clientX: 350, clientY: 300 } as MouseEvent, mockCanvas);
+      expect(textarea.style.pointerEvents).toBe('none');
+
+      // End resize
+      textTool.handleMouseUp({ clientX: 350, clientY: 300 } as MouseEvent, mockCanvas);
+
+      // After resize, pointer events should be restored
+      expect(textarea.style.pointerEvents).toBe('auto');
+
+      // Clean up
+      textarea.remove();
+    });
   });
 });
 
