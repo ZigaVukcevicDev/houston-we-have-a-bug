@@ -1,0 +1,108 @@
+name: 🐞 Bug report
+description: Report a reproducible problem with the extension
+title: "[Bug]: "
+labels: ["bug"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ⚠️ Read before submitting
+
+        This project prioritizes **reproducible, well-described bugs**.
+        Issues without clear steps or expected vs actual behavior may be closed.
+
+  - type: input
+    id: extension_version
+    attributes:
+      label: Extension version
+      description: Found in chrome://extensions
+      placeholder: e.g. 0.4.1
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      options:
+        - Chrome
+        - Chromium
+        - Edge
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - macOS
+        - Windows
+        - Linux
+    validations:
+      required: true
+
+  - type: textarea
+    id: what_happened
+    attributes:
+      label: What happened?
+      description: Describe the problem clearly and concisely.
+      placeholder: |
+        Example:
+        After clicking "Annotate screenshot", the editor opens,
+        but drawing tools do not respond.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Use numbered steps.
+      placeholder: |
+        1. Open any webpage
+        2. Click the extension icon
+        3. Click "Annotate screenshot"
+        4. Try to draw an arrow
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: |
+        Drawing tools should respond immediately.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      placeholder: |
+        Nothing happens when clicking or dragging.
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or recordings
+      description: Drag & drop annotated screenshots or screen recordings here.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation
+      options:
+        - label: I have checked existing issues
+          required: true
+        - label: I can reproduce this consistently
+          required: true
+        - label: This is not a support or usage question
+          required: true
