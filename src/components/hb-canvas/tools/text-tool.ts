@@ -212,7 +212,7 @@ export class TextTool implements Tool {
     const borderWidth = 2;
     const borderOffsetCanvas = (borderWidth / 2) * scaleX;
 
-    // Update textarea position and size
+    // Update textarea position and size (with borderOffset for text alignment)
     this.textArea.style.left = `${(box.x - borderOffsetCanvas) / scaleX + rect.left}px`;
     this.textArea.style.top = `${(box.y - borderOffsetCanvas) / scaleY + rect.top}px`;
     this.textArea.style.width = `${(box.width + borderOffsetCanvas * 2) / scaleX}px`;
@@ -282,7 +282,7 @@ export class TextTool implements Tool {
 
       const borderWidth = 2 * scaleX;
       const borderOffset = borderWidth / 2; // strokeRect centers the stroke
-      const textareaPadding = 5 * scaleX;  // Use scaleX instead of dpr
+      const textareaPadding = 10 * scaleX;  // Use scaleX instead of dpr
 
       // Text starts at: box edge + border inner offset + textarea padding
       // strokeRect border extends borderOffset inward from the path
@@ -344,9 +344,8 @@ export class TextTool implements Tool {
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
 
-    // Border width adjustment: CSS border is applied outside the box,
-    // but strokeRect centers the stroke on the path (half inside, half outside).
-    // We need to adjust position and size to match the visual appearance exactly.
+    // Textarea has no border, but we need to offset its position by borderWidth/2
+    // to align the text with the canvas rendering which accounts for strokeRect borderOffset
     const borderWidth = 2;
     const borderOffsetCanvas = (borderWidth / 2) * scaleX; // borderOffset in canvas pixels
 
@@ -369,7 +368,7 @@ export class TextTool implements Tool {
       border: none;
       border-radius: 4px;
       outline: none;
-      padding: 5px;
+      padding: 10px;
       resize: none;
       overflow: hidden;
       white-space: pre-wrap;

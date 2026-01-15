@@ -434,11 +434,11 @@ describe('TextTool', () => {
         const widthPx = parseFloat(textarea.style.width);
         const heightPx = parseFloat(textarea.style.height);
 
-        // Expected: box.x=100, offset by -1px -> 99px
+        // Textarea offset by borderWidth/2 for text alignment
         expect(leftPx).toBe(100 - borderOffset);
         expect(topPx).toBe(100 - borderOffset);
 
-        // Expected: box.width=200, expanded by 2*1px -> 202px
+        // Width/height expanded by borderOffset on both sides
         expect(widthPx).toBe(200 + borderOffset * 2);
         expect(heightPx).toBe(100 + borderOffset * 2);
       }
@@ -464,9 +464,7 @@ describe('TextTool', () => {
       expect(textarea).toBeTruthy();
 
       if (textarea) {
-        // Textarea outer border should align with strokeRect outer edge
-        // strokeRect(50, 50, 200, 100) with 2px stroke -> outer edge at (49, 49, 202, 102)
-        // textarea at (49, 49) with size (202, 102) -> outer edge at (49, 49, 202, 102)
+        // Textarea offset by borderWidth/2 to align with strokeRect visual rendering
         expect(parseFloat(textarea.style.left)).toBe(49);
         expect(parseFloat(textarea.style.top)).toBe(49);
         expect(parseFloat(textarea.style.width)).toBe(202);
@@ -505,15 +503,15 @@ describe('TextTool', () => {
 
       // Expected position calculation:
       // strokeRect centers 2px border: inner edge at x + 1
-      // Textarea padding: 5px
+      // Textarea padding: 10px
       // Font metrics adjustment: 1px (to align with textarea rendering)
-      // Total X offset: 1 + 5 = 6px
-      // Total Y offset: 1 + 5 + 1 = 7px
+      // Total X offset: 1 + 10 = 11px
+      // Total Y offset: 1 + 10 + 1 = 12px
       const borderOffset = 1; // borderWidth(2px) / 2
-      const padding = 5;
+      const padding = 10;
       const fontMetricsAdjustment = 1; // Compensation for textarea vs canvas text rendering
-      const expectedX = annotation.x + borderOffset + padding; // 100 + 6 = 106
-      const expectedY = annotation.y + borderOffset + padding + fontMetricsAdjustment; // 100 + 7 = 107
+      const expectedX = annotation.x + borderOffset + padding; // 100 + 11 = 111
+      const expectedY = annotation.y + borderOffset + padding + fontMetricsAdjustment; // 100 + 12 = 112
 
       expect(renderedX).toBe(expectedX);
       expect(renderedY).toBe(expectedY);
@@ -548,9 +546,9 @@ describe('TextTool', () => {
 
       // Expected maxWidth calculation:
       // width - (borderOffset + padding) * 2
-      // 200 - (1 + 5) * 2 = 200 - 12 = 188
+      // 200 - (1 + 10) * 2 = 200 - 22 = 178
       const borderOffset = 1;
-      const padding = 5;
+      const padding = 10;
       const expectedMaxWidth = annotation.width - (borderOffset + padding) * 2;
 
       expect(maxWidth).toBe(expectedMaxWidth);
@@ -609,14 +607,15 @@ describe('TextTool', () => {
       // Calculate where textarea text would appear in canvas coordinates
       const scaleX = mockCanvas.width / 400; // 800 / 400 = 2
       const textareaLeft = parseFloat(textarea.style.left); // CSS pixels
-      const textareaBorder = 2; // CSS pixels
-      const textareaPadding = 5; // CSS pixels
+      const textareaPadding = 10; // CSS pixels
+      const textareaBorder = 2; // CSS pixels, but textarea has no border - this is for strokeRect offset
+      // Textarea positioned with borderOffset, text starts at: left + border + padding
       const textareaTextStartCSS = textareaLeft + textareaBorder + textareaPadding;
       const textareaTextStartCanvas = textareaTextStartCSS * scaleX;
 
       // Canvas text position (already in canvas pixels)
       // Expected: both should be at the same position
-      // Canvas renders at: x + (borderOffset + textareaPadding) = 100 + (1*scaleX + 5*scaleX) = 100 + 12 = 112
+      // Canvas renders at: x + (borderOffset + textareaPadding) = 100 + (1*scaleX + 10*scaleX) = 100 + 22 = 122
       // Textarea text at: see calculation above
       // They should match!
       expect(canvasTextX).toBe(textareaTextStartCanvas);
@@ -672,7 +671,7 @@ describe('TextTool', () => {
 
       const textarea = getTextArea()!;
       const scaleX = mockCanvas.width / 400; // 1000 / 400 = 2.5
-      const textareaTextStartCanvas = (parseFloat(textarea.style.left) + 2 + 5) * scaleX;
+      const textareaTextStartCanvas = (parseFloat(textarea.style.left) + 2 + 10) * scaleX;
 
       // Now they should match because we're using scaleX consistently!
       expect(canvasTextX).toBe(textareaTextStartCanvas);
