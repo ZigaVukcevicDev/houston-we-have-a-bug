@@ -1,16 +1,17 @@
 name: 🐞 Bug report
 description: Report a reproducible problem with the extension
-title: "[Bug]: "
+title: "Bug: "
 labels: ["bug"]
 
 body:
   - type: markdown
     attributes:
       value: |
+        
         ⚠️ Read before submitting
 
         This project prioritizes **reproducible, well-described bugs**.
-        Issues without clear steps or expected vs actual behavior may be closed.
+        Issues without clear report may be closed.
 
   - type: input
     id: extension_version
@@ -18,18 +19,6 @@ body:
       label: Extension version
       description: Found in chrome://extensions
       placeholder: e.g. 0.4.1
-    validations:
-      required: true
-
-  - type: dropdown
-    id: browser
-    attributes:
-      label: Browser
-      options:
-        - Chrome
-        - Chromium
-        - Edge
-        - Other
     validations:
       required: true
 
@@ -93,7 +82,7 @@ body:
       label: Screenshots or recordings
       description: Drag & drop annotated screenshots or screen recordings here.
     validations:
-      required: false
+      required: true
 
   - type: checkboxes
     id: confirmation
@@ -103,6 +92,4 @@ body:
         - label: I have checked existing issues
           required: true
         - label: I can reproduce this consistently
-          required: true
-        - label: This is not a support or usage question
           required: true
