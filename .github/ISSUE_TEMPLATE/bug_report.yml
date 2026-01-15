@@ -80,7 +80,6 @@ body:
     id: screenshots
     attributes:
       label: Screenshots or recordings
-      description: Drag & drop annotated screenshots or screen recordings here.
     validations:
       required: true
 
