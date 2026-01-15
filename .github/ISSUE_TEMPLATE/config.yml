@@ -1,9 +1,0 @@
-blank_issues_enabled: false
-contact_links:
-  - name: 📖 Documentation
-    url: https://github.com/YOUR_USERNAME/YOUR_REPO#readme
-    about: Please check the documentation before opening an issue.
-
-  - name: 💬 Questions / Support
-    url: https://github.com/YOUR_USERNAME/YOUR_REPO/discussions
-    about: Usage questions belong in Discussions, not Issues.
