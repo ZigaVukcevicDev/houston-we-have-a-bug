@@ -1,13 +1,13 @@
 name: 💡 Improvement
 description: Propose an improvement
 title: "Improvement: "
-labels: ["improvement"]
+labels: ["enhancement"]
 
 body:
   - type: markdown
     attributes:
       value: |
-      
+
         ⚠️ Read before submitting
 
         This extension is built for **clear and fast bug reporting**.
