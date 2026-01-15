@@ -365,7 +365,7 @@ export class TextTool implements Tool {
       line-height: 1.2;
       color: ${this.color};
       background: transparent;
-      border: none;
+      border: ${borderWidth}px solid transparent;
       border-radius: 4px;
       outline: none;
       padding: 10px;
