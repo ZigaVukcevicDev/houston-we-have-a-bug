@@ -4,6 +4,7 @@
 ![Tests](https://github.com/ZigaVukcevicDev/houston-we-have-a-bug/actions/workflows/test.yml/badge.svg)
 ![Coverage](https://img.shields.io/badge/coverage-98%25-brightgreen)
 ![Tests](https://img.shields.io/badge/tests-461%20passing-success)
+![E2E](https://img.shields.io/badge/e2e-9%20passing-success)
 ![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Chrome_extension-blue)
 ![Lit](https://img.shields.io/badge/framework-Lit-324FFF?logo=lit)
@@ -21,7 +22,7 @@ A Chrome extension to capture bugs clearly. Annotate screenshots and gather syst
 />
 
 <details>
-  <summary>See example screenshots</summary>
+  <summary>See demo images</summary>
 
   <p align="center">
     <img src="src/images/extension-presentation/hb-screenshot-2-1280x800@2x.png" width="1280">
