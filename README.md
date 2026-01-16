@@ -1,7 +1,6 @@
 # Houston, we have a bug
 
 ![Status](https://img.shields.io/badge/status-work_in_progress-orange)
-![Tests](https://github.com/ZigaVukcevicDev/houston-we-have-a-bug/actions/workflows/test.yml/badge.svg)
 ![Coverage](https://img.shields.io/badge/coverage-98%25-brightgreen)
 ![Tests](https://img.shields.io/badge/tests-461%20passing-success)
 ![E2E](https://img.shields.io/badge/e2e-9%20passing-success)
