@@ -56,10 +56,12 @@ test('text annotation persists', async ({ page }) => {
 ## Manual testing
 
 Use `test-page.html` for quick manual testing:
-1. Run `npm run build` to build the extension
-2. Start a simple server: `npx http-server -p 8080`
-3. Open `http://localhost:8080/test-page.html` in browser
-4. Test the tool you changed
+```bash
+npm run build
+npx http-server dist -p 8080
+```
+
+Then open `http://localhost:8080/test-page.html` in your browser and test the tool you changed.
 
 ## Debugging tips
 
