@@ -1,11 +1,11 @@
 # TODO
 
-# Main functionalities 
+# Main functionalities
 
 1. Select tool
 
 - [x] on hover stroke annotation
-- [x] if no annotation is clicked, unselect all annotations 
+- [x] if no annotation is clicked, unselect all annotations
 - [x] if coming from other tool, don't select any annotation
 - [x] delete key deletes selected annotation
 
@@ -13,18 +13,18 @@
 
 - draw rectangle
   - [x] free
-  - [ ] prevents left and top draw
-  - [x] upon release user is able to type, select tool is being selected, four handlebars should appear
-- move endpoint
-  - [ ] top-left endpoint
-  - [ ] top-right endpoint
-  - [ ] bottom-left endpoint
-  - [ ] bottom-right endpoint
-  - [ ] has proper cursor
-- move rectangle
-  - [ ] without selection
-  - [ ] with selection
-  - [ ] has proper cursor
+  - [x] prevents left and top draw
+  - [x] upon release user is able to type, select tool is being selected, handles are visible
+- move endpoint (handled by select tool)
+  - [x] top-left endpoint
+  - [x] top-right endpoint
+  - [x] bottom-left endpoint
+  - [x] bottom-right endpoint
+  - [x] has proper cursor
+- move rectangle (handled by select tool)
+  - [x] without selection
+  - [x] with selection
+  - [x] has proper cursor
 
 3. Line tool
 
@@ -94,16 +94,16 @@
 - cancel crop
   - [x] clicking button
   - [x] with escape
-  - [x] by selecting other tool 
+  - [x] by selecting other tool
 - [ ] croping through annotations
- 
+
 7. Download
 
 - [x] deselect annotaions when downloading
 
 ## Details
 
-- [x] text rect should have transparent background 
+- [x] text rect should have transparent background
 - [x] make more padding to last tool
 - [x] make arrow tool default
 - [x] revisit crop area on white background, it looks too thin
@@ -132,4 +132,3 @@
   - [ ] on non-retina dark background
   - [ ] on retina white background
   - [ ] on retina dark background
-  

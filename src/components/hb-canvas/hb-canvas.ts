@@ -114,7 +114,7 @@ export class HBCanvas extends LitElement {
     this.tools.set('text', new TextTool(
       this.textAnnotations,
       () => this.redraw(),
-      (tool: string) => this.handleToolChange(tool)
+      (tool: string, annotationId?: string) => this.handleToolChange(tool, annotationId)
     ));
     this.tools.set('line', new LineTool(
       this.lineAnnotations,

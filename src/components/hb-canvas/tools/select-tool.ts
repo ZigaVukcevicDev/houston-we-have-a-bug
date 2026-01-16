@@ -110,6 +110,7 @@ export class SelectTool implements Tool {
     } else if (this.textAnnotations.find(t => t.id === id)) {
       this.selectedAnnotationType = 'text';
     }
+
     this.onRedraw();
   }
 

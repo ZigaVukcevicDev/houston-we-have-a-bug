@@ -2,7 +2,6 @@ import type { Tool } from '../../../interfaces/tool.interface';
 import type { TextAnnotation } from '../../../interfaces/annotation.interface';
 import { toolStyles } from './tool-styles';
 import { getCanvasCoordinates } from '../../../utils/get-canvas-coordinates';
-import { renderHandle, isPointOnHandle } from '../../../utils/render-handle';
 
 export class TextTool implements Tool {
   private annotations: TextAnnotation[];
@@ -10,18 +9,14 @@ export class TextTool implements Tool {
   private readonly color: string = toolStyles.color;
   private readonly fontSize: number = toolStyles.fontSize;
   private onRedraw: () => void;
-  private onToolChange: (tool: string) => void;
+  private onToolChange: (tool: string, annotationId?: string) => void;
 
   // Drawing state
   private isDrawing: boolean = false;
   private startPoint: { x: number; y: number } | null = null;
   private currentBox: { x: number; y: number; width: number; height: number } | null = null;
 
-  // Resize state for active textarea
-  private resizingHandle: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | null = null;
-  private resizeStartBox: { x: number; y: number; width: number; height: number } | null = null;
-
-  constructor(annotations: TextAnnotation[], onRedraw: () => void, onToolChange: (tool: string) => void) {
+  constructor(annotations: TextAnnotation[], onRedraw: () => void, onToolChange: (tool: string, annotationId?: string) => void) {
     this.annotations = annotations;
     this.onRedraw = onRedraw;
     this.onToolChange = onToolChange;
@@ -35,48 +30,12 @@ export class TextTool implements Tool {
   handleMouseDown(event: MouseEvent, canvas: HTMLCanvasElement): void {
     const { x, y } = getCanvasCoordinates(event, canvas);
 
-    // If there's an active textarea, check if clicking on resize handles
+    // If there's an active textarea, finalize it before starting a new box
     if (this.textArea) {
-      // If currentBox exists, check for handle clicks (resize mode)
-      if (this.currentBox) {
-        const topLeft = { x: this.currentBox.x, y: this.currentBox.y };
-        const topRight = { x: this.currentBox.x + this.currentBox.width, y: this.currentBox.y };
-        const bottomLeft = { x: this.currentBox.x, y: this.currentBox.y + this.currentBox.height };
-        const bottomRight = { x: this.currentBox.x + this.currentBox.width, y: this.currentBox.y + this.currentBox.height };
-
-        // Check each corner handle
-        if (isPointOnHandle(x, y, topLeft.x, topLeft.y)) {
-          this.resizingHandle = 'top-left';
-          this.resizeStartBox = { ...this.currentBox };
-          this.textArea.style.pointerEvents = 'none'; // Disable pointer events during resize
-          return;
-        }
-        if (isPointOnHandle(x, y, topRight.x, topRight.y)) {
-          this.resizingHandle = 'top-right';
-          this.resizeStartBox = { ...this.currentBox };
-          this.textArea.style.pointerEvents = 'none';
-          return;
-        }
-        if (isPointOnHandle(x, y, bottomLeft.x, bottomLeft.y)) {
-          this.resizingHandle = 'bottom-left';
-          this.resizeStartBox = { ...this.currentBox };
-          this.textArea.style.pointerEvents = 'none';
-          return;
-        }
-        if (isPointOnHandle(x, y, bottomRight.x, bottomRight.y)) {
-          this.resizingHandle = 'bottom-right';
-          this.resizeStartBox = { ...this.currentBox };
-          this.textArea.style.pointerEvents = 'none';
-          return;
-        }
-      }
-
-      // Click outside handles (or no currentBox) - finalize the textarea
       this.finalizeTextArea();
-      return;
     }
 
-    // No active textarea - start drawing new text box
+    // Start drawing new text box
     this.isDrawing = true;
     this.startPoint = { x, y };
     this.currentBox = { x, y, width: 0, height: 0 };
@@ -84,86 +43,6 @@ export class TextTool implements Tool {
 
   handleMouseMove(event: MouseEvent, canvas: HTMLCanvasElement): void {
     const { x, y } = getCanvasCoordinates(event, canvas);
-
-    // Handle resizing active textarea
-    if (this.resizingHandle && this.currentBox && this.textArea) {
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-
-      // Store original bounds for calculation
-      const originalRight = this.currentBox.x + this.currentBox.width;
-      const originalBottom = this.currentBox.y + this.currentBox.height;
-
-      // Minimum size constraints
-      const MIN_SIZE = 50;
-
-      // Resize based on which corner is being dragged
-      if (this.resizingHandle === 'top-left') {
-        this.currentBox.width = Math.max(MIN_SIZE, originalRight - x);
-        this.currentBox.height = Math.max(MIN_SIZE, originalBottom - y);
-        this.currentBox.x = originalRight - this.currentBox.width;
-        this.currentBox.y = originalBottom - this.currentBox.height;
-      } else if (this.resizingHandle === 'top-right') {
-        this.currentBox.width = Math.max(MIN_SIZE, x - this.currentBox.x);
-        this.currentBox.height = Math.max(MIN_SIZE, originalBottom - y);
-        this.currentBox.y = originalBottom - this.currentBox.height;
-      } else if (this.resizingHandle === 'bottom-left') {
-        this.currentBox.width = Math.max(MIN_SIZE, originalRight - x);
-        this.currentBox.height = Math.max(MIN_SIZE, y - this.currentBox.y);
-        this.currentBox.x = originalRight - this.currentBox.width;
-      } else if (this.resizingHandle === 'bottom-right') {
-        this.currentBox.width = Math.max(MIN_SIZE, x - this.currentBox.x);
-        this.currentBox.height = Math.max(MIN_SIZE, y - this.currentBox.y);
-      }
-
-      // Update textarea dimensions in real-time
-      this.updateTextAreaDimensions(canvas, this.currentBox, scaleX, scaleY);
-      this.onRedraw();
-      return;
-    }
-
-    // Provide cursor feedback when textarea is active
-    if (this.textArea && this.currentBox && !this.resizingHandle) {
-      const topLeft = { x: this.currentBox.x, y: this.currentBox.y };
-      const topRight = { x: this.currentBox.x + this.currentBox.width, y: this.currentBox.y };
-      const bottomLeft = { x: this.currentBox.x, y: this.currentBox.y + this.currentBox.height };
-      const bottomRight = { x: this.currentBox.x + this.currentBox.width, y: this.currentBox.y + this.currentBox.height };
-
-      // Check if hovering over any handle
-      const onTopLeft = isPointOnHandle(x, y, topLeft.x, topLeft.y);
-      const onTopRight = isPointOnHandle(x, y, topRight.x, topRight.y);
-      const onBottomLeft = isPointOnHandle(x, y, bottomLeft.x, bottomLeft.y);
-      const onBottomRight = isPointOnHandle(x, y, bottomRight.x, bottomRight.y);
-      const onAnyHandle = onTopLeft || onTopRight || onBottomLeft || onBottomRight;
-
-      // Disable textarea pointer events when over a handle to allow canvas clicks
-      if (onAnyHandle) {
-        this.textArea.style.pointerEvents = 'none';
-        if (onTopLeft || onBottomRight) {
-          canvas.style.cursor = 'nwse-resize';
-        } else {
-          canvas.style.cursor = 'nesw-resize';
-        }
-        return;
-      } else {
-        this.textArea.style.pointerEvents = 'auto';
-      }
-
-      // Over textarea content area - show text cursor
-      if (x >= this.currentBox.x && x <= this.currentBox.x + this.currentBox.width &&
-        y >= this.currentBox.y && y <= this.currentBox.y + this.currentBox.height) {
-        canvas.style.cursor = 'text';
-        return;
-      }
-
-      // Default cursor
-      canvas.style.cursor = '';
-      return;
-    } else if (this.resizingHandle && this.textArea) {
-      // Keep pointer events disabled during resize
-      this.textArea.style.pointerEvents = 'none';
-    }
 
     // Handle drawing new text box
     if (!this.isDrawing || !this.startPoint) return;
@@ -185,18 +64,6 @@ export class TextTool implements Tool {
   }
 
   handleMouseUp(event: MouseEvent, canvas: HTMLCanvasElement): void {
-    // End resizing
-    if (this.resizingHandle) {
-      this.resizingHandle = null;
-      this.resizeStartBox = null;
-      // Re-enable textarea pointer events after resize
-      if (this.textArea) {
-        this.textArea.style.pointerEvents = 'auto';
-      }
-      this.onRedraw();
-      return;
-    }
-
     // End drawing
     if (!this.isDrawing || !this.currentBox) return;
 
@@ -204,9 +71,30 @@ export class TextTool implements Tool {
 
     // Only create textarea if box has minimum size
     if (this.currentBox.width > 10 && this.currentBox.height > 10) {
+      // Create the annotation immediately
+      const newAnnotation = {
+        id: crypto.randomUUID(),
+        x: this.currentBox.x,
+        y: this.currentBox.y,
+        width: this.currentBox.width,
+        height: this.currentBox.height,
+        text: '', // Start with empty text
+        color: this.color,
+        fontSize: this.fontSize,
+      };
+
+      // IMPORTANT: Use push() to modify the shared array reference
+      this.annotations.push(newAnnotation);
+
+      // Create textarea for editing
       this.createTextArea(canvas, this.currentBox);
-      // Don't switch tools yet - allow resizing via handles
-      // Tool will switch to select when textarea is finalized
+
+      // Store the annotation ID in the textarea for later updates
+      this.textArea!.dataset.annotationId = newAnnotation.id;
+
+      // Switch to select tool and select the annotation (shows handles)
+      this.onToolChange('select', newAnnotation.id);
+      this.onRedraw();
     } else {
       // Box too small, clear state
       this.currentBox = null;
@@ -214,29 +102,8 @@ export class TextTool implements Tool {
     }
 
     this.startPoint = null;
-    this.onRedraw();
   }
 
-  // Helper method to update textarea dimensions during resize
-  private updateTextAreaDimensions(canvas: HTMLCanvasElement, box: { x: number; y: number; width: number; height: number }, scaleX: number, scaleY: number): void {
-    if (!this.textArea) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const borderWidth = 2;
-    const borderOffsetCanvas = (borderWidth / 2) * scaleX;
-
-    // Update textarea position and size (with borderOffset for text alignment)
-    this.textArea.style.left = `${(box.x - borderOffsetCanvas) / scaleX + rect.left}px`;
-    this.textArea.style.top = `${(box.y - borderOffsetCanvas) / scaleY + rect.top}px`;
-    this.textArea.style.width = `${(box.width + borderOffsetCanvas * 2) / scaleX}px`;
-    this.textArea.style.height = `${(box.height + borderOffsetCanvas * 2) / scaleY}px`;
-
-    // Update dataset to reflect new dimensions
-    this.textArea.dataset.canvasX = box.x.toString();
-    this.textArea.dataset.canvasY = box.y.toString();
-    this.textArea.dataset.canvasWidth = box.width.toString();
-    this.textArea.dataset.canvasHeight = box.height.toString();
-  }
 
   render(ctx: CanvasRenderingContext2D): void {
     // Get the scale factor from canvas dimensions
@@ -266,14 +133,6 @@ export class TextTool implements Tool {
       ctx.restore();
     }
 
-    // Render handles when textarea is active (for resizing)
-    if (this.textArea && this.currentBox) {
-      // Render 4 corner handles
-      renderHandle(ctx, this.currentBox.x, this.currentBox.y); // top-left
-      renderHandle(ctx, this.currentBox.x + this.currentBox.width, this.currentBox.y); // top-right
-      renderHandle(ctx, this.currentBox.x, this.currentBox.y + this.currentBox.height); // bottom-left
-      renderHandle(ctx, this.currentBox.x + this.currentBox.width, this.currentBox.y + this.currentBox.height); // bottom-right
-    }
   }
 
   private renderTextBox(ctx: CanvasRenderingContext2D, annotation: TextAnnotation, scaleX: number, scaleY: number): void {
@@ -387,7 +246,7 @@ export class TextTool implements Tool {
       white-space: pre-wrap;
       word-wrap: break-word;
       z-index: 10000;
-      pointer-events: auto;
+      pointer-events: none;
     `;
 
     this.textArea.dataset.canvasX = box.x.toString();
@@ -398,7 +257,19 @@ export class TextTool implements Tool {
     this.textArea.dataset.fontSize = this.fontSize.toString();
 
     document.body.appendChild(this.textArea);
+
+    // Focus the textarea to allow immediate typing
     this.textArea.focus();
+
+    // Start with pointer-events none to allow handle clicks
+    // Will be enabled temporarily when user hovers content area
+    this.textArea.style.pointerEvents = 'none';
+
+    // Add focus event to ensure textarea can receive keyboard input even with pointer-events: none
+    this.textArea.addEventListener('focus', () => {
+      // When focused, briefly enable pointer events to allow text selection
+      // but cursor position is already set by focus()
+    });
 
     this.textArea.addEventListener('keydown', this.handleTextAreaKeydown);
     this.textArea.addEventListener('blur', this.handleTextAreaBlur);
@@ -407,7 +278,19 @@ export class TextTool implements Tool {
   private handleTextAreaKeydown = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
       e.preventDefault();
+
+      // Remove the annotation on Escape
+      const annotationId = this.textArea?.dataset.annotationId;
+      if (annotationId) {
+        const index = this.annotations.findIndex(a => a.id === annotationId);
+        if (index !== -1) {
+          this.annotations.splice(index, 1);
+        }
+      }
+
       this.removeTextArea();
+      this.currentBox = null;
+      this.onRedraw();
     }
     // Don't finalize on Enter - allow multiline text
   };
@@ -419,40 +302,29 @@ export class TextTool implements Tool {
   private finalizeTextArea() {
     if (!this.textArea) return;
 
+    const annotationId = this.textArea.dataset.annotationId;
     const text = this.textArea.value.trim();
-    if (text) {
-      const x = parseFloat(this.textArea.dataset.canvasX || '0');
-      const y = parseFloat(this.textArea.dataset.canvasY || '0');
-      const width = parseFloat(this.textArea.dataset.canvasWidth || '200');
-      const height = parseFloat(this.textArea.dataset.canvasHeight || '100');
-      const annotationColor = this.textArea.dataset.color || this.color;
-      const annotationFontSize = parseInt(
-        this.textArea.dataset.fontSize || this.fontSize.toString(),
-        10
-      );
 
-      this.annotations = [
-        ...this.annotations,
-        {
-          id: crypto.randomUUID(),
-          x,
-          y,
-          width,
-          height,
-          text,
-          color: annotationColor,
-          fontSize: annotationFontSize,
-        },
-      ];
-
-      this.onRedraw();
+    if (annotationId) {
+      // Find and update the existing annotation
+      const annotation = this.annotations.find(a => a.id === annotationId);
+      if (annotation) {
+        if (text) {
+          // Update the annotation with the entered text
+          annotation.text = text;
+        } else {
+          // Remove annotation if no text was entered
+          const index = this.annotations.findIndex(a => a.id === annotationId);
+          if (index !== -1) {
+            this.annotations.splice(index, 1);
+          }
+        }
+      }
     }
 
     this.removeTextArea();
     this.currentBox = null;  // Clear drawing box state
-
-    // Switch to select tool after finalizing
-    this.onToolChange('select');
+    this.onRedraw();
   }
 
   private removeTextArea() {
@@ -464,6 +336,13 @@ export class TextTool implements Tool {
         this.textArea.parentNode.removeChild(this.textArea);
       }
       this.textArea = null;
+    }
+  }
+
+  // Called when switching away from text tool
+  deactivate(): void {
+    if (this.textArea) {
+      this.finalizeTextArea();
     }
   }
 }
