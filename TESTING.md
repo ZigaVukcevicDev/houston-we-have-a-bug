@@ -32,7 +32,7 @@ Located in `testing-e2e/`. Example:
 
 ```typescript
 test('text annotation persists', async ({ page }) => {
-  await page.goto('http://localhost:5173');
+  await page.goto('http://localhost:8080/test-page.html');
   await page.click('[data-tool="text"]');
 
   // Draw annotation
@@ -56,9 +56,10 @@ test('text annotation persists', async ({ page }) => {
 ## Manual testing
 
 Use `test-page.html` for quick manual testing:
-1. Run `npm run dev`
-2. Open `test-page.html` in browser
-3. Test the tool you changed
+1. Run `npm run build` to build the extension
+2. Start a simple server: `npx http-server -p 8080`
+3. Open `http://localhost:8080/test-page.html` in browser
+4. Test the tool you changed
 
 ## Debugging tips
 
@@ -79,14 +80,3 @@ Use `test-page.html` for quick manual testing:
 - 98% coverage didn't prevent the "annotation disappears" bug
 - Unit tests passed, but real functionality was broken
 - E2E tests would have caught it immediately
-
-**Always run before committing:**
-```bash
-npm run test:all
-```
-
-This runs automatically via pre-commit hook.
-
-## Resources
-
-- [Playwright Docs](https://playwright.dev)

@@ -9,16 +9,16 @@ Thank you for contributing to **Houston, we have a bug**!
 
 1. **Install**: `npm install`
 2. **Develop**: `npm run dev` (Builds and watches for changes)
-3. **Test**: `npm run test` (Runs Vitest)
+3. **Test**: `npm run test:all` (Runs unit and E2E tests)
 
 ## Guidelines
 
 - **Source code**: Only edit files in `src/`. The `dist/` folder is auto-generated.
 - **Testing**: All new features and bug fixes **must** have passing tests.
-- **AI assistants**: If you are an AI agent, strictly follow the rules in [AI_INSTRUCTIONS.md](./AI_INSTRUCTIONS.md).
+- **Test locally**: Run `npm run test:all` before committing.
 
 ## Submitting changes
 
-1. Ensure `npm run test` passes.
+1. Ensure `npm run test:all` passes.
 2. Commit your changes (Husky will verify tests again).
 3. Open a pull request.
