@@ -4,13 +4,13 @@ import { toolStyles } from './tool-styles';
 import { getCanvasCoordinates } from '../../../utils/get-canvas-coordinates';
 
 export class LineTool implements Tool {
-  private lineAnnotations: LineAnnotation[];
-  private isDrawing: boolean = false;
-  private startPoint: { x: number; y: number } | null = null;
-  private readonly color: string = toolStyles.color;
-  private readonly lineWidth: number = toolStyles.lineWidth;
-  private onRedraw: () => void;
-  private onToolChange?: (tool: string, annotationId?: string) => void;
+  protected lineAnnotations: LineAnnotation[];
+  protected isDrawing: boolean = false;
+  protected startPoint: { x: number; y: number } | null = null;
+  protected readonly color: string = toolStyles.color;
+  protected readonly lineWidth: number = toolStyles.lineWidth;
+  protected onRedraw: () => void;
+  protected onToolChange?: (tool: string, annotationId?: string) => void;
   private keydownHandler: ((event: KeyboardEvent) => void) | null = null;
 
   constructor(lineAnnotations: LineAnnotation[], onRedraw: () => void, onToolChange?: (tool: string, annotationId?: string) => void) {

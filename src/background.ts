@@ -1,6 +1,7 @@
 import type { ScreenshotSession } from './types/screenshot-session.type';
+import type { SystemInfo } from './interfaces/system-info.interface';
 
-async function storeScreenshotData(dataUrl: string, systemInfo: any): Promise<string> {
+async function storeScreenshotData(dataUrl: string, systemInfo: SystemInfo): Promise<string> {
   const sessionId = crypto.randomUUID();
   const data: ScreenshotSession = {
     dataUrl,

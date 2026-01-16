@@ -1,5 +1,4 @@
 import { LineTool } from './line-tool';
-import type { LineAnnotation } from '../../../interfaces/annotation.interface';
 import { getCanvasCoordinates } from '../../../utils/get-canvas-coordinates';
 import { renderArrowhead } from '../../../utils/render-arrowhead';
 
@@ -11,9 +10,8 @@ export class ArrowTool extends LineTool {
     let { x, y } = getCanvasCoordinates(event, canvas);
 
     // Apply shift-key constraints (use parent method)
-    const startPoint = (this as any).startPoint as { x: number; y: number } | null;
-    if (event.shiftKey && startPoint) {
-      ({ x, y } = this.applyLineConstraint(x, y, startPoint));
+    if (event.shiftKey && this.startPoint) {
+      ({ x, y } = this.applyLineConstraint(x, y, this.startPoint));
     }
 
     // Store constrained coordinates for preview
@@ -30,29 +28,21 @@ export class ArrowTool extends LineTool {
 
     const dpr = window.devicePixelRatio || 1;
 
-    // Access lineAnnotations through array passed to constructor
-    const annotations = (this as any).lineAnnotations as LineAnnotation[];
-
     // Add arrowheads to all annotations (they're all arrows in this array now)
-    annotations.forEach(arrow => {
+    this.lineAnnotations.forEach(arrow => {
       renderArrowhead(ctx, arrow.x1, arrow.y1, arrow.x2, arrow.y2, arrow.color, arrow.width, dpr);
     });
 
     // Also draw arrowhead on preview during drawing
-    const isDrawing = (this as any).isDrawing as boolean;
-    const startPoint = (this as any).startPoint as { x: number; y: number } | null;
-
-    if (isDrawing && startPoint) {
-      const color = (this as any).color;
-      const lineWidth = (this as any).lineWidth;
+    if (this.isDrawing && this.startPoint) {
       renderArrowhead(
         ctx,
-        startPoint.x,
-        startPoint.y,
+        this.startPoint.x,
+        this.startPoint.y,
         this.currentPreviewX,
         this.currentPreviewY,
-        color,
-        lineWidth,
+        this.color,
+        this.lineWidth,
         dpr
       );
     }

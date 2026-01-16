@@ -56,7 +56,12 @@
 
 ### Strict types
 - Use TypeScript interfaces properly
-- Avoid `any` type
+- NEVER use `any` type in production code - ALWAYS specify proper types
+  - GOOD: `function foo(data: SystemInfo): void`
+  - BAD: `function foo(data: any): void`
+  - If a child class needs access to parent properties, use `protected` instead of `private`
+  - For complex types, import the proper interface or create a new one
+  - In tests, use `Mock` type from vitest instead of `any`
 - Avoid duplicate types: If two types have identical definitions, delete one and use the other consistently
 
 ## Code organization
@@ -224,11 +229,13 @@
 ## Testing code quality
 
 ### Avoid `any` type in tests
-- NEVER use `as any` in test code - it bypasses type safety
-- Instead, use proper type assertions with `Mock` type from vitest
-- GOOD: `(mockCtx.fillText as Mock).mock.calls`
-- BAD: `(mockCtx.fillText as any).mock.calls`
+- Prefer proper types over `any` even in test code
+- For mock function assertions, use `Mock` type from vitest:
+  - GOOD: `(mockCtx.fillText as Mock).mock.calls`
+  - BAD: `(mockCtx.fillText as any).mock.calls`
 - For complex mock types, use `as unknown as SpecificType` if absolutely necessary
+- When creating mock objects, `any` is acceptable for simplicity (e.g., `{} as any` for minimal mocks)
+- ESLint allows `any` in tests as warnings (not errors), but minimize usage when practical
 
 ### Remove unused variables and parameters
 - Before committing, run `npm run lint` to check for lint errors
