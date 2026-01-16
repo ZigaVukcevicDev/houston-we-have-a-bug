@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from 'vitest';
 import { TextTool } from './text-tool';
+import type { TextAnnotation } from '../../../interfaces/annotation.interface';
 
 // Helper to get textarea element
 const getTextArea = (): HTMLTextAreaElement | null => {
@@ -498,7 +499,7 @@ describe('TextTool', () => {
       expect(mockCtx.fillText).toHaveBeenCalled();
 
       // Get the position where text was rendered
-      const fillTextCalls = (mockCtx.fillText as any).mock.calls;
+      const fillTextCalls = (mockCtx.fillText as Mock).mock.calls;
       const firstCall = fillTextCalls[0];
       const renderedX = firstCall[1];
       const renderedY = firstCall[2];
@@ -535,7 +536,7 @@ describe('TextTool', () => {
       const testTool = new TextTool(annotations, mockRedraw, mockToolChange);
 
       // Spy on wrapText to verify maxWidth calculation
-      const wrapTextSpy = vi.spyOn(testTool as any, 'wrapText');
+      const wrapTextSpy = vi.spyOn(testTool as unknown as { wrapText: (ctx: CanvasRenderingContext2D, text: string, maxWidth: number) => string[] }, 'wrapText');
 
       testTool.render(mockCtx);
 
@@ -543,8 +544,8 @@ describe('TextTool', () => {
       expect(wrapTextSpy).toHaveBeenCalled();
 
       // Get the maxWidth parameter
-      const wrapTextCall = wrapTextSpy.mock.calls[0];
-      const maxWidth = wrapTextCall[2]; // third parameter
+      const wrapTextCall = wrapTextSpy.mock.calls[0] as unknown[];
+      const maxWidth = wrapTextCall[2] as number; // third parameter
 
       // Expected maxWidth calculation:
       // width - (borderOffset + padding) * 2
@@ -594,9 +595,8 @@ describe('TextTool', () => {
       textTool.render(mockCtx);
 
       // Get where canvas text was rendered
-      const fillTextCalls = (mockCtx.fillText as any).mock.calls;
-      const canvasTextX = fillTextCalls[0][1];
-      const canvasTextY = fillTextCalls[0][2];
+      const fillTextCalls = (mockCtx.fillText as Mock).mock.calls;
+      const canvasTextX = fillTextCalls[0][1] as number;
 
       // Now simulate textarea creation at the same position
       const box = { x: 100, y: 100, width: 200, height: 100 };
@@ -663,8 +663,8 @@ describe('TextTool', () => {
       textTool['annotations'] = [annotation];
       textTool.render(mockCtx);
 
-      const fillTextCalls = (mockCtx.fillText as any).mock.calls;
-      const canvasTextX = fillTextCalls[0][1];
+      const fillTextCalls = (mockCtx.fillText as Mock).mock.calls;
+      const canvasTextX = fillTextCalls[0][1] as number;
 
       // Canvas with non-standard scaling
       const box = { x: 100, y: 100, width: 200, height: 100 };
@@ -684,6 +684,79 @@ describe('TextTool', () => {
         configurable: true,
         value: 1,
       });
+    });
+  });
+
+  describe('deactivate', () => {
+    it('should finalize text area when deactivating', () => {
+      const annotations: TextAnnotation[] = [];
+      const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      textTool.handleMouseDown({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 400, clientY: 300 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 400, clientY: 300 } as MouseEvent, mockCanvas);
+
+      const textarea = getTextArea();
+      expect(textarea).toBeTruthy();
+
+      textarea!.value = 'Test text';
+      textTool.deactivate();
+
+      expect(annotations.length).toBe(1);
+      expect(annotations[0].text).toBe('Test text');
+      expect(getTextArea()).toBeNull();
+    });
+
+    it('should handle deactivate when no text area exists', () => {
+      const annotations: TextAnnotation[] = [];
+      const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      expect(() => textTool.deactivate()).not.toThrow();
+      expect(annotations.length).toBe(0);
+    });
+  });
+
+  describe('word wrapping edge cases', () => {
+    it('should handle word wrapping when line width exceeds maxWidth', () => {
+      const annotation: TextAnnotation = {
+        id: 'text-wrap',
+        x: 100,
+        y: 100,
+        width: 50,
+        height: 100,
+        text: 'This is a very long text that needs wrapping',
+        color: '#E74C3C',
+        fontSize: 14,
+      };
+
+      const annotations = [annotation];
+      const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      textTool.render(mockCtx);
+
+      const fillTextCalls = (mockCtx.fillText as Mock).mock.calls;
+      expect(fillTextCalls.length).toBeGreaterThan(1);
+    });
+
+    it('should preserve empty lines in text', () => {
+      const annotation: TextAnnotation = {
+        id: 'text-empty-lines',
+        x: 100,
+        y: 100,
+        width: 200,
+        height: 100,
+        text: 'Line 1\n\nLine 3',
+        color: '#E74C3C',
+        fontSize: 14,
+      };
+
+      const annotations = [annotation];
+      const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      textTool.render(mockCtx);
+
+      const fillTextCalls = (mockCtx.fillText as Mock).mock.calls;
+      expect(fillTextCalls.length).toBeGreaterThanOrEqual(3);
     });
   });
 

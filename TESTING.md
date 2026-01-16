@@ -3,13 +3,15 @@
 ## Quick reference
 
 ### Run tests
+
 ```bash
-npm test              # Unit tests (486 tests, fast)
+npm test              # Unit tests
 npm run test:e2e      # E2E tests (real browser)
 npm run test:all      # All tests (runs automatically on commit)
 ```
 
 ### Debug E2E tests
+
 ```bash
 npm run test:e2e:ui   # Interactive mode - see browser, step through tests
 ```
@@ -17,11 +19,13 @@ npm run test:e2e:ui   # Interactive mode - see browser, step through tests
 ## Why two types of tests?
 
 **Unit tests (Vitest)**
-- Fast, comprehensive (486 tests, 98% coverage)
+
+- Fast, comprehensive
 - Test individual functions
 - ⚠️ Can pass while features are broken (tests mocks, not real behaviour)
 
 **E2E tests (Playwright)**
+
 - Slower, test critical flows
 - Run in real browser
 - ✅ Catch real bugs like "annotation disappears on mouse release"
@@ -56,6 +60,7 @@ test('text annotation persists', async ({ page }) => {
 ## Manual testing
 
 Use `test-page.html` for quick manual testing:
+
 ```bash
 npm run build
 npx http-server dist -p 8080
@@ -66,11 +71,13 @@ Then open `http://localhost:8080/test-page.html` in your browser and test the to
 ## Debugging tips
 
 ### E2E test failing?
+
 1. Run `npm run test:e2e:ui` to see what's happening
 2. Check screenshots in `test-results/`
 3. Add `await page.pause()` to pause execution
 
 ### Common issues
+
 - **Annotation disappears**: Check if using spread operator instead of `push()`
 - **Handles don't show**: Check if `selectAnnotation()` was called
 - **Can't type**: Check `pointer-events` CSS

@@ -544,8 +544,6 @@ describe('HBAnnotation', () => {
     });
 
     it('should prevent handleClickOutside from being called when clicking button with stopPropagation', async () => {
-      const handleClickOutsideSpy = vi.spyOn(annotation as any, 'handleClickOutside');
-
       const button = annotation.shadowRoot?.querySelector('.js-system-info-button') as HTMLElement;
       const event = new MouseEvent('click', { bubbles: true, cancelable: true });
 

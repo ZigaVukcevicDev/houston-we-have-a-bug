@@ -69,7 +69,7 @@ export class CropTool implements Tool {
     document.addEventListener('keydown', this.keydownHandler);
   }
 
-  handleMouseMove(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
+  handleMouseMove(event: MouseEvent, canvas: HTMLCanvasElement, _ctx: CanvasRenderingContext2D): void {
     const { x, y } = getCanvasCoordinates(event, canvas);
 
     // Handle dragging logic
@@ -201,7 +201,7 @@ export class CropTool implements Tool {
     this.onRedraw();
   }
 
-  handleClick(event: MouseEvent, canvas: HTMLCanvasElement): void {
+  handleClick(_event: MouseEvent, _canvas: HTMLCanvasElement): void {
     // Crop tool uses drag interaction, no click handling needed
   }
 

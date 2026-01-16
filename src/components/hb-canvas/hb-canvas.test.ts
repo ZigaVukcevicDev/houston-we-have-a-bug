@@ -402,7 +402,6 @@ describe('HBCanvas', () => {
 
     it('should not crash when active tool does not implement handler', () => {
       canvas.activeTool = 'line';
-      const lineTool = canvas['tools'].get('line')!;
 
       // Line tool doesn't have handleClick - should not throw
       const event = { clientX: 100, clientY: 100 } as MouseEvent;
@@ -732,7 +731,6 @@ describe('HBCanvas', () => {
 
     it('should not auto-select annotation when manually switching to select tool', () => {
       // Add some line annotations
-      const lineTool = canvas['tools'].get('line')!;
       canvas['lineAnnotations'].push({
         id: 'line-1',
         x1: 100,

@@ -2,7 +2,7 @@
 
 ![Status](https://img.shields.io/badge/status-work_in_progress-orange)
 ![Coverage](https://img.shields.io/badge/coverage-98%25-brightgreen)
-![Tests](https://img.shields.io/badge/tests-461%20passing-success)
+![Tests](https://img.shields.io/badge/tests-494%20passing-success)
 ![E2E](https://img.shields.io/badge/e2e-37%20passing-success)
 ![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Chrome_extension-blue)
@@ -106,7 +106,7 @@ This compiles TypeScript and SCSS into a single bundled JavaScript file.
 ### 3. Testing
 
 #### Unit Tests (Vitest)
-Run all 486 unit tests:
+Run all 494 unit tests:
 ```bash
 npm run test              # Run all tests
 npm run test:watch        # Watch mode

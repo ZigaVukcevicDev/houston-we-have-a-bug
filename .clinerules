@@ -4,23 +4,85 @@
 
 - Use British English spelling (colour, behaviour, organisation, etc.)
 - NOT American English (color, behavior, organization, etc.)
-- Use sentence case for headings, NOT title case
-  - GOOD: "Before committing code"
-  - BAD: "Before Committing Code"
+- Use sentence case for headings and all text, NOT title case
+  - GOOD: "Before committing code", "Copy to clipboard", "Test text"
+  - BAD: "Before Committing Code", "Copy to Clipboard", "Test Text"
+- Applies to: UI labels, buttons, test data, test descriptions, documentation
 
 ## Testing requirements
 
 ### Before committing code
-- ALWAYS run `npm run test:all` before committing
+- ALWAYS run `npm run test:all` before committing (runs both unit tests AND E2E tests)
+- NEVER run only `npm test` - you MUST run the full test suite with `npm run test:all`
+- If a test fails, fixing it is your top priority - do not proceed until tests pass
 - Unit tests passing ≠ feature working - verify manually too
 - If changing annotation tools, test with `test-page.html`
+- No regressions: Ensure existing features continue to work
 
 ### Writing tests
-- For new features: Add E2E test in `testing-e2e/`
+- For new features: Write comprehensive tests covering:
+  - All major code paths and functionality
+  - Edge cases and error handling
+  - Integration points with other components
+  - User interactions and state changes
 - For bug fixes: Add E2E test that would have caught the bug
+- Avoid duplicate coverage: Component tests should focus on the component's responsibilities (initialization, delegation, rendering), not duplicate behavior tests that exist in child test files
 - High coverage doesn't guarantee working features - E2E tests do
 
+## Code quality and cleanliness
+
+### No leftovers
+- When refactoring or removing features, fully remove all related code, types, and unused imports
+- Remove unused imports after any refactoring - check imports in all modified files
+- No commented code: Delete it, don't comment it out
+- Remove dead code: Unused functions, variables, or imports
+- Avoid ALL CAPS words in comments (use "Get raw position first" not "Get raw position FIRST")
+- No redundant method descriptions: Avoid JSDoc comments that restate what the function name already conveys
+  - GOOD: Well-named functions with clear parameters (no comment needed)
+  - BAD: `/** Returns a filename-safe date and time string */` above `getFilenameSafeDateTime()`
+  - Only add comments when explaining why or documenting non-obvious behaviour/edge cases
+
+### Console statements
+- Do not use console.log, console.warn, or console.debug in production code
+- GOOD: `console.error()` in catch blocks for critical errors
+- BAD: Debug logging, informational messages, or warnings
+- Keep error messages informative but concise
+
+### Consistent spacing
+- Use exactly one empty line between methods, functions, and major code blocks
+- GOOD: Single empty line between methods
+- BAD: Two or more empty lines between methods
+- IMPORTANT: Never create two or more consecutive empty lines
+
+### Strict types
+- Use TypeScript interfaces properly
+- Avoid `any` type
+- Avoid duplicate types: If two types have identical definitions, delete one and use the other consistently
+
+## Code organization
+
+### Types vs interfaces
+- `src/types/` - For type aliases (e.g., `type ActiveTool = 'text' | 'line'`)
+- `src/interfaces/` - For object structures (e.g., `interface LineAnnotation { ... }`)
+
+### Naming conventions
+- Private methods: Use `private` keyword only, NO underscore prefix
+  - GOOD: `private handleClick()`, `private redraw()`
+  - BAD: `private _handleClick()`, `private _redraw()`
+- Constants: Use camelCase, NOT SCREAMING_SNAKE_CASE
+  - GOOD: `const handleRadius = 8;`
+  - BAD: `const HANDLE_RADIUS = 8;`
+
+### Component method order
+- In LitElement components, place `render()` method near the top, immediately after class properties
+- Order: `constructor` → properties → `render()` → lifecycle methods → event handlers → helper methods
+
 ## Code patterns
+
+### Source of truth
+- `src/*` only: Edit files in `src/` specifically
+- `dist/*` is forbidden: Never edit files in `dist/` - they are auto-generated
+- Build: Run `npm run build` to verify, but rely on `npm run test` for logic verification
 
 ### Shared array references
 - NEVER use spread operator on shared arrays
@@ -32,11 +94,29 @@
 - Creation tools (text, arrow, etc.): Create annotations
 - Select tool: Handles all manipulation (resize, move, delete)
 - Don't duplicate resize/move logic in creation tools
+- Tools should implement `deactivate()` to clean up resources
+  - Always remove event listeners in `deactivate()`
+  - Call cleanup methods like `cancelDrawing()` in `deactivate()`
 
 ### State management
 - Tools share array references via constructor injection
 - Don't reassign arrays - mutate them with push/splice
 - Call `onRedraw()` after state changes
+
+### ID generation
+- ALWAYS use `crypto.randomUUID()` for creating annotation IDs
+- GOOD: `id: crypto.randomUUID()`
+- BAD: `` id: `rect-${Date.now()}` `` (not collision-safe, inconsistent)
+
+### Constraints (shift-key behaviour)
+- Extract constraint logic into private/protected methods, don't duplicate
+- LineTool example: `applyLineConstraint(x, y, startPoint)` (protected for inheritance)
+- RectangleTool example: `applySquareConstraint(width, height)` (private)
+
+### Error handling consistency
+- All utility functions that can fail should return 'N/A' on error
+- GOOD: `return 'N/A';`
+- BAD: `return 'Unknown';` or other inconsistent error strings
 
 ## Development workflow
 
@@ -51,6 +131,60 @@
 - Use `npm run test:e2e:ui` to see what's happening in browser
 - Check `test-results/` for screenshots of failures
 - Add `console.log` at key points, but remove before committing
+
+## UI and styling
+
+### SCSS modules
+- Use `@use` to import variables
+- Always use variables from `_variables.scss` (e.g., `$color-red-500`, `$spacing-md`) instead of hardcoded values
+
+### Icons and assets
+- Use the CSS 3-state toggle pattern (Default/Hover/Active) with hidden `img` classes (`.icon-default`, `.icon-hover`, `.icon-active`)
+- Not SVG filters or inline SVGs
+
+## Canvas rendering and Retina display support
+
+### Device pixel ratio scaling
+- All canvas drawing operations MUST account for `window.devicePixelRatio` to render correctly on Retina/high-DPI displays
+- When drawing shapes, multiply dimensions by DPR: `size * (window.devicePixelRatio || 1)`
+- When drawing strokes, multiply line widths by DPR: `lineWidth * (window.devicePixelRatio || 1)`
+- When hit-testing canvas elements, multiply hit areas by DPR
+- Example:
+  ```typescript
+  const dpr = window.devicePixelRatio || 1;
+  ctx.lineWidth = baseLineWidth * dpr;
+  ctx.fillRect(x, y, width * dpr, height * dpr);
+  ```
+
+### Why this matters
+- On Retina displays (DPR=2), canvas pixels ≠ CSS pixels
+- Without DPR scaling:
+  - An 8px canvas element appears as 4 CSS pixels (50% too small)
+  - A 5px line appears as 2.5 CSS pixels (looks thin/blurry)
+- Affected areas: Handle rendering, line annotation rendering, any canvas-based annotations
+
+## Utility functions
+
+### Canvas coordinate conversion
+- ALWAYS use `getCanvasCoordinates()` from `utils/get-canvas-coordinates.ts` to convert mouse events to canvas coordinates
+- GOOD: `const { x, y } = getCanvasCoordinates(event, canvas);`
+- BAD: Manual calculation with `getBoundingClientRect()` + scaling (creates duplication)
+
+### Arrowhead rendering
+- Use `renderArrowhead()` and `getArrowheadPoints()` from `utils/render-arrowhead.ts`
+- For drawing: `renderArrowhead(ctx, x1, y1, x2, y2, color, width, dpr)`
+- For hit detection: `getArrowheadPoints(x1, y1, x2, y2, dpr)` returns the arrowhead line endpoints
+- Constants available: `arrowheadLength`, `arrowheadAngle`
+
+### Date formatting
+- For display: `getDateAndTime()` from `get-date-and-time.ts` returns "DD.MM.YYYY at HH:MM"
+- For filenames: `getDateTimeForFilename()` from `get-date-time-for-filename.ts` returns "YYYY-MM-DD at HH-MM-SS"
+
+### Handle rendering
+- Use `renderHandle()` from `utils/render-handle.ts`
+- Function: `renderHandle(ctx, x, y)` - handles DPR automatically
+- For hit detection: `isPointOnHandle(px, py, hx, hy)`
+- Constants: `handleSize`, `handleHitThreshold`
 
 ## Project conventions
 
@@ -87,9 +221,42 @@
 - Verify textarea is focused
 - Check for z-index conflicts
 
+## Testing code quality
+
+### Avoid `any` type in tests
+- NEVER use `as any` in test code - it bypasses type safety
+- Instead, use proper type assertions with `Mock` type from vitest
+- GOOD: `(mockCtx.fillText as Mock).mock.calls`
+- BAD: `(mockCtx.fillText as any).mock.calls`
+- For complex mock types, use `as unknown as SpecificType` if absolutely necessary
+
+### Remove unused variables and parameters
+- Before committing, run `npm run lint` to check for lint errors
+- Delete or comment out any unused variables
+- Don't declare variables you won't use in assertions
+- Prefix unused parameters with underscore: `_event`, `_canvas`, `_ctx` (follows ESLint rule: `argsIgnorePattern: '^_'`)
+
+### Test file patterns
+When writing new tests:
+1. Import `Mock` type from vitest if accessing mock properties
+2. Use `Mock` type instead of `any` for mock function assertions
+3. Clean up unused variables and prefix unused parameters with underscore
+4. Run `npm run lint` to catch lint errors
+5. Run `npm run test:all` to verify both unit and E2E tests pass
+
+## Lint configuration
+
+### ESLint script setup
+- The `npm run lint` script MUST use quoted glob patterns: `eslint "src/**/*.ts"`
+- GOOD: `"lint": "eslint \"src/**/*.ts\""`
+- BAD: `"lint": "eslint src/**/*.ts"` (shell expansion may miss test files)
+- Without quotes, shell glob expansion happens before ESLint processes the pattern, which may not include all files
+
 ## Remember
 
 - 98% test coverage didn't prevent bugs - E2E tests would have
 - Unit tests can pass while features are broken
 - Always verify manually for critical paths
 - If it feels wrong, it probably is - investigate
+- ALWAYS run `npm run test:all` before committing (NOT just `npm test`)
+- Run `npm run lint` before committing to catch all lint errors

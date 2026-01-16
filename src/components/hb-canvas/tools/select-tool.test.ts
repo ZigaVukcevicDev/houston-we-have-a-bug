@@ -560,7 +560,7 @@ describe('SelectTool', () => {
       selectTool['hoveredAnnotationId'] = 'line-1';
       selectTool['hoveredAnnotationType'] = 'line';
 
-      const beginPathCalls = mockCtx.beginPath as any;
+      const beginPathCalls = mockCtx.beginPath as Mock;
       beginPathCalls.mockClear();
 
       selectTool.render(mockCtx);
@@ -659,7 +659,6 @@ describe('SelectTool', () => {
     it('should render handles at correct corner positions', () => {
       selectTool['selectedAnnotationId'] = 'rect-1';
       selectTool['selectedAnnotationType'] = 'rectangle';
-      const rect = rectangleAnnotations[0];
 
       selectTool.render(mockCtx);
 
@@ -751,8 +750,6 @@ describe('SelectTool', () => {
     });
 
     it('should resize rectangle when dragging top-left corner', () => {
-      const originalX = rectangleAnnotations[0].x;
-      const originalY = rectangleAnnotations[0].y;
       const originalWidth = rectangleAnnotations[0].width;
       const originalHeight = rectangleAnnotations[0].height;
 
@@ -775,7 +772,6 @@ describe('SelectTool', () => {
 
     it('should resize rectangle when dragging top-right corner', () => {
       const originalX = rectangleAnnotations[0].x;
-      const originalY = rectangleAnnotations[0].y;
       const originalWidth = rectangleAnnotations[0].width;
       const originalHeight = rectangleAnnotations[0].height;
 
@@ -797,7 +793,6 @@ describe('SelectTool', () => {
     });
 
     it('should resize rectangle when dragging bottom-left corner', () => {
-      const originalX = rectangleAnnotations[0].x;
       const originalY = rectangleAnnotations[0].y;
       const originalWidth = rectangleAnnotations[0].width;
       const originalHeight = rectangleAnnotations[0].height;
@@ -886,7 +881,7 @@ describe('SelectTool', () => {
       selectTool['hoveredAnnotationId'] = 'rect-1';
       selectTool['hoveredAnnotationType'] = 'rectangle';
 
-      const beginPathCalls = mockCtx.beginPath as any;
+      const beginPathCalls = mockCtx.beginPath as Mock;
       beginPathCalls.mockClear();
 
       selectTool.render(mockCtx);
@@ -1589,6 +1584,64 @@ describe('SelectTool', () => {
         // Should select text annotation (checked first)
         expect(selectTool['selectedAnnotationId']).toBe('text-1');
         expect(selectTool['selectedAnnotationType']).toBe('text');
+      });
+    });
+
+    describe('text box resizing', () => {
+      it('should resize text box from top-left handle', () => {
+        selectTool['selectedAnnotationId'] = 'text-1';
+        selectTool['selectedAnnotationType'] = 'text';
+
+        selectTool.handleMouseDown({ clientX: 100, clientY: 400 } as MouseEvent, mockCanvas);
+        selectTool.handleMouseMove({ clientX: 120, clientY: 420 } as MouseEvent, mockCanvas, mockCtx);
+
+        const textBox = textAnnotations[0];
+        expect(textBox.x).toBe(120);
+        expect(textBox.y).toBe(420);
+        expect(textBox.width).toBe(180);
+        expect(textBox.height).toBe(80);
+      });
+
+      it('should resize text box from top-right handle', () => {
+        selectTool['selectedAnnotationId'] = 'text-1';
+        selectTool['selectedAnnotationType'] = 'text';
+
+        selectTool.handleMouseDown({ clientX: 300, clientY: 400 } as MouseEvent, mockCanvas);
+        selectTool.handleMouseMove({ clientX: 320, clientY: 420 } as MouseEvent, mockCanvas, mockCtx);
+
+        const textBox = textAnnotations[0];
+        expect(textBox.x).toBe(100);
+        expect(textBox.y).toBe(420);
+        expect(textBox.width).toBe(220);
+        expect(textBox.height).toBe(80);
+      });
+
+      it('should resize text box from bottom-left handle', () => {
+        selectTool['selectedAnnotationId'] = 'text-1';
+        selectTool['selectedAnnotationType'] = 'text';
+
+        selectTool.handleMouseDown({ clientX: 100, clientY: 500 } as MouseEvent, mockCanvas);
+        selectTool.handleMouseMove({ clientX: 120, clientY: 520 } as MouseEvent, mockCanvas, mockCtx);
+
+        const textBox = textAnnotations[0];
+        expect(textBox.x).toBe(120);
+        expect(textBox.y).toBe(400);
+        expect(textBox.width).toBe(180);
+        expect(textBox.height).toBe(120);
+      });
+
+      it('should resize text box from bottom-right handle', () => {
+        selectTool['selectedAnnotationId'] = 'text-1';
+        selectTool['selectedAnnotationType'] = 'text';
+
+        selectTool.handleMouseDown({ clientX: 300, clientY: 500 } as MouseEvent, mockCanvas);
+        selectTool.handleMouseMove({ clientX: 320, clientY: 520 } as MouseEvent, mockCanvas, mockCtx);
+
+        const textBox = textAnnotations[0];
+        expect(textBox.x).toBe(100);
+        expect(textBox.y).toBe(400);
+        expect(textBox.width).toBe(220);
+        expect(textBox.height).toBe(120);
       });
     });
   });

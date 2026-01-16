@@ -135,7 +135,7 @@ export class TextTool implements Tool {
 
   }
 
-  private renderTextBox(ctx: CanvasRenderingContext2D, annotation: TextAnnotation, scaleX: number, scaleY: number): void {
+  private renderTextBox(ctx: CanvasRenderingContext2D, annotation: TextAnnotation, scaleX: number, _scaleY: number): void {
     // Draw rectangle border
     ctx.save();
     ctx.strokeStyle = annotation.color;

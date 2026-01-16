@@ -301,7 +301,7 @@ export class SelectTool implements Tool {
     }
   }
 
-  handleMouseMove(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
+  handleMouseMove(event: MouseEvent, canvas: HTMLCanvasElement, _ctx: CanvasRenderingContext2D): void {
     // Provide cursor feedback when hovering (but not while dragging)
     if (!this.draggingHandle && !this.draggingLine) {
       // Provide cursor feedback when hovering over handles or lines
