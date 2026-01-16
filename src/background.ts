@@ -65,5 +65,4 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 chrome.runtime.onInstalled.addListener(() => { });
 
-
 export { };

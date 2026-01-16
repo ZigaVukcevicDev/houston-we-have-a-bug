@@ -104,7 +104,6 @@ export class TextTool implements Tool {
     this.startPoint = null;
   }
 
-
   render(ctx: CanvasRenderingContext2D): void {
     // Get the scale factor from canvas dimensions
     // This matches how coordinates are calculated in getCanvasCoordinates

@@ -210,7 +210,6 @@ describe('HBCanvas', () => {
         src: '',
       };
 
-
       const ImageMock2 = vi.fn().mockImplementation(function (this: any) {
         Object.assign(this, mockImg);
         return this;
@@ -1021,7 +1020,6 @@ describe('HBCanvas', () => {
       canvas.activeTool = 'crop';
       const cropTool = canvas['tools'].get('crop') as CropTool;
       cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
-
 
       const mockImage = new Image();
       vi.spyOn(cropTool as any, "confirmCrop").mockReturnValue(mockImage);

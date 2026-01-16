@@ -392,13 +392,11 @@ describe('HBAnnotation', () => {
     });
   });
 
-
   describe('System info functionality', () => {
     it('should have copyToClipboard method', () => {
       expect(typeof annotation['copyToClipboard']).toBe('function');
     });
   });
-
 
   describe('copyToClipboard', () => {
     it('should copy system info to clipboard', async () => {

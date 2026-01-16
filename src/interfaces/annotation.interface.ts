@@ -28,4 +28,3 @@ export interface RectangleAnnotation {
   color: string;
   strokeWidth: number;
 }
-

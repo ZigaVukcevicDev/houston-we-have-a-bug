@@ -135,8 +135,6 @@ export class LineTool implements Tool {
     this.cancelDrawing();
   }
 
-
-
   render(ctx: CanvasRenderingContext2D): void {
     const dpr = window.devicePixelRatio || 1;
     this.lineAnnotations.forEach((line) => {
