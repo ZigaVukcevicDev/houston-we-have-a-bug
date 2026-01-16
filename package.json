@@ -33,6 +33,7 @@
     "esbuild-sass-plugin": "^3.3.0",
     "eslint": "^9.39.2",
     "happy-dom": "^20.0.11",
+    "http-server": "^14.1.1",
     "husky": "^9.1.7",
     "prettier": "^3.7.4",
     "sass": "^1.69.5",

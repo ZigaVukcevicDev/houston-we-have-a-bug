@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Text Tool E2E', () => {
+test.describe('Text tool', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:5173');
+    await page.goto('http://localhost:8080/test-page.html');
   });
 
-  test('CRITICAL: text annotation persists after mouse release', async ({ page }) => {
+  test('text annotation persists after mouse release', async ({ page }) => {
     // Select text tool
     await page.click('[data-tool="text"]');
 

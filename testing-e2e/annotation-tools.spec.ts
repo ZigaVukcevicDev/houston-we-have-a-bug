@@ -4,12 +4,12 @@ import { test, expect } from '@playwright/test';
  * E2E tests for annotation tools
  * These test actual user flows in a real browser
  */
-test.describe('Annotation Tools E2E', () => {
+test.describe('Annotation tools', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:5173');
+    await page.goto('http://localhost:8080/test-page.html');
   });
 
-  test('CRITICAL: arrow annotation persists after drawing', async ({ page }) => {
+  test('arrow annotation persists after drawing', async ({ page }) => {
     await page.click('[data-tool="arrow"]');
 
     const canvas = page.locator('canvas');
@@ -32,7 +32,7 @@ test.describe('Annotation Tools E2E', () => {
     await expect(page.locator('[data-tool="select"][aria-selected="true"]')).toBeVisible();
   });
 
-  test('CRITICAL: text annotation persists after drawing', async ({ page }) => {
+  test('text annotation persists after drawing', async ({ page }) => {
     await page.click('[data-tool="text"]');
 
     const canvas = page.locator('canvas');
@@ -63,7 +63,7 @@ test.describe('Annotation Tools E2E', () => {
     await expect(page.locator('[data-tool="select"][aria-selected="true"]')).toBeVisible();
   });
 
-  test('CRITICAL: rectangle annotation persists after drawing', async ({ page }) => {
+  test('rectangle annotation persists after drawing', async ({ page }) => {
     await page.click('[data-tool="rectangle"]');
 
     const canvas = page.locator('canvas');
@@ -86,7 +86,7 @@ test.describe('Annotation Tools E2E', () => {
     await expect(page.locator('[data-tool="select"][aria-selected="true"]')).toBeVisible();
   });
 
-  test('CRITICAL: line annotation persists after drawing', async ({ page }) => {
+  test('line annotation persists after drawing', async ({ page }) => {
     await page.click('[data-tool="line"]');
 
     const canvas = page.locator('canvas');

@@ -103,6 +103,7 @@
 
 ## Details
 
+- [ ] merge instructions.md and .clinerules
 - [ ] update contributing file
 - [x] text rect should have transparent background
 - [x] make more padding to last tool

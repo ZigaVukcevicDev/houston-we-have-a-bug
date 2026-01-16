@@ -40,49 +40,51 @@
     </div>
 
     <script type="module">
-      import './src/components/hb-toolbar/hb-toolbar.ts';
-      import './src/components/hb-canvas/hb-canvas.ts';
+      // Load the built extension file
+      import '../dist/tab.js';
 
-      // Load a test image
-      const canvas = document.getElementById('test-canvas');
+      // Wait for custom elements to be defined
+      customElements.whenDefined('hb-canvas').then(() => {
+        const canvas = document.getElementById('test-canvas');
 
-      // Create a simple test image (white canvas with grid)
-      const testCanvas = document.createElement('canvas');
-      testCanvas.width = 800;
-      testCanvas.height = 600;
-      const ctx = testCanvas.getContext('2d');
+        // Create a simple test image (white canvas with grid)
+        const testCanvas = document.createElement('canvas');
+        testCanvas.width = 800;
+        testCanvas.height = 600;
+        const ctx = testCanvas.getContext('2d');
 
-      // White background
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, 800, 600);
+        // White background
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, 800, 600);
 
-      // Grid
-      ctx.strokeStyle = '#e0e0e0';
-      ctx.lineWidth = 1;
-      for (let x = 0; x < 800; x += 50) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, 600);
-        ctx.stroke();
-      }
-      for (let y = 0; y < 600; y += 50) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(800, y);
-        ctx.stroke();
-      }
+        // Grid
+        ctx.strokeStyle = '#e0e0e0';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < 800; x += 50) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, 600);
+          ctx.stroke();
+        }
+        for (let y = 0; y < 600; y += 50) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(800, y);
+          ctx.stroke();
+        }
 
-      // Set the test image
-      canvas.dataUrl = testCanvas.toDataURL();
+        // Set the test image
+        canvas.dataUrl = testCanvas.toDataURL();
 
-      // Wire up toolbar to canvas
-      const toolbar = document.querySelector('hb-toolbar');
-      toolbar.addEventListener('tool-change', (e) => {
-        canvas.activeTool = e.detail.tool;
-      });
+        // Wire up toolbar to canvas
+        const toolbar = document.querySelector('hb-toolbar');
+        toolbar.addEventListener('tool-change', (e) => {
+          canvas.activeTool = e.detail.tool;
+        });
 
-      canvas.addEventListener('tool-change', (e) => {
-        toolbar.activeTool = e.detail.tool;
+        canvas.addEventListener('tool-change', (e) => {
+          toolbar.activeTool = e.detail.tool;
+        });
       });
     </script>
   </body>
