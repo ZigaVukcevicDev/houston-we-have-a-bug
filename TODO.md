@@ -99,7 +99,7 @@
 
 7. Download
 
-- [x] deselect annotaions when downloading
+- [x] deselect annotations when downloading
 
 ## Details
 
@@ -113,7 +113,7 @@
 - [x] disable button "Annotate screenshot" on annotation page
 - [x] change cursors when moving endpoints or annotations (reference to crop tool - if applicable?) - check only for line and arrow, everything else is fine
 - [x] change color of annotations to use color E74C3C
-- [ ] screenshot should start at the bottom of topbar
+- [ ] screenshot should start at the bottom of top bar
 - [x] style "Uh-oh, there's no screenshot to annotate!" page
 - [x] add shadow to toolbar
 - [x] exclude extension-presentation from build
