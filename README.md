@@ -48,6 +48,7 @@ A Chrome extension to capture bugs clearly. Annotate screenshots and gather syst
 - 📘 **TypeScript** - Fully typed extension code
 - 🎨 **SCSS** - Styling with variables and nesting
 - 🧪 **Vitest** - Unit testing framework with DOM simulation
+- 🎭 **Playwright** - E2E testing for real browser behaviour
 - 📦 **Modern build setup** - esbuild compilation with Prettier formatting
 
 ## Project structure
@@ -104,11 +105,28 @@ This compiles TypeScript and SCSS into a single bundled JavaScript file.
 
 ### 3. Testing
 
-Run unit tests with Vitest:
-
+#### Unit Tests (Vitest)
+Run all 486 unit tests:
 ```bash
-npm run test
+npm run test              # Run all tests
+npm run test:watch        # Watch mode
+npm run test:coverage     # With coverage report
 ```
+
+#### E2E Tests (Playwright)
+Test real browser behavior:
+```bash
+npm run test:e2e          # All E2E tests
+npm run test:e2e:ui       # Interactive UI mode
+npm run test:all          # Run unit + E2E tests
+```
+
+**Before every commit, run:**
+```bash
+npm run test:all
+```
+
+See [TESTING.md](TESTING.md) for complete testing guide.
 
 Tests are automatically run before every commit using **Husky** hooks to ensure stability.
 

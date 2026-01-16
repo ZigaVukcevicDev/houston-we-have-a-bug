@@ -1,0 +1,95 @@
+# Project rules for Claude Code
+
+## Writing style
+
+- Use British English spelling (colour, behaviour, organisation, etc.)
+- NOT American English (color, behavior, organization, etc.)
+- Use sentence case for headings, NOT title case
+  - GOOD: "Before committing code"
+  - BAD: "Before Committing Code"
+
+## Testing requirements
+
+### Before committing code
+- ALWAYS run `npm run test:all` before committing
+- Unit tests passing ≠ feature working - verify manually too
+- If changing annotation tools, test with `test-page.html`
+
+### Writing tests
+- For new features: Add E2E test in `testing-e2e/`
+- For bug fixes: Add E2E test that would have caught the bug
+- High coverage doesn't guarantee working features - E2E tests do
+
+## Code patterns
+
+### Shared array references
+- NEVER use spread operator on shared arrays
+- BAD: `this.annotations = [...this.annotations, item]`
+- GOOD: `this.annotations.push(item)`
+- Reason: Spread creates new array, breaks shared reference between tools
+
+### Tool architecture
+- Creation tools (text, arrow, etc.): Create annotations
+- Select tool: Handles all manipulation (resize, move, delete)
+- Don't duplicate resize/move logic in creation tools
+
+### State management
+- Tools share array references via constructor injection
+- Don't reassign arrays - mutate them with push/splice
+- Call `onRedraw()` after state changes
+
+## Development workflow
+
+### Making changes
+1. Write/modify code
+2. Run unit tests: `npm test`
+3. Run E2E tests: `npm run test:e2e`
+4. Test manually with `test-page.html` if changing tools
+5. If all pass, commit
+
+### Debugging issues
+- Use `npm run test:e2e:ui` to see what's happening in browser
+- Check `test-results/` for screenshots of failures
+- Add `console.log` at key points, but remove before committing
+
+## Project conventions
+
+### File references
+- Use markdown links: `[file.ts](path/to/file.ts)`
+- For specific lines: `[file.ts:42](path/to/file.ts#L42)`
+- Not backticks or HTML tags
+
+### Documentation
+- Keep docs concise - remove unnecessary content
+- TESTING.md should stay under 100 lines
+- Remove files that become outdated/redundant
+
+### Code style
+- Follow existing patterns in the codebase
+- Use TypeScript strict mode
+- Prefer explicit over clever
+- Comment only when logic isn't obvious
+
+## Common pitfalls
+
+### "Annotation disappears on mouse release"
+- Check if using spread operator instead of push()
+- Verify annotation is in shared array, not a copy
+- Confirm render() is called after creation
+
+### "Handles don't appear"
+- Verify tool switched to select
+- Check if selectAnnotation() was called with correct ID
+- Confirm SelectTool has the annotation in its array
+
+### "Can't type in textarea"
+- Check CSS `pointer-events`
+- Verify textarea is focused
+- Check for z-index conflicts
+
+## Remember
+
+- 98% test coverage didn't prevent bugs - E2E tests would have
+- Unit tests can pass while features are broken
+- Always verify manually for critical paths
+- If it feels wrong, it probably is - investigate
