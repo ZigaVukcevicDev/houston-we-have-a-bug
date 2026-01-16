@@ -125,6 +125,7 @@
 ## Ongoing
 
 - [ ] increase code coverage
+- [ ] increase E2E tests
 - [ ] update badges with coverage (or integrate Codecov)
 
 ## Final
