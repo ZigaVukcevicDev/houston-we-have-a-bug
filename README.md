@@ -1,9 +1,9 @@
 # Houston, we have a bug
 
 ![Status](https://img.shields.io/badge/status-work_in_progress-orange)
-![Coverage](https://img.shields.io/badge/coverage-98%25-brightgreen)
-![Tests](https://img.shields.io/badge/tests-494%20passing-success)
-![E2E](https://img.shields.io/badge/e2e-37%20passing-success)
+![Coverage](https://img.shields.io/badge/coverage-97.7%25-yellowgreen)
+![Tests](https://img.shields.io/badge/tests-513%20passing-success)
+![E2E](https://img.shields.io/badge/e2e-47%20passing-success)
 ![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Chrome_extension-blue)
 ![Lit](https://img.shields.io/badge/framework-Lit-324FFF?logo=lit)
@@ -79,6 +79,7 @@ A Chrome extension to capture bugs clearly. Annotate screenshots and gather syst
 │   ├── images/                   # Extension icons and assets
 │   ├── utils/                    # Utility functions
 │   └── types/                    # TypeScript types
+├── testing-e2e/                 # Playwright E2E test specs
 ├── manifest.json                 # Extension configuration
 ├── tsconfig.json                 # TypeScript configuration
 ├── vitest.config.ts              # Test configuration
