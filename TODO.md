@@ -103,7 +103,7 @@
 
 ## Details
 
-- [ ] merge instructions.md and .clinerules
+- [x] merge instructions.md and .clinerules
 - [x] update contributing file
 - [x] text rect should have transparent background
 - [x] make more padding to last tool
@@ -120,13 +120,17 @@
 - [x] change "environment details" to "system info"
 - [x] when hovering over rectangle, highlight is visible only when hover over horizontal parts
 - [x] find a way to have better hover color for secondary button (as current is too pale)
-- [ ] Recheck annotations when scrolling
+- [ ] text tool - do we really need double click?
+- [ ] text tool - how about changing textarea to editable div?
+- [ ] text tool - when I draw text area and click outside, the text kind of jumps up for e.g. 1px.
+- [ ] text tool - less padding space between textarea and border, like 5px
+- [ ] recheck annotations when scrolling
 
 ## Ongoing
 
 - [ ] increase code coverage
 - [ ] increase E2E tests
-- [ ] update badges with coverage (or integrate Codecov)
+- [ ] update badges with coverage
 
 ## Final
 
