@@ -318,4 +318,231 @@ test.describe('Rectangle tool', () => {
     );
     expect(cursor).toBe('pointer');
   });
+
+  test('should draw multiple rectangles and select between them', async ({
+    page,
+  }) => {
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw first rectangle
+    await page.click('[data-tool="rectangle"]');
+    await page.mouse.move(box.x + 100, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 200, box.y + 150);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Draw second rectangle
+    await page.click('[data-tool="rectangle"]');
+    await page.mouse.move(box.x + 250, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 350, box.y + 150);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Draw third rectangle
+    await page.click('[data-tool="rectangle"]');
+    await page.mouse.move(box.x + 150, box.y + 200);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 250, box.y + 280);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Select first rectangle by clicking on its edge
+    await page.mouse.click(box.x + 100, box.y + 125);
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+
+    // Select second rectangle by clicking on its edge
+    await page.mouse.click(box.x + 250, box.y + 125);
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+
+    // Select third rectangle by clicking on its edge
+    await page.mouse.click(box.x + 150, box.y + 240);
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should cancel rectangle drawing with Escape key', async ({ page }) => {
+    await page.click('[data-tool="rectangle"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Start drawing rectangle
+    await page.mouse.move(box.x + 100, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 200, box.y + 200);
+
+    // Press Escape before releasing mouse
+    await page.keyboard.press('Escape');
+    await page.mouse.up();
+
+    await page.waitForTimeout(100);
+
+    // Rectangle tool should still be active
+    await expect(
+      page.locator('[data-tool="rectangle"][aria-selected="true"]')
+    ).toBeVisible();
+
+    // Try to click where the rectangle would have been - nothing should be selected
+    await page.mouse.click(box.x + 150, box.y + 150);
+    await page.waitForTimeout(100);
+
+    // Should not switch to select tool since no annotation was created
+    await expect(
+      page.locator('[data-tool="rectangle"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should resize from all four corner handles', async ({ page }) => {
+    await page.click('[data-tool="rectangle"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw initial rectangle
+    const startX = box.x + 200;
+    const startY = box.y + 200;
+    const endX = box.x + 300;
+    const endY = box.y + 300;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Test resizing from top-left corner
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(startX - 30, startY - 30);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Verify rectangle is still selectable at new position
+    await page.mouse.click(startX - 30, startY);
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+
+    // Test resizing from top-right corner
+    await page.mouse.move(endX, startY - 30);
+    await page.mouse.down();
+    await page.mouse.move(endX + 30, startY - 50);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Test resizing from bottom-left corner
+    await page.mouse.move(startX - 30, endY);
+    await page.mouse.down();
+    await page.mouse.move(startX - 50, endY + 30);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Test resizing from bottom-right corner
+    await page.mouse.move(endX + 30, endY + 30);
+    await page.mouse.down();
+    await page.mouse.move(endX + 50, endY + 50);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Verify rectangle is still selectable
+    await page.mouse.click(startX, startY + 50);
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should draw rectangles with negative dimensions', async ({ page }) => {
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw rectangle from bottom-right to top-left (negative width and height)
+    await page.click('[data-tool="rectangle"]');
+    await page.mouse.move(box.x + 300, box.y + 250);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 150, box.y + 150);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Verify rectangle was created by clicking on its edge
+    await page.mouse.click(box.x + 150, box.y + 200);
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+
+    // Draw rectangle from bottom-left to top-right (negative height only)
+    await page.click('[data-tool="rectangle"]');
+    await page.mouse.move(box.x + 100, box.y + 400);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 250, box.y + 320);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Verify second rectangle was created
+    await page.mouse.click(box.x + 100, box.y + 360);
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+
+    // Draw rectangle from top-right to bottom-left (negative width only)
+    await page.click('[data-tool="rectangle"]');
+    await page.mouse.move(box.x + 450, box.y + 150);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 350, box.y + 230);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Verify third rectangle was created
+    await page.mouse.click(box.x + 350, box.y + 190);
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should draw rectangles with extreme aspect ratios', async ({
+    page,
+  }) => {
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw very wide rectangle (horizontal)
+    await page.click('[data-tool="rectangle"]');
+    await page.mouse.move(box.x + 50, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 450, box.y + 120);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Verify wide rectangle was created by clicking on its edge
+    await page.mouse.click(box.x + 50, box.y + 110);
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+
+    // Draw very tall rectangle (vertical)
+    await page.click('[data-tool="rectangle"]');
+    await page.mouse.move(box.x + 100, box.y + 150);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 120, box.y + 450);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Verify tall rectangle was created by clicking on its edge
+    await page.mouse.click(box.x + 110, box.y + 150);
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
 });

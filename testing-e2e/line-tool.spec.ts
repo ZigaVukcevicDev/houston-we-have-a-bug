@@ -337,4 +337,121 @@ test.describe('Line tool', () => {
     );
     expect(cursor).toBe('pointer');
   });
+
+  test('should draw multiple lines and select between them', async ({
+    page,
+  }) => {
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw first line
+    await page.click('[data-tool="line"]');
+    await page.mouse.move(box.x + 100, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 200, box.y + 150);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Draw second line
+    await page.click('[data-tool="line"]');
+    await page.mouse.move(box.x + 300, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 400, box.y + 150);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Draw third line
+    await page.click('[data-tool="line"]');
+    await page.mouse.move(box.x + 150, box.y + 200);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 250, box.y + 250);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Select first line
+    await page.mouse.click(box.x + 150, box.y + 125);
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+
+    // Select second line
+    await page.mouse.click(box.x + 350, box.y + 125);
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+
+    // Select third line
+    await page.mouse.click(box.x + 200, box.y + 225);
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should cancel line drawing with Escape key', async ({ page }) => {
+    await page.click('[data-tool="line"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Start drawing line
+    await page.mouse.move(box.x + 100, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 200, box.y + 200);
+
+    // Press Escape before releasing mouse
+    await page.keyboard.press('Escape');
+    await page.mouse.up();
+
+    await page.waitForTimeout(100);
+
+    // Line tool should still be active
+    await expect(
+      page.locator('[data-tool="line"][aria-selected="true"]')
+    ).toBeVisible();
+
+    // Try to click where the line would have been - nothing should be selected
+    await page.mouse.click(box.x + 150, box.y + 150);
+    await page.waitForTimeout(100);
+
+    // Should not switch to select tool since no annotation was created
+    await expect(
+      page.locator('[data-tool="line"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should draw vertical and horizontal lines', async ({ page }) => {
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw vertical line
+    await page.click('[data-tool="line"]');
+    await page.mouse.move(box.x + 100, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 100, box.y + 300);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Verify vertical line was created by clicking on it
+    await page.mouse.click(box.x + 100, box.y + 200);
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+
+    // Draw horizontal line
+    await page.click('[data-tool="line"]');
+    await page.mouse.move(box.x + 150, box.y + 350);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 350, box.y + 350);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Verify horizontal line was created by clicking on it
+    await page.mouse.click(box.x + 250, box.y + 350);
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
 });
