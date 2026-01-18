@@ -7,85 +7,90 @@
     <style>
       body {
         margin: 0;
-        padding: 20px;
+        padding: 0;
         font-family:
           system-ui,
           -apple-system,
           sans-serif;
-        background: #f5f5f5;
-      }
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      }
-      h1 {
-        margin-top: 0;
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <h1>Houston we have a bug - E2E test page</h1>
-      <p>This page is used for E2E testing the annotation tools.</p>
-
-      <!-- Toolbar -->
-      <hb-toolbar></hb-toolbar>
-
-      <!-- Canvas with test image -->
-      <hb-canvas id="test-canvas"></hb-canvas>
-    </div>
+    <!-- Use the full annotation component -->
+    <hb-annotation id="test-annotation"></hb-annotation>
 
     <script type="module">
       // Load the built extension file
       import './tab.js';
 
-      // Wait for custom elements to be defined
-      customElements.whenDefined('hb-canvas').then(() => {
-        const canvas = document.getElementById('test-canvas');
-
-        // Create a simple test image (white canvas with grid)
-        const testCanvas = document.createElement('canvas');
-        testCanvas.width = 800;
-        testCanvas.height = 600;
-        const ctx = testCanvas.getContext('2d');
-
-        // White background
-        ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, 800, 600);
-
-        // Grid
-        ctx.strokeStyle = '#e0e0e0';
-        ctx.lineWidth = 1;
-        for (let x = 0; x < 800; x += 50) {
-          ctx.beginPath();
-          ctx.moveTo(x, 0);
-          ctx.lineTo(x, 600);
-          ctx.stroke();
-        }
-        for (let y = 0; y < 600; y += 50) {
-          ctx.beginPath();
-          ctx.moveTo(0, y);
-          ctx.lineTo(800, y);
-          ctx.stroke();
-        }
-
-        // Set the test image
-        canvas.dataUrl = testCanvas.toDataURL();
-
-        // Wire up toolbar to canvas
-        const toolbar = document.querySelector('hb-toolbar');
-        toolbar.addEventListener('tool-change', (e) => {
-          canvas.activeTool = e.detail.tool;
-        });
-
-        canvas.addEventListener('tool-change', (e) => {
-          toolbar.activeTool = e.detail.tool;
-        });
+      // Add error handling
+      window.addEventListener('error', (e) => {
+        console.error('Error loading:', e);
       });
+
+      console.log('Waiting for hb-annotation to be defined...');
+
+      // Wait for custom elements to be defined
+      customElements
+        .whenDefined('hb-annotation')
+        .then(async () => {
+          console.log('hb-annotation is defined!');
+          const annotation = document.getElementById('test-annotation');
+          console.log('Found annotation element:', annotation);
+
+          // Wait for initial render
+          await annotation.updateComplete;
+
+          // Create a simple test image (white canvas with grid)
+          const testCanvas = document.createElement('canvas');
+          testCanvas.width = 800;
+          testCanvas.height = 600;
+          const ctx = testCanvas.getContext('2d');
+
+          // White background
+          ctx.fillStyle = 'white';
+          ctx.fillRect(0, 0, 800, 600);
+
+          // Grid
+          ctx.strokeStyle = '#e0e0e0';
+          ctx.lineWidth = 1;
+          for (let x = 0; x < 800; x += 50) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, 600);
+            ctx.stroke();
+          }
+          for (let y = 0; y < 600; y += 50) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(800, y);
+            ctx.stroke();
+          }
+
+          // Mock system info for testing
+          const mockSystemInfo = {
+            dateAndTime: '2026-01-18 12:00:00',
+            url: 'http://localhost:8080/test-page.html',
+            visibleArea: '1920 x 1080 px',
+            displayResolution: '1920 x 1080 px',
+            devicePixelRatio: '1',
+            browser: 'Chrome 131',
+            os: 'macOS',
+          };
+
+          console.log('Setting data URL and system info...');
+          // Set private properties using bracket notation
+          annotation['dataUrl'] = testCanvas.toDataURL();
+          annotation['systemInfo'] = mockSystemInfo;
+
+          // Force a re-render and wait for it
+          await annotation.requestUpdate();
+          await annotation.updateComplete;
+          console.log('Data set and component updated!');
+        })
+        .catch((err) => {
+          console.error('Error waiting for hb-annotation:', err);
+        });
     </script>
   </body>
 </html>

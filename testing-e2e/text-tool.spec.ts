@@ -35,10 +35,15 @@ test.describe('Text tool', () => {
     // Check that handles are visible
     // Handles should be rendered on canvas, we need to verify the canvas state
     // For now, we'll check that the select tool is active
-    await expect(page.locator('[data-tool="select"][aria-selected="true"]')).toBeVisible();
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
 
     // Type some text
-    await textDiv.evaluate((el, text) => el.textContent = text,'Test annotation');
+    await textDiv.evaluate(
+      (el, text) => (el.textContent = text),
+      'Test annotation'
+    );
 
     // Click outside to finalize
     await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
@@ -53,10 +58,14 @@ test.describe('Text tool', () => {
     // For now, verify that we can still see the annotation by selecting it
     await page.mouse.click(startX + 50, startY + 50);
     // If annotation exists, clicking it should select it and show handles
-    await expect(page.locator('[data-tool="select"][aria-selected="true"]')).toBeVisible();
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
   });
 
-  test('should show handles immediately after drawing text box', async ({ page }) => {
+  test('should show handles immediately after drawing text box', async ({
+    page,
+  }) => {
     // Select text tool
     await page.click('[data-tool="text"]');
 
@@ -79,7 +88,9 @@ test.describe('Text tool', () => {
     await page.waitForTimeout(100);
 
     // Verify select tool is now active
-    await expect(page.locator('[data-tool="select"][aria-selected="true"]')).toBeVisible();
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
 
     // Verify textDiv is visible and focused
     const textDiv = page.locator('div[contenteditable="true"]');
@@ -88,7 +99,7 @@ test.describe('Text tool', () => {
 
     // Verify we can type immediately
     await page.keyboard.type('Quick test');
-    const text = await textDiv.evaluate(el => el.textContent);
+    const text = await textDiv.evaluate((el) => el.textContent);
     expect(text).toBe('Quick test');
   });
 
@@ -138,7 +149,10 @@ test.describe('Text tool', () => {
     await expect(textDiv).toBeVisible();
 
     // Type some text
-    await textDiv.evaluate((el, text) => el.textContent = text,'Will be cancelled');
+    await textDiv.evaluate(
+      (el, text) => (el.textContent = text),
+      'Will be cancelled'
+    );
 
     // Press Escape
     await page.keyboard.press('Escape');
@@ -182,7 +196,9 @@ test.describe('Text tool', () => {
     // This would require checking the canvas rendering or component state
   });
 
-  test('should show resize cursor when hovering over handles', async ({ page }) => {
+  test('should show resize cursor when hovering over handles', async ({
+    page,
+  }) => {
     // Select text tool
     await page.click('[data-tool="text"]');
 
@@ -202,11 +218,15 @@ test.describe('Text tool', () => {
     await page.mouse.up();
 
     // Wait for tool switch to select
-    await expect(page.locator('[data-tool="select"][aria-selected="true"]')).toBeVisible();
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
 
     // Wait for canvas to update (mode-select has default cursor, not crosshair)
     await page.waitForFunction(() => {
-      const hbCanvas = document.querySelector('hb-canvas');
+      const hbAnnotation = document.querySelector('hb-annotation');
+      if (!hbAnnotation || !hbAnnotation.shadowRoot) return false;
+      const hbCanvas = hbAnnotation.shadowRoot.querySelector('hb-canvas');
       if (!hbCanvas || !hbCanvas.shadowRoot) return false;
       const canvas = hbCanvas.shadowRoot.querySelector('canvas');
       return canvas && window.getComputedStyle(canvas).cursor !== 'crosshair';
@@ -215,7 +235,9 @@ test.describe('Text tool', () => {
     // Hover over top-left handle
     await page.mouse.move(startX, startY);
     await page.waitForTimeout(50);
-    let cursor = await canvas.evaluate((el) => window.getComputedStyle(el).cursor);
+    let cursor = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).cursor
+    );
     expect(cursor).toBe('nwse-resize');
 
     // Hover over bottom-right handle
@@ -237,7 +259,9 @@ test.describe('Text tool', () => {
     expect(cursor).toBe('nesw-resize');
   });
 
-  test('should show move cursor when hovering over text box border', async ({ page }) => {
+  test('should show move cursor when hovering over text box border', async ({
+    page,
+  }) => {
     // Select text tool
     await page.click('[data-tool="text"]');
 
@@ -257,11 +281,15 @@ test.describe('Text tool', () => {
     await page.mouse.up();
 
     // Wait for tool switch to select
-    await expect(page.locator('[data-tool="select"][aria-selected="true"]')).toBeVisible();
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
 
     // Wait for canvas to update (mode-select has default cursor, not crosshair)
     await page.waitForFunction(() => {
-      const hbCanvas = document.querySelector('hb-canvas');
+      const hbAnnotation = document.querySelector('hb-annotation');
+      if (!hbAnnotation || !hbAnnotation.shadowRoot) return false;
+      const hbCanvas = hbAnnotation.shadowRoot.querySelector('hb-canvas');
       if (!hbCanvas || !hbCanvas.shadowRoot) return false;
       const canvas = hbCanvas.shadowRoot.querySelector('canvas');
       return canvas && window.getComputedStyle(canvas).cursor !== 'crosshair';
@@ -271,11 +299,15 @@ test.describe('Text tool', () => {
     const midY = (startY + endY) / 2;
     await page.mouse.move(startX, midY);
     await page.waitForTimeout(50);
-    const cursor = await canvas.evaluate((el) => window.getComputedStyle(el).cursor);
+    const cursor = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).cursor
+    );
     expect(cursor).toBe('move');
   });
 
-  test('should show pointer cursor when hovering over unselected text box', async ({ page }) => {
+  test('should show pointer cursor when hovering over unselected text box', async ({
+    page,
+  }) => {
     // Select text tool
     await page.click('[data-tool="text"]');
 
@@ -291,18 +323,22 @@ test.describe('Text tool', () => {
 
     const textDiv = page.locator('div[contenteditable="true"]');
     await expect(textDiv).toBeVisible();
-    await textDiv.evaluate((el, text) => el.textContent = text,'Test text');
+    await textDiv.evaluate((el, text) => (el.textContent = text), 'Test text');
 
     // Click outside to finalize and deselect
     await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
     await expect(textDiv).not.toBeVisible();
 
     // Verify we're still in select mode
-    await expect(page.locator('[data-tool="select"][aria-selected="true"]')).toBeVisible();
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
 
     // Wait for canvas to update (mode-select has default cursor, not crosshair)
     await page.waitForFunction(() => {
-      const hbCanvas = document.querySelector('hb-canvas');
+      const hbAnnotation = document.querySelector('hb-annotation');
+      if (!hbAnnotation || !hbAnnotation.shadowRoot) return false;
+      const hbCanvas = hbAnnotation.shadowRoot.querySelector('hb-canvas');
       if (!hbCanvas || !hbCanvas.shadowRoot) return false;
       const canvas = hbCanvas.shadowRoot.querySelector('canvas');
       return canvas && window.getComputedStyle(canvas).cursor !== 'crosshair';
@@ -311,11 +347,15 @@ test.describe('Text tool', () => {
     // Now hover over the text box border
     await page.mouse.move(canvasBox.x + 100, canvasBox.y + 100);
     await page.waitForTimeout(50);
-    const cursor = await canvas.evaluate((el) => window.getComputedStyle(el).cursor);
+    const cursor = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).cursor
+    );
     expect(cursor).toBe('pointer');
   });
 
-  test('should not have text position jump when finalizing', async ({ page }) => {
+  test('should not have text position jump when finalizing', async ({
+    page,
+  }) => {
     // Select text tool
     await page.click('[data-tool="text"]');
 
@@ -341,7 +381,10 @@ test.describe('Text tool', () => {
     if (!textDivBox1) throw new Error('Text div not found');
 
     // Type some text
-    await textDiv1.evaluate((el, text) => el.textContent = text,'Test text alignment');
+    await textDiv1.evaluate(
+      (el, text) => (el.textContent = text),
+      'Test text alignment'
+    );
 
     // Click outside to finalize
     await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
@@ -373,7 +416,10 @@ test.describe('Text tool', () => {
     expect(textDivBox2.height).toBeCloseTo(textDivBox1.height, 0);
 
     // Type text in the second one
-    await textDiv2.evaluate((el, text) => el.textContent = text,'Second annotation');
+    await textDiv2.evaluate(
+      (el, text) => (el.textContent = text),
+      'Second annotation'
+    );
 
     // Finalize the second one
     await page.keyboard.press('Escape');
@@ -388,7 +434,8 @@ test.describe('Text tool', () => {
     await page.waitForTimeout(100);
 
     // Should select one of the annotations (they're at the same position)
-    await expect(page.locator('[data-tool="select"][aria-selected="true"]')).toBeVisible();
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
   });
-
 });

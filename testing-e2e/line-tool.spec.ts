@@ -244,7 +244,9 @@ test.describe('Line tool', () => {
     ).toBeVisible();
 
     await page.waitForFunction(() => {
-      const hbCanvas = document.querySelector('hb-canvas');
+      const hbAnnotation = document.querySelector('hb-annotation');
+      if (!hbAnnotation || !hbAnnotation.shadowRoot) return false;
+      const hbCanvas = hbAnnotation.shadowRoot.querySelector('hb-canvas');
       if (!hbCanvas || !hbCanvas.shadowRoot) return false;
       const canvas = hbCanvas.shadowRoot.querySelector('canvas');
       return canvas && window.getComputedStyle(canvas).cursor !== 'crosshair';
@@ -287,7 +289,9 @@ test.describe('Line tool', () => {
     ).toBeVisible();
 
     await page.waitForFunction(() => {
-      const hbCanvas = document.querySelector('hb-canvas');
+      const hbAnnotation = document.querySelector('hb-annotation');
+      if (!hbAnnotation || !hbAnnotation.shadowRoot) return false;
+      const hbCanvas = hbAnnotation.shadowRoot.querySelector('hb-canvas');
       if (!hbCanvas || !hbCanvas.shadowRoot) return false;
       const canvas = hbCanvas.shadowRoot.querySelector('canvas');
       return canvas && window.getComputedStyle(canvas).cursor !== 'crosshair';

@@ -129,6 +129,7 @@
 - [ ] does test html needs to be in build/dist?
 - [x] update readme file structure with e2e tests
 - [x] write e2e tests for crop tool
+- [x] write e2e tests for download and system info
 
 ## Ongoing
 
