@@ -128,7 +128,7 @@
 - [ ] fix screenshot is horizontally scrollable
 - [ ] does test html needs to be in build/dist?
 - [x] update readme file structure with e2e tests
-- [ ] write e2e tests for crop tool
+- [x] write e2e tests for crop tool
 
 ## Ongoing
 
