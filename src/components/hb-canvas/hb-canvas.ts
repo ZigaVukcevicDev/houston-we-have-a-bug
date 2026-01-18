@@ -146,6 +146,9 @@ export class HBCanvas extends LitElement {
   }
 
   private handleToolChange(tool: string, annotationId?: string) {
+    // Update the active tool immediately
+    this.activeTool = tool as ActiveTool;
+
     // Dispatch event to notify toolbar of tool change
     this.dispatchEvent(new CustomEvent('tool-change', {
       detail: { tool },

@@ -181,4 +181,137 @@ test.describe('Text tool', () => {
     // This would require checking the canvas rendering or component state
   });
 
+  test('should show resize cursor when hovering over handles', async ({ page }) => {
+    // Select text tool
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    // Draw text box
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    // Wait for tool switch to select
+    await expect(page.locator('[data-tool="select"][aria-selected="true"]')).toBeVisible();
+
+    // Wait for canvas to update (mode-select has default cursor, not crosshair)
+    await page.waitForFunction(() => {
+      const hbCanvas = document.querySelector('hb-canvas');
+      if (!hbCanvas || !hbCanvas.shadowRoot) return false;
+      const canvas = hbCanvas.shadowRoot.querySelector('canvas');
+      return canvas && window.getComputedStyle(canvas).cursor !== 'crosshair';
+    });
+
+    // Hover over top-left handle
+    await page.mouse.move(startX, startY);
+    await page.waitForTimeout(50);
+    let cursor = await canvas.evaluate((el) => window.getComputedStyle(el).cursor);
+    expect(cursor).toBe('nwse-resize');
+
+    // Hover over bottom-right handle
+    await page.mouse.move(endX, endY);
+    await page.waitForTimeout(50);
+    cursor = await canvas.evaluate((el) => window.getComputedStyle(el).cursor);
+    expect(cursor).toBe('nwse-resize');
+
+    // Hover over top-right handle
+    await page.mouse.move(endX, startY);
+    await page.waitForTimeout(50);
+    cursor = await canvas.evaluate((el) => window.getComputedStyle(el).cursor);
+    expect(cursor).toBe('nesw-resize');
+
+    // Hover over bottom-left handle
+    await page.mouse.move(startX, endY);
+    await page.waitForTimeout(50);
+    cursor = await canvas.evaluate((el) => window.getComputedStyle(el).cursor);
+    expect(cursor).toBe('nesw-resize');
+  });
+
+  test('should show move cursor when hovering over text box border', async ({ page }) => {
+    // Select text tool
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    // Draw text box
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    // Wait for tool switch to select
+    await expect(page.locator('[data-tool="select"][aria-selected="true"]')).toBeVisible();
+
+    // Wait for canvas to update (mode-select has default cursor, not crosshair)
+    await page.waitForFunction(() => {
+      const hbCanvas = document.querySelector('hb-canvas');
+      if (!hbCanvas || !hbCanvas.shadowRoot) return false;
+      const canvas = hbCanvas.shadowRoot.querySelector('canvas');
+      return canvas && window.getComputedStyle(canvas).cursor !== 'crosshair';
+    });
+
+    // Hover over left border (not on handle)
+    const midY = (startY + endY) / 2;
+    await page.mouse.move(startX, midY);
+    await page.waitForTimeout(50);
+    const cursor = await canvas.evaluate((el) => window.getComputedStyle(el).cursor);
+    expect(cursor).toBe('move');
+  });
+
+  test('should show pointer cursor when hovering over unselected text box', async ({ page }) => {
+    // Select text tool
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    // Draw text box
+    await page.mouse.move(canvasBox.x + 100, canvasBox.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(canvasBox.x + 300, canvasBox.y + 200);
+    await page.mouse.up();
+
+    const textarea = page.locator('textarea');
+    await expect(textarea).toBeVisible();
+    await textarea.fill('Test text');
+
+    // Click outside to finalize and deselect
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await expect(textarea).not.toBeVisible();
+
+    // Verify we're still in select mode
+    await expect(page.locator('[data-tool="select"][aria-selected="true"]')).toBeVisible();
+
+    // Wait for canvas to update (mode-select has default cursor, not crosshair)
+    await page.waitForFunction(() => {
+      const hbCanvas = document.querySelector('hb-canvas');
+      if (!hbCanvas || !hbCanvas.shadowRoot) return false;
+      const canvas = hbCanvas.shadowRoot.querySelector('canvas');
+      return canvas && window.getComputedStyle(canvas).cursor !== 'crosshair';
+    });
+
+    // Now hover over the text box border
+    await page.mouse.move(canvasBox.x + 100, canvasBox.y + 100);
+    await page.waitForTimeout(50);
+    const cursor = await canvas.evaluate((el) => window.getComputedStyle(el).cursor);
+    expect(cursor).toBe('pointer');
+  });
+
 });

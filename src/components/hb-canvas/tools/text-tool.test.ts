@@ -722,6 +722,320 @@ describe('TextTool', () => {
     });
   });
 
+  describe('keepTextAreaActive flag behavior', () => {
+    it('should set keepTextAreaActive to true when creating annotation', () => {
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+
+      // Flag should be set to true
+      expect(textTool['keepTextAreaActive']).toBe(true);
+    });
+
+    it('should prevent deactivate from finalizing when keepTextAreaActive is true', () => {
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+
+      const textarea = getTextArea();
+      expect(textarea).toBeTruthy();
+
+      // Call deactivate (simulating tool switch to select)
+      textTool.deactivate();
+
+      // Textarea should still exist
+      expect(getTextArea()).toBeTruthy();
+    });
+
+    it('should reset keepTextAreaActive flag after preventing finalization', () => {
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+
+      expect(textTool['keepTextAreaActive']).toBe(true);
+
+      // Call deactivate
+      textTool.deactivate();
+
+      // Flag should be reset to false
+      expect(textTool['keepTextAreaActive']).toBe(false);
+    });
+
+    it('should finalize textarea on second deactivate call when keepTextAreaActive is false', async () => {
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+
+      const textarea = getTextArea()!;
+      textarea.value = 'Test text';
+
+      // First deactivate - should keep textarea
+      textTool.deactivate();
+      expect(getTextArea()).toBeTruthy();
+
+      // Second deactivate - should finalize
+      textTool.deactivate();
+
+      // Wait for finalization
+      await new Promise(resolve => setTimeout(resolve, 150));
+
+      expect(getTextArea()).toBeNull();
+    });
+
+    it('should not set keepTextAreaActive when box is too small', () => {
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 105, clientY: 105 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 105, clientY: 105 } as MouseEvent, mockCanvas);
+
+      // Flag should remain false
+      expect(textTool['keepTextAreaActive']).toBe(false);
+    });
+  });
+
+  describe('multiple annotations workflow', () => {
+    it('should handle creating multiple text annotations sequentially', async () => {
+      const annotations: TextAnnotation[] = [];
+      const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      // Create first annotation
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+
+      let textarea = getTextArea()!;
+      textarea.value = 'First annotation';
+      textarea.dispatchEvent(new Event('blur'));
+
+      await new Promise(resolve => setTimeout(resolve, 150));
+
+      expect(annotations.length).toBe(1);
+      expect(annotations[0].text).toBe('First annotation');
+
+      // Create second annotation
+      textTool.handleMouseDown({ clientX: 300, clientY: 300 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 450, clientY: 400 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 450, clientY: 400 } as MouseEvent, mockCanvas);
+
+      textarea = getTextArea()!;
+      textarea.value = 'Second annotation';
+      textarea.dispatchEvent(new Event('blur'));
+
+      await new Promise(resolve => setTimeout(resolve, 150));
+
+      expect(annotations.length).toBe(2);
+      expect(annotations[0].text).toBe('First annotation');
+      expect(annotations[1].text).toBe('Second annotation');
+    });
+
+    it('should finalize existing textarea when starting new annotation', async () => {
+      const annotations: TextAnnotation[] = [];
+      const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      // Create first annotation
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+
+      const firstTextarea = getTextArea()!;
+      firstTextarea.value = 'First text';
+
+      // Start new annotation before finalizing first
+      textTool.handleMouseDown({ clientX: 300, clientY: 300 } as MouseEvent, mockCanvas);
+
+      // Wait for finalization timeout
+      await new Promise(resolve => setTimeout(resolve, 150));
+
+      // First annotation should be created with text
+      expect(annotations.length).toBe(1);
+      expect(annotations[0].text).toBe('First text');
+
+      // New drawing should have started
+      expect(textTool['isDrawing']).toBe(true);
+      expect(textTool['startPoint']).toEqual({ x: 300, y: 300 });
+    });
+
+    it('should remove first annotation if empty when starting second annotation', () => {
+      const annotations: TextAnnotation[] = [];
+      const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      // Create first annotation
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+
+      expect(annotations.length).toBe(1);
+      expect(annotations[0].text).toBe('');
+
+      // Start new annotation with first still empty
+      textTool.handleMouseDown({ clientX: 300, clientY: 300 } as MouseEvent, mockCanvas);
+
+      // First annotation should be removed
+      expect(annotations.length).toBe(0);
+    });
+
+    it('should properly update annotation text when finalized', async () => {
+      const annotations: TextAnnotation[] = [];
+      const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+
+      // Annotation created with empty text
+      expect(annotations.length).toBe(1);
+      expect(annotations[0].text).toBe('');
+
+      const textarea = getTextArea()!;
+      textarea.value = 'Updated text';
+      textarea.dispatchEvent(new Event('blur'));
+
+      await new Promise(resolve => setTimeout(resolve, 150));
+
+      // Same annotation should be updated
+      expect(annotations.length).toBe(1);
+      expect(annotations[0].text).toBe('Updated text');
+    });
+  });
+
+  describe('annotation lifecycle and updates', () => {
+    it('should create annotation immediately on mouseup with empty text', () => {
+      const annotations: TextAnnotation[] = [];
+      const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+
+      expect(annotations.length).toBe(1);
+      expect(annotations[0]).toMatchObject({
+        x: 100,
+        y: 100,
+        width: 150,
+        height: 100,
+        text: '',
+        color: '#E74C3C',
+        fontSize: 14,
+      });
+      expect(annotations[0].id).toBeTruthy();
+    });
+
+    it('should update the same annotation when text is finalized', async () => {
+      const annotations: TextAnnotation[] = [];
+      const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+
+      const annotationId = annotations[0].id;
+
+      const textarea = getTextArea()!;
+      textarea.value = 'Final text';
+      textarea.dispatchEvent(new Event('blur'));
+
+      await new Promise(resolve => setTimeout(resolve, 150));
+
+      // Should still be 1 annotation
+      expect(annotations.length).toBe(1);
+      // Same ID
+      expect(annotations[0].id).toBe(annotationId);
+      // Updated text
+      expect(annotations[0].text).toBe('Final text');
+    });
+
+    it('should remove annotation on Escape even after initial creation', () => {
+      const annotations: TextAnnotation[] = [];
+      const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+
+      // Annotation created
+      expect(annotations.length).toBe(1);
+
+      const textarea = getTextArea()!;
+      textarea.value = 'Some text';
+
+      // Press Escape
+      const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
+      textarea.dispatchEvent(escapeEvent);
+
+      // Annotation should be removed
+      expect(annotations.length).toBe(0);
+      expect(getTextArea()).toBeNull();
+    });
+
+    it('should match annotation ID in textarea dataset with created annotation', () => {
+      const annotations: TextAnnotation[] = [];
+      const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+
+      const annotation = annotations[0];
+      const textarea = getTextArea()!;
+
+      expect(textarea.dataset.annotationId).toBe(annotation.id);
+    });
+  });
+
+  describe('canvas scaling edge cases', () => {
+    it('should handle canvas with different display size vs internal size', () => {
+      // Canvas displayed at 400x300 but internal size is 800x600
+      mockCanvas.getBoundingClientRect = vi.fn().mockReturnValue({
+        left: 0,
+        top: 0,
+        width: 400,
+        height: 300,
+      });
+      mockCanvas.width = 800;
+      mockCanvas.height = 600;
+
+      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+
+      const textarea = getTextArea()!;
+      expect(textarea).toBeTruthy();
+
+      // Textarea should be positioned correctly accounting for scale
+      // CSS coordinates (100-1, 100-1) with scale 2
+      expect(parseFloat(textarea.style.left)).toBe(99);
+      expect(parseFloat(textarea.style.top)).toBe(99);
+    });
+
+    it('should correctly scale font size in render based on canvas scale', () => {
+      mockCanvas.width = 1600;
+      mockCanvas.height = 1200;
+      mockCanvas.getBoundingClientRect = vi.fn().mockReturnValue({
+        left: 0,
+        top: 0,
+        width: 800,
+        height: 600,
+      });
+
+      const annotation: TextAnnotation = {
+        id: 'test-scale',
+        x: 100,
+        y: 100,
+        width: 200,
+        height: 100,
+        text: 'Scaled text',
+        color: '#E74C3C',
+        fontSize: 14,
+      };
+
+      textTool['annotations'] = [annotation];
+      textTool.render(mockCtx);
+
+      // Font should be scaled: 14 * scaleX = 14 * 2 = 28
+      const expectedFontSize = 14 * 2;
+      expect(mockCtx.font).toContain(`${expectedFontSize}px`);
+    });
+  });
+
   describe('word wrapping edge cases', () => {
     it('should handle word wrapping when line width exceeds maxWidth', () => {
       const annotation: TextAnnotation = {

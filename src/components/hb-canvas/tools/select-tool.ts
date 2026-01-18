@@ -376,6 +376,49 @@ export class SelectTool implements Tool {
         }
       }
 
+      // Check if hovering over a handle of selected text box
+      const selectedText = this.textAnnotations.find(t => t.id === this.selectedAnnotationId);
+      if (selectedText) {
+        const topLeft = { x: selectedText.x, y: selectedText.y };
+        const topRight = { x: selectedText.x + selectedText.width, y: selectedText.y };
+        const bottomLeft = { x: selectedText.x, y: selectedText.y + selectedText.height };
+        const bottomRight = { x: selectedText.x + selectedText.width, y: selectedText.y + selectedText.height };
+
+        // Check each corner and set appropriate resize cursor
+        if (isPointOnHandle(x, y, topLeft.x, topLeft.y)) {
+          canvas.style.cursor = 'nwse-resize';
+          this.hoveredAnnotationId = null;
+          this.onRedraw();
+          return;
+        }
+        if (isPointOnHandle(x, y, bottomRight.x, bottomRight.y)) {
+          canvas.style.cursor = 'nwse-resize';
+          this.hoveredAnnotationId = null;
+          this.onRedraw();
+          return;
+        }
+        if (isPointOnHandle(x, y, topRight.x, topRight.y)) {
+          canvas.style.cursor = 'nesw-resize';
+          this.hoveredAnnotationId = null;
+          this.onRedraw();
+          return;
+        }
+        if (isPointOnHandle(x, y, bottomLeft.x, bottomLeft.y)) {
+          canvas.style.cursor = 'nesw-resize';
+          this.hoveredAnnotationId = null;
+          this.onRedraw();
+          return;
+        }
+
+        // If hovering over selected text box body (not handle)
+        if (this.isPointOnTextBox(x, y, selectedText)) {
+          canvas.style.cursor = 'move';
+          this.hoveredAnnotationId = null;
+          this.onRedraw();
+          return;
+        }
+      }
+
       // Check if hovering over any line (iterate backwards for most recent)
       const allLines = this.getAllLines();
       for (let i = allLines.length - 1; i >= 0; i--) {
@@ -397,6 +440,19 @@ export class SelectTool implements Tool {
           if (this.hoveredAnnotationId !== this.rectangleAnnotations[i].id) {
             this.hoveredAnnotationId = this.rectangleAnnotations[i].id;
             this.hoveredAnnotationType = 'rectangle';
+            this.onRedraw();
+          }
+          return;
+        }
+      }
+
+      // Check if hovering over any text box (iterate backwards for most recent)
+      for (let i = this.textAnnotations.length - 1; i >= 0; i--) {
+        if (this.isPointOnTextBox(x, y, this.textAnnotations[i])) {
+          canvas.style.cursor = 'pointer';
+          if (this.hoveredAnnotationId !== this.textAnnotations[i].id) {
+            this.hoveredAnnotationId = this.textAnnotations[i].id;
+            this.hoveredAnnotationType = 'text';
             this.onRedraw();
           }
           return;
