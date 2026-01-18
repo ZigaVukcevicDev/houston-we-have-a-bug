@@ -40,7 +40,7 @@ A Chrome extension to capture bugs clearly. Annotate screenshots and gather syst
 
 - 📸 **Screenshot with annotations** - Capture visible tab and add annotations
 - 📋 **System info** - Gather current date and time, URL, display settings, browser, and OS information
-- 🗺️ **[Roadmap](ROADMAP.md)** - Planned features, and evolution
+- 🗺️ **[Roadmap](ROADMAP.md)** - Planned features and evolution
 
 ## Tech stack & tooling
 
@@ -48,7 +48,7 @@ A Chrome extension to capture bugs clearly. Annotate screenshots and gather syst
 - 📘 **TypeScript** - Fully typed extension code
 - 🎨 **SCSS** - Styling with variables and nesting
 - 🧪 **Vitest** - Unit testing framework with DOM simulation
-- 🎭 **Playwright** - E2E testing for real browser behaviour
+- 🎭 **Playwright** - E2E testing for real browser behavior
 - 📦 **Modern build setup** - esbuild compilation with Prettier formatting
 
 ## Project structure
@@ -106,7 +106,7 @@ This compiles TypeScript and SCSS into a single bundled JavaScript file.
 
 ### 3. Testing
 
-Tests are automatically run before every commit using **Husky** hooks to ensure stability. To run manually
+Tests are automatically run before every commit using **Husky** hooks to ensure stability. To run manually:
 
 ```bash
 npm run test:all
