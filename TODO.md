@@ -120,10 +120,10 @@
 - [x] change "environment details" to "system info"
 - [x] when hovering over rectangle, highlight is visible only when hover over horizontal parts
 - [x] find a way to have better hover color for secondary button (as current is too pale)
-- [ ] text tool - do we really need double click?
+- [ ] text tool - double click to edit
 - [x] text tool - changing textarea to editable div
 - [ ] text tool - when I draw text area and click outside, the text kind of jumps up for e.g. 1px.
-- [ ] text tool - less padding space in editable div - 5px
+- [ ] text tool - less padding space in editable div, 5px
 - [ ] recheck annotations when scrolling
 - [ ] fix screenshot is horizontally scrollable
 - [ ] does test html needs to be in build/dist?
