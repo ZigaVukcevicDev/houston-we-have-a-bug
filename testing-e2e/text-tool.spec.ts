@@ -180,4 +180,5 @@ test.describe('Text tool', () => {
     // Verify the text box was resized
     // This would require checking the canvas rendering or component state
   });
+
 });

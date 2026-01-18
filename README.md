@@ -105,29 +105,6 @@ This compiles TypeScript and SCSS into a single bundled JavaScript file.
 
 ### 3. Testing
 
-#### Unit Tests (Vitest)
-Run all 494 unit tests:
-```bash
-npm run test              # Run all tests
-npm run test:watch        # Watch mode
-npm run test:coverage     # With coverage report
-```
-
-#### E2E Tests (Playwright)
-Test real browser behavior:
-```bash
-npm run test:e2e          # All E2E tests
-npm run test:e2e:ui       # Interactive UI mode
-npm run test:all          # Run unit + E2E tests
-```
-
-**Before every commit, run:**
-```bash
-npm run test:all
-```
-
-See [TESTING.md](TESTING.md) for complete testing guide.
-
 Tests are automatically run before every commit using **Husky** hooks to ensure stability.
 
 ### 4. Load in Chrome

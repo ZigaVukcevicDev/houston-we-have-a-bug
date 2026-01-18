@@ -261,14 +261,8 @@ export class TextTool implements Tool {
     this.textArea.focus();
 
     // Start with pointer-events none to allow handle clicks
-    // Will be enabled temporarily when user hovers content area
+    // Will be enabled when user clicks in the content area
     this.textArea.style.pointerEvents = 'none';
-
-    // Add focus event to ensure textarea can receive keyboard input even with pointer-events: none
-    this.textArea.addEventListener('focus', () => {
-      // When focused, briefly enable pointer events to allow text selection
-      // but cursor position is already set by focus()
-    });
 
     this.textArea.addEventListener('keydown', this.handleTextAreaKeydown);
     this.textArea.addEventListener('blur', this.handleTextAreaBlur);

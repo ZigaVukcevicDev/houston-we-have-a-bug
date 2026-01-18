@@ -20,7 +20,13 @@ export class SelectTool implements Tool {
 
   private onRedraw: () => void;
 
-  constructor(lineAnnotations: LineAnnotation[], arrowAnnotations: LineAnnotation[], rectangleAnnotations: RectangleAnnotation[], textAnnotations: TextAnnotation[], onRedraw: () => void) {
+  constructor(
+    lineAnnotations: LineAnnotation[],
+    arrowAnnotations: LineAnnotation[],
+    rectangleAnnotations: RectangleAnnotation[],
+    textAnnotations: TextAnnotation[],
+    onRedraw: () => void
+  ) {
     this.lineAnnotations = lineAnnotations;
     this.arrowAnnotations = arrowAnnotations;
     this.rectangleAnnotations = rectangleAnnotations;

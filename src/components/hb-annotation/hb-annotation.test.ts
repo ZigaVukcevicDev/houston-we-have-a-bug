@@ -237,6 +237,14 @@ describe('HBAnnotation', () => {
   describe('connectedCallback', () => {
     it('should call loadScreenshotFromStorage when connected', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+      mockChrome.storage.session.get.mockResolvedValue({
+        'screenshot_test-session-123': {
+          dataUrl: 'data:image/png;base64,mock',
+          systemInfo: null,
+          timestamp: Date.now(),
+        },
+      });
+
       const spy = vi.spyOn(annotation as any, 'loadScreenshotFromStorage');
       document.body.appendChild(annotation);
 
@@ -372,7 +380,7 @@ describe('HBAnnotation', () => {
 
     it('should render system info table when data is available', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
-      annotation['systemInfo'] = {
+      const mockSystemInfo = {
         dateAndTime: '2026-01-04 11:00:00',
         url: 'https://example.com',
         visibleArea: '1920 x 1080 px',
@@ -381,7 +389,15 @@ describe('HBAnnotation', () => {
         browser: 'Chrome 142',
         os: 'macOS',
       };
-      annotation['dataUrl'] = 'data:image/png;base64,test';
+
+      mockChrome.storage.session.get.mockResolvedValue({
+        'screenshot_test-session-123': {
+          dataUrl: 'data:image/png;base64,test',
+          systemInfo: mockSystemInfo,
+          timestamp: Date.now(),
+        },
+      });
+
       document.body.appendChild(annotation);
       await annotation.updateComplete;
 
