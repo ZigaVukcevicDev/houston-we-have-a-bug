@@ -127,7 +127,7 @@
 - [ ] recheck annotations when scrolling
 - [ ] fix screenshot is horizontally scrollable
 - [ ] does test html needs to be in build/dist?
-- [ ] update readme file structure with e2e tests
+- [x] update readme file structure with e2e tests
 
 ## Ongoing
 
