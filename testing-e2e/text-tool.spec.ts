@@ -28,9 +28,9 @@ test.describe('Text tool', () => {
     // Wait for annotation to be created
     await page.waitForTimeout(100);
 
-    // Check that textarea exists and is visible
-    const textarea = page.locator('textarea');
-    await expect(textarea).toBeVisible();
+    // Check that contenteditable div exists and is visible
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
 
     // Check that handles are visible
     // Handles should be rendered on canvas, we need to verify the canvas state
@@ -38,13 +38,13 @@ test.describe('Text tool', () => {
     await expect(page.locator('[data-tool="select"][aria-selected="true"]')).toBeVisible();
 
     // Type some text
-    await textarea.fill('Test annotation');
+    await textDiv.evaluate((el, text) => el.textContent = text,'Test annotation');
 
     // Click outside to finalize
     await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
 
-    // Wait for textarea to be removed
-    await expect(textarea).not.toBeVisible();
+    // Wait for textDiv to be removed
+    await expect(textDiv).not.toBeVisible();
 
     // Verify annotation persists by checking if it's rendered on canvas
     // We can do this by taking a screenshot and comparing, or by checking
@@ -81,14 +81,15 @@ test.describe('Text tool', () => {
     // Verify select tool is now active
     await expect(page.locator('[data-tool="select"][aria-selected="true"]')).toBeVisible();
 
-    // Verify textarea is visible and focused
-    const textarea = page.locator('textarea');
-    await expect(textarea).toBeVisible();
-    await expect(textarea).toBeFocused();
+    // Verify textDiv is visible and focused
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+    await expect(textDiv).toBeFocused();
 
     // Verify we can type immediately
     await page.keyboard.type('Quick test');
-    await expect(textarea).toHaveValue('Quick test');
+    const text = await textDiv.evaluate(el => el.textContent);
+    expect(text).toBe('Quick test');
   });
 
   test('should remove annotation if no text is entered', async ({ page }) => {
@@ -112,7 +113,7 @@ test.describe('Text tool', () => {
     await page.waitForTimeout(200);
 
     // Textarea should be gone
-    await expect(page.locator('textarea')).not.toBeVisible();
+    await expect(page.locator('div[contenteditable="true"]')).not.toBeVisible();
 
     // Annotation should not exist - verify by checking canvas doesn't have the annotation
     // We can verify this by taking a snapshot of the annotations array
@@ -133,17 +134,17 @@ test.describe('Text tool', () => {
     await page.mouse.move(canvasBox.x + 300, canvasBox.y + 200);
     await page.mouse.up();
 
-    const textarea = page.locator('textarea');
-    await expect(textarea).toBeVisible();
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
 
     // Type some text
-    await textarea.fill('Will be cancelled');
+    await textDiv.evaluate((el, text) => el.textContent = text,'Will be cancelled');
 
     // Press Escape
     await page.keyboard.press('Escape');
 
     // Textarea should be removed
-    await expect(textarea).not.toBeVisible();
+    await expect(textDiv).not.toBeVisible();
 
     // Annotation should be removed (we'd need to verify canvas state)
   });
@@ -288,13 +289,13 @@ test.describe('Text tool', () => {
     await page.mouse.move(canvasBox.x + 300, canvasBox.y + 200);
     await page.mouse.up();
 
-    const textarea = page.locator('textarea');
-    await expect(textarea).toBeVisible();
-    await textarea.fill('Test text');
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+    await textDiv.evaluate((el, text) => el.textContent = text,'Test text');
 
     // Click outside to finalize and deselect
     await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
-    await expect(textarea).not.toBeVisible();
+    await expect(textDiv).not.toBeVisible();
 
     // Verify we're still in select mode
     await expect(page.locator('[data-tool="select"][aria-selected="true"]')).toBeVisible();
@@ -333,18 +334,18 @@ test.describe('Text tool', () => {
     await page.mouse.move(endX, endY);
     await page.mouse.up();
 
-    // Get the first textarea position
-    const textarea1 = page.locator('textarea');
-    await expect(textarea1).toBeVisible();
-    const textareaBox1 = await textarea1.boundingBox();
-    if (!textareaBox1) throw new Error('Textarea not found');
+    // Get the first textDiv position
+    const textDiv1 = page.locator('div[contenteditable="true"]');
+    await expect(textDiv1).toBeVisible();
+    const textDivBox1 = await textDiv1.boundingBox();
+    if (!textDivBox1) throw new Error('Text div not found');
 
     // Type some text
-    await textarea1.fill('Test text alignment');
+    await textDiv1.evaluate((el, text) => el.textContent = text,'Test text alignment');
 
     // Click outside to finalize
     await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
-    await expect(textarea1).not.toBeVisible();
+    await expect(textDiv1).not.toBeVisible();
 
     // Wait a bit for finalization
     await page.waitForTimeout(100);
@@ -358,25 +359,25 @@ test.describe('Text tool', () => {
     await page.mouse.move(endX, endY);
     await page.mouse.up();
 
-    // Get the second textarea position
-    const textarea2 = page.locator('textarea');
-    await expect(textarea2).toBeVisible();
-    const textareaBox2 = await textarea2.boundingBox();
-    if (!textareaBox2) throw new Error('Second textarea not found');
+    // Get the second textDiv position
+    const textDiv2 = page.locator('div[contenteditable="true"]');
+    await expect(textDiv2).toBeVisible();
+    const textDivBox2 = await textDiv2.boundingBox();
+    if (!textDivBox2) throw new Error('Second textDiv not found');
 
-    // Verify the textareas appear at the same position
-    // If there was a vertical jump bug, the second textarea would be offset
-    expect(textareaBox2.x).toBeCloseTo(textareaBox1.x, 0);
-    expect(textareaBox2.y).toBeCloseTo(textareaBox1.y, 0);
-    expect(textareaBox2.width).toBeCloseTo(textareaBox1.width, 0);
-    expect(textareaBox2.height).toBeCloseTo(textareaBox1.height, 0);
+    // Verify the textDivs appear at the same position
+    // If there was a vertical jump bug, the second textDiv would be offset
+    expect(textDivBox2.x).toBeCloseTo(textDivBox1.x, 0);
+    expect(textDivBox2.y).toBeCloseTo(textDivBox1.y, 0);
+    expect(textDivBox2.width).toBeCloseTo(textDivBox1.width, 0);
+    expect(textDivBox2.height).toBeCloseTo(textDivBox1.height, 0);
 
     // Type text in the second one
-    await textarea2.fill('Second annotation');
+    await textDiv2.evaluate((el, text) => el.textContent = text,'Second annotation');
 
     // Finalize the second one
     await page.keyboard.press('Escape');
-    await expect(textarea2).not.toBeVisible();
+    await expect(textDiv2).not.toBeVisible();
 
     // Verify both annotations exist and are correctly positioned
     // Switch to select tool

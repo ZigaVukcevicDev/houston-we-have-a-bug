@@ -46,9 +46,9 @@ test.describe('Annotation tools', () => {
     await page.mouse.up();
 
     // Type text
-    const textarea = page.locator('textarea');
-    await expect(textarea).toBeVisible();
-    await textarea.fill('Test');
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+    await textDiv.evaluate((el, text) => el.textContent = text, 'Test');
 
     // Click outside to finalize
     await page.mouse.click(box.x + 400, box.y + 400);

@@ -5,7 +5,7 @@ import { getCanvasCoordinates } from '../../../utils/get-canvas-coordinates';
 
 export class TextTool implements Tool {
   private annotations: TextAnnotation[];
-  private textArea: HTMLTextAreaElement | null = null;
+  private textDiv: HTMLDivElement | null = null;
   private readonly color: string = toolStyles.color;
   private readonly fontSize: number = toolStyles.fontSize;
   private onRedraw: () => void;
@@ -15,7 +15,7 @@ export class TextTool implements Tool {
   private isDrawing: boolean = false;
   private startPoint: { x: number; y: number } | null = null;
   private currentBox: { x: number; y: number; width: number; height: number } | null = null;
-  private keepTextAreaActive: boolean = false;
+  private keepTextDivActive: boolean = false;
 
   constructor(annotations: TextAnnotation[], onRedraw: () => void, onToolChange: (tool: string, annotationId?: string) => void) {
     this.annotations = annotations;
@@ -31,9 +31,9 @@ export class TextTool implements Tool {
   handleMouseDown(event: MouseEvent, canvas: HTMLCanvasElement): void {
     const { x, y } = getCanvasCoordinates(event, canvas);
 
-    // If there's an active textarea, finalize it before starting a new box
-    if (this.textArea) {
-      this.finalizeTextArea();
+    // If there's an active text div, finalize it before starting a new box
+    if (this.textDiv) {
+      this.finalizeTextDiv();
     }
 
     // Start drawing new text box
@@ -87,14 +87,14 @@ export class TextTool implements Tool {
       // IMPORTANT: Use push() to modify the shared array reference
       this.annotations.push(newAnnotation);
 
-      // Create textarea for editing
-      this.createTextArea(canvas, this.currentBox);
+      // Create text div for editing
+      this.createTextDiv(canvas, this.currentBox);
 
-      // Store the annotation ID in the textarea for later updates
-      this.textArea!.dataset.annotationId = newAnnotation.id;
+      // Store the annotation ID in the text div for later updates
+      this.textDiv!.dataset.annotationId = newAnnotation.id;
 
-      // Keep textarea active when switching to select tool
-      this.keepTextAreaActive = true;
+      // Keep text div active when switching to select tool
+      this.keepTextDivActive = true;
 
       // Switch to select tool and select the annotation (shows handles)
       this.onToolChange('select', newAnnotation.id);
@@ -212,7 +212,7 @@ export class TextTool implements Tool {
     return allLines.length > 0 ? allLines : [''];
   }
 
-  private createTextArea(canvas: HTMLCanvasElement, box: { x: number; y: number; width: number; height: number }): void {
+  private createTextDiv(canvas: HTMLCanvasElement, box: { x: number; y: number; width: number; height: number }): void {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
@@ -223,8 +223,9 @@ export class TextTool implements Tool {
     const borderOffsetCanvasX = (borderWidth / 2) * scaleX;
     const borderOffsetCanvasY = (borderWidth / 2) * scaleY;
 
-    this.textArea = document.createElement('textarea');
-    this.textArea.style.cssText = `
+    this.textDiv = document.createElement('div');
+    this.textDiv.contentEditable = 'true';
+    this.textDiv.style.cssText = `
       position: fixed;
       box-sizing: border-box;
       left: ${(box.x - borderOffsetCanvasX) / scaleX + rect.left}px;
@@ -243,7 +244,6 @@ export class TextTool implements Tool {
       border-radius: 4px;
       outline: none;
       padding: 10px;
-      resize: none;
       overflow: hidden;
       white-space: pre-wrap;
       word-wrap: break-word;
@@ -251,32 +251,32 @@ export class TextTool implements Tool {
       pointer-events: none;
     `;
 
-    this.textArea.dataset.canvasX = box.x.toString();
-    this.textArea.dataset.canvasY = box.y.toString();
-    this.textArea.dataset.canvasWidth = box.width.toString();
-    this.textArea.dataset.canvasHeight = box.height.toString();
-    this.textArea.dataset.color = this.color;
-    this.textArea.dataset.fontSize = this.fontSize.toString();
+    this.textDiv.dataset.canvasX = box.x.toString();
+    this.textDiv.dataset.canvasY = box.y.toString();
+    this.textDiv.dataset.canvasWidth = box.width.toString();
+    this.textDiv.dataset.canvasHeight = box.height.toString();
+    this.textDiv.dataset.color = this.color;
+    this.textDiv.dataset.fontSize = this.fontSize.toString();
 
-    document.body.appendChild(this.textArea);
+    document.body.appendChild(this.textDiv);
 
-    // Focus the textarea to allow immediate typing
-    this.textArea.focus();
+    // Focus the div to allow immediate typing
+    this.textDiv.focus();
 
     // Start with pointer-events none to allow handle clicks
     // Will be enabled when user clicks in the content area
-    this.textArea.style.pointerEvents = 'none';
+    this.textDiv.style.pointerEvents = 'none';
 
-    this.textArea.addEventListener('keydown', this.handleTextAreaKeydown);
-    this.textArea.addEventListener('blur', this.handleTextAreaBlur);
+    this.textDiv.addEventListener('keydown', this.handleTextDivKeydown);
+    this.textDiv.addEventListener('blur', this.handleTextDivBlur);
   }
 
-  private handleTextAreaKeydown = (e: KeyboardEvent) => {
+  private handleTextDivKeydown = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
       e.preventDefault();
 
       // Remove the annotation on Escape
-      const annotationId = this.textArea?.dataset.annotationId;
+      const annotationId = this.textDiv?.dataset.annotationId;
       if (annotationId) {
         const index = this.annotations.findIndex(a => a.id === annotationId);
         if (index !== -1) {
@@ -284,22 +284,22 @@ export class TextTool implements Tool {
         }
       }
 
-      this.removeTextArea();
+      this.removeTextDiv();
       this.currentBox = null;
       this.onRedraw();
     }
     // Don't finalize on Enter - allow multiline text
   };
 
-  private handleTextAreaBlur = () => {
-    setTimeout(() => this.finalizeTextArea(), 100);
+  private handleTextDivBlur = () => {
+    setTimeout(() => this.finalizeTextDiv(), 100);
   };
 
-  private finalizeTextArea() {
-    if (!this.textArea) return;
+  private finalizeTextDiv() {
+    if (!this.textDiv) return;
 
-    const annotationId = this.textArea.dataset.annotationId;
-    const text = this.textArea.value.trim();
+    const annotationId = this.textDiv.dataset.annotationId;
+    const text = this.textDiv.textContent?.trim() || '';
 
     if (annotationId) {
       // Find and update the existing annotation
@@ -318,33 +318,33 @@ export class TextTool implements Tool {
       }
     }
 
-    this.removeTextArea();
+    this.removeTextDiv();
     this.currentBox = null;  // Clear drawing box state
     this.onRedraw();
   }
 
-  private removeTextArea() {
-    if (this.textArea) {
-      this.textArea.removeEventListener('keydown', this.handleTextAreaKeydown);
-      this.textArea.removeEventListener('blur', this.handleTextAreaBlur);
+  private removeTextDiv() {
+    if (this.textDiv) {
+      this.textDiv.removeEventListener('keydown', this.handleTextDivKeydown);
+      this.textDiv.removeEventListener('blur', this.handleTextDivBlur);
       // Use remove() instead of parentNode.removeChild for compatibility
-      if (this.textArea.parentNode) {
-        this.textArea.parentNode.removeChild(this.textArea);
+      if (this.textDiv.parentNode) {
+        this.textDiv.parentNode.removeChild(this.textDiv);
       }
-      this.textArea = null;
+      this.textDiv = null;
     }
   }
 
   // Called when switching away from text tool
   deactivate(): void {
-    // Don't finalize if we want to keep the textarea active (e.g., when switching to select tool)
-    if (this.keepTextAreaActive) {
-      this.keepTextAreaActive = false;
+    // Don't finalize if we want to keep the text div active (e.g., when switching to select tool)
+    if (this.keepTextDivActive) {
+      this.keepTextDivActive = false;
       return;
     }
 
-    if (this.textArea) {
-      this.finalizeTextArea();
+    if (this.textDiv) {
+      this.finalizeTextDiv();
     }
   }
 }
