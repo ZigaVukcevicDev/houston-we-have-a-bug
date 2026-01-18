@@ -862,6 +862,14 @@ describe('HBCanvas', () => {
           fillRect: vi.fn(),
           strokeRect: vi.fn(),
           setLineDash: vi.fn(),
+          rect: vi.fn(),
+          measureText: vi.fn().mockReturnValue({ width: 50 }),
+          fillText: vi.fn(),
+          fillStyle: '',
+          textBaseline: '',
+          letterSpacing: '',
+          font: '',
+          lineJoin: '',
         };
 
         mockCanvasElement.getContext = vi.fn().mockReturnValue(mockCtx);
@@ -907,14 +915,120 @@ describe('HBCanvas', () => {
         expect(deselectAllSpy).toHaveBeenCalled();
       });
 
-      it('should not call deselect when switching to non-crop tool', () => {
+      it('should deselect all annotations when switching to line tool', () => {
+        canvas['lineAnnotations'].push({
+          id: 'line-1',
+          x1: 100,
+          y1: 100,
+          x2: 200,
+          y2: 200,
+          color: '#E74C3C',
+          width: 5,
+        });
+
         const selectTool = canvas['tools'].get('select') as SelectTool;
+        selectTool.selectAnnotation('line-1');
+
         const deselectAllSpy = vi.spyOn(selectTool, 'deselectAll');
 
         canvas.activeTool = 'line';
+        canvas['updated'](new Map([['activeTool', 'select']]));
+
+        expect(deselectAllSpy).toHaveBeenCalled();
+        expect(selectTool['selectedAnnotationId']).toBeNull();
+      });
+
+      it('should deselect all annotations when switching to arrow tool', () => {
+        canvas['rectangleAnnotations'].push({
+          id: 'rect-1',
+          x: 100,
+          y: 100,
+          width: 100,
+          height: 100,
+          color: '#E74C3C',
+          strokeWidth: 2,
+        });
+
+        const selectTool = canvas['tools'].get('select') as SelectTool;
+        selectTool.selectAnnotation('rect-1');
+
+        const deselectAllSpy = vi.spyOn(selectTool, 'deselectAll');
+
+        canvas.activeTool = 'arrow';
+        canvas['updated'](new Map([['activeTool', 'select']]));
+
+        expect(deselectAllSpy).toHaveBeenCalled();
+        expect(selectTool['selectedAnnotationId']).toBeNull();
+      });
+
+      it('should deselect all annotations when switching to text tool', () => {
+        canvas['textAnnotations'].push({
+          id: 'text-1',
+          x: 100,
+          y: 100,
+          width: 200,
+          height: 100,
+          text: 'Test',
+          color: '#E74C3C',
+          fontSize: 14,
+        });
+
+        const selectTool = canvas['tools'].get('select') as SelectTool;
+        selectTool.selectAnnotation('text-1');
+
+        const deselectAllSpy = vi.spyOn(selectTool, 'deselectAll');
+
+        canvas.activeTool = 'text';
+        canvas['updated'](new Map([['activeTool', 'select']]));
+
+        expect(deselectAllSpy).toHaveBeenCalled();
+        expect(selectTool['selectedAnnotationId']).toBeNull();
+      });
+
+      it('should deselect all annotations when switching to rectangle tool', () => {
+        canvas['arrowAnnotations'].push({
+          id: 'arrow-1',
+          x1: 100,
+          y1: 100,
+          x2: 200,
+          y2: 200,
+          color: '#E74C3C',
+          width: 5,
+        });
+
+        const selectTool = canvas['tools'].get('select') as SelectTool;
+        selectTool.selectAnnotation('arrow-1');
+
+        const deselectAllSpy = vi.spyOn(selectTool, 'deselectAll');
+
+        canvas.activeTool = 'rectangle';
+        canvas['updated'](new Map([['activeTool', 'select']]));
+
+        expect(deselectAllSpy).toHaveBeenCalled();
+        expect(selectTool['selectedAnnotationId']).toBeNull();
+      });
+
+      it('should NOT deselect when switching to select tool', () => {
+        canvas['lineAnnotations'].push({
+          id: 'line-1',
+          x1: 100,
+          y1: 100,
+          x2: 200,
+          y2: 200,
+          color: '#E74C3C',
+          width: 5,
+        });
+
+        const selectTool = canvas['tools'].get('select') as SelectTool;
+        selectTool.selectAnnotation('line-1');
+
+        const deselectAllSpy = vi.spyOn(selectTool, 'deselectAll');
+
+        canvas.activeTool = 'select';
         canvas['updated'](new Map([['activeTool', 'text']]));
 
         expect(deselectAllSpy).not.toHaveBeenCalled();
+        expect(selectTool['selectedAnnotationId']).toBe('line-1');
       });
     });
   });

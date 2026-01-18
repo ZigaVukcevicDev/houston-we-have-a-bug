@@ -96,8 +96,8 @@ export class HBCanvas extends LitElement {
         prevTool?.deactivate?.();
       }
 
-      // Deselect all annotations when switching to crop tool
-      if (this.activeTool === 'crop') {
+      // Deselect all annotations when switching to any tool except select
+      if (this.activeTool !== 'select') {
         const selectTool = this.tools.get('select') as SelectTool;
         if (selectTool) {
           selectTool.deselectAll();
