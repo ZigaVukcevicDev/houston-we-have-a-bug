@@ -105,7 +105,11 @@ This compiles TypeScript and SCSS into a single bundled JavaScript file.
 
 ### 3. Testing
 
-Tests are automatically run before every commit using **Husky** hooks to ensure stability.
+Tests are automatically run before every commit using **Husky** hooks to ensure stability. To run manually
+
+```bash
+npm run test:all
+```
 
 ### 4. Load in Chrome
 

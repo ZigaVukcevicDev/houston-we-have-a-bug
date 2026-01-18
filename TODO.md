@@ -126,6 +126,7 @@
 - [ ] text tool - less padding space between textarea and border, like 5px
 - [ ] recheck annotations when scrolling
 - [ ] does test html needs to be in build/dist?
+- [ ] update readme file structure with e2e tests
 
 ## Ongoing
 
