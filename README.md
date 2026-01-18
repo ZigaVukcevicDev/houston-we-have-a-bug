@@ -21,7 +21,7 @@ A Chrome extension to capture bugs clearly. Annotate screenshots and gather syst
 />
 
 <details>
-  <summary>See demo images</summary>
+  <summary>See presentation images</summary>
 
   <p align="center">
     <img src="src/images/extension-presentation/hb-screenshot-2-1280x800@2x.png" width="1280">
