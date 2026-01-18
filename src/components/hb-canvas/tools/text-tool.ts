@@ -15,6 +15,7 @@ export class TextTool implements Tool {
   private isDrawing: boolean = false;
   private startPoint: { x: number; y: number } | null = null;
   private currentBox: { x: number; y: number; width: number; height: number } | null = null;
+  private keepTextAreaActive: boolean = false;
 
   constructor(annotations: TextAnnotation[], onRedraw: () => void, onToolChange: (tool: string, annotationId?: string) => void) {
     this.annotations = annotations;
@@ -91,6 +92,9 @@ export class TextTool implements Tool {
 
       // Store the annotation ID in the textarea for later updates
       this.textArea!.dataset.annotationId = newAnnotation.id;
+
+      // Keep textarea active when switching to select tool
+      this.keepTextAreaActive = true;
 
       // Switch to select tool and select the annotation (shows handles)
       this.onToolChange('select', newAnnotation.id);
@@ -334,6 +338,12 @@ export class TextTool implements Tool {
 
   // Called when switching away from text tool
   deactivate(): void {
+    // Don't finalize if we want to keep the textarea active (e.g., when switching to select tool)
+    if (this.keepTextAreaActive) {
+      this.keepTextAreaActive = false;
+      return;
+    }
+
     if (this.textArea) {
       this.finalizeTextArea();
     }

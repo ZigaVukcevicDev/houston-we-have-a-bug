@@ -688,7 +688,7 @@ describe('TextTool', () => {
   });
 
   describe('deactivate', () => {
-    it('should finalize text area when deactivating', () => {
+    it('should finalize text area when deactivating', async () => {
       const annotations: TextAnnotation[] = [];
       const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
 
@@ -700,7 +700,13 @@ describe('TextTool', () => {
       expect(textarea).toBeTruthy();
 
       textarea!.value = 'Test text';
-      textTool.deactivate();
+
+      // After creating text box, it switches to select tool and keeps textarea active
+      // To finalize, trigger blur event (like clicking outside)
+      textarea!.dispatchEvent(new Event('blur'));
+
+      // Wait for the blur timeout (100ms)
+      await new Promise(resolve => setTimeout(resolve, 150));
 
       expect(annotations.length).toBe(1);
       expect(annotations[0].text).toBe('Test text');
