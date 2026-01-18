@@ -125,6 +125,7 @@
 - [ ] text tool - when I draw text area and click outside, the text kind of jumps up for e.g. 1px.
 - [ ] text tool - less padding space between textarea and border, like 5px
 - [ ] recheck annotations when scrolling
+- [ ] does test html needs to be in build/dist?
 
 ## Ongoing
 
