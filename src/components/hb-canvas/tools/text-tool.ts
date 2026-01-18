@@ -149,29 +149,27 @@ export class TextTool implements Tool {
     // Render text with wrapping
     if (annotation.text) {
       ctx.save();
-      // Use scaleX for font size to match coordinate system
+      // Scale font size to match canvas coordinate system
       ctx.font = `500 ${annotation.fontSize * scaleX}px Inter`;
       ctx.fillStyle = annotation.color;
       ctx.textBaseline = 'top';
       ctx.letterSpacing = '0.01em';
 
+      // Scale measurements to match canvas coordinate system
       const borderWidth = 2 * scaleX;
-      const borderOffset = borderWidth / 2; // strokeRect centers the stroke
-      const textareaPadding = 10 * scaleX;  // Use scaleX instead of dpr
+      const borderOffset = borderWidth / 2;
+      const textareaPadding = 10 * scaleX;
 
       // Text starts at: box edge + border inner offset + textarea padding
-      // strokeRect border extends borderOffset inward from the path
       const textStartOffset = borderOffset + textareaPadding;
 
       const maxWidth = annotation.width - textStartOffset * 2;
       const lines = this.wrapText(ctx, annotation.text, maxWidth);
 
-      // Add 1px vertical adjustment to compensate for font metrics difference
-      // between textarea rendering and canvas textBaseline: 'top'
-      let yOffset = annotation.y + textStartOffset + scaleX;
+      // Text vertical position matches textarea exactly
+      let yOffset = annotation.y + textStartOffset;
 
-      // Round line-height to prevent sub-pixel accumulation differences
-      // between textarea and canvas rendering in multi-line text
+      // Line height must match the scaled font size
       const lineHeight = Math.round(annotation.fontSize * scaleX * 1.2);
 
       lines.forEach((line) => {
@@ -219,19 +217,20 @@ export class TextTool implements Tool {
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
 
-    // Textarea has no border, but we need to offset its position by borderWidth/2
-    // to align the text with the canvas rendering which accounts for strokeRect borderOffset
+    // Calculate border offset in canvas coordinates to match canvas rendering
+    // IMPORTANT: Use separate offsets for X and Y to match their respective scales
     const borderWidth = 2;
-    const borderOffsetCanvas = (borderWidth / 2) * scaleX; // borderOffset in canvas pixels
+    const borderOffsetCanvasX = (borderWidth / 2) * scaleX;
+    const borderOffsetCanvasY = (borderWidth / 2) * scaleY;
 
     this.textArea = document.createElement('textarea');
     this.textArea.style.cssText = `
       position: fixed;
       box-sizing: border-box;
-      left: ${(box.x - borderOffsetCanvas) / scaleX + rect.left}px;
-      top: ${(box.y - borderOffsetCanvas) / scaleY + rect.top}px;
-      width: ${(box.width + borderOffsetCanvas * 2) / scaleX}px;
-      height: ${(box.height + borderOffsetCanvas * 2) / scaleY}px;
+      left: ${(box.x - borderOffsetCanvasX) / scaleX + rect.left}px;
+      top: ${(box.y - borderOffsetCanvasY) / scaleY + rect.top}px;
+      width: ${(box.width + borderOffsetCanvasX * 2) / scaleX}px;
+      height: ${(box.height + borderOffsetCanvasY * 2) / scaleY}px;
       margin: 0;
       font-size: ${this.fontSize}px;
       font-family: Inter;

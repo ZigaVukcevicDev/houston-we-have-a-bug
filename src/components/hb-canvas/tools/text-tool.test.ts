@@ -507,14 +507,12 @@ describe('TextTool', () => {
       // Expected position calculation:
       // strokeRect centers 2px border: inner edge at x + 1
       // Textarea padding: 10px
-      // Font metrics adjustment: 1px (to align with textarea rendering)
       // Total X offset: 1 + 10 = 11px
-      // Total Y offset: 1 + 10 + 1 = 12px
+      // Total Y offset: 1 + 10 = 11px (no additional adjustment needed)
       const borderOffset = 1; // borderWidth(2px) / 2
       const padding = 10;
-      const fontMetricsAdjustment = 1; // Compensation for textarea vs canvas text rendering
       const expectedX = annotation.x + borderOffset + padding; // 100 + 11 = 111
-      const expectedY = annotation.y + borderOffset + padding + fontMetricsAdjustment; // 100 + 12 = 112
+      const expectedY = annotation.y + borderOffset + padding; // 100 + 11 = 111
 
       expect(renderedX).toBe(expectedX);
       expect(renderedY).toBe(expectedY);

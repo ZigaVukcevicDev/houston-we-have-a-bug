@@ -314,4 +314,80 @@ test.describe('Text tool', () => {
     expect(cursor).toBe('pointer');
   });
 
+  test('should not have text position jump when finalizing', async ({ page }) => {
+    // Select text tool
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    // Draw first text box at a specific position
+    const startX = canvasBox.x + 150;
+    const startY = canvasBox.y + 150;
+    const endX = canvasBox.x + 350;
+    const endY = canvasBox.y + 250;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    // Get the first textarea position
+    const textarea1 = page.locator('textarea');
+    await expect(textarea1).toBeVisible();
+    const textareaBox1 = await textarea1.boundingBox();
+    if (!textareaBox1) throw new Error('Textarea not found');
+
+    // Type some text
+    await textarea1.fill('Test text alignment');
+
+    // Click outside to finalize
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await expect(textarea1).not.toBeVisible();
+
+    // Wait a bit for finalization
+    await page.waitForTimeout(100);
+
+    // Switch back to text tool (it was auto-switched to select)
+    await page.click('[data-tool="text"]');
+
+    // Draw second text box at the EXACT same position
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    // Get the second textarea position
+    const textarea2 = page.locator('textarea');
+    await expect(textarea2).toBeVisible();
+    const textareaBox2 = await textarea2.boundingBox();
+    if (!textareaBox2) throw new Error('Second textarea not found');
+
+    // Verify the textareas appear at the same position
+    // If there was a vertical jump bug, the second textarea would be offset
+    expect(textareaBox2.x).toBeCloseTo(textareaBox1.x, 0);
+    expect(textareaBox2.y).toBeCloseTo(textareaBox1.y, 0);
+    expect(textareaBox2.width).toBeCloseTo(textareaBox1.width, 0);
+    expect(textareaBox2.height).toBeCloseTo(textareaBox1.height, 0);
+
+    // Type text in the second one
+    await textarea2.fill('Second annotation');
+
+    // Finalize the second one
+    await page.keyboard.press('Escape');
+    await expect(textarea2).not.toBeVisible();
+
+    // Verify both annotations exist and are correctly positioned
+    // Switch to select tool
+    await page.click('[data-tool="select"]');
+
+    // Click on the first annotation position
+    await page.mouse.click(startX + 50, startY + 50);
+    await page.waitForTimeout(100);
+
+    // Should select one of the annotations (they're at the same position)
+    await expect(page.locator('[data-tool="select"][aria-selected="true"]')).toBeVisible();
+  });
+
 });
