@@ -232,14 +232,50 @@ export class TextTool implements Tool {
       let currentLine = '';
 
       words.forEach((word) => {
-        const testLine = currentLine ? `${currentLine} ${word}` : word;
-        const metrics = ctx.measureText(testLine);
+        // Check if the word itself is too long
+        const wordMetrics = ctx.measureText(word);
 
-        if (metrics.width > maxWidth && currentLine) {
-          allLines.push(currentLine);
-          currentLine = word;
+        if (wordMetrics.width > maxWidth) {
+          // Push current line if it has content
+          if (currentLine) {
+            allLines.push(currentLine);
+            currentLine = '';
+          }
+
+          // Break the long word character by character
+          let remainingWord = word;
+          while (remainingWord) {
+            let charLine = '';
+            for (let i = 0; i < remainingWord.length; i++) {
+              const testChar = charLine + remainingWord[i];
+              const charMetrics = ctx.measureText(testChar);
+
+              if (charMetrics.width > maxWidth && charLine) {
+                break;
+              }
+              charLine = testChar;
+            }
+
+            if (charLine) {
+              allLines.push(charLine);
+              remainingWord = remainingWord.slice(charLine.length);
+            } else {
+              // Single character exceeds width, push it anyway
+              allLines.push(remainingWord[0]);
+              remainingWord = remainingWord.slice(1);
+            }
+          }
         } else {
-          currentLine = testLine;
+          // Word fits, try to add it to current line
+          const testLine = currentLine ? `${currentLine} ${word}` : word;
+          const metrics = ctx.measureText(testLine);
+
+          if (metrics.width > maxWidth && currentLine) {
+            allLines.push(currentLine);
+            currentLine = word;
+          } else {
+            currentLine = testLine;
+          }
         }
       });
 
@@ -274,6 +310,7 @@ export class TextTool implements Tool {
       left: ${(box.x - borderOffsetCanvasX) / scaleX + rect.left}px;
       top: ${(box.y - borderOffsetCanvasY) / scaleY + rect.top}px;
       width: ${(box.width + borderOffsetCanvasX * 2) / scaleX}px;
+      max-width: ${(box.width + borderOffsetCanvasX * 2) / scaleX}px;
       height: ${(box.height + borderOffsetCanvasY * 2) / scaleY}px;
       margin: 0;
       font-size: ${this.fontSize}px;
@@ -289,7 +326,8 @@ export class TextTool implements Tool {
       padding: 5px;
       overflow: hidden;
       white-space: pre-wrap;
-      word-wrap: break-word;
+      overflow-wrap: break-word;
+      word-break: break-word;
       z-index: 10000;
       pointer-events: none;
     `;

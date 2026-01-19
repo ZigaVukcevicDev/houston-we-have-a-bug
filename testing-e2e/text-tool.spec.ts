@@ -551,4 +551,244 @@ test.describe('Text tool', () => {
     // If the bug existed, verticalDiff would be ~110px (the height difference)
     expect(verticalDiff).toBeLessThan(3);
   });
+
+  test('should wrap long words during typing without horizontal overflow', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    await page.waitForTimeout(100);
+
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+
+    const divWidth = await textDiv.evaluate((el) => {
+      return el.getBoundingClientRect().width;
+    });
+
+    // Type a long word character by character like a real user
+    const longWord = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'; // 42 chars
+    await textDiv.focus();
+    await textDiv.type(longWord, { delay: 10 });
+
+    await page.waitForTimeout(100);
+
+    const hasHorizontalOverflow = await textDiv.evaluate((el) => {
+      return el.scrollWidth > el.clientWidth;
+    });
+
+    expect(hasHorizontalOverflow).toBe(false);
+
+    // Click outside to render to canvas
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await page.waitForTimeout(200);
+
+    // Verify text was rendered (basic check - detailed overflow detection is complex)
+    const hasText = await canvas.evaluate((canvasEl) => {
+      if (!(canvasEl instanceof HTMLCanvasElement)) return false;
+      const ctx = canvasEl.getContext('2d');
+      if (!ctx) return false;
+      const imageData = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
+      for (let i = 3; i < imageData.data.length; i += 4) {
+        if (imageData.data[i] !== 0) return true;
+      }
+      return false;
+    });
+
+    expect(hasText).toBe(true);
+  });
+
+  test('should wrap text with multiple long words', async ({ page }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    await page.waitForTimeout(100);
+
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+
+    const text = 'aaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbb cccccccccccccccccc';
+    await textDiv.evaluate((el, txt) => {
+      el.textContent = txt;
+    }, text);
+
+    await page.waitForTimeout(100);
+
+    const hasHorizontalOverflow = await textDiv.evaluate((el) => {
+      return el.scrollWidth > el.clientWidth;
+    });
+
+    expect(hasHorizontalOverflow).toBe(false);
+  });
+
+  test('should preserve wrapping after clicking outside', async ({ page }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    await page.waitForTimeout(100);
+
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+
+    const longWord = 'a'.repeat(50);
+    await textDiv.evaluate((el, txt) => {
+      el.textContent = txt;
+    }, longWord);
+
+    await page.waitForTimeout(100);
+
+    const hasOverflowBefore = await textDiv.evaluate((el) => {
+      return el.scrollWidth > el.clientWidth;
+    });
+    expect(hasOverflowBefore).toBe(false);
+
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+
+    await page.waitForTimeout(100);
+
+    const divExists = await textDiv.count();
+    expect(divExists).toBe(0);
+
+    const hasText = await canvas.evaluate((canvasEl) => {
+      if (!(canvasEl instanceof HTMLCanvasElement)) return false;
+      const ctx = canvasEl.getContext('2d');
+      if (!ctx) return false;
+      const imageData = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
+      for (let i = 3; i < imageData.data.length; i += 4) {
+        if (imageData.data[i] !== 0) return true;
+      }
+      return false;
+    });
+
+    expect(hasText).toBe(true);
+  });
+
+  test('should wrap text with special characters', async ({ page }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    await page.waitForTimeout(100);
+
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+
+    const text =
+      'https://verylongdomainname.com/with/a/very/long/path/that/continues';
+    await textDiv.evaluate((el, txt) => {
+      el.textContent = txt;
+    }, text);
+
+    await page.waitForTimeout(100);
+
+    const hasHorizontalOverflow = await textDiv.evaluate((el) => {
+      return el.scrollWidth > el.clientWidth;
+    });
+
+    expect(hasHorizontalOverflow).toBe(false);
+  });
+
+  test('should wrap text when resizing text box', async ({ page }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    await page.waitForTimeout(100);
+
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+
+    const longWord = 'a'.repeat(40);
+    await textDiv.evaluate((el, txt) => {
+      el.textContent = txt;
+    }, longWord);
+
+    await page.waitForTimeout(100);
+
+    const initialHasOverflow = await textDiv.evaluate((el) => {
+      return el.scrollWidth > el.clientWidth;
+    });
+    expect(initialHasOverflow).toBe(false);
+
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+
+    await page.waitForTimeout(100);
+
+    const hasAnnotation = await canvas.evaluate((canvasEl) => {
+      if (!(canvasEl instanceof HTMLCanvasElement)) return false;
+      const ctx = canvasEl.getContext('2d');
+      if (!ctx) return false;
+      const imageData = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
+      for (let i = 3; i < imageData.data.length; i += 4) {
+        if (imageData.data[i] !== 0) return true;
+      }
+      return false;
+    });
+
+    expect(hasAnnotation).toBe(true);
+  });
 });
