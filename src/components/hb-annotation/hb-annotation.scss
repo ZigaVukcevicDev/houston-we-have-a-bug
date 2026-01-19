@@ -134,7 +134,7 @@
   align-items: flex-start;
 
   hb-canvas {
-    flex-shrink: 0;
+    max-width: 100%;
   }
 }
 

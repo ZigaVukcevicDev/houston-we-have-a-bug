@@ -3,7 +3,11 @@ import { customElement, property, query } from 'lit/decorators.js';
 import styles from './hb-canvas.scss';
 import type { ActiveTool } from '../../types/active-tool.type';
 import type { Tool } from '../../interfaces/tool.interface';
-import type { LineAnnotation, TextAnnotation, RectangleAnnotation } from '../../interfaces/annotation.interface';
+import type {
+  LineAnnotation,
+  TextAnnotation,
+  RectangleAnnotation,
+} from '../../interfaces/annotation.interface';
 import { TextTool } from './tools/text-tool';
 import { LineTool } from './tools/line-tool';
 import { ArrowTool } from './tools/arrow-tool';
@@ -44,34 +48,53 @@ export class HBCanvas extends LitElement {
   }
 
   render() {
-    const modeClass = this.activeTool ? `mode-${this.activeTool}` : 'mode-default';
+    const modeClass = this.activeTool
+      ? `mode-${this.activeTool}`
+      : 'mode-default';
     const cropTool = this.tools.get('crop') as CropTool;
-    const showCropButtons = this.activeTool === 'crop' && cropTool && !cropTool.getIsDrawing() && !cropTool.getIsDragging() && this.getCropButtonsPosition();
+    const showCropButtons =
+      this.activeTool === 'crop' &&
+      cropTool &&
+      !cropTool.getIsDrawing() &&
+      !cropTool.getIsDragging() &&
+      this.getCropButtonsPosition();
     return html`<canvas
-      class="${modeClass}"
-      @click=${this.handleCanvasClick}
-      @mousedown=${this.handleMouseDown}
-      @mousemove=${this.handleMouseMove}
-      @mouseup=${this.handleMouseUp}
-    ></canvas>
-    ${showCropButtons ? html`
-      <div class="crop-buttons" style="${this.getCropButtonsStyle()}">
-        <button
-          @click=${this.handleCropConfirm}
-          title="Confirm crop"
-        >
-          <img class="icon-default" src="../images/check-1-black.svg" alt="check" />
-          <img class="icon-hover-and-active" src="../images/check-1-white.svg" alt="check" />
-        </button>
-        <button
-          @click=${this.handleCropCancel}
-          title="Cancel crop"
-        >
-          <img class="icon-default" src="../images/cancel-black.svg" alt="cancel" />
-          <img class="icon-hover-and-active" src="../images/cancel-white.svg" alt="cancel" />
-        </button>
-      </div>
-    ` : ''}`;
+        class="${modeClass}"
+        @click=${this.handleCanvasClick}
+        @mousedown=${this.handleMouseDown}
+        @mousemove=${this.handleMouseMove}
+        @mouseup=${this.handleMouseUp}
+      ></canvas>
+      ${showCropButtons
+        ? html`
+            <div class="crop-buttons" style="${this.getCropButtonsStyle()}">
+              <button @click=${this.handleCropConfirm} title="Confirm crop">
+                <img
+                  class="icon-default"
+                  src="../images/check-1-black.svg"
+                  alt="check"
+                />
+                <img
+                  class="icon-hover-and-active"
+                  src="../images/check-1-white.svg"
+                  alt="check"
+                />
+              </button>
+              <button @click=${this.handleCropCancel} title="Cancel crop">
+                <img
+                  class="icon-default"
+                  src="../images/cancel-black.svg"
+                  alt="cancel"
+                />
+                <img
+                  class="icon-hover-and-active"
+                  src="../images/cancel-white.svg"
+                  alt="cancel"
+                />
+              </button>
+            </div>
+          `
+        : ''}`;
   }
 
   protected firstUpdated() {
@@ -90,7 +113,9 @@ export class HBCanvas extends LitElement {
     // Handle tool switching
     if (changedProperties.has('activeTool')) {
       // Deactivate previous tool
-      const previousMode = changedProperties.get('activeTool') as ActiveTool | undefined;
+      const previousMode = changedProperties.get('activeTool') as
+        | ActiveTool
+        | undefined;
       if (previousMode) {
         const prevTool = this.tools.get(previousMode);
         prevTool?.deactivate?.();
@@ -111,38 +136,60 @@ export class HBCanvas extends LitElement {
 
   private initializeTools() {
     // Initialize tools with shared annotations and callbacks
-    this.tools.set('text', new TextTool(
-      this.textAnnotations,
-      () => this.redraw(),
-      (tool: string, annotationId?: string) => this.handleToolChange(tool, annotationId)
-    ));
-    this.tools.set('line', new LineTool(
-      this.lineAnnotations,
-      () => this.redraw(),
-      (tool: string, annotationId?: string) => this.handleToolChange(tool, annotationId)
-    ));
-    this.tools.set('arrow', new ArrowTool(
-      this.arrowAnnotations,
-      () => this.redraw(),
-      (tool: string, annotationId?: string) => this.handleToolChange(tool, annotationId)
-    ));
-    this.tools.set('rectangle', new RectangleTool(
-      this.rectangleAnnotations,
-      () => this.redraw(),
-      (tool: string, annotationId?: string) => this.handleToolChange(tool, annotationId)
-    ));
-    this.tools.set('select', new SelectTool(
-      this.lineAnnotations,
-      this.arrowAnnotations,
-      this.rectangleAnnotations,
-      this.textAnnotations,
-      () => this.redraw()
-    ));
-    this.tools.set('crop', new CropTool(
-      () => this.redraw(),
-      (tool: string) => this.handleToolChange(tool),
-      () => this.handleCropConfirm()
-    ));
+    this.tools.set(
+      'text',
+      new TextTool(
+        this.textAnnotations,
+        () => this.redraw(),
+        (tool: string, annotationId?: string) =>
+          this.handleToolChange(tool, annotationId)
+      )
+    );
+    this.tools.set(
+      'line',
+      new LineTool(
+        this.lineAnnotations,
+        () => this.redraw(),
+        (tool: string, annotationId?: string) =>
+          this.handleToolChange(tool, annotationId)
+      )
+    );
+    this.tools.set(
+      'arrow',
+      new ArrowTool(
+        this.arrowAnnotations,
+        () => this.redraw(),
+        (tool: string, annotationId?: string) =>
+          this.handleToolChange(tool, annotationId)
+      )
+    );
+    this.tools.set(
+      'rectangle',
+      new RectangleTool(
+        this.rectangleAnnotations,
+        () => this.redraw(),
+        (tool: string, annotationId?: string) =>
+          this.handleToolChange(tool, annotationId)
+      )
+    );
+    this.tools.set(
+      'select',
+      new SelectTool(
+        this.lineAnnotations,
+        this.arrowAnnotations,
+        this.rectangleAnnotations,
+        this.textAnnotations,
+        () => this.redraw()
+      )
+    );
+    this.tools.set(
+      'crop',
+      new CropTool(
+        () => this.redraw(),
+        (tool: string) => this.handleToolChange(tool),
+        () => this.handleCropConfirm()
+      )
+    );
   }
 
   private handleToolChange(tool: string, annotationId?: string) {
@@ -150,11 +197,13 @@ export class HBCanvas extends LitElement {
     this.activeTool = tool as ActiveTool;
 
     // Dispatch event to notify toolbar of tool change
-    this.dispatchEvent(new CustomEvent('tool-change', {
-      detail: { tool },
-      bubbles: true,
-      composed: true
-    }));
+    this.dispatchEvent(
+      new CustomEvent('tool-change', {
+        detail: { tool },
+        bubbles: true,
+        composed: true,
+      })
+    );
 
     // If an annotation ID is provided, select it after tool change
     if (annotationId && tool === 'select') {
@@ -179,9 +228,26 @@ export class HBCanvas extends LitElement {
       this.canvas.width = img.width;
       this.canvas.height = img.height;
 
-      // Set canvas display size to account for DPR
-      this.canvas.style.width = `${img.width / dpr}px`;
-      this.canvas.style.height = `${img.height / dpr}px`;
+      // Calculate display size accounting for DPR
+      const displayWidth = img.width / dpr;
+      const displayHeight = img.height / dpr;
+
+      // Get available container width (accounting for padding)
+      const container = this.closest('.canvas-container') as HTMLElement;
+      const containerWidth = container
+        ? container.clientWidth - 32
+        : window.innerWidth - 32; // 32px for padding
+
+      // Scale down if image is wider than container, but maintain a minimum size
+      const scale =
+        displayWidth > containerWidth ? containerWidth / displayWidth : 1;
+      const finalWidth = displayWidth * scale;
+      const finalHeight = displayHeight * scale;
+
+      this.canvas.style.width = `${finalWidth}px`;
+      this.canvas.style.height = `${finalHeight}px`;
+      this.canvas.style.minWidth = `${finalWidth}px`;
+      this.canvas.style.minHeight = `${finalHeight}px`;
 
       this.redraw();
     };
@@ -252,7 +318,7 @@ export class HBCanvas extends LitElement {
     const padding = 5;
     return {
       x: cropRect.x + cropRect.width - (buttonWidth + padding) * dpr,
-      y: cropRect.y + cropRect.height - (buttonHeight + padding) * dpr
+      y: cropRect.y + cropRect.height - (buttonHeight + padding) * dpr,
     };
   }
 
@@ -289,11 +355,13 @@ export class HBCanvas extends LitElement {
         this.activeTool = 'select';
         this.requestUpdate();
         // Dispatch event so parent component (hb-annotation) knows about the tool change
-        this.dispatchEvent(new CustomEvent('tool-change', {
-          detail: { tool: 'select' },
-          bubbles: true,
-          composed: true
-        }));
+        this.dispatchEvent(
+          new CustomEvent('tool-change', {
+            detail: { tool: 'select' },
+            bubbles: true,
+            composed: true,
+          })
+        );
       };
     }
   }

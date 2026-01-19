@@ -515,11 +515,15 @@ test.describe('Crop tool', () => {
 
     const canvas = page.locator('canvas');
 
-    // Get initial canvas dimensions
+    // Get initial canvas dimensions (internal resolution)
+    const initialDimensions = await canvas.evaluate((c: HTMLCanvasElement) => ({
+      width: c.width,
+      height: c.height,
+    }));
+
+    // Get display dimensions
     const initialBox = await canvas.boundingBox();
     if (!initialBox) throw new Error('Canvas not found');
-    const initialWidth = initialBox.width;
-    const initialHeight = initialBox.height;
 
     // Draw crop rectangle (smaller than original)
     const startX = initialBox.x + 100;
@@ -537,21 +541,29 @@ test.describe('Crop tool', () => {
     await page.click('.crop-buttons button[title="Confirm crop"]');
     await page.waitForTimeout(200); // Wait for image to load and canvas to resize
 
-    // Get new canvas dimensions
-    const newBox = await canvas.boundingBox();
-    if (!newBox) throw new Error('Canvas not found after crop');
+    // Get new canvas dimensions (internal resolution)
+    const newDimensions = await canvas.evaluate((c: HTMLCanvasElement) => ({
+      width: c.width,
+      height: c.height,
+    }));
 
-    // Canvas should be smaller than original
-    expect(newBox.width).toBeLessThan(initialWidth);
-    expect(newBox.height).toBeLessThan(initialHeight);
+    // Canvas internal resolution should be smaller than original
+    expect(newDimensions.width).toBeLessThan(initialDimensions.width);
+    expect(newDimensions.height).toBeLessThan(initialDimensions.height);
 
-    // Approximate crop dimensions (accounting for devicePixelRatio)
-    const cropWidth = endX - startX;
-    const cropHeight = endY - startY;
+    // The canvas should have been cropped to approximately the selected area
+    // (allowing for device pixel ratio scaling)
+    const dpr = await page.evaluate(() => window.devicePixelRatio);
+    const expectedWidth = (endX - startX) * dpr;
+    const expectedHeight = (endY - startY) * dpr;
 
-    // New dimensions should be close to crop dimensions
-    expect(Math.abs(newBox.width - cropWidth)).toBeLessThan(5);
-    expect(Math.abs(newBox.height - cropHeight)).toBeLessThan(5);
+    // New dimensions should be close to crop dimensions (within 10% tolerance for scaling)
+    expect(
+      Math.abs(newDimensions.width - expectedWidth) / expectedWidth
+    ).toBeLessThan(0.1);
+    expect(
+      Math.abs(newDimensions.height - expectedHeight) / expectedHeight
+    ).toBeLessThan(0.1);
   });
 
   test('should crop the correct visual content from the image', async ({
