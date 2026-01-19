@@ -14,7 +14,11 @@ describe('RectangleTool', () => {
     rectangleAnnotations = [];
     mockRedraw = vi.fn();
     mockToolChange = vi.fn();
-    rectangleTool = new RectangleTool(rectangleAnnotations, mockRedraw, mockToolChange);
+    rectangleTool = new RectangleTool(
+      rectangleAnnotations,
+      mockRedraw,
+      mockToolChange
+    );
 
     mockCanvas = {
       getBoundingClientRect: vi.fn().mockReturnValue({
@@ -79,9 +83,15 @@ describe('RectangleTool', () => {
     it('should add keyboard listener for Escape key', () => {
       const addEventListenerSpy = vi.spyOn(document, 'addEventListener');
 
-      rectangleTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      rectangleTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
 
-      expect(addEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+      expect(addEventListenerSpy).toHaveBeenCalledWith(
+        'keydown',
+        expect.any(Function)
+      );
     });
   });
 
@@ -190,7 +200,9 @@ describe('RectangleTool', () => {
         color: '#E74C3C',
         strokeWidth: 5,
       });
-      expect(rectangleAnnotations[0].id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i); // UUID format
+      expect(rectangleAnnotations[0].id).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      ); // UUID format
     });
 
     it('should normalize negative dimensions', () => {
@@ -232,7 +244,12 @@ describe('RectangleTool', () => {
         mockCanvas
       );
 
-      expect(mockToolChange).toHaveBeenCalledWith('select', expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)); // UUID format
+      expect(mockToolChange).toHaveBeenCalledWith(
+        'select',
+        expect.stringMatching(
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+        )
+      ); // UUID format
     });
 
     it('should not create rectangle if dimensions are too small', () => {
@@ -271,9 +288,11 @@ describe('RectangleTool', () => {
   });
 
   describe('deactivate', () => {
-
     it('should cancel drawing on deactivate', () => {
-      rectangleTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      rectangleTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
       rectangleTool['isDrawing'] = true;
 
       rectangleTool.deactivate();
@@ -284,7 +303,10 @@ describe('RectangleTool', () => {
 
   describe('Escape key handling', () => {
     it('should cancel drawing when Escape is pressed', () => {
-      rectangleTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      rectangleTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
       expect(rectangleTool['isDrawing']).toBe(true);
 
       const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
@@ -297,11 +319,17 @@ describe('RectangleTool', () => {
     it('should remove keyboard listener after escape', () => {
       const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
 
-      rectangleTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      rectangleTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
       const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
       rectangleTool['keydownHandler']?.(escapeEvent);
 
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        'keydown',
+        expect.any(Function)
+      );
     });
   });
 
@@ -401,19 +429,34 @@ describe('RectangleTool', () => {
         height: 600,
       });
 
-      rectangleTool.handleMouseDown({ clientX: 150, clientY: 200 } as MouseEvent, mockCanvas);
+      rectangleTool.handleMouseDown(
+        { clientX: 150, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(rectangleTool['startPoint']).toEqual({ x: 100, y: 100 });
     });
 
     it('should handle multiple rectangles', () => {
       // Draw first rectangle
-      rectangleTool.handleMouseDown({ clientX: 50, clientY: 50 } as MouseEvent, mockCanvas);
-      rectangleTool.handleMouseUp({ clientX: 150, clientY: 150, shiftKey: false } as MouseEvent, mockCanvas);
+      rectangleTool.handleMouseDown(
+        { clientX: 50, clientY: 50 } as MouseEvent,
+        mockCanvas
+      );
+      rectangleTool.handleMouseUp(
+        { clientX: 150, clientY: 150, shiftKey: false } as MouseEvent,
+        mockCanvas
+      );
 
       // Draw second rectangle
-      rectangleTool.handleMouseDown({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas);
-      rectangleTool.handleMouseUp({ clientX: 300, clientY: 300, shiftKey: false } as MouseEvent, mockCanvas);
+      rectangleTool.handleMouseDown(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      rectangleTool.handleMouseUp(
+        { clientX: 300, clientY: 300, shiftKey: false } as MouseEvent,
+        mockCanvas
+      );
 
       expect(rectangleAnnotations).toHaveLength(2);
       expect(rectangleAnnotations[0]).toBeDefined();
@@ -421,13 +464,91 @@ describe('RectangleTool', () => {
     });
 
     it('should handle perfect square with shift key', () => {
-      rectangleTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      rectangleTool.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: true } as MouseEvent, mockCanvas);
+      rectangleTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      rectangleTool.handleMouseUp(
+        { clientX: 200, clientY: 200, shiftKey: true } as MouseEvent,
+        mockCanvas
+      );
 
       expect(rectangleAnnotations[0]).toMatchObject({
         width: 100,
         height: 100,
       });
+    });
+
+    it('should cancel drawing on Escape key', () => {
+      rectangleTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      expect(rectangleTool['isDrawing']).toBe(true);
+
+      // Simulate Escape key
+      const event = new KeyboardEvent('keydown', { key: 'Escape' });
+      document.dispatchEvent(event);
+
+      expect(rectangleTool['isDrawing']).toBe(false);
+      expect(rectangleAnnotations).toHaveLength(0);
+    });
+
+    it('should cleanup event listener on deactivate', () => {
+      rectangleTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
+
+      rectangleTool.deactivate();
+
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        'keydown',
+        expect.any(Function)
+      );
+      expect(rectangleTool['isDrawing']).toBe(false);
+    });
+
+    it('should handle deactivate when not drawing', () => {
+      expect(rectangleTool['isDrawing']).toBe(false);
+
+      // Should not throw
+      expect(() => {
+        rectangleTool.deactivate();
+      }).not.toThrow();
+
+      expect(rectangleTool['isDrawing']).toBe(false);
+    });
+
+    it('should constrain to square with negative width', () => {
+      rectangleTool.handleMouseDown(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      rectangleTool.handleMouseMove(
+        { clientX: 100, clientY: 150, shiftKey: true } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      // Should draw square with larger dimension (100), both dimensions negative
+      expect(mockCtx.rect).toHaveBeenCalledWith(200, 200, -100, -100);
+    });
+
+    it('should constrain to square with mixed sign dimensions', () => {
+      rectangleTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      rectangleTool.handleMouseMove(
+        { clientX: 150, clientY: 50, shiftKey: true } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      // Height is negative and larger in absolute value (50), so both should be 50/-50
+      expect(mockCtx.rect).toHaveBeenCalledWith(100, 100, 50, -50);
     });
   });
 });
