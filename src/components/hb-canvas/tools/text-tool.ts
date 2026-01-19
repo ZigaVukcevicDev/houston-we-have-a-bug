@@ -14,10 +14,19 @@ export class TextTool implements Tool {
   // Drawing state
   private isDrawing: boolean = false;
   private startPoint: { x: number; y: number } | null = null;
-  private currentBox: { x: number; y: number; width: number; height: number } | null = null;
+  private currentBox: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null = null;
   private keepTextDivActive: boolean = false;
 
-  constructor(annotations: TextAnnotation[], onRedraw: () => void, onToolChange: (tool: string, annotationId?: string) => void) {
+  constructor(
+    annotations: TextAnnotation[],
+    onRedraw: () => void,
+    onToolChange: (tool: string, annotationId?: string) => void
+  ) {
     this.annotations = annotations;
     this.onRedraw = onRedraw;
     this.onToolChange = onToolChange;
@@ -123,7 +132,11 @@ export class TextTool implements Tool {
     });
 
     // Render current drawing box border (also when textarea is active, since textarea has no border)
-    if (this.currentBox && this.currentBox.width > 0 && this.currentBox.height > 0) {
+    if (
+      this.currentBox &&
+      this.currentBox.width > 0 &&
+      this.currentBox.height > 0
+    ) {
       ctx.save();
       ctx.strokeStyle = this.color;
       ctx.lineWidth = 2 * scaleX;
@@ -135,15 +148,24 @@ export class TextTool implements Tool {
       );
       ctx.restore();
     }
-
   }
 
-  private renderTextBox(ctx: CanvasRenderingContext2D, annotation: TextAnnotation, scaleX: number, scaleY: number): void {
+  private renderTextBox(
+    ctx: CanvasRenderingContext2D,
+    annotation: TextAnnotation,
+    scaleX: number,
+    scaleY: number
+  ): void {
     // Draw rectangle border
     ctx.save();
     ctx.strokeStyle = annotation.color;
     ctx.lineWidth = 2 * scaleX;
-    ctx.strokeRect(annotation.x, annotation.y, annotation.width, annotation.height);
+    ctx.strokeRect(
+      annotation.x,
+      annotation.y,
+      annotation.width,
+      annotation.height
+    );
     ctx.restore();
 
     // Render text with wrapping
@@ -152,7 +174,7 @@ export class TextTool implements Tool {
       // Scale font size to match canvas coordinate system
       ctx.font = `500 ${annotation.fontSize * scaleX}px Inter`;
       // Use a slightly darker color for text to compensate for anti-aliasing making it appear lighter
-      ctx.fillStyle = this.darkenColor(annotation.color, 0.08);
+      ctx.fillStyle = this.darkenColor(annotation.color, 0.05);
       ctx.textBaseline = 'top';
       ctx.letterSpacing = '0.01em';
 
@@ -195,7 +217,11 @@ export class TextTool implements Tool {
     }
   }
 
-  private wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+  private wrapText(
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    maxWidth: number
+  ): string[] {
     // Split by newlines first to preserve multi-line text
     const paragraphs = text.split('\n');
     const allLines: string[] = [];
@@ -226,7 +252,10 @@ export class TextTool implements Tool {
     return allLines.length > 0 ? allLines : [''];
   }
 
-  private createTextDiv(canvas: HTMLCanvasElement, box: { x: number; y: number; width: number; height: number }): void {
+  private createTextDiv(
+    canvas: HTMLCanvasElement,
+    box: { x: number; y: number; width: number; height: number }
+  ): void {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
@@ -292,7 +321,7 @@ export class TextTool implements Tool {
       // Remove the annotation on Escape
       const annotationId = this.textDiv?.dataset.annotationId;
       if (annotationId) {
-        const index = this.annotations.findIndex(a => a.id === annotationId);
+        const index = this.annotations.findIndex((a) => a.id === annotationId);
         if (index !== -1) {
           this.annotations.splice(index, 1);
         }
@@ -317,14 +346,16 @@ export class TextTool implements Tool {
 
     if (annotationId) {
       // Find and update the existing annotation
-      const annotation = this.annotations.find(a => a.id === annotationId);
+      const annotation = this.annotations.find((a) => a.id === annotationId);
       if (annotation) {
         if (text) {
           // Update the annotation with the entered text
           annotation.text = text;
         } else {
           // Remove annotation if no text was entered
-          const index = this.annotations.findIndex(a => a.id === annotationId);
+          const index = this.annotations.findIndex(
+            (a) => a.id === annotationId
+          );
           if (index !== -1) {
             this.annotations.splice(index, 1);
           }
@@ -333,7 +364,7 @@ export class TextTool implements Tool {
     }
 
     this.removeTextDiv();
-    this.currentBox = null;  // Clear drawing box state
+    this.currentBox = null; // Clear drawing box state
     this.onRedraw();
   }
 
