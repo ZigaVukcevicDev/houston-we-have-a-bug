@@ -232,11 +232,11 @@ export class HBCanvas extends LitElement {
       const displayWidth = img.width / dpr;
       const displayHeight = img.height / dpr;
 
-      // Get available container width (accounting for padding)
+      // Get available container width (no padding now)
       const container = this.closest('.canvas-container') as HTMLElement;
       const containerWidth = container
-        ? container.clientWidth - 32
-        : window.innerWidth - 32; // 32px for padding
+        ? container.clientWidth
+        : window.innerWidth;
 
       // Scale down if image is wider than container, but maintain a minimum size
       const scale =

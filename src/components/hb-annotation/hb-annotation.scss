@@ -128,7 +128,8 @@
 .canvas-container {
   flex: 1;
   overflow: auto;
-  padding: $spacing-lg;
+  padding: 0;
+  padding-top: 49px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
