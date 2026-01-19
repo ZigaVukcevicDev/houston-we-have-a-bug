@@ -126,6 +126,11 @@
 - [x] text tool - less padding space in editable div, 5px
 - [ ] text tool - increase font size (also update demo images)
 - [ ] text tool - darkenColor is not applied when writing text, also cursor
+- [ ] text tool - fix text not to be scrollable when not fitting vertically (it works ok when clicking outside)
+- [x] text tool - set minimum width and height of 40px when creating or resizing
+- [ ] text tool - make border transparent when clicking outside
+- [ ] text tool - make border 35% visible when hovering
+- [x] text tool - revisit if user can't resize in negative directions
 - [x] recheck annotations when scrolling
 - [x] screenshot is horizontally scrollable
 - [x] does test html needs to be in build/dist?

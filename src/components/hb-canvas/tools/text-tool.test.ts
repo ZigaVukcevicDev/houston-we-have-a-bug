@@ -1,10 +1,20 @@
-import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  vi,
+  type Mock,
+} from 'vitest';
 import { TextTool } from './text-tool';
 import type { TextAnnotation } from '../../../interfaces/annotation.interface';
 
 // Helper to get text div element
 const getTextDiv = (): HTMLDivElement | null => {
-  return document.querySelector('div[contenteditable="true"]') as HTMLDivElement | null;
+  return document.querySelector(
+    'div[contenteditable="true"]'
+  ) as HTMLDivElement | null;
 };
 
 describe('TextTool', () => {
@@ -34,7 +44,7 @@ describe('TextTool', () => {
 
     // Mock context
     mockCtx = {
-      canvas: mockCanvas,  // Add reference to canvas for getBoundingClientRect access
+      canvas: mockCanvas, // Add reference to canvas for getBoundingClientRect access
       font: '',
       fillStyle: '',
       strokeStyle: '',
@@ -60,15 +70,24 @@ describe('TextTool', () => {
 
   describe('drawing rectangle', () => {
     it('should start drawing on mousedown', () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(textTool['isDrawing']).toBe(true);
       expect(textTool['startPoint']).toEqual({ x: 100, y: 100 });
     });
 
     it('should update currentBox on mousemove while drawing', () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 200, clientY: 150 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 200, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(textTool['currentBox']).toEqual({
         x: 100,
@@ -79,27 +98,42 @@ describe('TextTool', () => {
     });
 
     it('should constrain dragging to right and down only', () => {
-      textTool.handleMouseDown({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       // Try to drag left and up
-      textTool.handleMouseMove({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
 
-      // Width and height should be minimum size (2px), not 0
-      expect(textTool['currentBox']?.width).toBe(2);
-      expect(textTool['currentBox']?.height).toBe(2);
+      // Width and height should be minimum size (40px), not 0
+      expect(textTool['currentBox']?.width).toBe(40);
+      expect(textTool['currentBox']?.height).toBe(40);
     });
 
     it('should call redraw during mousemove', () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
       mockRedraw.mockClear();
 
-      textTool.handleMouseMove({ clientX: 200, clientY: 150 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove(
+        { clientX: 200, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(mockRedraw).toHaveBeenCalled();
     });
 
     it('should not update box if not drawing', () => {
-      textTool.handleMouseMove({ clientX: 200, clientY: 150 } as MouseEvent, mockCanvas);
+      textTool.handleMouseMove(
+        { clientX: 200, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(textTool['currentBox']).toBeNull();
     });
@@ -107,9 +141,18 @@ describe('TextTool', () => {
 
   describe('text div creation', () => {
     it('should create contenteditable div on mouseup with valid box size', () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       const textDiv = getTextDiv();
       expect(textDiv).toBeTruthy();
@@ -117,29 +160,59 @@ describe('TextTool', () => {
       expect(textDiv?.contentEditable).toBe('true');
     });
 
-    it('should not create textDiv if box is too small', () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 105, clientY: 105 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 105, clientY: 105 } as MouseEvent, mockCanvas);
+    it('should create textDiv with minimum 40px dimensions even when dragging small', () => {
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 105, clientY: 105 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 105, clientY: 105 } as MouseEvent,
+        mockCanvas
+      );
 
-      expect(getTextDiv()).toBeNull();
+      const textDiv = getTextDiv();
+      expect(textDiv).toBeTruthy();
+      expect(textDiv?.dataset.canvasWidth).toBe('40');
+      expect(textDiv?.dataset.canvasHeight).toBe('40');
     });
 
     it('should auto-focus textDiv on creation', () => {
       const focusSpy = vi.spyOn(HTMLDivElement.prototype, 'focus');
 
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(focusSpy).toHaveBeenCalled();
       focusSpy.mockRestore();
     });
 
     it('should apply correct styling to textDiv', () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       const textDiv = getTextDiv()!;
       expect(textDiv.style.position).toBe('fixed');
@@ -152,9 +225,18 @@ describe('TextTool', () => {
 
   describe('annotation creation', () => {
     it('should create annotation with width and height on blur', async () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 300, clientY: 250 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 300, clientY: 250 } as MouseEvent,
+        mockCanvas
+      );
 
       const textDiv = getTextDiv()!;
       textDiv.textContent = 'Test text';
@@ -175,9 +257,18 @@ describe('TextTool', () => {
     });
 
     it('should not create annotation if text is empty', async () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 300, clientY: 250 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 300, clientY: 250 } as MouseEvent,
+        mockCanvas
+      );
 
       const textDiv = getTextDiv()!;
       textDiv.textContent = '   '; // Only whitespace
@@ -189,9 +280,18 @@ describe('TextTool', () => {
     });
 
     it('should trim whitespace from text', async () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 300, clientY: 250 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 300, clientY: 250 } as MouseEvent,
+        mockCanvas
+      );
 
       const textDiv = getTextDiv()!;
       textDiv.textContent = '  Trimmed text  ';
@@ -203,9 +303,18 @@ describe('TextTool', () => {
     });
 
     it('should generate unique ID for annotation', async () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 300, clientY: 250 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 300, clientY: 250 } as MouseEvent,
+        mockCanvas
+      );
 
       const textDiv = getTextDiv()!;
       textDiv.textContent = 'Test';
@@ -220,9 +329,18 @@ describe('TextTool', () => {
 
   describe('keyboard handling', () => {
     it('should remove textDiv on Escape key', () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 300, clientY: 250 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 300, clientY: 250 } as MouseEvent,
+        mockCanvas
+      );
 
       // Annotation is created immediately on mouseup (with empty text)
       expect(textTool['annotations']).toHaveLength(1);
@@ -239,9 +357,18 @@ describe('TextTool', () => {
     });
 
     it('should allow Enter key for multiline text', () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 300, clientY: 250 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 300, clientY: 250 } as MouseEvent,
+        mockCanvas
+      );
 
       const textDiv = getTextDiv()!;
       textDiv.textContent = 'Line 1';
@@ -256,8 +383,14 @@ describe('TextTool', () => {
 
   describe('rendering', () => {
     it('should render drawing preview rectangle', () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 300, clientY: 250 } as MouseEvent,
+        mockCanvas
+      );
 
       textTool.render(mockCtx);
 
@@ -265,16 +398,18 @@ describe('TextTool', () => {
     });
 
     it('should render saved annotations with border', () => {
-      textTool['annotations'] = [{
-        id: 'test-1',
-        x: 50,
-        y: 50,
-        width: 200,
-        height: 100,
-        text: 'Test',
-        color: '#E74C3C',
-        fontSize: 14,
-      }];
+      textTool['annotations'] = [
+        {
+          id: 'test-1',
+          x: 50,
+          y: 50,
+          width: 200,
+          height: 100,
+          text: 'Test',
+          color: '#E74C3C',
+          fontSize: 14,
+        },
+      ];
 
       textTool.render(mockCtx);
 
@@ -282,16 +417,18 @@ describe('TextTool', () => {
     });
 
     it('should render text with wrapping', () => {
-      textTool['annotations'] = [{
-        id: 'test-1',
-        x: 50,
-        y: 50,
-        width: 200,
-        height: 100,
-        text: 'Test text',
-        color: '#E74C3C',
-        fontSize: 14,
-      }];
+      textTool['annotations'] = [
+        {
+          id: 'test-1',
+          x: 50,
+          y: 50,
+          width: 200,
+          height: 100,
+          text: 'Test text',
+          color: '#E74C3C',
+          fontSize: 14,
+        },
+      ];
 
       textTool.render(mockCtx);
 
@@ -299,7 +436,10 @@ describe('TextTool', () => {
     });
 
     it('should not render if box has no size', () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
       // No mousemove, so box has size 0
 
       textTool.render(mockCtx);
@@ -311,24 +451,45 @@ describe('TextTool', () => {
   describe('edge cases', () => {
     it('should finalize existing textDiv before starting new rectangle', () => {
       // Create first textDiv
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 300, clientY: 250 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 300, clientY: 250 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 300, clientY: 250 } as MouseEvent,
+        mockCanvas
+      );
 
       const firstTextarea = getTextDiv()!;
       firstTextarea.textContent = 'First';
 
       // Try to start new rectangle
-      textTool.handleMouseDown({ clientX: 400, clientY: 400 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 400, clientY: 400 } as MouseEvent,
+        mockCanvas
+      );
 
       // First textDiv should be removed
       expect(getTextDiv()).toBeNull();
     });
 
     it('should remove annotation when finalizing with empty text', () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       // Annotation created on mouseup
       expect(textTool['annotations']).toHaveLength(1);
@@ -337,7 +498,10 @@ describe('TextTool', () => {
       textDiv.textContent = ''; // Empty text
 
       // Finalize by clicking outside
-      textTool.handleMouseDown({ clientX: 400, clientY: 400 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 400, clientY: 400 } as MouseEvent,
+        mockCanvas
+      );
 
       // Annotation should be removed since text is empty
       expect(textTool['annotations']).toHaveLength(0);
@@ -351,8 +515,14 @@ describe('TextTool', () => {
         height: 600,
       });
 
-      textTool.handleMouseDown({ clientX: 150, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 350, clientY: 350 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 150, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 350, clientY: 350 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(textTool['currentBox']).toEqual({
         x: 100,
@@ -365,36 +535,66 @@ describe('TextTool', () => {
 
   describe('tool switching', () => {
     it('should call onToolChange with "select" and annotation ID immediately on mouseup', () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       // Tool change should happen immediately with annotation ID
       expect(mockToolChange).toHaveBeenCalledTimes(1);
       expect(mockToolChange).toHaveBeenCalledWith('select', expect.any(String));
     });
 
-    it('should not call onToolChange if box is too small', () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 105, clientY: 105 } as MouseEvent, mockCanvas);
+    it('should call onToolChange even with small drags (enforces 40px minimum)', () => {
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 105, clientY: 105 } as MouseEvent,
+        mockCanvas
+      );
 
-      textTool.handleMouseUp({ clientX: 105, clientY: 105 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp(
+        { clientX: 105, clientY: 105 } as MouseEvent,
+        mockCanvas
+      );
 
-      expect(mockToolChange).not.toHaveBeenCalled();
+      expect(mockToolChange).toHaveBeenCalledWith('select', expect.any(String));
     });
 
     it('should create annotation and switch to select tool immediately', () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
-      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       // Annotation should be created immediately
       expect(textTool['annotations']).toHaveLength(1);
       expect(textTool['annotations'][0].text).toBe('');
 
       // Tool change should be called with annotation ID
-      expect(mockToolChange).toHaveBeenCalledWith('select', textTool['annotations'][0].id);
+      expect(mockToolChange).toHaveBeenCalledWith(
+        'select',
+        textTool['annotations'][0].id
+      );
 
       // Textarea should be created
       const textDiv = getTextDiv();
@@ -402,9 +602,18 @@ describe('TextTool', () => {
     });
 
     it('should store annotation ID in textDiv dataset', () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       // Annotation should be created
       expect(textTool['annotations']).toHaveLength(1);
@@ -419,9 +628,18 @@ describe('TextTool', () => {
   describe('textDiv positioning to match strokeRect', () => {
     it('should offset textDiv position by borderWidth/2 to match strokeRect visual rendering', () => {
       // Draw a box
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 300, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 300, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 300, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 300, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       const textDiv = getTextDiv();
       expect(textDiv).toBeTruthy();
@@ -451,8 +669,14 @@ describe('TextTool', () => {
     it('should ensure textDiv border visually aligns with rendered rectangle preview', () => {
       // This test verifies that the border doesn't "jump" when transitioning
       // from drawing preview (strokeRect) to textDiv input
-      textTool.handleMouseDown({ clientX: 50, clientY: 50 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 250, clientY: 150 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 50, clientY: 50 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
 
       // Before mouseup, currentBox is rendered with strokeRect
       expect(textTool['currentBox']).toEqual({
@@ -462,7 +686,10 @@ describe('TextTool', () => {
         height: 100,
       });
 
-      textTool.handleMouseUp({ clientX: 250, clientY: 150 } as MouseEvent, mockCanvas);
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
 
       const textDiv = getTextDiv();
       expect(textDiv).toBeTruthy();
@@ -538,7 +765,16 @@ describe('TextTool', () => {
       const testTool = new TextTool(annotations, mockRedraw, mockToolChange);
 
       // Spy on wrapText to verify maxWidth calculation
-      const wrapTextSpy = vi.spyOn(testTool as unknown as { wrapText: (ctx: CanvasRenderingContext2D, text: string, maxWidth: number) => string[] }, 'wrapText');
+      const wrapTextSpy = vi.spyOn(
+        testTool as unknown as {
+          wrapText: (
+            ctx: CanvasRenderingContext2D,
+            text: string,
+            maxWidth: number
+          ) => string[];
+        },
+        'wrapText'
+      );
 
       testTool.render(mockCtx);
 
@@ -573,10 +809,10 @@ describe('TextTool', () => {
       mockCanvas.getBoundingClientRect = vi.fn().mockReturnValue({
         left: 0,
         top: 0,
-        width: 400,  // Displayed at 400px
+        width: 400, // Displayed at 400px
         height: 300,
       });
-      mockCanvas.width = 800;  // Internal canvas size (400 * 2 for retina)
+      mockCanvas.width = 800; // Internal canvas size (400 * 2 for retina)
       mockCanvas.height = 600;
 
       // Create annotation
@@ -648,7 +884,7 @@ describe('TextTool', () => {
         width: 400,
         height: 300,
       });
-      mockCanvas.width = 1000;  // Not 400*2 = 800, but 1000!
+      mockCanvas.width = 1000; // Not 400*2 = 800, but 1000!
       mockCanvas.height = 750;
 
       const annotation = {
@@ -675,7 +911,8 @@ describe('TextTool', () => {
 
       const textDiv = getTextDiv()!;
       const scaleX = mockCanvas.width / 400; // 1000 / 400 = 2.5
-      const textDivTextStartCanvas = (parseFloat(textDiv.style.left) + 2 + 5) * scaleX;
+      const textDivTextStartCanvas =
+        (parseFloat(textDiv.style.left) + 2 + 5) * scaleX;
 
       // Now they should match because we're using scaleX consistently!
       expect(canvasTextX).toBe(textDivTextStartCanvas);
@@ -694,9 +931,18 @@ describe('TextTool', () => {
       const annotations: TextAnnotation[] = [];
       const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
 
-      textTool.handleMouseDown({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 400, clientY: 300 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 400, clientY: 300 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 400, clientY: 300 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 400, clientY: 300 } as MouseEvent,
+        mockCanvas
+      );
 
       const textDiv = getTextDiv();
       expect(textDiv).toBeTruthy();
@@ -708,7 +954,7 @@ describe('TextTool', () => {
       textDiv!.dispatchEvent(new Event('blur'));
 
       // Wait for the blur timeout (100ms)
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise((resolve) => setTimeout(resolve, 150));
 
       expect(annotations.length).toBe(1);
       expect(annotations[0].text).toBe('Test text');
@@ -726,18 +972,36 @@ describe('TextTool', () => {
 
   describe('keepTextDivActive flag behavior', () => {
     it('should set keepTextDivActive to true when creating annotation', () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       // Flag should be set to true
       expect(textTool['keepTextDivActive']).toBe(true);
     });
 
     it('should prevent deactivate from finalizing when keepTextDivActive is true', () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       const textDiv = getTextDiv();
       expect(textDiv).toBeTruthy();
@@ -750,9 +1014,18 @@ describe('TextTool', () => {
     });
 
     it('should reset keepTextDivActive flag after preventing finalization', () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(textTool['keepTextDivActive']).toBe(true);
 
@@ -764,9 +1037,18 @@ describe('TextTool', () => {
     });
 
     it('should finalize textDiv on second deactivate call when keepTextDivActive is false', async () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       const textDiv = getTextDiv()!;
       textDiv.textContent = 'Test text';
@@ -779,18 +1061,27 @@ describe('TextTool', () => {
       textTool.deactivate();
 
       // Wait for finalization
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise((resolve) => setTimeout(resolve, 150));
 
       expect(getTextDiv()).toBeNull();
     });
 
-    it('should not set keepTextDivActive when box is too small', () => {
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 105, clientY: 105 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 105, clientY: 105 } as MouseEvent, mockCanvas);
+    it('should set keepTextDivActive even with small drags (enforces 40px minimum)', () => {
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 105, clientY: 105 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 105, clientY: 105 } as MouseEvent,
+        mockCanvas
+      );
 
-      // Flag should remain false
-      expect(textTool['keepTextDivActive']).toBe(false);
+      // Flag should be true due to 40px minimum enforcement
+      expect(textTool['keepTextDivActive']).toBe(true);
     });
   });
 
@@ -800,29 +1091,47 @@ describe('TextTool', () => {
       const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
 
       // Create first annotation
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       let textDiv = getTextDiv()!;
       textDiv.textContent = 'First annotation';
       textDiv.dispatchEvent(new Event('blur'));
 
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise((resolve) => setTimeout(resolve, 150));
 
       expect(annotations.length).toBe(1);
       expect(annotations[0].text).toBe('First annotation');
 
       // Create second annotation
-      textTool.handleMouseDown({ clientX: 300, clientY: 300 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 450, clientY: 400 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 450, clientY: 400 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 300, clientY: 300 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 450, clientY: 400 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 450, clientY: 400 } as MouseEvent,
+        mockCanvas
+      );
 
       textDiv = getTextDiv()!;
       textDiv.textContent = 'Second annotation';
       textDiv.dispatchEvent(new Event('blur'));
 
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise((resolve) => setTimeout(resolve, 150));
 
       expect(annotations.length).toBe(2);
       expect(annotations[0].text).toBe('First annotation');
@@ -834,18 +1143,30 @@ describe('TextTool', () => {
       const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
 
       // Create first annotation
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       const firstTextarea = getTextDiv()!;
       firstTextarea.textContent = 'First text';
 
       // Start new annotation before finalizing first
-      textTool.handleMouseDown({ clientX: 300, clientY: 300 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 300, clientY: 300 } as MouseEvent,
+        mockCanvas
+      );
 
       // Wait for finalization timeout
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise((resolve) => setTimeout(resolve, 150));
 
       // First annotation should be created with text
       expect(annotations.length).toBe(1);
@@ -861,15 +1182,27 @@ describe('TextTool', () => {
       const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
 
       // Create first annotation
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(annotations.length).toBe(1);
       expect(annotations[0].text).toBe('');
 
       // Start new annotation with first still empty
-      textTool.handleMouseDown({ clientX: 300, clientY: 300 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 300, clientY: 300 } as MouseEvent,
+        mockCanvas
+      );
 
       // First annotation should be removed
       expect(annotations.length).toBe(0);
@@ -879,9 +1212,18 @@ describe('TextTool', () => {
       const annotations: TextAnnotation[] = [];
       const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
 
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       // Annotation created with empty text
       expect(annotations.length).toBe(1);
@@ -891,7 +1233,7 @@ describe('TextTool', () => {
       textDiv.textContent = 'Updated text';
       textDiv.dispatchEvent(new Event('blur'));
 
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise((resolve) => setTimeout(resolve, 150));
 
       // Same annotation should be updated
       expect(annotations.length).toBe(1);
@@ -904,9 +1246,18 @@ describe('TextTool', () => {
       const annotations: TextAnnotation[] = [];
       const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
 
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(annotations.length).toBe(1);
       expect(annotations[0]).toMatchObject({
@@ -925,9 +1276,18 @@ describe('TextTool', () => {
       const annotations: TextAnnotation[] = [];
       const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
 
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       const annotationId = annotations[0].id;
 
@@ -935,7 +1295,7 @@ describe('TextTool', () => {
       textDiv.textContent = 'Final text';
       textDiv.dispatchEvent(new Event('blur'));
 
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise((resolve) => setTimeout(resolve, 150));
 
       // Should still be 1 annotation
       expect(annotations.length).toBe(1);
@@ -949,9 +1309,18 @@ describe('TextTool', () => {
       const annotations: TextAnnotation[] = [];
       const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
 
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       // Annotation created
       expect(annotations.length).toBe(1);
@@ -972,9 +1341,18 @@ describe('TextTool', () => {
       const annotations: TextAnnotation[] = [];
       const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
 
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       const annotation = annotations[0];
       const textDiv = getTextDiv()!;
@@ -995,9 +1373,18 @@ describe('TextTool', () => {
       mockCanvas.width = 800;
       mockCanvas.height = 600;
 
-      textTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      textTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
-      textTool.handleMouseUp({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas);
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       const textDiv = getTextDiv()!;
       expect(textDiv).toBeTruthy();
@@ -1081,6 +1468,4 @@ describe('TextTool', () => {
       expect(fillTextCalls.length).toBeGreaterThanOrEqual(3);
     });
   });
-
 });
-

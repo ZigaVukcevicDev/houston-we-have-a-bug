@@ -58,8 +58,8 @@ export class TextTool implements Tool {
     if (!this.isDrawing || !this.startPoint) return;
 
     // Constrain to only right and down
-    // Use minimum size (2px) to show user can't go left/up
-    const MIN_SIZE = 2;
+    // Use minimum size (40px) for text box dimensions
+    const MIN_SIZE = 40;
     const width = Math.max(MIN_SIZE, x - this.startPoint.x);
     const height = Math.max(MIN_SIZE, y - this.startPoint.y);
 
@@ -80,7 +80,7 @@ export class TextTool implements Tool {
     this.isDrawing = false;
 
     // Only create textarea if box has minimum size
-    if (this.currentBox.width > 10 && this.currentBox.height > 10) {
+    if (this.currentBox.width >= 40 && this.currentBox.height >= 40) {
       // Create the annotation immediately
       const newAnnotation = {
         id: crypto.randomUUID(),

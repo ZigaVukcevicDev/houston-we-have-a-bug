@@ -791,4 +791,273 @@ test.describe('Text tool', () => {
 
     expect(hasAnnotation).toBe(true);
   });
+
+  test('should enforce minimum width of 40px when drawing', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    // Try to drag only 5px to the right
+    const endX = canvasBox.x + 105;
+    const endY = canvasBox.y + 200;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+
+    // Check that the box is at least 20px wide during drawing
+    await page.waitForTimeout(50);
+
+    const drawnWidth = await canvas.evaluate((canvasEl) => {
+      if (!(canvasEl instanceof HTMLCanvasElement)) return null;
+      const ctx = canvasEl.getContext('2d');
+      if (!ctx) return null;
+
+      // The text tool draws a red rectangle border while drawing
+      const imageData = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
+      const data = imageData.data;
+      const rect = canvasEl.getBoundingClientRect();
+      const scaleX = canvasEl.width / rect.width;
+
+      // Find the rightmost red pixel in the drawing area
+      let maxX = 0;
+      const startCanvasX = 100 * scaleX;
+
+      for (let y = 0; y < canvasEl.height; y++) {
+        for (let x = Math.floor(startCanvasX); x < canvasEl.width; x++) {
+          const i = (y * canvasEl.width + x) * 4;
+          const red = data[i];
+          const alpha = data[i + 3];
+          if (red > 200 && alpha > 50) {
+            maxX = Math.max(maxX, x);
+          }
+        }
+      }
+
+      return (maxX - startCanvasX) / scaleX;
+    });
+
+    expect(drawnWidth).toBeGreaterThanOrEqual(39); // Allow 1px tolerance
+
+    await page.mouse.up();
+  });
+
+  test('should enforce minimum height of 40px when drawing', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 200;
+    // Try to drag only 5px down
+    const endY = canvasBox.y + 105;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+
+    await page.waitForTimeout(50);
+
+    const drawnHeight = await canvas.evaluate((canvasEl) => {
+      if (!(canvasEl instanceof HTMLCanvasElement)) return null;
+      const ctx = canvasEl.getContext('2d');
+      if (!ctx) return null;
+
+      const imageData = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
+      const data = imageData.data;
+      const rect = canvasEl.getBoundingClientRect();
+      const scaleY = canvasEl.height / rect.height;
+
+      let maxY = 0;
+      const startCanvasY = 100 * scaleY;
+
+      for (let y = Math.floor(startCanvasY); y < canvasEl.height; y++) {
+        for (let x = 0; x < canvasEl.width; x++) {
+          const i = (y * canvasEl.width + x) * 4;
+          const red = data[i];
+          const alpha = data[i + 3];
+          if (red > 200 && alpha > 50) {
+            maxY = Math.max(maxY, y);
+          }
+        }
+      }
+
+      return (maxY - startCanvasY) / scaleY;
+    });
+
+    expect(drawnHeight).toBeGreaterThanOrEqual(39);
+
+    await page.mouse.up();
+  });
+
+  test('should enforce minimum width of 40px when resizing', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    // Draw a text box
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 200;
+    const endY = canvasBox.y + 200;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    await page.waitForTimeout(100);
+
+    // Type some text and finalize
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await textDiv.evaluate((el) => {
+      el.textContent = 'Test';
+    });
+    await page.mouse.click(canvasBox.x + 300, canvasBox.y + 300);
+
+    await page.waitForTimeout(100);
+
+    // Click to select the text box
+    await page.mouse.click(startX + 50, startY + 50);
+
+    await page.waitForTimeout(100);
+
+    // Try to resize from right edge to make it very narrow (drag left past minimum)
+    const rightEdgeX = canvasBox.x + 200;
+    const rightEdgeY = canvasBox.y + 150;
+
+    await page.mouse.move(rightEdgeX, rightEdgeY);
+    await page.mouse.down();
+    // Try to drag to make width only 5px
+    await page.mouse.move(canvasBox.x + 105, rightEdgeY);
+    await page.mouse.up();
+
+    await page.waitForTimeout(100);
+
+    // Check the actual width
+    const finalWidth = await canvas.evaluate((canvasEl) => {
+      if (!(canvasEl instanceof HTMLCanvasElement)) return null;
+      const ctx = canvasEl.getContext('2d');
+      if (!ctx) return null;
+
+      const imageData = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
+      const data = imageData.data;
+      const rect = canvasEl.getBoundingClientRect();
+      const scaleX = canvasEl.width / rect.width;
+
+      // Find leftmost and rightmost red pixels
+      let minX = canvasEl.width;
+      let maxX = 0;
+      const searchY = Math.floor(150 * (canvasEl.height / rect.height));
+
+      for (let x = 0; x < canvasEl.width; x++) {
+        const i = (searchY * canvasEl.width + x) * 4;
+        const red = data[i];
+        const alpha = data[i + 3];
+        if (red > 200 && alpha > 50) {
+          minX = Math.min(minX, x);
+          maxX = Math.max(maxX, x);
+        }
+      }
+
+      return (maxX - minX) / scaleX;
+    });
+
+    expect(finalWidth).toBeGreaterThanOrEqual(39);
+  });
+
+  test('should enforce minimum height of 40px when resizing', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    // Draw a text box
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 200;
+    const endY = canvasBox.y + 200;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    await page.waitForTimeout(100);
+
+    // Type some text and finalize
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await textDiv.evaluate((el) => {
+      el.textContent = 'Test';
+    });
+    await page.mouse.click(canvasBox.x + 300, canvasBox.y + 300);
+
+    await page.waitForTimeout(100);
+
+    // Click to select the text box
+    await page.mouse.click(startX + 50, startY + 50);
+
+    await page.waitForTimeout(100);
+
+    // Try to resize from bottom edge to make it very short
+    const bottomEdgeX = canvasBox.x + 150;
+    const bottomEdgeY = canvasBox.y + 200;
+
+    await page.mouse.move(bottomEdgeX, bottomEdgeY);
+    await page.mouse.down();
+    // Try to drag to make height only 5px
+    await page.mouse.move(bottomEdgeX, canvasBox.y + 105);
+    await page.mouse.up();
+
+    await page.waitForTimeout(100);
+
+    // Check the actual height
+    const finalHeight = await canvas.evaluate((canvasEl) => {
+      if (!(canvasEl instanceof HTMLCanvasElement)) return null;
+      const ctx = canvasEl.getContext('2d');
+      if (!ctx) return null;
+
+      const imageData = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
+      const data = imageData.data;
+      const rect = canvasEl.getBoundingClientRect();
+      const scaleY = canvasEl.height / rect.height;
+
+      // Find topmost and bottommost red pixels
+      let minY = canvasEl.height;
+      let maxY = 0;
+      const searchX = Math.floor(150 * (canvasEl.width / rect.width));
+
+      for (let y = 0; y < canvasEl.height; y++) {
+        const i = (y * canvasEl.width + searchX) * 4;
+        const red = data[i];
+        const alpha = data[i + 3];
+        if (red > 200 && alpha > 50) {
+          minY = Math.min(minY, y);
+          maxY = Math.max(maxY, y);
+        }
+      }
+
+      return (maxY - minY) / scaleY;
+    });
+
+    expect(finalHeight).toBeGreaterThanOrEqual(39);
+  });
 });
