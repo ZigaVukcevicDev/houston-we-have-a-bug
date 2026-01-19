@@ -128,7 +128,7 @@
 - [ ] text tool - increase font size (also update demo images)
 - [ ] recheck annotations when scrolling
 - [x] screenshot is horizontally scrollable
-- [ ] does test html needs to be in build/dist?
+- [x] does test html needs to be in build/dist?
 - [x] update readme file structure with e2e tests
 - [x] write e2e tests for crop tool
 - [x] write e2e tests for download and system info
