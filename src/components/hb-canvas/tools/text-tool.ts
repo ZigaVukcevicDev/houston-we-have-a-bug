@@ -138,7 +138,7 @@ export class TextTool implements Tool {
 
   }
 
-  private renderTextBox(ctx: CanvasRenderingContext2D, annotation: TextAnnotation, scaleX: number, _scaleY: number): void {
+  private renderTextBox(ctx: CanvasRenderingContext2D, annotation: TextAnnotation, scaleX: number, scaleY: number): void {
     // Draw rectangle border
     ctx.save();
     ctx.strokeStyle = annotation.color;
@@ -156,24 +156,37 @@ export class TextTool implements Tool {
       ctx.letterSpacing = '0.01em';
 
       // Scale measurements to match canvas coordinate system
-      const borderWidth = 2 * scaleX;
-      const borderOffset = borderWidth / 2;
-      const textareaPadding = 10 * scaleX;
+      // IMPORTANT: Use scaleX for horizontal, scaleY for vertical
+      const borderWidthX = 2 * scaleX;
+      const borderWidthY = 2 * scaleY;
+      const borderOffsetX = borderWidthX / 2;
+      const borderOffsetY = borderWidthY / 2;
+      const textPaddingX = 10 * scaleX;
+      const textPaddingY = 10 * scaleY;
 
-      // Text starts at: box edge + border inner offset + textarea padding
-      const textStartOffset = borderOffset + textareaPadding;
+      // Text starts at: box edge + border inner offset + padding
+      const textStartOffsetX = borderOffsetX + textPaddingX;
+      const textStartOffsetY = borderOffsetY + textPaddingY;
 
-      const maxWidth = annotation.width - textStartOffset * 2;
+      const maxWidth = annotation.width - textStartOffsetX * 2;
       const lines = this.wrapText(ctx, annotation.text, maxWidth);
 
-      // Text vertical position matches textarea exactly
-      let yOffset = annotation.y + textStartOffset;
+      // CSS line-height creates a line box and centers text within it
+      // We need to calculate the "half-leading" offset to match this behavior
+      const cssLineHeight = annotation.fontSize * 1.2; // CSS pixels
+      const cssFontSize = annotation.fontSize; // CSS pixels
+      const halfLeading = (cssLineHeight - cssFontSize) / 2; // CSS pixels
+      const halfLeadingCanvas = halfLeading * scaleY; // Convert to canvas pixels
 
-      // Line height must match the scaled font size
-      const lineHeight = Math.round(annotation.fontSize * scaleX * 1.2);
+      // Text vertical position: box edge + border offset + padding + half-leading
+      let yOffset = annotation.y + textStartOffsetY + halfLeadingCanvas;
+
+      // Line height in canvas pixels (vertical measurement uses scaleY)
+      // IMPORTANT: Do NOT round - browser doesn't round line-height calculations
+      const lineHeight = cssLineHeight * scaleY;
 
       lines.forEach((line) => {
-        ctx.fillText(line, annotation.x + textStartOffset, yOffset);
+        ctx.fillText(line, annotation.x + textStartOffsetX, yOffset);
         yOffset += lineHeight;
       });
 

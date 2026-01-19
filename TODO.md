@@ -122,7 +122,7 @@
 - [x] find a way to have better hover color for secondary button (as current is too pale)
 - [ ] text tool - double click to edit
 - [x] text tool - changing textarea to editable div
-- [ ] text tool - when I draw text area and click outside, the text kind of jumps up for e.g. 1px.
+- [x] text tool - when I draw text area and click outside, the text jumps up
 - [ ] text tool - less padding space in editable div, 5px
 - [ ] recheck annotations when scrolling
 - [ ] fix screenshot is horizontally scrollable

@@ -438,4 +438,117 @@ test.describe('Text tool', () => {
       page.locator('[data-tool="select"][aria-selected="true"]')
     ).toBeVisible();
   });
+
+  test('should render text at same position as contenteditable div (visual test)', async ({
+    page,
+  }) => {
+    // This test uses screenshot comparison to verify text position alignment
+    // between the contenteditable div and canvas rendering
+
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    // Draw text box at a specific position
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+
+    // Type multi-line text to make alignment more obvious
+    await textDiv.evaluate(
+      (el, text) => (el.textContent = text),
+      'Line one\nLine two\nLine three'
+    );
+
+    // Wait for text to render
+    await page.waitForTimeout(100);
+
+    // Get text bounding box from contenteditable div
+    const textBounds = await textDiv.evaluate((el) => {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      const rect = range.getBoundingClientRect();
+      return {
+        top: rect.top,
+        left: rect.left,
+        bottom: rect.bottom,
+        right: rect.right,
+      };
+    });
+
+    // Now finalize the text
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await expect(textDiv).not.toBeVisible();
+    await page.waitForTimeout(100);
+
+    // Get the canvas ImageData to find where text was actually rendered
+    const canvasTextBounds = await canvas.evaluate((element) => {
+      const canvasEl = element as HTMLCanvasElement;
+      const ctx = canvasEl.getContext('2d');
+      if (!ctx) return null;
+
+      const imageData = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
+      const data = imageData.data;
+
+      // We need to find text pixels, not border pixels
+      // The border is a 2px stroke, so skip pixels near the edges
+      // Look for text in the interior of the annotation box
+      const rect = canvasEl.getBoundingClientRect();
+      const scaleX = canvasEl.width / rect.width;
+      const scaleY = canvasEl.height / rect.height;
+
+      // Annotation is at (100, 100) in canvas coordinates
+      // After scaling: (100 * scaleX, 100 * scaleY)
+      // Text starts at: annotation.x + borderOffset + padding + halfLeading
+      // Border offset = 1 * scaleX, padding = 10 * scaleX
+      const annotationX = 100 * scaleX;
+      const annotationY = 100 * scaleY;
+      const borderOffset = 1 * scaleX;
+      const padding = 10 * scaleX;
+      const searchStartX = Math.floor(annotationX + borderOffset + padding);
+      const searchStartY = Math.floor(annotationY + borderOffset + padding);
+
+      // Find first text pixel (skip the border region)
+      let textTopY = null;
+      for (let y = searchStartY; y < canvasEl.height; y++) {
+        for (let x = searchStartX; x < searchStartX + 50; x++) {
+          const i = (y * canvasEl.width + x) * 4;
+          const alpha = data[i + 3];
+
+          if (alpha > 50) {
+            textTopY = y;
+            break;
+          }
+        }
+        if (textTopY !== null) break;
+      }
+
+      if (textTopY === null) return null;
+
+      return {
+        top: rect.top + textTopY / scaleY,
+      };
+    });
+
+    if (!canvasTextBounds) throw new Error('Could not get canvas text bounds');
+
+    // Compare vertical positions
+    // Allow 3px tolerance for rounding, anti-aliasing, and line-height differences
+    const verticalDiff = Math.abs(textBounds.top - canvasTextBounds.top);
+
+    // This assertion will catch the text jump bug
+    // If the bug existed, verticalDiff would be ~110px (the height difference)
+    expect(verticalDiff).toBeLessThan(3);
+  });
 });
