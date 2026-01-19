@@ -113,7 +113,7 @@
 - [x] disable button "Annotate screenshot" on annotation page
 - [x] change cursors when moving endpoints or annotations (reference to crop tool - if applicable?) - check only for line and arrow, everything else is fine
 - [x] change color of annotations to use color E74C3C
-- [ ] screenshot should start at the bottom of top bar
+- [x] screenshot should start at the bottom of top bar
 - [x] style "Uh-oh, there's no screenshot to annotate!" page
 - [x] add shadow to toolbar
 - [x] exclude extension-presentation from build
@@ -125,6 +125,7 @@
 - [x] text tool - when I draw text area and click outside, the text jumps up
 - [ ] text tool - darken text
 - [x] text tool - less padding space in editable div, 5px
+- [ ] text tool - increase font size (also update demo images)
 - [ ] recheck annotations when scrolling
 - [x] screenshot is horizontally scrollable
 - [ ] does test html needs to be in build/dist?
