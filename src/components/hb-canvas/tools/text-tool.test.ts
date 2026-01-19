@@ -1085,6 +1085,141 @@ describe('TextTool', () => {
     });
   });
 
+  describe('edge case coverage', () => {
+    it('should handle mouseup when not drawing', () => {
+      // Don't call mousedown first
+      textTool.handleMouseUp(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
+
+      // Should not create textDiv
+      expect(getTextDiv()).toBeNull();
+      expect(mockToolChange).not.toHaveBeenCalled();
+    });
+
+    it('should handle mouseup when currentBox is null', () => {
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      // Manually clear currentBox
+      textTool['currentBox'] = null;
+
+      textTool.handleMouseUp(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
+
+      expect(getTextDiv()).toBeNull();
+      expect(mockToolChange).not.toHaveBeenCalled();
+    });
+
+    it('should handle Escape when currentBox and startPoint exist', () => {
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+
+      const textDiv = getTextDiv()!;
+      expect(textDiv).toBeTruthy();
+
+      // Simulate Escape key
+      const event = new KeyboardEvent('keydown', { key: 'Escape' });
+      textDiv.dispatchEvent(event);
+
+      // TextDiv should be removed
+      expect(getTextDiv()).toBeNull();
+      // CurrentBox and startPoint should be cleared
+      expect(textTool['currentBox']).toBeNull();
+      expect(textTool['startPoint']).toBeNull();
+    });
+
+    it('should handle removeTextDiv when textDiv does not exist', () => {
+      // Call removeTextDiv directly without creating a textDiv
+      expect(() => {
+        textTool['removeTextDiv']();
+      }).not.toThrow();
+    });
+
+    it('should handle word wrapping with long word that needs current line pushed first', () => {
+      const mockContext = {
+        ...mockCtx,
+        measureText: vi.fn((text: string) => {
+          // "short" fits (10), "verylongwordthatexceedswidth" exceeds (50)
+          if (text === 'short') return { width: 10 };
+          if (text === 'verylongwordthatexceedswidth') return { width: 50 };
+          if (text === 'short verylongwordthatexceedswidth')
+            return { width: 60 };
+          // For character-by-character breaking
+          if (text.length <= 5) return { width: text.length * 2 };
+          return { width: 50 };
+        }),
+      } as unknown as CanvasRenderingContext2D;
+
+      const lines = textTool['wrapText'](
+        mockContext,
+        'short verylongwordthatexceedswidth',
+        30
+      );
+
+      // First line should be "short", then the long word gets broken
+      expect(lines[0]).toBe('short');
+      expect(lines.length).toBeGreaterThan(1);
+    });
+
+    it('should handle single character that exceeds maxWidth', () => {
+      const mockContext = {
+        ...mockCtx,
+        measureText: vi.fn((text: string) => {
+          // Even a single character "W" exceeds width (50 > 30)
+          // This specifically tests the case where even adding one character
+          // exceeds maxWidth, forcing the else branch (lines 261-262)
+          if (text.length === 0) return { width: 0 };
+          if (text.length === 1 && text === 'W') return { width: 50 };
+          if (text === 'WW') return { width: 100 };
+          return { width: text.length * 50 };
+        }),
+      } as unknown as CanvasRenderingContext2D;
+
+      const lines = textTool['wrapText'](mockContext, 'WWW', 30);
+
+      // Each character should be on its own line since they all exceed maxWidth
+      expect(lines.length).toBe(3);
+      lines.forEach((line) => {
+        expect(line.length).toBe(1);
+        expect(line).toBe('W');
+      });
+    });
+
+    it('should move word to next line when it does not fit with current line', () => {
+      const mockContext = {
+        ...mockCtx,
+        measureText: vi.fn((text: string) => {
+          if (text === 'hello') return { width: 25 };
+          if (text === 'world') return { width: 25 };
+          if (text === 'hello world') return { width: 60 };
+          return { width: 50 };
+        }),
+      } as unknown as CanvasRenderingContext2D;
+
+      const lines = textTool['wrapText'](mockContext, 'hello world', 40);
+
+      // "hello world" exceeds 40, so should be split
+      expect(lines.length).toBe(2);
+      expect(lines[0]).toBe('hello');
+      expect(lines[1]).toBe('world');
+    });
+  });
+
   describe('multiple annotations workflow', () => {
     it('should handle creating multiple text annotations sequentially', async () => {
       const annotations: TextAnnotation[] = [];

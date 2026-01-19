@@ -108,12 +108,9 @@ export class TextTool implements Tool {
       // Switch to select tool and select the annotation (shows handles)
       this.onToolChange('select', newAnnotation.id);
       this.onRedraw();
-    } else {
-      // Box too small, clear state
-      this.currentBox = null;
-      this.startPoint = null;
     }
 
+    this.currentBox = null;
     this.startPoint = null;
   }
 
