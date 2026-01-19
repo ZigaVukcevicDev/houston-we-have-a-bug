@@ -32,7 +32,9 @@ describe('HBAnnotation', () => {
   beforeEach(() => {
     // Set up window.location with a valid session ID to prevent console errors
     delete (globalThis.window as any).location;
-    (globalThis.window as any).location = { search: '?session=test-session-123' };
+    (globalThis.window as any).location = {
+      search: '?session=test-session-123',
+    };
 
     annotation = new HBAnnotation();
     vi.clearAllMocks();
@@ -49,7 +51,9 @@ describe('HBAnnotation', () => {
   describe('_loadScreenshotFromStorage', () => {
     beforeEach(() => {
       delete (globalThis.window as any).location;
-      (globalThis.window as any).location = { search: '?session=test-session-123' };
+      (globalThis.window as any).location = {
+        search: '?session=test-session-123',
+      };
     });
 
     it('should load screenshot from storage', async () => {
@@ -64,9 +68,13 @@ describe('HBAnnotation', () => {
 
       await annotation['loadScreenshotFromStorage']();
 
-      expect(mockChrome.storage.session.get).toHaveBeenCalledWith('screenshot_test-session-123');
+      expect(mockChrome.storage.session.get).toHaveBeenCalledWith(
+        'screenshot_test-session-123'
+      );
       expect(annotation['dataUrl']).toBe(mockDataUrl);
-      expect(mockChrome.storage.session.remove).toHaveBeenCalledWith('screenshot_test-session-123');
+      expect(mockChrome.storage.session.remove).toHaveBeenCalledWith(
+        'screenshot_test-session-123'
+      );
     });
 
     it('should load systemInfo along with screenshot', async () => {
@@ -97,7 +105,9 @@ describe('HBAnnotation', () => {
 
     it('should handle missing session ID in URL', async () => {
       (globalThis.window as any).location = { search: '' };
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
 
       await annotation['loadScreenshotFromStorage']();
 
@@ -107,7 +117,9 @@ describe('HBAnnotation', () => {
     });
 
     it('should handle errors gracefully', async () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
       mockChrome.storage.session.get.mockRejectedValue(
         new Error('Storage error')
       );
@@ -123,7 +135,9 @@ describe('HBAnnotation', () => {
     });
 
     it('should handle missing screenshot data', async () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
       mockChrome.storage.session.get.mockResolvedValue({
         'screenshot_test-session-123': null, // Data not found
       });
@@ -131,7 +145,9 @@ describe('HBAnnotation', () => {
       await annotation['loadScreenshotFromStorage']();
 
       expect(annotation['dataUrl']).toBe('');
-      expect(consoleSpy).toHaveBeenCalledWith('Screenshot data not found or expired');
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Screenshot data not found or expired'
+      );
       consoleSpy.mockRestore();
     });
   });
@@ -208,7 +224,9 @@ describe('HBAnnotation', () => {
 
   describe('render', () => {
     it('should render toolbar and canvas when dataUrl is set', async () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
       annotation['dataUrl'] = 'data:image/png;base64,test';
       document.body.appendChild(annotation);
       await annotation.updateComplete;
@@ -223,20 +241,24 @@ describe('HBAnnotation', () => {
     });
 
     it('should render loading message when dataUrl is empty', async () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
       annotation['dataUrl'] = '';
       document.body.appendChild(annotation);
       await annotation.updateComplete;
 
       const content = annotation.shadowRoot?.textContent;
-      expect(content).toContain('Uh-oh, there\'s no screenshot to annotate!');
+      expect(content).toContain("Uh-oh, there's no screenshot to annotate!");
       consoleSpy.mockRestore();
     });
   });
 
   describe('connectedCallback', () => {
     it('should call loadScreenshotFromStorage when connected', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
       mockChrome.storage.session.get.mockResolvedValue({
         'screenshot_test-session-123': {
           dataUrl: 'data:image/png;base64,mock',
@@ -263,14 +285,13 @@ describe('HBAnnotation', () => {
       await annotation['toggleSystemInfo']();
       expect(annotation['showSystemInfo']).toBe(false);
     });
-
   });
 
   describe('handleClickOutside', () => {
     let consoleSpy: ReturnType<typeof vi.spyOn>;
 
     beforeEach(() => {
-      consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+      consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       annotation['dataUrl'] = 'data:image/png;base64,test';
       document.body.appendChild(annotation);
     });
@@ -283,11 +304,17 @@ describe('HBAnnotation', () => {
       annotation['showSystemInfo'] = true;
       const container = document.createElement('div');
       container.className = 'js-system-info-container';
-      vi.spyOn(annotation.shadowRoot!, 'querySelector').mockReturnValue(container);
+      vi.spyOn(annotation.shadowRoot!, 'querySelector').mockReturnValue(
+        container
+      );
 
       const event = {
         target: container,
-        composedPath: () => [container, document.body, document.documentElement],
+        composedPath: () => [
+          container,
+          document.body,
+          document.documentElement,
+        ],
       } as unknown as MouseEvent;
 
       annotation['handleClickOutside'](event);
@@ -316,11 +343,17 @@ describe('HBAnnotation', () => {
       const container = document.createElement('div');
       container.className = 'js-system-info-container';
       const outsideElement = document.createElement('div');
-      vi.spyOn(annotation.shadowRoot!, 'querySelector').mockReturnValue(container);
+      vi.spyOn(annotation.shadowRoot!, 'querySelector').mockReturnValue(
+        container
+      );
 
       const event = {
         target: outsideElement,
-        composedPath: () => [outsideElement, document.body, document.documentElement],
+        composedPath: () => [
+          outsideElement,
+          document.body,
+          document.documentElement,
+        ],
       } as unknown as MouseEvent;
 
       annotation['handleClickOutside'](event);
@@ -337,6 +370,32 @@ describe('HBAnnotation', () => {
       annotation['handleClickOutside'](event);
 
       expect(annotation['showSystemInfo']).toBe(false);
+    });
+
+    it('should handle Node elements in composedPath that are children of container', () => {
+      annotation['showSystemInfo'] = true;
+      const container = document.createElement('div');
+      container.className = 'js-system-info-container';
+      const childElement = document.createElement('span');
+      container.appendChild(childElement);
+
+      vi.spyOn(annotation.shadowRoot!, 'querySelector').mockImplementation(
+        (selector) => {
+          if (selector === '.js-system-info-container') return container;
+          if (selector === '.js-system-info-button') return null;
+          return null;
+        }
+      );
+
+      const event = {
+        target: childElement,
+        composedPath: () => [childElement, container, document.body],
+      } as unknown as MouseEvent;
+
+      annotation['handleClickOutside'](event);
+
+      // Should not close because clicked inside container
+      expect(annotation['showSystemInfo']).toBe(true);
     });
   });
 
@@ -379,7 +438,9 @@ describe('HBAnnotation', () => {
     });
 
     it('should render system info table when data is available', async () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
       const mockSystemInfo = {
         dateAndTime: '2026-01-04 11:00:00',
         url: 'https://example.com',
@@ -474,7 +535,9 @@ describe('HBAnnotation', () => {
 
   describe('disconnectedCallback', () => {
     it('should remove click event listener when disconnected', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
       const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
 
       document.body.appendChild(annotation);
@@ -513,7 +576,7 @@ describe('HBAnnotation', () => {
     let consoleSpy: ReturnType<typeof vi.spyOn>;
 
     beforeEach(async () => {
-      consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+      consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       annotation['dataUrl'] = 'data:image/png;base64,test';
       annotation['systemInfo'] = {
         dateAndTime: '2026-01-05 18:00:00',
@@ -534,10 +597,15 @@ describe('HBAnnotation', () => {
     });
 
     it('should call stopPropagation when clicking system info button', async () => {
-      const button = annotation.shadowRoot?.querySelector('.js-system-info-button') as HTMLElement;
+      const button = annotation.shadowRoot?.querySelector(
+        '.js-system-info-button'
+      ) as HTMLElement;
       expect(button).toBeTruthy();
 
-      const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+      const event = new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+      });
       const stopPropagationSpy = vi.spyOn(event, 'stopPropagation');
 
       button?.dispatchEvent(event);
@@ -546,10 +614,15 @@ describe('HBAnnotation', () => {
     });
 
     it('should call stopPropagation when clicking inside system info container', async () => {
-      const container = annotation.shadowRoot?.querySelector('.js-system-info-container') as HTMLElement;
+      const container = annotation.shadowRoot?.querySelector(
+        '.js-system-info-container'
+      ) as HTMLElement;
       expect(container).toBeTruthy();
 
-      const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+      const event = new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+      });
       const stopPropagationSpy = vi.spyOn(event, 'stopPropagation');
 
       container?.dispatchEvent(event);
@@ -558,8 +631,13 @@ describe('HBAnnotation', () => {
     });
 
     it('should prevent handleClickOutside from being called when clicking button with stopPropagation', async () => {
-      const button = annotation.shadowRoot?.querySelector('.js-system-info-button') as HTMLElement;
-      const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+      const button = annotation.shadowRoot?.querySelector(
+        '.js-system-info-button'
+      ) as HTMLElement;
+      const event = new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+      });
 
       button?.dispatchEvent(event);
 
