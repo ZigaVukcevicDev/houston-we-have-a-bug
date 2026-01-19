@@ -98,7 +98,7 @@ describe('HBCanvas', () => {
 
       // Then create mockCtx with canvas reference
       mockCtx = {
-        canvas: mockCanvasElement,  // Now mockCanvasElement exists
+        canvas: mockCanvasElement, // Now mockCanvasElement exists
         clearRect: vi.fn(),
         drawImage: vi.fn(),
         fillText: vi.fn(),
@@ -385,7 +385,11 @@ describe('HBCanvas', () => {
       canvas.activeTool = 'line';
       canvas['handleMouseMove'](event);
 
-      expect(handleMouseMoveSpy).toHaveBeenCalledWith(event, mockCanvasElement, mockCtx);
+      expect(handleMouseMoveSpy).toHaveBeenCalledWith(
+        event,
+        mockCanvasElement,
+        mockCtx
+      );
     });
 
     it('should delegate mouseup events to active tool', () => {
@@ -508,10 +512,16 @@ describe('HBCanvas', () => {
       vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
 
       canvas.download('test.jpg', 1.0);
-      expect(mockCanvasElement.toDataURL).toHaveBeenCalledWith('image/jpeg', 1.0);
+      expect(mockCanvasElement.toDataURL).toHaveBeenCalledWith(
+        'image/jpeg',
+        1.0
+      );
 
       canvas.download('test.jpg', 0.1);
-      expect(mockCanvasElement.toDataURL).toHaveBeenCalledWith('image/jpeg', 0.1);
+      expect(mockCanvasElement.toDataURL).toHaveBeenCalledWith(
+        'image/jpeg',
+        0.1
+      );
     });
 
     it('should deselect all annotations before downloading', () => {
@@ -530,7 +540,9 @@ describe('HBCanvas', () => {
 
       expect(deselectAllSpy).toHaveBeenCalled();
       // Verify deselectAll was called before toDataURL
-      expect(deselectAllSpy).toHaveBeenCalledBefore(mockCanvasElement.toDataURL);
+      expect(deselectAllSpy).toHaveBeenCalledBefore(
+        mockCanvasElement.toDataURL
+      );
     });
   });
 
@@ -760,12 +772,19 @@ describe('HBCanvas', () => {
       const lineTool = canvas['tools'].get('line')!;
 
       // Draw a line
-      lineTool.handleMouseDown!({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvasElement);
-      lineTool.handleMouseUp!({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvasElement);
+      lineTool.handleMouseDown!(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvasElement
+      );
+      lineTool.handleMouseUp!(
+        { clientX: 200, clientY: 200, shiftKey: false } as MouseEvent,
+        mockCanvasElement
+      );
 
       // The line tool should have triggered tool change with annotation ID
       // This simulates the event being dispatched and handled
-      const newLineId = canvas['lineAnnotations'][canvas['lineAnnotations'].length - 1]?.id;
+      const newLineId =
+        canvas['lineAnnotations'][canvas['lineAnnotations'].length - 1]?.id;
 
       if (newLineId) {
         // Manually call handleToolChange as the tool would
@@ -818,11 +837,20 @@ describe('HBCanvas', () => {
       const rectangleTool = canvas['tools'].get('rectangle')!;
 
       // Draw a rectangle
-      rectangleTool.handleMouseDown!({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvasElement);
-      rectangleTool.handleMouseUp!({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvasElement);
+      rectangleTool.handleMouseDown!(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvasElement
+      );
+      rectangleTool.handleMouseUp!(
+        { clientX: 200, clientY: 200, shiftKey: false } as MouseEvent,
+        mockCanvasElement
+      );
 
       // The rectangle tool should have triggered tool change with annotation ID
-      const newRectId = canvas['rectangleAnnotations'][canvas['rectangleAnnotations'].length - 1]?.id;
+      const newRectId =
+        canvas['rectangleAnnotations'][
+          canvas['rectangleAnnotations'].length - 1
+        ]?.id;
 
       if (newRectId) {
         // Verify the tool change was triggered and annotation was auto-selected
@@ -879,7 +907,10 @@ describe('HBCanvas', () => {
           writable: true,
         });
         canvas['firstUpdated']();
-        canvas['originalImage'] = { width: 800, height: 600 } as HTMLImageElement;
+        canvas['originalImage'] = {
+          width: 800,
+          height: 600,
+        } as HTMLImageElement;
       });
 
       it('should deactivate previous tool when switching tools', () => {
@@ -1052,7 +1083,7 @@ describe('HBCanvas', () => {
 
       // Create mockCtx with canvas reference
       mockCtx = {
-        canvas: mockCanvasElement,  // Reference to actual mock canvas element
+        canvas: mockCanvasElement, // Reference to actual mock canvas element
         clearRect: vi.fn(),
         drawImage: vi.fn(),
         strokeStyle: '',
@@ -1099,7 +1130,9 @@ describe('HBCanvas', () => {
       canvas.activeTool = 'select';
       const cropTool = canvas['tools'].get('crop') as CropTool;
       cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
-      const showCropButtons = (canvas.activeTool as string) === 'crop' && canvas['getCropButtonsPosition']();
+      const showCropButtons =
+        (canvas.activeTool as string) === 'crop' &&
+        canvas['getCropButtonsPosition']();
       expect(showCropButtons).toBeFalsy();
     });
 
@@ -1127,7 +1160,10 @@ describe('HBCanvas', () => {
       cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
       const confirmSpy = vi.spyOn(cropTool as any, 'confirmCrop');
       canvas['handleCropConfirm']();
-      expect(confirmSpy).toHaveBeenCalledWith(mockCanvasElement, canvas['originalImage']);
+      expect(confirmSpy).toHaveBeenCalledWith(
+        mockCanvasElement,
+        canvas['originalImage']
+      );
     });
 
     it('should dispatch tool-change event after confirming crop', () => {
@@ -1136,7 +1172,7 @@ describe('HBCanvas', () => {
       cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
 
       const mockImage = new Image();
-      vi.spyOn(cropTool as any, "confirmCrop").mockReturnValue(mockImage);
+      vi.spyOn(cropTool as any, 'confirmCrop').mockReturnValue(mockImage);
 
       // Listen for the tool-change event
       let eventFired = false;
@@ -1216,6 +1252,76 @@ describe('HBCanvas', () => {
       expect(eventSpy).toHaveBeenCalled();
       expect(eventSpy.mock.calls[0][0].detail.tool).toBe('select');
     });
+
+    it('should trigger text tool callbacks', () => {
+      const textTool = canvas['tools'].get('text');
+      const redrawSpy = vi.spyOn(canvas as any, 'redraw');
+      const toolChangeSpy = vi.spyOn(canvas as any, 'handleToolChange');
+
+      // Test redraw callback
+      (textTool as any)['onRedraw']();
+      expect(redrawSpy).toHaveBeenCalled();
+
+      // Test handleToolChange callback with annotationId
+      (textTool as any)['onToolChange']('select', 'text-123');
+      expect(toolChangeSpy).toHaveBeenCalledWith('select', 'text-123');
+    });
+  });
+
+  describe('arrow tool callback integration', () => {
+    it('should have redraw and handleToolChange callbacks configured for arrow tool', () => {
+      const arrowTool = canvas['tools'].get('arrow');
+      expect(arrowTool).toBeDefined();
+
+      // Verify the tool has access to the callbacks by checking it can call redraw
+      const redrawSpy = vi.spyOn(canvas as any, 'redraw');
+      (arrowTool as any)['onRedraw']();
+      expect(redrawSpy).toHaveBeenCalled();
+    });
+
+    it('should trigger handleToolChange with annotationId through arrow tool callback', () => {
+      const arrowTool = canvas['tools'].get('arrow');
+      const toolChangeSpy = vi.spyOn(canvas as any, 'handleToolChange');
+
+      // Call the callback with both tool and annotationId
+      (arrowTool as any)['onToolChange']('select', 'test-annotation-id');
+
+      expect(toolChangeSpy).toHaveBeenCalledWith(
+        'select',
+        'test-annotation-id'
+      );
+    });
+  });
+
+  describe('crop tool callback integration', () => {
+    it('should have all three callbacks configured for crop tool', () => {
+      const cropTool = canvas['tools'].get('crop');
+      expect(cropTool).toBeDefined();
+
+      // Verify crop tool has access to callbacks
+      expect((cropTool as any)['onRedraw']).toBeDefined();
+      expect((cropTool as any)['onToolChange']).toBeDefined();
+      expect((cropTool as any)['onConfirmCrop']).toBeDefined();
+    });
+
+    it('should trigger handleToolChange through crop tool callback', () => {
+      const cropTool = canvas['tools'].get('crop');
+      const toolChangeSpy = vi.spyOn(canvas as any, 'handleToolChange');
+
+      // Directly call the callback that was passed to crop tool
+      (cropTool as any)['onToolChange']('select');
+
+      expect(toolChangeSpy).toHaveBeenCalledWith('select');
+    });
+
+    it('should trigger handleCropConfirm through crop tool callback', () => {
+      const cropTool = canvas['tools'].get('crop');
+      const confirmSpy = vi.spyOn(canvas as any, 'handleCropConfirm');
+
+      // Directly call the callback that was passed to crop tool
+      (cropTool as any)['onConfirmCrop']();
+
+      expect(confirmSpy).toHaveBeenCalled();
+    });
   });
 });
-
