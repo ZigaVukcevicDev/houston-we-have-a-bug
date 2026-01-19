@@ -123,11 +123,10 @@
 - [ ] text tool - double click to edit
 - [x] text tool - changing textarea to editable div
 - [x] text tool - when I draw text area and click outside, the text jumps up
-- [ ] text tool - darken text
 - [x] text tool - less padding space in editable div, 5px
 - [ ] text tool - increase font size (also update demo images)
 - [ ] text tool - darkenColor is not applied when writing text, also cursor
-- [ ] recheck annotations when scrolling
+- [x] recheck annotations when scrolling
 - [x] screenshot is horizontally scrollable
 - [x] does test html needs to be in build/dist?
 - [x] update readme file structure with e2e tests
