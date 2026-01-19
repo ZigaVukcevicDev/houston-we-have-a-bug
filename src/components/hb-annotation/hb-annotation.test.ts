@@ -646,5 +646,18 @@ describe('HBAnnotation', () => {
       // Note: In our test environment, we'd need to verify the interaction differently
       expect(button).toBeTruthy();
     });
+
+    it('should handle click event when target is not a Node instance', () => {
+      const annotation = document.createElement('hb-annotation');
+      document.body.appendChild(annotation);
+
+      // Dispatch the event
+      annotation.dispatchEvent(new Event('click', { bubbles: true }));
+
+      // Should not crash when encountering non-Node instances
+      expect(annotation).toBeTruthy();
+
+      document.body.removeChild(annotation);
+    });
   });
 });

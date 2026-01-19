@@ -11,6 +11,7 @@ import { SelectTool } from './select-tool';
 import type {
   LineAnnotation,
   RectangleAnnotation,
+  TextAnnotation,
 } from '../../../interfaces/annotation.interface';
 
 describe('SelectTool', () => {
@@ -2091,7 +2092,7 @@ describe('SelectTool', () => {
     });
 
     it('should drag text annotation when draggingLine is true with text type', () => {
-      const textAnnotations: any[] = [
+      const textAnnotations: TextAnnotation[] = [
         {
           id: 'text-1',
           x: 100,
@@ -2120,6 +2121,345 @@ describe('SelectTool', () => {
 
       expect(textAnnotations[0].x).toBe(150);
       expect(textAnnotations[0].y).toBe(150);
+    });
+  });
+
+  describe('handleMouseMove cursor edge cases', () => {
+    it('should set nesw-resize cursor when hovering topRight handle of text box', () => {
+      const textAnnotations: TextAnnotation[] = [
+        {
+          id: 'text-1',
+          x: 100,
+          y: 100,
+          width: 200,
+          height: 100,
+          text: 'Test',
+          color: '#E74C3C',
+          fontSize: 14,
+        },
+      ];
+      const selectTool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        textAnnotations,
+        mockRedraw
+      );
+      selectTool['selectedAnnotationId'] = 'text-1';
+      selectTool['selectedAnnotationType'] = 'text';
+
+      // Hover over topRight handle (x + width, y)
+      selectTool.handleMouseMove(
+        { clientX: 300, clientY: 100 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(mockCanvas.style.cursor).toBe('nesw-resize');
+    });
+
+    it('should set nesw-resize cursor when hovering bottomLeft handle of text box', () => {
+      const textAnnotations: TextAnnotation[] = [
+        {
+          id: 'text-1',
+          x: 100,
+          y: 100,
+          width: 200,
+          height: 100,
+          text: 'Test',
+          color: '#E74C3C',
+          fontSize: 14,
+        },
+      ];
+      const selectTool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        textAnnotations,
+        mockRedraw
+      );
+      selectTool['selectedAnnotationId'] = 'text-1';
+      selectTool['selectedAnnotationType'] = 'text';
+
+      // Hover over bottomLeft handle (x, y + height)
+      selectTool.handleMouseMove(
+        { clientX: 100, clientY: 200 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(mockCanvas.style.cursor).toBe('nesw-resize');
+    });
+  });
+
+  describe('isPointOnLine with lengthSquared === 0', () => {
+    it('should handle zero-length line (start and end at same point)', () => {
+      const selectTool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        [],
+        mockRedraw
+      );
+
+      // Zero-length line
+      const line: LineAnnotation = {
+        id: 'line-1',
+        x1: 100,
+        y1: 100,
+        x2: 100,
+        y2: 100,
+        color: '#E74C3C',
+        width: 2,
+      };
+
+      // Point close to the zero-length line
+      const result = selectTool['isPointOnLine'](102, 102, line);
+      expect(result).toBe(true);
+
+      // Point far from the zero-length line
+      const result2 = selectTool['isPointOnLine'](150, 150, line);
+      expect(result2).toBe(false);
+    });
+  });
+
+  describe('text box hover detection', () => {
+    it('should detect hovering over unselected text box and set pointer cursor', () => {
+      const textAnnotations: TextAnnotation[] = [
+        {
+          id: 'text-1',
+          x: 100,
+          y: 100,
+          width: 200,
+          height: 100,
+          text: 'Test',
+          color: '#E74C3C',
+          fontSize: 14,
+        },
+      ];
+      const selectTool = new SelectTool(
+        [],
+        [],
+        [],
+        textAnnotations,
+        mockRedraw
+      );
+
+      // No annotation selected, hover over text box edge (left edge)
+      selectTool.handleMouseMove(
+        { clientX: 100, clientY: 150 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(mockCanvas.style.cursor).toBe('pointer');
+      expect(selectTool['hoveredAnnotationId']).toBe('text-1');
+      expect(selectTool['hoveredAnnotationType']).toBe('text');
+    });
+
+    it('should update hovered annotation when hovering over different text box', () => {
+      const textAnnotations: TextAnnotation[] = [
+        {
+          id: 'text-1',
+          x: 100,
+          y: 100,
+          width: 100,
+          height: 50,
+          text: 'Test 1',
+          color: '#E74C3C',
+          fontSize: 14,
+        },
+        {
+          id: 'text-2',
+          x: 300,
+          y: 100,
+          width: 100,
+          height: 50,
+          text: 'Test 2',
+          color: '#3498DB',
+          fontSize: 14,
+        },
+      ];
+      const selectTool = new SelectTool(
+        [],
+        [],
+        [],
+        textAnnotations,
+        mockRedraw
+      );
+
+      // Hover over first text box edge (left edge)
+      selectTool.handleMouseMove(
+        { clientX: 100, clientY: 125 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+      expect(selectTool['hoveredAnnotationId']).toBe('text-1');
+
+      // Hover over second text box edge (left edge)
+      selectTool.handleMouseMove(
+        { clientX: 300, clientY: 125 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+      expect(selectTool['hoveredAnnotationId']).toBe('text-2');
+      expect(mockRedraw).toHaveBeenCalled();
+    });
+
+    it('should set move cursor when hovering over selected text box edge', () => {
+      const textAnnotations: TextAnnotation[] = [
+        {
+          id: 'text-1',
+          x: 100,
+          y: 100,
+          width: 200,
+          height: 100,
+          text: 'Test',
+          color: '#E74C3C',
+          fontSize: 14,
+        },
+      ];
+      const selectTool = new SelectTool(
+        [],
+        [],
+        [],
+        textAnnotations,
+        mockRedraw
+      );
+
+      // Select the text annotation
+      selectTool['selectedAnnotationId'] = 'text-1';
+      selectTool['selectedAnnotationType'] = 'text';
+
+      // Hover over the selected text box edge (top edge, not on a handle)
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 100 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(mockCanvas.style.cursor).toBe('move');
+    });
+  });
+
+  describe('text box dragging on mouseDown', () => {
+    it('should start dragging text box when clicking on its edge', () => {
+      const textAnnotations: TextAnnotation[] = [
+        {
+          id: 'text-1',
+          x: 100,
+          y: 100,
+          width: 200,
+          height: 100,
+          text: 'Test',
+          color: '#E74C3C',
+          fontSize: 14,
+        },
+      ];
+      const selectTool = new SelectTool(
+        [],
+        [],
+        [],
+        textAnnotations,
+        mockRedraw
+      );
+
+      // First select the text box
+      selectTool['selectedAnnotationId'] = 'text-1';
+      selectTool['selectedAnnotationType'] = 'text';
+
+      // Click on text box edge to start dragging
+      selectTool.handleMouseDown(
+        { clientX: 100, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
+
+      expect(selectTool['draggingLine']).toBe(true);
+      expect(selectTool['dragOffset']).toEqual({ x: 100, y: 150 });
+    });
+  });
+
+  describe('handle hover detection for selected text', () => {
+    it('should set nwse-resize cursor when hovering over top-left handle of selected text', () => {
+      const textAnnotations: TextAnnotation[] = [
+        {
+          id: 'text-1',
+          x: 100,
+          y: 100,
+          width: 200,
+          height: 100,
+          text: 'Test',
+          color: '#E74C3C',
+          fontSize: 14,
+        },
+      ];
+      const selectTool = new SelectTool(
+        [],
+        [],
+        [],
+        textAnnotations,
+        mockRedraw
+      );
+
+      selectTool['selectedAnnotationId'] = 'text-1';
+      selectTool['selectedAnnotationType'] = 'text';
+
+      // Hover over top-left handle
+      selectTool.handleMouseMove(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(mockCanvas.style.cursor).toBe('nwse-resize');
+    });
+
+    it('should set nwse-resize cursor when hovering over bottom-right handle of selected text', () => {
+      const textAnnotations: TextAnnotation[] = [
+        {
+          id: 'text-1',
+          x: 100,
+          y: 100,
+          width: 200,
+          height: 100,
+          text: 'Test',
+          color: '#E74C3C',
+          fontSize: 14,
+        },
+      ];
+      const selectTool = new SelectTool(
+        [],
+        [],
+        [],
+        textAnnotations,
+        mockRedraw
+      );
+
+      selectTool['selectedAnnotationId'] = 'text-1';
+      selectTool['selectedAnnotationType'] = 'text';
+
+      // Hover over bottom-right handle
+      selectTool.handleMouseMove(
+        { clientX: 300, clientY: 200 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(mockCanvas.style.cursor).toBe('nwse-resize');
+    });
+  });
+
+  describe('findLineById edge cases', () => {
+    it('should return undefined when searching empty arrays', () => {
+      const selectTool = new SelectTool([], [], [], [], mockRedraw);
+      const result = selectTool['findLineById']('test-id');
+      expect(result).toBeUndefined();
+    });
+
+    it('should return false when removing non-existent line ID', () => {
+      const selectTool = new SelectTool([], [], [], [], mockRedraw);
+      const result = selectTool['removeLineById']('non-existent-id');
+      expect(result).toBe(false);
     });
   });
 });

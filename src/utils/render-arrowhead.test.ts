@@ -146,4 +146,63 @@ describe('getArrowheadPoints', () => {
       100 - expectedLength * Math.cos(-arrowheadAngle)
     );
   });
+
+  it('should handle when window.devicePixelRatio is undefined', () => {
+    const originalDpr = window.devicePixelRatio;
+    // @ts-expect-error - testing undefined case
+    delete window.devicePixelRatio;
+
+    const result = getArrowheadPoints(0, 0, 100, 0);
+
+    // Should fallback to 1
+    const expectedLength = arrowheadLength * 1;
+    expect(result.point1.x).toBeCloseTo(
+      100 - expectedLength * Math.cos(-arrowheadAngle)
+    );
+
+    // Restore original value
+    Object.defineProperty(window, 'devicePixelRatio', {
+      value: originalDpr,
+      writable: true,
+      configurable: true,
+    });
+  });
+});
+
+describe('renderArrowhead with undefined devicePixelRatio', () => {
+  let mockCtx: CanvasRenderingContext2D;
+
+  beforeEach(() => {
+    mockCtx = {
+      save: vi.fn(),
+      restore: vi.fn(),
+      beginPath: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      stroke: vi.fn(),
+      strokeStyle: '',
+      lineWidth: 0,
+      lineCap: '',
+      lineJoin: '',
+    } as unknown as CanvasRenderingContext2D;
+  });
+
+  it('should handle when window.devicePixelRatio is undefined in renderArrowhead', () => {
+    const originalDpr = window.devicePixelRatio;
+    // @ts-expect-error - testing undefined case
+    delete window.devicePixelRatio;
+
+    renderArrowhead(mockCtx, 0, 0, 100, 0, '#000', 2);
+
+    // Should fallback to 1, so lineWidth should be 2 * 1 = 2
+    expect(mockCtx.lineWidth).toBe(2);
+    expect(mockCtx.stroke).toHaveBeenCalled();
+
+    // Restore original value
+    Object.defineProperty(window, 'devicePixelRatio', {
+      value: originalDpr,
+      writable: true,
+      configurable: true,
+    });
+  });
 });

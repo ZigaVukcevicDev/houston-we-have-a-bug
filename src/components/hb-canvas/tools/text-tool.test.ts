@@ -1603,4 +1603,264 @@ describe('TextTool', () => {
       expect(fillTextCalls.length).toBeGreaterThanOrEqual(3);
     });
   });
+
+  describe('word wrapping edge cases - single character exceeds width branch', () => {
+    it('should handle single character that exceeds maxWidth (else branch at line 261-262)', () => {
+      const mockCanvas = {
+        getBoundingClientRect: vi.fn().mockReturnValue({
+          left: 0,
+          top: 0,
+          width: 800,
+          height: 600,
+        }),
+        width: 800,
+        height: 600,
+      } as unknown as HTMLCanvasElement;
+
+      const mockCtx = {
+        canvas: mockCanvas,
+        font: '14px Arial',
+        measureText: vi.fn((text: string) => {
+          // Make single characters return width greater than maxWidth
+          if (text.length === 1) {
+            return { width: 250 }; // Exceeds maxWidth of 200
+          }
+          return { width: text.length * 20 };
+        }),
+        fillText: vi.fn(),
+        fillStyle: '',
+        save: vi.fn(),
+        restore: vi.fn(),
+        strokeRect: vi.fn(),
+        strokeStyle: '',
+        lineWidth: 0,
+      } as unknown as CanvasRenderingContext2D;
+
+      const annotation: TextAnnotation = {
+        id: 'test-1',
+        x: 100,
+        y: 100,
+        width: 200,
+        height: 100,
+        text: 'A B C', // Each char will exceed width when measured alone
+        color: '#E74C3C',
+        fontSize: 14,
+      };
+
+      const annotations = [annotation];
+      const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      textTool.render(mockCtx);
+
+      // Should still render even though single chars exceed width
+      expect(mockCtx.fillText).toHaveBeenCalled();
+    });
+
+    it('should push single character anyway when it exceeds width in remaining word', () => {
+      const mockCanvas = {
+        getBoundingClientRect: vi.fn().mockReturnValue({
+          left: 0,
+          top: 0,
+          width: 800,
+          height: 600,
+        }),
+        width: 800,
+        height: 600,
+      } as unknown as HTMLCanvasElement;
+
+      const mockCtx = {
+        canvas: mockCanvas,
+        font: '14px Arial',
+        measureText: vi.fn((text: string) => {
+          // Make the word "WWWWW" too wide, and each W also too wide individually
+          if (text === 'WWWWW' || text.startsWith('W')) {
+            return { width: 250 }; // Exceeds maxWidth
+          }
+          return { width: text.length * 8 };
+        }),
+        fillText: vi.fn(),
+        fillStyle: '',
+        save: vi.fn(),
+        restore: vi.fn(),
+        strokeRect: vi.fn(),
+        strokeStyle: '',
+        lineWidth: 0,
+      } as unknown as CanvasRenderingContext2D;
+
+      const annotation: TextAnnotation = {
+        id: 'test-1',
+        x: 100,
+        y: 100,
+        width: 200,
+        height: 100,
+        text: 'WWWWW', // Word too wide, and chars also too wide
+        color: '#E74C3C',
+        fontSize: 14,
+      };
+
+      const annotations = [annotation];
+      const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      textTool.render(mockCtx);
+
+      // Each character should still be pushed to lines even though they exceed width
+      const fillTextCalls = (mockCtx.fillText as Mock).mock.calls;
+      expect(fillTextCalls.length).toBeGreaterThan(0);
+    });
+
+    it('should handle when charLine is null and push single character anyway', () => {
+      const mockCanvas = {
+        getBoundingClientRect: vi.fn().mockReturnValue({
+          left: 0,
+          top: 0,
+          width: 800,
+          height: 600,
+        }),
+        width: 800,
+        height: 600,
+      } as unknown as HTMLCanvasElement;
+
+      const mockCtx = {
+        canvas: mockCanvas,
+        font: '14px Arial',
+        measureText: vi.fn(() => {
+          // Make everything too wide, including single characters
+          // And make findLongestFittingSubstring return empty string
+          return { width: 300 }; // Always exceeds maxWidth of 200
+        }),
+        fillText: vi.fn(),
+        fillStyle: '',
+        save: vi.fn(),
+        restore: vi.fn(),
+        strokeRect: vi.fn(),
+        strokeStyle: '',
+        lineWidth: 0,
+      } as unknown as CanvasRenderingContext2D;
+
+      const annotation: TextAnnotation = {
+        id: 'test-1',
+        x: 100,
+        y: 100,
+        width: 200,
+        height: 100,
+        text: 'ABC',
+        color: '#E74C3C',
+        fontSize: 14,
+      };
+
+      const annotations = [annotation];
+      const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      textTool.render(mockCtx);
+
+      // Should still render characters even when they all exceed width
+      expect(mockCtx.fillText).toHaveBeenCalled();
+    });
+
+    it('should push single character when charLine loop produces empty string', () => {
+      const mockCanvas = {
+        getBoundingClientRect: vi.fn().mockReturnValue({
+          left: 0,
+          top: 0,
+          width: 800,
+          height: 600,
+        }),
+        width: 800,
+        height: 600,
+      } as unknown as HTMLCanvasElement;
+
+      // Create a mock that simulates charLine remaining empty
+      // because the first character itself exceeds width
+      const mockCtx = {
+        canvas: mockCanvas,
+        font: '14px Arial',
+        measureText: vi.fn((text: string) => {
+          // Single characters are too wide (even one char)
+          // This forces charLine to stay empty in the loop
+          if (text.length === 1) {
+            return { width: 250 }; // First character exceeds maxWidth
+          }
+          // Any accumulated string is also too wide
+          return { width: 300 };
+        }),
+        fillText: vi.fn(),
+        fillStyle: '',
+        save: vi.fn(),
+        restore: vi.fn(),
+        strokeRect: vi.fn(),
+        strokeStyle: '',
+        lineWidth: 0,
+      } as unknown as CanvasRenderingContext2D;
+
+      const annotation: TextAnnotation = {
+        id: 'test-1',
+        x: 100,
+        y: 100,
+        width: 200,
+        height: 100,
+        text: 'W',
+        color: '#E74C3C',
+        fontSize: 14,
+      };
+
+      const annotations = [annotation];
+      const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      textTool.render(mockCtx);
+
+      // Should still render the character even though it's too wide
+      expect(mockCtx.fillText).toHaveBeenCalled();
+    });
+
+    it('should handle text with multiple consecutive newlines (empty paragraphs)', () => {
+      const mockCanvas = {
+        getBoundingClientRect: vi.fn().mockReturnValue({
+          left: 0,
+          top: 0,
+          width: 800,
+          height: 600,
+        }),
+        width: 800,
+        height: 600,
+      } as unknown as HTMLCanvasElement;
+
+      const mockCtx = {
+        canvas: mockCanvas,
+        font: '14px Arial',
+        measureText: vi.fn((text: string) => ({
+          width: text.length * 8,
+        })),
+        fillText: vi.fn(),
+        fillStyle: '',
+        save: vi.fn(),
+        restore: vi.fn(),
+        strokeRect: vi.fn(),
+        strokeStyle: '',
+        lineWidth: 0,
+      } as unknown as CanvasRenderingContext2D;
+
+      const annotation: TextAnnotation = {
+        id: 'test-1',
+        x: 100,
+        y: 100,
+        width: 200,
+        height: 100,
+        text: 'Line1\n\nLine3',
+        color: '#E74C3C',
+        fontSize: 14,
+      };
+
+      const annotations = [annotation];
+      const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      textTool.render(mockCtx);
+
+      // Should render all lines including the empty one
+      // First line "Line1", empty line, then "Line3"
+      expect(mockCtx.fillText).toHaveBeenCalled();
+      const calls = (mockCtx.fillText as any).mock.calls;
+      // Should have at least 3 calls for the 3 lines
+      expect(calls.length).toBeGreaterThanOrEqual(3);
+    });
+  });
 });

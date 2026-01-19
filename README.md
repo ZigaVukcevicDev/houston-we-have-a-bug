@@ -1,8 +1,8 @@
 # Houston, we have a bug
 
 ![Status](https://img.shields.io/badge/status-work_in_progress-orange)
-![Coverage](https://img.shields.io/badge/coverage-97.7%25-yellowgreen)
-![Tests](https://img.shields.io/badge/tests-513%20passing-success)
+![Coverage](https://img.shields.io/badge/coverage-99%25-brightgreen)
+![Tests](https://img.shields.io/badge/tests-571%20passing-success)
 ![E2E](https://img.shields.io/badge/e2e-117%20passing-success)
 ![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Chrome_extension-blue)

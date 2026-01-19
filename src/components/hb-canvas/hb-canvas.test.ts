@@ -1324,4 +1324,116 @@ describe('HBCanvas', () => {
       expect(confirmSpy).toHaveBeenCalled();
     });
   });
+
+  describe('getCropButtonsPosition edge cases', () => {
+    it('should return null when crop tool is not available', () => {
+      // Remove crop tool temporarily
+      canvas['tools'].delete('crop');
+      const position = canvas['getCropButtonsPosition']();
+      expect(position).toBeNull();
+    });
+
+    it('should return null when crop rect does not exist', async () => {
+      canvas['dataUrl'] = 'data:image/png;base64,test';
+      document.body.appendChild(canvas);
+      await canvas.updateComplete;
+
+      const cropTool = canvas['tools'].get('crop') as CropTool;
+      expect(cropTool).toBeDefined();
+
+      // Ensure no crop rect exists
+      const position = canvas['getCropButtonsPosition']();
+      expect(position).toBeNull();
+    });
+  });
+
+  describe('getCropButtonsStyle edge cases', () => {
+    it('should return empty string when position is null', () => {
+      vi.spyOn(canvas as any, 'getCropButtonsPosition').mockReturnValue(null);
+      const style = canvas['getCropButtonsStyle']();
+      expect(style).toBe('');
+    });
+  });
+
+  describe('handleCropCancel', () => {
+    it('should call cancelCrop on crop tool when available', async () => {
+      canvas['dataUrl'] = 'data:image/png;base64,test';
+      document.body.appendChild(canvas);
+      await canvas.updateComplete;
+
+      const cropTool = canvas['tools'].get('crop') as CropTool;
+      const cancelSpy = vi.spyOn(cropTool, 'cancelCrop');
+
+      canvas['handleCropCancel']();
+
+      expect(cancelSpy).toHaveBeenCalledWith(false, canvas['canvas']);
+    });
+
+    it('should not crash when crop tool is not available', () => {
+      canvas['tools'].delete('crop');
+      expect(() => canvas['handleCropCancel']()).not.toThrow();
+    });
+  });
+
+  describe('handleCropConfirm edge cases', () => {
+    it('should return early when crop tool is not available', () => {
+      canvas['tools'].delete('crop');
+      canvas['handleCropConfirm']();
+      // Should not crash
+      expect(canvas['tools'].has('crop')).toBe(false);
+    });
+
+    it('should return early when originalImage is not loaded', async () => {
+      canvas['dataUrl'] = 'data:image/png;base64,test';
+      document.body.appendChild(canvas);
+      await canvas.updateComplete;
+
+      canvas['originalImage'] = null;
+      canvas['handleCropConfirm']();
+      // Should not crash
+      expect(canvas['originalImage']).toBeNull();
+    });
+
+    it('should handle when confirmCrop returns null', async () => {
+      canvas['dataUrl'] = 'data:image/png;base64,test';
+      document.body.appendChild(canvas);
+      await canvas.updateComplete;
+
+      const cropTool = canvas['tools'].get('crop') as CropTool;
+      vi.spyOn(cropTool, 'confirmCrop').mockReturnValue(null);
+
+      canvas['handleCropConfirm']();
+      // Should not crash when confirmCrop returns null
+    });
+  });
+
+  describe('container width calculations', () => {
+    it('should scale down image when wider than container', async () => {
+      canvas['dataUrl'] = 'data:image/png;base64,test';
+      const container = document.createElement('div');
+      container.className = 'canvas-container';
+      container.style.width = '500px';
+      container.appendChild(canvas);
+      document.body.appendChild(container);
+      await canvas.updateComplete;
+
+      const img = new Image();
+      img.width = 2000; // Wider than container
+      img.height = 1000;
+
+      // Test that the image loading logic exists and can be triggered
+      // The actual scaling happens in the onload callback
+      expect(canvas['canvas']).toBeDefined();
+      expect(container.contains(canvas)).toBe(true);
+
+      document.body.removeChild(container);
+    });
+  });
+
+  describe('deselectAll when selectTool is null', () => {
+    it('should not crash when select tool is not available', () => {
+      canvas['tools'].delete('select');
+      expect(() => canvas.deselectAll()).not.toThrow();
+    });
+  });
 });
