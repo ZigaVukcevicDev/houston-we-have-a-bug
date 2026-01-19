@@ -151,7 +151,8 @@ export class TextTool implements Tool {
       ctx.save();
       // Scale font size to match canvas coordinate system
       ctx.font = `500 ${annotation.fontSize * scaleX}px Inter`;
-      ctx.fillStyle = annotation.color;
+      // Use a slightly darker color for text to compensate for anti-aliasing making it appear lighter
+      ctx.fillStyle = this.darkenColor(annotation.color, 0.08);
       ctx.textBaseline = 'top';
       ctx.letterSpacing = '0.01em';
 
@@ -346,6 +347,24 @@ export class TextTool implements Tool {
       }
       this.textDiv = null;
     }
+  }
+
+  private darkenColor(hex: string, amount: number): string {
+    // Remove # if present
+    hex = hex.replace('#', '');
+
+    // Parse RGB values
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+
+    // Darken by reducing each channel
+    const darkenedR = Math.max(0, Math.floor(r * (1 - amount)));
+    const darkenedG = Math.max(0, Math.floor(g * (1 - amount)));
+    const darkenedB = Math.max(0, Math.floor(b * (1 - amount)));
+
+    // Convert back to hex
+    return `#${darkenedR.toString(16).padStart(2, '0')}${darkenedG.toString(16).padStart(2, '0')}${darkenedB.toString(16).padStart(2, '0')}`;
   }
 
   // Called when switching away from text tool

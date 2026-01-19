@@ -633,4 +633,65 @@ test.describe('Crop tool', () => {
     expect(beforeCropScreenshot.length).toBeGreaterThan(0);
     expect(afterCropScreenshot.length).toBeGreaterThan(0);
   });
+
+  test('should maintain aspect ratio after cropping', async ({ page }) => {
+    await page.click('[data-tool="crop"]');
+
+    const canvas = page.locator('canvas');
+    const initialBox = await canvas.boundingBox();
+    if (!initialBox) throw new Error('Canvas not found');
+
+    // Draw a crop rectangle with known aspect ratio (2:1)
+    const cropWidth = 400;
+    const cropHeight = 200;
+    const startX = initialBox.x + 100;
+    const startY = initialBox.y + 100;
+    const endX = startX + cropWidth;
+    const endY = startY + cropHeight;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Confirm crop
+    await page.click('.crop-buttons button[title="Confirm crop"]');
+    await page.waitForTimeout(300);
+
+    // Get canvas dimensions after crop
+    const afterCropBox = await canvas.boundingBox();
+    if (!afterCropBox) throw new Error('Canvas not found after crop');
+
+    // Calculate display aspect ratio
+    const displayAspectRatio = afterCropBox.width / afterCropBox.height;
+
+    // Get internal canvas dimensions
+    const internalDimensions = await canvas.evaluate(
+      (c: HTMLCanvasElement) => ({
+        width: c.width,
+        height: c.height,
+        aspectRatio: c.width / c.height,
+      })
+    );
+
+    // Get DPR to calculate expected aspect ratio
+    const dpr = await page.evaluate(() => window.devicePixelRatio);
+    const expectedAspectRatio = cropWidth / cropHeight; // Should be 2:1
+
+    // Internal aspect ratio should match expected crop (2:1)
+    expect(
+      Math.abs(internalDimensions.aspectRatio - expectedAspectRatio)
+    ).toBeLessThan(0.05);
+
+    // Display aspect ratio should also match (accounting for DPR scaling)
+    expect(Math.abs(displayAspectRatio - expectedAspectRatio)).toBeLessThan(
+      0.05
+    );
+
+    // Canvas should not be stretched - internal and display aspect ratios should match
+    expect(
+      Math.abs(internalDimensions.aspectRatio - displayAspectRatio)
+    ).toBeLessThan(0.01);
+  });
 });

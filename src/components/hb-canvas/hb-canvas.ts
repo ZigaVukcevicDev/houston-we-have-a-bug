@@ -346,10 +346,32 @@ export class HBCanvas extends LitElement {
       croppedImage.onload = () => {
         this.originalImage = croppedImage;
         const dpr = window.devicePixelRatio || 1;
+
+        // Set canvas internal resolution to cropped image size
         this.canvas.width = croppedImage.width;
         this.canvas.height = croppedImage.height;
-        this.canvas.style.width = `${croppedImage.width / dpr}px`;
-        this.canvas.style.height = `${croppedImage.height / dpr}px`;
+
+        // Calculate display size accounting for DPR
+        const displayWidth = croppedImage.width / dpr;
+        const displayHeight = croppedImage.height / dpr;
+
+        // Get available container width (no padding now)
+        const container = this.closest('.canvas-container') as HTMLElement;
+        const containerWidth = container
+          ? container.clientWidth
+          : window.innerWidth;
+
+        // Scale down if image is wider than container, but maintain a minimum size
+        const scale =
+          displayWidth > containerWidth ? containerWidth / displayWidth : 1;
+        const finalWidth = displayWidth * scale;
+        const finalHeight = displayHeight * scale;
+
+        this.canvas.style.width = `${finalWidth}px`;
+        this.canvas.style.height = `${finalHeight}px`;
+        this.canvas.style.minWidth = `${finalWidth}px`;
+        this.canvas.style.minHeight = `${finalHeight}px`;
+
         cropTool.cancelCrop();
         this.redraw();
         this.activeTool = 'select';
