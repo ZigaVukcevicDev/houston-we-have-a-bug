@@ -120,10 +120,10 @@
 - [x] change "environment details" to "system info"
 - [x] when hovering over rectangle, highlight is visible only when hover over horizontal parts
 - [x] find a way to have better hover color for secondary button (as current is too pale)
-- [ ] text tool - double click to edit
 - [x] text tool - changing textarea to editable div
 - [x] text tool - when I draw text area and click outside, the text jumps up
 - [x] text tool - less padding space in editable div, 5px
+- [ ] text tool - double click to edit
 - [ ] text tool - increase font size
 - [ ] text tool - no antialiasing? different font?
 - [ ] text tool - darkenColor is not applied when writing text, also cursor
@@ -131,7 +131,8 @@
 - [x] text tool - set minimum width and height of 40px when creating or resizing
 - [ ] text tool - make border transparent when clicking outside
 - [ ] text tool - make border 50% visible when hovering
-- [ ] text tool - select all color
+- [ ] text tool - select all / highlight color (update design)
+- [ ] text tool - when deleting text, annotation gets deleted
 - [x] text tool - revisit if user can't resize in negative directions
 - [x] recheck annotations when scrolling
 - [x] screenshot is horizontally scrollable
