@@ -1,6 +1,17 @@
-import { describe, it, expect, beforeEach, vi, type Mock, afterEach } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  vi,
+  type Mock,
+  afterEach,
+} from 'vitest';
 import { SelectTool } from './select-tool';
-import type { LineAnnotation, RectangleAnnotation } from '../../../interfaces/annotation.interface';
+import type {
+  LineAnnotation,
+  RectangleAnnotation,
+} from '../../../interfaces/annotation.interface';
 
 describe('SelectTool', () => {
   let selectTool: SelectTool;
@@ -54,7 +65,13 @@ describe('SelectTool', () => {
         strokeWidth: 5,
       },
     ];
-    selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, [], mockRedraw);
+    selectTool = new SelectTool(
+      lineAnnotations,
+      arrowAnnotations,
+      rectangleAnnotations,
+      [],
+      mockRedraw
+    );
 
     // Mock canvas
     mockCanvas = {
@@ -150,7 +167,10 @@ describe('SelectTool', () => {
   describe('line selection', () => {
     it('should select a line when clicked on it', () => {
       // Click near the middle of line-1
-      selectTool.handleClick({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+      selectTool.handleClick(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(selectTool['selectedAnnotationId']).toBe('line-1');
       expect(mockRedraw).toHaveBeenCalled();
@@ -169,7 +189,10 @@ describe('SelectTool', () => {
       });
 
       // Click on overlapping lines
-      selectTool.handleClick({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+      selectTool.handleClick(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
 
       // Should select the most recent one (line-3)
       expect(selectTool['selectedAnnotationId']).toBe('line-3');
@@ -177,12 +200,18 @@ describe('SelectTool', () => {
 
     it('should deselect when clicking on empty space', () => {
       // First select a line
-      selectTool.handleClick({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+      selectTool.handleClick(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
       expect(selectTool['selectedAnnotationId']).toBe('line-1');
       mockRedraw.mockClear();
 
       // Then click on empty space
-      selectTool.handleClick({ clientX: 500, clientY: 500 } as MouseEvent, mockCanvas);
+      selectTool.handleClick(
+        { clientX: 500, clientY: 500 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(selectTool['selectedAnnotationId']).toBeNull();
       expect(mockRedraw).toHaveBeenCalled();
@@ -197,7 +226,10 @@ describe('SelectTool', () => {
       });
 
       // Click at client coordinates that map to line-1 after scaling
-      selectTool.handleClick({ clientX: 75, clientY: 75 } as MouseEvent, mockCanvas);
+      selectTool.handleClick(
+        { clientX: 75, clientY: 75 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(selectTool['selectedAnnotationId']).toBe('line-1');
     });
@@ -211,13 +243,19 @@ describe('SelectTool', () => {
     });
 
     it('should start dragging start handle when clicked', () => {
-      selectTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(selectTool['draggingHandle']).toBe('start');
     });
 
     it('should update start point when dragging start handle', () => {
-      selectTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
 
       selectTool.handleMouseMove(
         { clientX: 120, clientY: 120, shiftKey: false } as MouseEvent,
@@ -241,13 +279,19 @@ describe('SelectTool', () => {
     });
 
     it('should start dragging end handle when clicked', () => {
-      selectTool.handleMouseDown({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(selectTool['draggingHandle']).toBe('end');
     });
 
     it('should update end point when dragging end handle', () => {
-      selectTool.handleMouseDown({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       selectTool.handleMouseMove(
         { clientX: 220, clientY: 220, shiftKey: false } as MouseEvent,
@@ -262,7 +306,10 @@ describe('SelectTool', () => {
     });
 
     it('should stop dragging on mouse up', () => {
-      selectTool.handleMouseDown({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
       expect(selectTool['draggingHandle']).toBe('end');
 
       selectTool.handleMouseUp();
@@ -283,7 +330,10 @@ describe('SelectTool', () => {
       selectTool['selectedAnnotationType'] = 'line';
 
       // Then start dragging a handle
-      selectTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
       mockCanvas.style.cursor = 'move';
 
       // Move mouse while dragging
@@ -329,15 +379,15 @@ describe('SelectTool', () => {
         1,
         96, // 100 - 4 (half of handleSize)
         96, // 100 - 4
-        8,  // handleSize
-        8   // handleSize
+        8, // handleSize
+        8 // handleSize
       );
       expect(mockCtx.fillRect).toHaveBeenNthCalledWith(
         2,
         196, // 200 - 4
         196, // 200 - 4
-        8,   // handleSize
-        8    // handleSize
+        8, // handleSize
+        8 // handleSize
       );
     });
 
@@ -363,13 +413,19 @@ describe('SelectTool', () => {
     it('should handle empty line annotations array', () => {
       const emptySelectTool = new SelectTool([], [], [], [], mockRedraw);
 
-      emptySelectTool.handleClick({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+      emptySelectTool.handleClick(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(emptySelectTool['selectedAnnotationId']).toBeNull();
     });
 
     it('should not start dragging if no line is selected', () => {
-      selectTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(selectTool['draggingHandle']).toBeNull();
     });
@@ -379,7 +435,10 @@ describe('SelectTool', () => {
       selectTool['selectedAnnotationType'] = 'line';
 
       // Click somewhere that's not on a handle
-      selectTool.handleMouseDown({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(selectTool['draggingHandle']).toBeNull();
     });
@@ -389,7 +448,10 @@ describe('SelectTool', () => {
       selectTool['selectedAnnotationType'] = 'line';
 
       // Mouse down at position slightly offset from handle center
-      selectTool.handleMouseDown({ clientX: 102, clientY: 103 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 102, clientY: 103 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(selectTool['dragOffset']).toEqual({ x: 2, y: 3 });
 
@@ -412,7 +474,10 @@ describe('SelectTool', () => {
         height: 600,
       });
 
-      selectTool.handleClick({ clientX: 200, clientY: 250 } as MouseEvent, mockCanvas);
+      selectTool.handleClick(
+        { clientX: 200, clientY: 250 } as MouseEvent,
+        mockCanvas
+      );
 
       // Should account for canvas offset (clientX - left = 150, clientY - top = 150)
       expect(selectTool['selectedAnnotationId']).toBe('line-1');
@@ -422,11 +487,17 @@ describe('SelectTool', () => {
   describe('integration scenarios', () => {
     it('should handle full select -> drag -> deselect workflow', () => {
       // 1. Select line
-      selectTool.handleClick({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+      selectTool.handleClick(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
       expect(selectTool['selectedAnnotationId']).toBe('line-1');
 
       // 2. Drag handle
-      selectTool.handleMouseDown({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
       selectTool.handleMouseMove(
         { clientX: 220, clientY: 220, shiftKey: false } as MouseEvent,
         mockCanvas,
@@ -439,17 +510,26 @@ describe('SelectTool', () => {
       expect(selectTool['draggingHandle']).toBeNull();
 
       // 4. Deselect
-      selectTool.handleClick({ clientX: 500, clientY: 500 } as MouseEvent, mockCanvas);
+      selectTool.handleClick(
+        { clientX: 500, clientY: 500 } as MouseEvent,
+        mockCanvas
+      );
       expect(selectTool['selectedAnnotationId']).toBeNull();
     });
 
     it('should allow switching selection between lines', () => {
       // Select first line
-      selectTool.handleClick({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+      selectTool.handleClick(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
       expect(selectTool['selectedAnnotationId']).toBe('line-1');
 
       // Select second line
-      selectTool.handleClick({ clientX: 350, clientY: 150 } as MouseEvent, mockCanvas);
+      selectTool.handleClick(
+        { clientX: 350, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
       expect(selectTool['selectedAnnotationId']).toBe('line-2');
     });
   });
@@ -460,7 +540,10 @@ describe('SelectTool', () => {
       selectTool['selectedAnnotationType'] = 'line';
 
       // Click on line body (not on handles)
-      selectTool.handleMouseDown({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(selectTool['draggingLine']).toBe(true);
     });
@@ -474,7 +557,10 @@ describe('SelectTool', () => {
       const originalY2 = lineAnnotations[0].y2;
 
       // Start dragging line body
-      selectTool.handleMouseDown({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
 
       // Drag to new position
       selectTool.handleMouseMove(
@@ -495,7 +581,10 @@ describe('SelectTool', () => {
     it('should stop dragging line on mouse up', () => {
       selectTool['selectedAnnotationId'] = 'line-1';
       selectTool['selectedAnnotationType'] = 'line';
-      selectTool.handleMouseDown({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
 
       selectTool.handleMouseUp();
 
@@ -601,7 +690,10 @@ describe('SelectTool', () => {
       selectTool['hoveredAnnotationId'] = 'line-1';
 
       // Start dragging handle
-      selectTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
       mockRedraw.mockClear();
 
       // Move mouse while dragging
@@ -619,7 +711,10 @@ describe('SelectTool', () => {
   describe('rectangle selection', () => {
     it('should select a rectangle when clicked on it', () => {
       // Click on rect-1's edge
-      selectTool.handleClick({ clientX: 100, clientY: 310 } as MouseEvent, mockCanvas);
+      selectTool.handleClick(
+        { clientX: 100, clientY: 310 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(selectTool['selectedAnnotationId']).toBe('rect-1');
       expect(selectTool['selectedAnnotationType']).toBe('rectangle');
@@ -639,7 +734,10 @@ describe('SelectTool', () => {
       });
 
       // Click on overlapping rectangles
-      selectTool.handleClick({ clientX: 100, clientY: 310 } as MouseEvent, mockCanvas);
+      selectTool.handleClick(
+        { clientX: 100, clientY: 310 } as MouseEvent,
+        mockCanvas
+      );
 
       // Should select the most recent one (rect-3)
       expect(selectTool['selectedAnnotationId']).toBe('rect-3');
@@ -680,7 +778,10 @@ describe('SelectTool', () => {
       selectTool['selectedAnnotationType'] = 'rectangle';
 
       // Click on rectangle edge
-      selectTool.handleMouseDown({ clientX: 100, clientY: 310 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 100, clientY: 310 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(selectTool['draggingLine']).toBe(true);
     });
@@ -692,7 +793,10 @@ describe('SelectTool', () => {
       const originalY = rectangleAnnotations[0].y;
 
       // Start dragging rectangle body (click on left edge)
-      selectTool.handleMouseDown({ clientX: 100, clientY: 310 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 100, clientY: 310 } as MouseEvent,
+        mockCanvas
+      );
 
       // Drag to new position
       selectTool.handleMouseMove(
@@ -710,7 +814,10 @@ describe('SelectTool', () => {
     it('should stop dragging rectangle on mouse up', () => {
       selectTool['selectedAnnotationId'] = 'rect-1';
       selectTool['selectedAnnotationType'] = 'rectangle';
-      selectTool.handleMouseDown({ clientX: 110, clientY: 310 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 110, clientY: 310 } as MouseEvent,
+        mockCanvas
+      );
 
       selectTool.handleMouseUp();
 
@@ -724,7 +831,10 @@ describe('SelectTool', () => {
       const originalHeight = rectangleAnnotations[0].height;
 
       // Start dragging and move
-      selectTool.handleMouseDown({ clientX: 110, clientY: 310 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 110, clientY: 310 } as MouseEvent,
+        mockCanvas
+      );
       selectTool.handleMouseMove(
         { clientX: 140, clientY: 340 } as MouseEvent,
         mockCanvas,
@@ -744,7 +854,10 @@ describe('SelectTool', () => {
     });
 
     it('should start dragging when clicking on top-left corner handle', () => {
-      selectTool.handleMouseDown({ clientX: 100, clientY: 300 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 100, clientY: 300 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(selectTool['draggingHandle']).toBe('top-left');
     });
@@ -754,7 +867,10 @@ describe('SelectTool', () => {
       const originalHeight = rectangleAnnotations[0].height;
 
       // Click on top-left corner
-      selectTool.handleMouseDown({ clientX: 100, clientY: 300 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 100, clientY: 300 } as MouseEvent,
+        mockCanvas
+      );
 
       // Drag to new position (moving corner inward)
       selectTool.handleMouseMove(
@@ -776,7 +892,10 @@ describe('SelectTool', () => {
       const originalHeight = rectangleAnnotations[0].height;
 
       // Click on top-right corner (x=200, y=300)
-      selectTool.handleMouseDown({ clientX: 200, clientY: 300 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 200, clientY: 300 } as MouseEvent,
+        mockCanvas
+      );
 
       // Drag to new position
       selectTool.handleMouseMove(
@@ -798,7 +917,10 @@ describe('SelectTool', () => {
       const originalHeight = rectangleAnnotations[0].height;
 
       // Click on bottom-left corner (x=100, y=350)
-      selectTool.handleMouseDown({ clientX: 100, clientY: 350 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 100, clientY: 350 } as MouseEvent,
+        mockCanvas
+      );
 
       // Drag to new position
       selectTool.handleMouseMove(
@@ -821,7 +943,10 @@ describe('SelectTool', () => {
       const originalHeight = rectangleAnnotations[0].height;
 
       // Click on bottom-right corner (x=200, y=350)
-      selectTool.handleMouseDown({ clientX: 200, clientY: 350 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 200, clientY: 350 } as MouseEvent,
+        mockCanvas
+      );
 
       // Drag to new position
       selectTool.handleMouseMove(
@@ -838,7 +963,10 @@ describe('SelectTool', () => {
     });
 
     it('should stop dragging corner handle on mouse up', () => {
-      selectTool.handleMouseDown({ clientX: 100, clientY: 300 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 100, clientY: 300 } as MouseEvent,
+        mockCanvas
+      );
       expect(selectTool['draggingHandle']).toBe('top-left');
 
       selectTool.handleMouseUp();
@@ -925,7 +1053,13 @@ describe('SelectTool', () => {
         color: '#E74C3C',
         width: 5,
       });
-      selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, [], mockRedraw);
+      selectTool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        [],
+        mockRedraw
+      );
     });
 
     it('should detect hover on arrow line body', () => {
@@ -989,7 +1123,13 @@ describe('SelectTool', () => {
         color: '#E74C3C',
         width: 5,
       });
-      selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, [], mockRedraw);
+      selectTool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        [],
+        mockRedraw
+      );
 
       // Hover way below the arrow
       selectTool.handleMouseMove(
@@ -1013,10 +1153,20 @@ describe('SelectTool', () => {
         color: '#E74C3C',
         width: 5,
       });
-      selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, [], mockRedraw);
+      selectTool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        [],
+        mockRedraw
+      );
 
       // Hover exactly on the point to trigger lengthSquared === 0 case
-      selectTool.handleMouseMove({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas, mockCtx);
+      selectTool.handleMouseMove(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(selectTool['hoveredAnnotationId']).toBe('point-line');
     });
@@ -1032,7 +1182,13 @@ describe('SelectTool', () => {
         color: '#E74C3C',
         width: 5,
       });
-      selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, [], mockRedraw);
+      selectTool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        [],
+        mockRedraw
+      );
 
       // Hover near the diagonal arrowhead
       selectTool.handleMouseMove(
@@ -1058,7 +1214,13 @@ describe('SelectTool', () => {
         width: 5,
       });
 
-      selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, [], mockRedraw);
+      selectTool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        [],
+        mockRedraw
+      );
 
       // Now clear arrowAnnotations and add to lineAnnotations to make it a regular line
       arrowAnnotations.length = 0;
@@ -1071,9 +1233,15 @@ describe('SelectTool', () => {
         color: '#E74C3C',
         width: 5,
       });
-      selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, [], mockRedraw);
+      selectTool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        [],
+        mockRedraw
+      );
 
-      // Hover where arrowhead would be - should not detect for regular line  
+      // Hover where arrowhead would be - should not detect for regular line
       // This point is only near arrowhead, not the main line body
       selectTool.handleMouseMove(
         { clientX: 190, clientY: 90 } as MouseEvent,
@@ -1090,25 +1258,37 @@ describe('SelectTool', () => {
     it('should handle empty rectangle annotations array', () => {
       const emptySelectTool = new SelectTool([], [], [], [], mockRedraw);
 
-      emptySelectTool.handleClick({ clientX: 150, clientY: 310 } as MouseEvent, mockCanvas);
+      emptySelectTool.handleClick(
+        { clientX: 150, clientY: 310 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(emptySelectTool['selectedAnnotationId']).toBeNull();
     });
 
     it('should not start dragging if no rectangle is selected', () => {
-      selectTool.handleMouseDown({ clientX: 110, clientY: 310 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 110, clientY: 310 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(selectTool['draggingLine']).toBe(false);
     });
 
     it('should handle switching between line and rectangle selection', () => {
       // Select a line first
-      selectTool.handleClick({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+      selectTool.handleClick(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
       expect(selectTool['selectedAnnotationId']).toBe('line-1');
       expect(selectTool['selectedAnnotationType']).toBe('line');
 
       // Select a rectangle
-      selectTool.handleClick({ clientX: 100, clientY: 310 } as MouseEvent, mockCanvas);
+      selectTool.handleClick(
+        { clientX: 100, clientY: 310 } as MouseEvent,
+        mockCanvas
+      );
       expect(selectTool['selectedAnnotationId']).toBe('rect-1');
       expect(selectTool['selectedAnnotationType']).toBe('rectangle');
     });
@@ -1120,7 +1300,10 @@ describe('SelectTool', () => {
       expect(selectTool['selectedAnnotationId']).toBeNull();
 
       // Click on line-1 (not selected)
-      selectTool.handleMouseDown({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
 
       // Should auto-select and start dragging
       expect(selectTool['selectedAnnotationId']).toBe('line-1');
@@ -1135,7 +1318,10 @@ describe('SelectTool', () => {
       const originalY2 = lineAnnotations[0].y2;
 
       // Click on unselected line
-      selectTool.handleMouseDown({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
 
       // Drag to new position
       selectTool.handleMouseMove(
@@ -1156,7 +1342,10 @@ describe('SelectTool', () => {
       expect(selectTool['selectedAnnotationId']).toBeNull();
 
       // Click on rect-1 (not selected)
-      selectTool.handleMouseDown({ clientX: 100, clientY: 310 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 100, clientY: 310 } as MouseEvent,
+        mockCanvas
+      );
 
       // Should auto-select and start dragging
       expect(selectTool['selectedAnnotationId']).toBe('rect-1');
@@ -1169,7 +1358,10 @@ describe('SelectTool', () => {
       const originalY = rectangleAnnotations[0].y;
 
       // Click on unselected rectangle
-      selectTool.handleMouseDown({ clientX: 100, clientY: 310 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 100, clientY: 310 } as MouseEvent,
+        mockCanvas
+      );
 
       // Drag to new position
       selectTool.handleMouseMove(
@@ -1189,7 +1381,10 @@ describe('SelectTool', () => {
       selectTool['selectedAnnotationType'] = 'line';
 
       // Click on line-2 area (but line-1 is selected and we're on it)
-      selectTool.handleMouseDown({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+      selectTool.handleMouseDown(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
 
       // Should still be dragging line-1  (the selected one)
       expect(selectTool['selectedAnnotationId']).toBe('line-1');
@@ -1209,7 +1404,7 @@ describe('SelectTool', () => {
 
       // Line should be deleted
       expect(lineAnnotations.length).toBe(initialLength - 1);
-      expect(lineAnnotations.find(l => l.id === 'line-1')).toBeUndefined();
+      expect(lineAnnotations.find((l) => l.id === 'line-1')).toBeUndefined();
       expect(selectTool['selectedAnnotationId']).toBeNull();
     });
 
@@ -1224,7 +1419,9 @@ describe('SelectTool', () => {
 
       // Rectangle should be deleted
       expect(rectangleAnnotations.length).toBe(initialLength - 1);
-      expect(rectangleAnnotations.find(r => r.id === 'rect-1')).toBeUndefined();
+      expect(
+        rectangleAnnotations.find((r) => r.id === 'rect-1')
+      ).toBeUndefined();
       expect(selectTool['selectedAnnotationId']).toBeNull();
     });
 
@@ -1246,7 +1443,10 @@ describe('SelectTool', () => {
 
       selectTool.deactivate();
 
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        'keydown',
+        expect.any(Function)
+      );
       expect(selectTool['keydownHandler']).toBeNull();
     });
 
@@ -1262,7 +1462,13 @@ describe('SelectTool', () => {
       });
 
       selectTool.deactivate();
-      selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, [], mockRedraw);
+      selectTool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        [],
+        mockRedraw
+      );
       selectTool.activate();
 
       selectTool.selectAnnotation('arrow-1');
@@ -1272,7 +1478,7 @@ describe('SelectTool', () => {
       document.dispatchEvent(deleteEvent);
 
       expect(arrowAnnotations.length).toBe(initialLength - 1);
-      expect(arrowAnnotations.find(a => a.id === 'arrow-1')).toBeUndefined();
+      expect(arrowAnnotations.find((a) => a.id === 'arrow-1')).toBeUndefined();
       expect(selectTool['selectedAnnotationId']).toBeNull();
     });
   });
@@ -1289,7 +1495,13 @@ describe('SelectTool', () => {
         width: 3,
       });
 
-      selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, [], mockRedraw);
+      selectTool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        [],
+        mockRedraw
+      );
 
       selectTool.handleMouseMove(
         { clientX: 200, clientY: 200 } as MouseEvent,
@@ -1311,7 +1523,13 @@ describe('SelectTool', () => {
         width: 3,
       });
 
-      selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, [], mockRedraw);
+      selectTool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        [],
+        mockRedraw
+      );
 
       selectTool.handleMouseMove(
         { clientX: 250, clientY: 250 } as MouseEvent,
@@ -1335,7 +1553,13 @@ describe('SelectTool', () => {
         width: 3,
       });
 
-      selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, [], mockRedraw);
+      selectTool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        [],
+        mockRedraw
+      );
 
       // Hover over the arrow
       selectTool.handleMouseMove(
@@ -1361,7 +1585,11 @@ describe('SelectTool', () => {
       selectTool['selectedAnnotationId'] = 'line-1';
       selectTool['selectedAnnotationType'] = 'line';
 
-      selectTool.handleMouseMove({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas, mockCtx);
+      selectTool.handleMouseMove(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(mockCanvas.style.cursor).toBe('move');
     });
@@ -1370,7 +1598,11 @@ describe('SelectTool', () => {
       selectTool['selectedAnnotationId'] = 'line-1';
       selectTool['selectedAnnotationType'] = 'line';
 
-      selectTool.handleMouseMove({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas, mockCtx);
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(mockCanvas.style.cursor).toBe('move');
     });
@@ -1379,7 +1611,11 @@ describe('SelectTool', () => {
       selectTool['selectedAnnotationId'] = 'rect-1';
       selectTool['selectedAnnotationType'] = 'rectangle';
 
-      selectTool.handleMouseMove({ clientX: 100, clientY: 300 } as MouseEvent, mockCanvas, mockCtx);
+      selectTool.handleMouseMove(
+        { clientX: 100, clientY: 300 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(mockCanvas.style.cursor).toBe('nwse-resize');
     });
@@ -1388,7 +1624,11 @@ describe('SelectTool', () => {
       selectTool['selectedAnnotationId'] = 'rect-1';
       selectTool['selectedAnnotationType'] = 'rectangle';
 
-      selectTool.handleMouseMove({ clientX: 200, clientY: 300 } as MouseEvent, mockCanvas, mockCtx);
+      selectTool.handleMouseMove(
+        { clientX: 200, clientY: 300 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(mockCanvas.style.cursor).toBe('nesw-resize');
     });
@@ -1397,7 +1637,11 @@ describe('SelectTool', () => {
       selectTool['selectedAnnotationId'] = 'rect-1';
       selectTool['selectedAnnotationType'] = 'rectangle';
 
-      selectTool.handleMouseMove({ clientX: 100, clientY: 350 } as MouseEvent, mockCanvas, mockCtx);
+      selectTool.handleMouseMove(
+        { clientX: 100, clientY: 350 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(mockCanvas.style.cursor).toBe('nesw-resize');
     });
@@ -1406,7 +1650,11 @@ describe('SelectTool', () => {
       selectTool['selectedAnnotationId'] = 'rect-1';
       selectTool['selectedAnnotationType'] = 'rectangle';
 
-      selectTool.handleMouseMove({ clientX: 200, clientY: 350 } as MouseEvent, mockCanvas, mockCtx);
+      selectTool.handleMouseMove(
+        { clientX: 200, clientY: 350 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(mockCanvas.style.cursor).toBe('nwse-resize');
     });
@@ -1415,7 +1663,11 @@ describe('SelectTool', () => {
       selectTool['selectedAnnotationId'] = 'rect-1';
       selectTool['selectedAnnotationType'] = 'rectangle';
 
-      selectTool.handleMouseMove({ clientX: 100, clientY: 325 } as MouseEvent, mockCanvas, mockCtx);
+      selectTool.handleMouseMove(
+        { clientX: 100, clientY: 325 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(mockCanvas.style.cursor).toBe('move');
     });
@@ -1423,7 +1675,11 @@ describe('SelectTool', () => {
     it('should set cursor to pointer when hovering over unselected annotation', () => {
       expect(selectTool['selectedAnnotationId']).toBeNull();
 
-      selectTool.handleMouseMove({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas, mockCtx);
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(mockCanvas.style.cursor).toBe('pointer');
     });
@@ -1436,13 +1692,25 @@ describe('SelectTool', () => {
 
       selectTool.deactivate();
 
-      expect(removeListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+      expect(removeListenerSpy).toHaveBeenCalledWith(
+        'keydown',
+        expect.any(Function)
+      );
       expect(selectTool['keydownHandler']).toBeNull();
     });
   });
 
   describe('text annotation support', () => {
-    let textAnnotations: Array<{ id: string; x: number; y: number; width: number; height: number; text: string; color: string; fontSize: number }>;
+    let textAnnotations: Array<{
+      id: string;
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      text: string;
+      color: string;
+      fontSize: number;
+    }>;
 
     beforeEach(() => {
       textAnnotations = [
@@ -1458,14 +1726,23 @@ describe('SelectTool', () => {
         },
       ];
       selectTool.deactivate();
-      selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, textAnnotations, mockRedraw);
+      selectTool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        textAnnotations,
+        mockRedraw
+      );
       selectTool.activate();
     });
 
     describe('text box selection', () => {
       it('should select text annotation when clicking on border edge', () => {
         // Click on left edge of text box
-        selectTool.handleClick({ clientX: 100, clientY: 450 } as MouseEvent, mockCanvas);
+        selectTool.handleClick(
+          { clientX: 100, clientY: 450 } as MouseEvent,
+          mockCanvas
+        );
 
         expect(selectTool['selectedAnnotationId']).toBe('text-1');
         expect(selectTool['selectedAnnotationType']).toBe('text');
@@ -1474,7 +1751,10 @@ describe('SelectTool', () => {
 
       it('should not select text annotation when clicking inside (not on edge)', () => {
         // Click inside the text box (not near edges)
-        selectTool.handleClick({ clientX: 200, clientY: 450 } as MouseEvent, mockCanvas);
+        selectTool.handleClick(
+          { clientX: 200, clientY: 450 } as MouseEvent,
+          mockCanvas
+        );
 
         expect(selectTool['selectedAnnotationId']).toBeNull();
       });
@@ -1483,7 +1763,10 @@ describe('SelectTool', () => {
         selectTool['selectedAnnotationId'] = 'text-1';
         selectTool['selectedAnnotationType'] = 'text';
 
-        selectTool.handleClick({ clientX: 500, clientY: 500 } as MouseEvent, mockCanvas);
+        selectTool.handleClick(
+          { clientX: 500, clientY: 500 } as MouseEvent,
+          mockCanvas
+        );
 
         expect(selectTool['selectedAnnotationId']).toBeNull();
         expect(selectTool['selectedAnnotationType']).toBeNull();
@@ -1511,7 +1794,7 @@ describe('SelectTool', () => {
         // Check positions of the 4 corner handles (centered on corners)
         // Top-left
         expect(mockCtx.fillRect).toHaveBeenNthCalledWith(1, 96, 396, 8, 8);
-        // Top-right  
+        // Top-right
         expect(mockCtx.fillRect).toHaveBeenNthCalledWith(2, 296, 396, 8, 8);
         // Bottom-left
         expect(mockCtx.fillRect).toHaveBeenNthCalledWith(3, 96, 496, 8, 8);
@@ -1529,34 +1812,49 @@ describe('SelectTool', () => {
         document.dispatchEvent(deleteEvent);
 
         expect(textAnnotations.length).toBe(initialLength - 1);
-        expect(textAnnotations.find(t => t.id === 'text-1')).toBeUndefined();
+        expect(textAnnotations.find((t) => t.id === 'text-1')).toBeUndefined();
         expect(selectTool['selectedAnnotationId']).toBeNull();
       });
     });
 
     describe('text box edge detection', () => {
       it('should detect click on top edge', () => {
-        selectTool.handleClick({ clientX: 150, clientY: 400 } as MouseEvent, mockCanvas);
+        selectTool.handleClick(
+          { clientX: 150, clientY: 400 } as MouseEvent,
+          mockCanvas
+        );
         expect(selectTool['selectedAnnotationId']).toBe('text-1');
       });
 
       it('should detect click on bottom edge', () => {
-        selectTool.handleClick({ clientX: 150, clientY: 500 } as MouseEvent, mockCanvas);
+        selectTool.handleClick(
+          { clientX: 150, clientY: 500 } as MouseEvent,
+          mockCanvas
+        );
         expect(selectTool['selectedAnnotationId']).toBe('text-1');
       });
 
       it('should detect click on left edge', () => {
-        selectTool.handleClick({ clientX: 100, clientY: 450 } as MouseEvent, mockCanvas);
+        selectTool.handleClick(
+          { clientX: 100, clientY: 450 } as MouseEvent,
+          mockCanvas
+        );
         expect(selectTool['selectedAnnotationId']).toBe('text-1');
       });
 
       it('should detect click on right edge', () => {
-        selectTool.handleClick({ clientX: 300, clientY: 450 } as MouseEvent, mockCanvas);
+        selectTool.handleClick(
+          { clientX: 300, clientY: 450 } as MouseEvent,
+          mockCanvas
+        );
         expect(selectTool['selectedAnnotationId']).toBe('text-1');
       });
 
       it('should not detect click far from edges', () => {
-        selectTool.handleClick({ clientX: 150, clientY: 450 } as MouseEvent, mockCanvas);
+        selectTool.handleClick(
+          { clientX: 150, clientY: 450 } as MouseEvent,
+          mockCanvas
+        );
         expect(selectTool['selectedAnnotationId']).toBeNull();
       });
     });
@@ -1575,11 +1873,20 @@ describe('SelectTool', () => {
         });
 
         selectTool.deactivate();
-        selectTool = new SelectTool(lineAnnotations, arrowAnnotations, rectangleAnnotations, textAnnotations, mockRedraw);
+        selectTool = new SelectTool(
+          lineAnnotations,
+          arrowAnnotations,
+          rectangleAnnotations,
+          textAnnotations,
+          mockRedraw
+        );
         selectTool.activate();
 
         // Click on overlapping area
-        selectTool.handleClick({ clientX: 100, clientY: 450 } as MouseEvent, mockCanvas);
+        selectTool.handleClick(
+          { clientX: 100, clientY: 450 } as MouseEvent,
+          mockCanvas
+        );
 
         // Should select text annotation (checked first)
         expect(selectTool['selectedAnnotationId']).toBe('text-1');
@@ -1592,8 +1899,15 @@ describe('SelectTool', () => {
         selectTool['selectedAnnotationId'] = 'text-1';
         selectTool['selectedAnnotationType'] = 'text';
 
-        selectTool.handleMouseDown({ clientX: 100, clientY: 400 } as MouseEvent, mockCanvas);
-        selectTool.handleMouseMove({ clientX: 120, clientY: 420 } as MouseEvent, mockCanvas, mockCtx);
+        selectTool.handleMouseDown(
+          { clientX: 100, clientY: 400 } as MouseEvent,
+          mockCanvas
+        );
+        selectTool.handleMouseMove(
+          { clientX: 120, clientY: 420 } as MouseEvent,
+          mockCanvas,
+          mockCtx
+        );
 
         const textBox = textAnnotations[0];
         expect(textBox.x).toBe(120);
@@ -1606,8 +1920,15 @@ describe('SelectTool', () => {
         selectTool['selectedAnnotationId'] = 'text-1';
         selectTool['selectedAnnotationType'] = 'text';
 
-        selectTool.handleMouseDown({ clientX: 300, clientY: 400 } as MouseEvent, mockCanvas);
-        selectTool.handleMouseMove({ clientX: 320, clientY: 420 } as MouseEvent, mockCanvas, mockCtx);
+        selectTool.handleMouseDown(
+          { clientX: 300, clientY: 400 } as MouseEvent,
+          mockCanvas
+        );
+        selectTool.handleMouseMove(
+          { clientX: 320, clientY: 420 } as MouseEvent,
+          mockCanvas,
+          mockCtx
+        );
 
         const textBox = textAnnotations[0];
         expect(textBox.x).toBe(100);
@@ -1620,8 +1941,15 @@ describe('SelectTool', () => {
         selectTool['selectedAnnotationId'] = 'text-1';
         selectTool['selectedAnnotationType'] = 'text';
 
-        selectTool.handleMouseDown({ clientX: 100, clientY: 500 } as MouseEvent, mockCanvas);
-        selectTool.handleMouseMove({ clientX: 120, clientY: 520 } as MouseEvent, mockCanvas, mockCtx);
+        selectTool.handleMouseDown(
+          { clientX: 100, clientY: 500 } as MouseEvent,
+          mockCanvas
+        );
+        selectTool.handleMouseMove(
+          { clientX: 120, clientY: 520 } as MouseEvent,
+          mockCanvas,
+          mockCtx
+        );
 
         const textBox = textAnnotations[0];
         expect(textBox.x).toBe(120);
@@ -1634,8 +1962,15 @@ describe('SelectTool', () => {
         selectTool['selectedAnnotationId'] = 'text-1';
         selectTool['selectedAnnotationType'] = 'text';
 
-        selectTool.handleMouseDown({ clientX: 300, clientY: 500 } as MouseEvent, mockCanvas);
-        selectTool.handleMouseMove({ clientX: 320, clientY: 520 } as MouseEvent, mockCanvas, mockCtx);
+        selectTool.handleMouseDown(
+          { clientX: 300, clientY: 500 } as MouseEvent,
+          mockCanvas
+        );
+        selectTool.handleMouseMove(
+          { clientX: 320, clientY: 520 } as MouseEvent,
+          mockCanvas,
+          mockCtx
+        );
 
         const textBox = textAnnotations[0];
         expect(textBox.x).toBe(100);
@@ -1643,6 +1978,148 @@ describe('SelectTool', () => {
         expect(textBox.width).toBe(220);
         expect(textBox.height).toBe(120);
       });
+
+      it('should enforce minimum width when resizing from left edge', () => {
+        selectTool['selectedAnnotationId'] = 'text-1';
+        selectTool['selectedAnnotationType'] = 'text';
+
+        // Try to resize below minimum width from top-left handle
+        selectTool.handleMouseDown(
+          { clientX: 100, clientY: 400 } as MouseEvent,
+          mockCanvas
+        );
+        selectTool.handleMouseMove(
+          { clientX: 290, clientY: 410 } as MouseEvent,
+          mockCanvas,
+          mockCtx
+        );
+
+        const textBox = textAnnotations[0];
+        // Width should be minimum 40, and x position adjusted
+        expect(textBox.width).toBe(40);
+        expect(textBox.x).toBe(260); // 300 (right edge) - 40 (min width)
+      });
+
+      it('should enforce minimum height when resizing from top edge', () => {
+        selectTool['selectedAnnotationId'] = 'text-1';
+        selectTool['selectedAnnotationType'] = 'text';
+
+        // Try to resize below minimum height from top-left handle
+        selectTool.handleMouseDown(
+          { clientX: 100, clientY: 400 } as MouseEvent,
+          mockCanvas
+        );
+        selectTool.handleMouseMove(
+          { clientX: 110, clientY: 490 } as MouseEvent,
+          mockCanvas,
+          mockCtx
+        );
+
+        const textBox = textAnnotations[0];
+        // Height should be minimum 40, and y position adjusted
+        expect(textBox.height).toBe(40);
+        expect(textBox.y).toBe(460); // 500 (bottom edge) - 40 (min height)
+      });
+    });
+  });
+
+  describe('additional edge cases', () => {
+    it('should handle zero-length line in distance calculation', () => {
+      const zeroLengthLine: LineAnnotation = {
+        id: 'zero-line',
+        x1: 100,
+        x2: 100,
+        y1: 100,
+        y2: 100,
+        color: '#E74C3C',
+        width: 3,
+      };
+      lineAnnotations.push(zeroLengthLine);
+      selectTool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        [],
+        mockRedraw
+      );
+
+      // Mouse directly on the point
+      selectTool.handleMouseMove(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBe('zero-line');
+    });
+
+    it('should handle draggingLine with arrow type', () => {
+      const arrow: LineAnnotation = {
+        id: 'arrow-1',
+        x1: 100,
+        y1: 100,
+        x2: 200,
+        y2: 200,
+        color: '#E74C3C',
+        width: 3,
+      };
+      arrowAnnotations.push(arrow);
+      selectTool = new SelectTool(
+        [],
+        arrowAnnotations,
+        rectangleAnnotations,
+        [],
+        mockRedraw
+      );
+
+      selectTool['selectedAnnotationId'] = 'arrow-1';
+      selectTool['selectedAnnotationType'] = 'line'; // Arrows use 'line' type in drag logic
+      selectTool['draggingLine'] = true;
+      selectTool['dragOffset'] = { x: 100, y: 100 };
+
+      // Drag the arrow
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(arrow.x1).toBe(150);
+      expect(arrow.y1).toBe(150);
+      expect(arrow.x2).toBe(250);
+      expect(arrow.y2).toBe(250);
+    });
+
+    it('should drag text annotation when draggingLine is true with text type', () => {
+      const textAnnotations: any[] = [
+        {
+          id: 'text-1',
+          x: 100,
+          y: 100,
+          width: 200,
+          height: 100,
+          text: 'Test',
+          color: '#E74C3C',
+          fontSize: 14,
+        },
+      ];
+
+      selectTool = new SelectTool([], [], [], textAnnotations, mockRedraw);
+
+      selectTool['selectedAnnotationId'] = 'text-1';
+      selectTool['selectedAnnotationType'] = 'text';
+      selectTool['draggingLine'] = true;
+      selectTool['dragOffset'] = { x: 100, y: 100 };
+
+      // Drag the text box
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(textAnnotations[0].x).toBe(150);
+      expect(textAnnotations[0].y).toBe(150);
     });
   });
 });
