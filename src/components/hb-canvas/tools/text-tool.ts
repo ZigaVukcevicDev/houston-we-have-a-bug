@@ -161,8 +161,8 @@ export class TextTool implements Tool {
       const borderWidthY = 2 * scaleY;
       const borderOffsetX = borderWidthX / 2;
       const borderOffsetY = borderWidthY / 2;
-      const textPaddingX = 10 * scaleX;
-      const textPaddingY = 10 * scaleY;
+      const textPaddingX = 5 * scaleX;
+      const textPaddingY = 5 * scaleY;
 
       // Text starts at: box edge + border inner offset + padding
       const textStartOffsetX = borderOffsetX + textPaddingX;
@@ -256,7 +256,7 @@ export class TextTool implements Tool {
       border: ${borderWidth}px solid transparent;
       border-radius: 4px;
       outline: none;
-      padding: 10px;
+      padding: 5px;
       overflow: hidden;
       white-space: pre-wrap;
       word-wrap: break-word;

@@ -507,16 +507,16 @@ describe('TextTool', () => {
 
       // Expected position calculation:
       // strokeRect centers 2px border: inner edge at x + 1
-      // Textarea padding: 10px
+      // Textarea padding: 5px
       // Half-leading offset to match CSS line-height centering: (lineHeight - fontSize) / 2
-      // Total X offset: 1 + 10 = 11px
-      // Total Y offset: 1 + 10 + halfLeading
+      // Total X offset: 1 + 5 = 6px
+      // Total Y offset: 1 + 5 + halfLeading
       const borderOffset = 1; // borderWidth(2px) / 2
-      const padding = 10;
+      const padding = 5;
       const cssLineHeight = annotation.fontSize * 1.2; // 14 * 1.2 = 16.8
       const halfLeading = (cssLineHeight - annotation.fontSize) / 2; // (16.8 - 14) / 2 = 1.4
-      const expectedX = annotation.x + borderOffset + padding; // 100 + 11 = 111
-      const expectedY = annotation.y + borderOffset + padding + halfLeading; // 100 + 11 + 1.4 = 112.4
+      const expectedX = annotation.x + borderOffset + padding; // 100 + 6 = 106
+      const expectedY = annotation.y + borderOffset + padding + halfLeading; // 100 + 6 + 1.4 = 107.4
 
       expect(renderedX).toBe(expectedX);
       expect(renderedY).toBe(expectedY);
@@ -551,9 +551,9 @@ describe('TextTool', () => {
 
       // Expected maxWidth calculation:
       // width - (borderOffset + padding) * 2
-      // 200 - (1 + 10) * 2 = 200 - 22 = 178
+      // 200 - (1 + 5) * 2 = 200 - 12 = 188
       const borderOffset = 1;
-      const padding = 10;
+      const padding = 5;
       const expectedMaxWidth = annotation.width - (borderOffset + padding) * 2;
 
       expect(maxWidth).toBe(expectedMaxWidth);
@@ -611,7 +611,7 @@ describe('TextTool', () => {
       // Calculate where textDiv text would appear in canvas coordinates
       const scaleX = mockCanvas.width / 400; // 800 / 400 = 2
       const textDivLeft = parseFloat(textDiv.style.left); // CSS pixels
-      const textDivPadding = 10; // CSS pixels
+      const textDivPadding = 5; // CSS pixels
       const textDivBorder = 2; // CSS pixels, but textDiv has no border - this is for strokeRect offset
       // Textarea positioned with borderOffset, text starts at: left + border + padding
       const textDivTextStartCSS = textDivLeft + textDivBorder + textDivPadding;
@@ -619,7 +619,7 @@ describe('TextTool', () => {
 
       // Canvas text position (already in canvas pixels)
       // Expected: both should be at the same position
-      // Canvas renders at: x + (borderOffset + textDivPadding) = 100 + (1*scaleX + 10*scaleX) = 100 + 22 = 122
+      // Canvas renders at: x + (borderOffset + textDivPadding) = 100 + (1*scaleX + 5*scaleX) = 100 + 12 = 112
       // Textarea text at: see calculation above
       // They should match!
       expect(canvasTextX).toBe(textDivTextStartCanvas);
@@ -675,7 +675,7 @@ describe('TextTool', () => {
 
       const textDiv = getTextDiv()!;
       const scaleX = mockCanvas.width / 400; // 1000 / 400 = 2.5
-      const textDivTextStartCanvas = (parseFloat(textDiv.style.left) + 2 + 10) * scaleX;
+      const textDivTextStartCanvas = (parseFloat(textDiv.style.left) + 2 + 5) * scaleX;
 
       // Now they should match because we're using scaleX consistently!
       expect(canvasTextX).toBe(textDivTextStartCanvas);

@@ -511,11 +511,11 @@ test.describe('Text tool', () => {
       // Annotation is at (100, 100) in canvas coordinates
       // After scaling: (100 * scaleX, 100 * scaleY)
       // Text starts at: annotation.x + borderOffset + padding + halfLeading
-      // Border offset = 1 * scaleX, padding = 10 * scaleX
+      // Border offset = 1 * scaleX, padding = 5 * scaleX
       const annotationX = 100 * scaleX;
       const annotationY = 100 * scaleY;
       const borderOffset = 1 * scaleX;
-      const padding = 10 * scaleX;
+      const padding = 5 * scaleX;
       const searchStartX = Math.floor(annotationX + borderOffset + padding);
       const searchStartY = Math.floor(annotationY + borderOffset + padding);
 

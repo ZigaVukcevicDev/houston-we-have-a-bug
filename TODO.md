@@ -123,9 +123,9 @@
 - [ ] text tool - double click to edit
 - [x] text tool - changing textarea to editable div
 - [x] text tool - when I draw text area and click outside, the text jumps up
-- [ ] text tool - less padding space in editable div, 5px
+- [x] text tool - less padding space in editable div, 5px
 - [ ] recheck annotations when scrolling
-- [ ] fix screenshot is horizontally scrollable
+- [ ] screenshot is horizontally scrollable, fix it
 - [ ] does test html needs to be in build/dist?
 - [x] update readme file structure with e2e tests
 - [x] write e2e tests for crop tool
