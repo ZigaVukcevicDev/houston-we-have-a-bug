@@ -10,7 +10,8 @@
 :host {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .toolbar-container {
@@ -129,7 +130,8 @@
   flex: 1;
   overflow: auto;
   padding: 0;
-  padding-top: 49px;
+  margin-top: 49px;
+  height: calc(100vh - 49px);
   display: flex;
   justify-content: center;
   align-items: flex-start;
