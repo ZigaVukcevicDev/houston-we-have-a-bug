@@ -124,12 +124,14 @@
 - [x] text tool - changing textarea to editable div
 - [x] text tool - when I draw text area and click outside, the text jumps up
 - [x] text tool - less padding space in editable div, 5px
-- [ ] text tool - increase font size (also update demo images)
+- [ ] text tool - increase font size
+- [ ] text tool - no antialiasing? different font?
 - [ ] text tool - darkenColor is not applied when writing text, also cursor
 - [ ] text tool - fix text not to be scrollable when not fitting vertically (it works ok when clicking outside)
 - [x] text tool - set minimum width and height of 40px when creating or resizing
 - [ ] text tool - make border transparent when clicking outside
-- [ ] text tool - make border 35% visible when hovering
+- [ ] text tool - make border 50% visible when hovering
+- [ ] text tool - select all color
 - [x] text tool - revisit if user can't resize in negative directions
 - [x] recheck annotations when scrolling
 - [x] screenshot is horizontally scrollable
