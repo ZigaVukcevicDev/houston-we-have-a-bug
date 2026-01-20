@@ -9,14 +9,12 @@ export default defineConfig({
   use: {
     trace: 'on-first-retry',
   },
-
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-
   webServer: {
     command: 'npx http-server dist -p 8080',
     url: 'http://localhost:8080',
