@@ -2,8 +2,6 @@
 
 ## Writing style
 
-- Use British English spelling (colour, behaviour, organisation, etc.)
-- NOT American English (color, behavior, organization, etc.)
 - Use sentence case for headings and all text, NOT title case
   - GOOD: "Before committing code", "Copy to clipboard", "Test text"
   - BAD: "Before Committing Code", "Copy to Clipboard", "Test Text"
@@ -12,6 +10,7 @@
 ## Testing requirements
 
 ### Before committing code
+
 - ALWAYS run `npm run test:all` before committing (runs both unit tests AND E2E tests)
 - NEVER run only `npm test` - you MUST run the full test suite with `npm run test:all`
 - If a test fails, fixing it is your top priority - do not proceed until tests pass
@@ -20,6 +19,7 @@
 - No regressions: Ensure existing features continue to work
 
 ### Writing tests
+
 - For new features: Write comprehensive tests covering:
   - All major code paths and functionality
   - Edge cases and error handling
@@ -32,6 +32,7 @@
 ## Code quality and cleanliness
 
 ### No leftovers
+
 - When refactoring or removing features, fully remove all related code, types, and unused imports
 - Remove unused imports after any refactoring - check imports in all modified files
 - No commented code: Delete it, don't comment it out
@@ -43,18 +44,21 @@
   - Only add comments when explaining why or documenting non-obvious behaviour/edge cases
 
 ### Console statements
+
 - Do not use console.log, console.warn, or console.debug in production code
 - GOOD: `console.error()` in catch blocks for critical errors
 - BAD: Debug logging, informational messages, or warnings
 - Keep error messages informative but concise
 
 ### Consistent spacing
+
 - Use exactly one empty line between methods, functions, and major code blocks
 - GOOD: Single empty line between methods
 - BAD: Two or more empty lines between methods
 - IMPORTANT: Never create two or more consecutive empty lines
 
 ### Strict types
+
 - Use TypeScript interfaces properly
 - NEVER use `any` type in production code - ALWAYS specify proper types
   - GOOD: `function foo(data: SystemInfo): void`
@@ -67,10 +71,12 @@
 ## Code organization
 
 ### Types vs interfaces
+
 - `src/types/` - For type aliases (e.g., `type ActiveTool = 'text' | 'line'`)
 - `src/interfaces/` - For object structures (e.g., `interface LineAnnotation { ... }`)
 
 ### Naming conventions
+
 - Private methods: Use `private` keyword only, NO underscore prefix
   - GOOD: `private handleClick()`, `private redraw()`
   - BAD: `private _handleClick()`, `private _redraw()`
@@ -79,23 +85,27 @@
   - BAD: `const HANDLE_RADIUS = 8;`
 
 ### Component method order
+
 - In LitElement components, place `render()` method near the top, immediately after class properties
 - Order: `constructor` → properties → `render()` → lifecycle methods → event handlers → helper methods
 
 ## Code patterns
 
 ### Source of truth
+
 - `src/*` only: Edit files in `src/` specifically
 - `dist/*` is forbidden: Never edit files in `dist/` - they are auto-generated
 - Build: Run `npm run build` to verify, but rely on `npm run test` for logic verification
 
 ### Shared array references
+
 - NEVER use spread operator on shared arrays
 - BAD: `this.annotations = [...this.annotations, item]`
 - GOOD: `this.annotations.push(item)`
 - Reason: Spread creates new array, breaks shared reference between tools
 
 ### Tool architecture
+
 - Creation tools (text, arrow, etc.): Create annotations
 - Select tool: Handles all manipulation (resize, move, delete)
 - Don't duplicate resize/move logic in creation tools
@@ -104,21 +114,25 @@
   - Call cleanup methods like `cancelDrawing()` in `deactivate()`
 
 ### State management
+
 - Tools share array references via constructor injection
 - Don't reassign arrays - mutate them with push/splice
 - Call `onRedraw()` after state changes
 
 ### ID generation
+
 - ALWAYS use `crypto.randomUUID()` for creating annotation IDs
 - GOOD: `id: crypto.randomUUID()`
 - BAD: `` id: `rect-${Date.now()}` `` (not collision-safe, inconsistent)
 
 ### Constraints (shift-key behaviour)
+
 - Extract constraint logic into private/protected methods, don't duplicate
 - LineTool example: `applyLineConstraint(x, y, startPoint)` (protected for inheritance)
 - RectangleTool example: `applySquareConstraint(width, height)` (private)
 
 ### Error handling consistency
+
 - All utility functions that can fail should return 'N/A' on error
 - GOOD: `return 'N/A';`
 - BAD: `return 'Unknown';` or other inconsistent error strings
@@ -126,6 +140,7 @@
 ## Development workflow
 
 ### Making changes
+
 1. Write/modify code
 2. Run unit tests: `npm test`
 3. Run E2E tests: `npm run test:e2e`
@@ -133,6 +148,7 @@
 5. If all pass, commit
 
 ### Debugging issues
+
 - Use `npm run test:e2e:ui` to see what's happening in browser
 - Check `test-results/` for screenshots of failures
 - Add `console.log` at key points, but remove before committing
@@ -140,16 +156,19 @@
 ## UI and styling
 
 ### SCSS modules
+
 - Use `@use` to import variables
 - Always use variables from `_variables.scss` (e.g., `$color-red-500`, `$spacing-md`) instead of hardcoded values
 
 ### Icons and assets
+
 - Use the CSS 3-state toggle pattern (Default/Hover/Active) with hidden `img` classes (`.icon-default`, `.icon-hover`, `.icon-active`)
 - Not SVG filters or inline SVGs
 
 ## Canvas rendering and Retina display support
 
 ### Device pixel ratio scaling
+
 - All canvas drawing operations MUST account for `window.devicePixelRatio` to render correctly on Retina/high-DPI displays
 - When drawing shapes, multiply dimensions by DPR: `size * (window.devicePixelRatio || 1)`
 - When drawing strokes, multiply line widths by DPR: `lineWidth * (window.devicePixelRatio || 1)`
@@ -162,6 +181,7 @@
   ```
 
 ### Why this matters
+
 - On Retina displays (DPR=2), canvas pixels ≠ CSS pixels
 - Without DPR scaling:
   - An 8px canvas element appears as 4 CSS pixels (50% too small)
@@ -171,21 +191,25 @@
 ## Utility functions
 
 ### Canvas coordinate conversion
+
 - ALWAYS use `getCanvasCoordinates()` from `utils/get-canvas-coordinates.ts` to convert mouse events to canvas coordinates
 - GOOD: `const { x, y } = getCanvasCoordinates(event, canvas);`
 - BAD: Manual calculation with `getBoundingClientRect()` + scaling (creates duplication)
 
 ### Arrowhead rendering
+
 - Use `renderArrowhead()` and `getArrowheadPoints()` from `utils/render-arrowhead.ts`
 - For drawing: `renderArrowhead(ctx, x1, y1, x2, y2, color, width, dpr)`
 - For hit detection: `getArrowheadPoints(x1, y1, x2, y2, dpr)` returns the arrowhead line endpoints
 - Constants available: `arrowheadLength`, `arrowheadAngle`
 
 ### Date formatting
+
 - For display: `getDateAndTime()` from `get-date-and-time.ts` returns "DD.MM.YYYY at HH:MM"
 - For filenames: `getDateTimeForFilename()` from `get-date-time-for-filename.ts` returns "YYYY-MM-DD at HH-MM-SS"
 
 ### Handle rendering
+
 - Use `renderHandle()` from `utils/render-handle.ts`
 - Function: `renderHandle(ctx, x, y)` - handles DPR automatically
 - For hit detection: `isPointOnHandle(px, py, hx, hy)`
@@ -194,16 +218,19 @@
 ## Project conventions
 
 ### File references
+
 - Use markdown links: `[file.ts](path/to/file.ts)`
 - For specific lines: `[file.ts:42](path/to/file.ts#L42)`
 - Not backticks or HTML tags
 
 ### Documentation
+
 - Keep docs concise - remove unnecessary content
 - TESTING.md should stay under 100 lines
 - Remove files that become outdated/redundant
 
 ### Code style
+
 - Follow existing patterns in the codebase
 - Use TypeScript strict mode
 - Prefer explicit over clever
@@ -212,16 +239,19 @@
 ## Common pitfalls
 
 ### "Annotation disappears on mouse release"
+
 - Check if using spread operator instead of push()
 - Verify annotation is in shared array, not a copy
 - Confirm render() is called after creation
 
 ### "Handles don't appear"
+
 - Verify tool switched to select
 - Check if selectAnnotation() was called with correct ID
 - Confirm SelectTool has the annotation in its array
 
 ### "Can't type in textarea"
+
 - Check CSS `pointer-events`
 - Verify textarea is focused
 - Check for z-index conflicts
@@ -229,6 +259,7 @@
 ## Testing code quality
 
 ### Avoid `any` type in tests
+
 - Prefer proper types over `any` even in test code
 - For mock function assertions, use `Mock` type from vitest:
   - GOOD: `(mockCtx.fillText as Mock).mock.calls`
@@ -238,13 +269,16 @@
 - ESLint allows `any` in tests as warnings (not errors), but minimize usage when practical
 
 ### Remove unused variables and parameters
+
 - Before committing, run `npm run lint` to check for lint errors
 - Delete or comment out any unused variables
 - Don't declare variables you won't use in assertions
 - Prefix unused parameters with underscore: `_event`, `_canvas`, `_ctx` (follows ESLint rule: `argsIgnorePattern: '^_'`)
 
 ### Test file patterns
+
 When writing new tests:
+
 1. Import `Mock` type from vitest if accessing mock properties
 2. Use `Mock` type instead of `any` for mock function assertions
 3. Clean up unused variables and prefix unused parameters with underscore
@@ -254,6 +288,7 @@ When writing new tests:
 ## Lint configuration
 
 ### ESLint script setup
+
 - The `npm run lint` script MUST use quoted glob patterns: `eslint "src/**/*.ts"`
 - GOOD: `"lint": "eslint \"src/**/*.ts\""`
 - BAD: `"lint": "eslint src/**/*.ts"` (shell expansion may miss test files)
