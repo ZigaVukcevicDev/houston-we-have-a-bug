@@ -128,3 +128,7 @@ npm run dev
 ```
 
 This builds once, then watches for changes and automatically rebuilds.
+
+## License
+
+For full terms, see the [LICENSE](LICENSE.md) file.
