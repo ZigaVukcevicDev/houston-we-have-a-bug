@@ -130,6 +130,8 @@
 - [x] text tool - set minimum width and height of 40px when creating or resizing
 - [x] text tool - make border transparent when clicking outside
 - [x] text tool - make border 50% visible when hovering
+- [ ] text tool - make border 50% visible when hovering - update to 40%
+- [ ] text tool - when hovering over textbox and showing border, it should work also for hovering over overflown text
 - [ ] text tool - select all / highlight color (update design)
 - [ ] text tool - when deleting text, annotation gets deleted
 - [ ] text tool - if no text entered and try to resize, the annotation disappears
