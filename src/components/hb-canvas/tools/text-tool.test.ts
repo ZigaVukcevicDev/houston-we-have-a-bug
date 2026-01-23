@@ -93,7 +93,7 @@ describe('TextTool', () => {
         x: 100,
         y: 100,
         width: 100,
-        height: 50,
+        height: 60,
       });
     });
 
@@ -109,9 +109,9 @@ describe('TextTool', () => {
         mockCanvas
       );
 
-      // Width and height should be minimum size (40px), not 0
+      // Width and height should be minimum size (40px width, 60px height), not 0
       expect(textTool['currentBox']?.width).toBe(40);
-      expect(textTool['currentBox']?.height).toBe(40);
+      expect(textTool['currentBox']?.height).toBe(60);
     });
 
     it('should call redraw during mousemove', () => {
@@ -177,7 +177,7 @@ describe('TextTool', () => {
       const textDiv = getTextDiv();
       expect(textDiv).toBeTruthy();
       expect(textDiv?.dataset.canvasWidth).toBe('40');
-      expect(textDiv?.dataset.canvasHeight).toBe('40');
+      expect(textDiv?.dataset.canvasHeight).toBe('60');
     });
 
     it('should auto-focus textDiv on creation', () => {

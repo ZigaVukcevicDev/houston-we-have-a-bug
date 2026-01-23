@@ -58,10 +58,11 @@ export class TextTool implements Tool {
     if (!this.isDrawing || !this.startPoint) return;
 
     // Constrain to only right and down
-    // Use minimum size (40px) for text box dimensions
-    const MIN_SIZE = 40;
-    const width = Math.max(MIN_SIZE, x - this.startPoint.x);
-    const height = Math.max(MIN_SIZE, y - this.startPoint.y);
+    // Use minimum size for text box dimensions
+    const MIN_WIDTH = 40;
+    const MIN_HEIGHT = 60;
+    const width = Math.max(MIN_WIDTH, x - this.startPoint.x);
+    const height = Math.max(MIN_HEIGHT, y - this.startPoint.y);
 
     this.currentBox = {
       x: this.startPoint.x,
@@ -80,7 +81,7 @@ export class TextTool implements Tool {
     this.isDrawing = false;
 
     // Only create textarea if box has minimum size
-    if (this.currentBox.width >= 40 && this.currentBox.height >= 40) {
+    if (this.currentBox.width >= 40 && this.currentBox.height >= 60) {
       // Create the annotation immediately
       const newAnnotation = {
         id: crypto.randomUUID(),
@@ -171,7 +172,7 @@ export class TextTool implements Tool {
       // Scale font size to match canvas coordinate system
       ctx.font = `500 ${annotation.fontSize * scaleX}px Inter`;
       // Use a slightly darker color for text to compensate for anti-aliasing making it appear lighter
-      ctx.fillStyle = this.darkenColor(annotation.color, 0.05);
+      ctx.fillStyle = this.darkenColor(annotation.color, 0.02);
       ctx.textBaseline = 'alphabetic';
       ctx.letterSpacing = '0.01em';
 
@@ -303,10 +304,10 @@ export class TextTool implements Tool {
 
     this.textDiv = document.createElement('div');
     this.textDiv.contentEditable = 'true';
-
+    
     // Apply darkened color for better visibility
-    const darkenedColor = this.darkenColor(this.color, 0.05);
-
+    const darkenedColor = this.darkenColor(this.color, 0.02);
+    
     this.textDiv.style.cssText = `
       position: fixed;
       box-sizing: border-box;
