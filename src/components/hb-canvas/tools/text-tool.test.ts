@@ -252,7 +252,7 @@ describe('TextTool', () => {
         height: 150,
         text: 'Test text',
         color: '#E74C3C',
-        fontSize: 14,
+        fontSize: 15,
       });
     });
 
@@ -407,7 +407,7 @@ describe('TextTool', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 14,
+          fontSize: 15,
         },
       ];
 
@@ -426,7 +426,7 @@ describe('TextTool', () => {
           height: 100,
           text: 'Test text',
           color: '#E74C3C',
-          fontSize: 14,
+          fontSize: 15,
         },
       ];
 
@@ -714,7 +714,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'Test text',
         color: '#E74C3C',
-        fontSize: 14,
+        fontSize: 15,
       };
 
       const annotations = [annotation];
@@ -740,8 +740,8 @@ describe('TextTool', () => {
       // Total Y offset: 1 + 5 + halfLeading
       const borderOffset = 1; // borderWidth(2px) / 2
       const padding = 5;
-      const cssLineHeight = annotation.fontSize * 1.2; // 14 * 1.2 = 16.8
-      const halfLeading = (cssLineHeight - annotation.fontSize) / 2; // (16.8 - 14) / 2 = 1.4
+      const cssLineHeight = annotation.fontSize * 1.2; // 15 * 1.2 = 18
+      const halfLeading = (cssLineHeight - annotation.fontSize) / 2; // (18 - 15) / 2 = 1.5
       const expectedX = annotation.x + borderOffset + padding; // 100 + 6 = 106
       const expectedY = annotation.y + borderOffset + padding + halfLeading; // 100 + 6 + 1.4 = 107.4
 
@@ -758,7 +758,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'Long text for wrapping test',
         color: '#E74C3C',
-        fontSize: 14,
+        fontSize: 15,
       };
 
       const annotations = [annotation];
@@ -824,7 +824,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'Test',
         color: '#E74C3C',
-        fontSize: 14,
+        fontSize: 15,
       };
 
       textTool['annotations'] = [annotation];
@@ -895,7 +895,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'Test',
         color: '#E74C3C',
-        fontSize: 14,
+        fontSize: 15,
       };
 
       textTool['annotations'] = [annotation];
@@ -1402,7 +1402,7 @@ describe('TextTool', () => {
         height: 100,
         text: '',
         color: '#E74C3C',
-        fontSize: 14,
+        fontSize: 15,
       });
       expect(annotations[0].id).toBeTruthy();
     });
@@ -1548,14 +1548,14 @@ describe('TextTool', () => {
         height: 100,
         text: 'Scaled text',
         color: '#E74C3C',
-        fontSize: 14,
+        fontSize: 15,
       };
 
       textTool['annotations'] = [annotation];
       textTool.render(mockCtx);
 
-      // Font should be scaled: 14 * scaleX = 14 * 2 = 28
-      const expectedFontSize = 14 * 2;
+      // Font should be scaled: 15 * scaleX = 15 * 2 = 30
+      const expectedFontSize = 15 * 2;
       expect(mockCtx.font).toContain(`${expectedFontSize}px`);
     });
   });
@@ -1570,7 +1570,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'This is a very long text that needs wrapping',
         color: '#E74C3C',
-        fontSize: 14,
+        fontSize: 15,
       };
 
       const annotations = [annotation];
@@ -1591,7 +1591,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'Line 1\n\nLine 3',
         color: '#E74C3C',
-        fontSize: 14,
+        fontSize: 15,
       };
 
       const annotations = [annotation];
@@ -1644,7 +1644,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'A B C', // Each char will exceed width when measured alone
         color: '#E74C3C',
-        fontSize: 14,
+        fontSize: 15,
       };
 
       const annotations = [annotation];
@@ -1695,7 +1695,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'WWWWW', // Word too wide, and chars also too wide
         color: '#E74C3C',
-        fontSize: 14,
+        fontSize: 15,
       };
 
       const annotations = [annotation];
@@ -1745,7 +1745,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'ABC',
         color: '#E74C3C',
-        fontSize: 14,
+        fontSize: 15,
       };
 
       const annotations = [annotation];
@@ -1800,7 +1800,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'W',
         color: '#E74C3C',
-        fontSize: 14,
+        fontSize: 15,
       };
 
       const annotations = [annotation];
@@ -1847,7 +1847,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'Line1\n\nLine3',
         color: '#E74C3C',
-        fontSize: 14,
+        fontSize: 15,
       };
 
       const annotations = [annotation];

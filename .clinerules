@@ -13,6 +13,10 @@
 
 - ALWAYS run `npm run test:all` before committing (runs both unit tests AND E2E tests)
 - NEVER run only `npm test` - you MUST run the full test suite with `npm run test:all`
+- `npm run test:all` runs:
+  - Unit tests: 571 tests across 26 test files (vitest)
+  - E2E tests: 117 tests (playwright)
+  - Total: 688 tests
 - If a test fails, fixing it is your top priority - do not proceed until tests pass
 - Unit tests passing ≠ feature working - verify manually too
 - If changing annotation tools, test with `test-page.html`

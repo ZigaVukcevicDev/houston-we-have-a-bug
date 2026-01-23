@@ -124,7 +124,7 @@
 - [x] text tool - when I draw text area and click outside, the text jumps up
 - [x] text tool - less padding space in editable div, 5px
 - [ ] text tool - double click to edit
-- [ ] text tool - increase font size
+- [x] text tool - increase font size to 15px
 - [ ] text tool - no antialiasing? different font?
 - [ ] text tool - darkenColor is not applied when writing text, also cursor
 - [ ] text tool - fix text not to be scrollable when not fitting vertically (it works ok when clicking outside)

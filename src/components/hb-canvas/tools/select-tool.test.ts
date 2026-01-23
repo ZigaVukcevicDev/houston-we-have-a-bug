@@ -1723,7 +1723,7 @@ describe('SelectTool', () => {
           height: 100,
           text: 'Test text',
           color: '#E74C3C',
-          fontSize: 14,
+          fontSize: 15,
         },
       ];
       selectTool.deactivate();
@@ -2101,7 +2101,7 @@ describe('SelectTool', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 14,
+          fontSize: 15,
         },
       ];
 
@@ -2135,7 +2135,7 @@ describe('SelectTool', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 14,
+          fontSize: 15,
         },
       ];
       const selectTool = new SelectTool(
@@ -2168,7 +2168,7 @@ describe('SelectTool', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 14,
+          fontSize: 15,
         },
       ];
       const selectTool = new SelectTool(
@@ -2234,7 +2234,7 @@ describe('SelectTool', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 14,
+          fontSize: 15,
         },
       ];
       const selectTool = new SelectTool(
@@ -2267,7 +2267,7 @@ describe('SelectTool', () => {
           height: 50,
           text: 'Test 1',
           color: '#E74C3C',
-          fontSize: 14,
+          fontSize: 15,
         },
         {
           id: 'text-2',
@@ -2277,7 +2277,7 @@ describe('SelectTool', () => {
           height: 50,
           text: 'Test 2',
           color: '#3498DB',
-          fontSize: 14,
+          fontSize: 15,
         },
       ];
       const selectTool = new SelectTool(
@@ -2316,7 +2316,7 @@ describe('SelectTool', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 14,
+          fontSize: 15,
         },
       ];
       const selectTool = new SelectTool(
@@ -2353,7 +2353,7 @@ describe('SelectTool', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 14,
+          fontSize: 15,
         },
       ];
       const selectTool = new SelectTool(
@@ -2390,7 +2390,7 @@ describe('SelectTool', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 14,
+          fontSize: 15,
         },
       ];
       const selectTool = new SelectTool(
@@ -2424,7 +2424,7 @@ describe('SelectTool', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 14,
+          fontSize: 15,
         },
       ];
       const selectTool = new SelectTool(
