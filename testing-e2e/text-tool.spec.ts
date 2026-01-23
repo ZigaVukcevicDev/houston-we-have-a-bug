@@ -1060,4 +1060,171 @@ test.describe('Text tool', () => {
 
     expect(finalHeight).toBeGreaterThanOrEqual(39);
   });
+
+  test('should allow text to overflow box height and be visible', async ({
+    page,
+  }) => {
+    // Click text tool
+    await page.click('[data-tool="text"]');
+
+    // Draw a text box with limited height
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 160; // Only 60px height
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    // Wait for contenteditable to appear
+    await page.waitForSelector('[contenteditable="true"]');
+    const editableDiv = page.locator('[contenteditable="true"]');
+
+    // Type text that exceeds box height
+    await editableDiv.type('d');
+    await editableDiv.press('Enter');
+    await editableDiv.type('s');
+    await editableDiv.press('Enter');
+    await editableDiv.type('a');
+    await editableDiv.press('Enter');
+    await editableDiv.type('d');
+    await editableDiv.press('Enter');
+    await editableDiv.type('a');
+    await editableDiv.press('Enter');
+    await editableDiv.type('s');
+    await editableDiv.press('Enter');
+    await editableDiv.type('d');
+
+    // Verify the div doesn't have max-height restriction
+    const maxHeight = await editableDiv.evaluate(
+      (el) => window.getComputedStyle(el).maxHeight
+    );
+    expect(maxHeight).toBe('none');
+
+    // Click outside to finalize
+    await page.mouse.click(canvasBox.x + 50, canvasBox.y + 50);
+
+    // Wait for text to be rendered on canvas
+    await page.waitForTimeout(100);
+
+    // Verify all text is rendered on canvas (check full area)
+    const hasAllText = await canvas.evaluate((canvasEl) => {
+      if (!(canvasEl instanceof HTMLCanvasElement)) return false;
+      const ctx = canvasEl.getContext('2d');
+      if (!ctx) return false;
+
+      const imageData = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
+      const data = imageData.data;
+      const rect = canvasEl.getBoundingClientRect();
+      const scaleX = canvasEl.width / rect.width;
+      const scaleY = canvasEl.height / rect.height;
+
+      // Check for red text pixels in extended area (including beyond box)
+      const searchStartX = Math.floor(105 * scaleX);
+      const searchEndX = Math.floor(295 * scaleX);
+      const searchStartY = Math.floor(105 * scaleY);
+      const searchEndY = Math.floor(250 * scaleY); // Extended beyond box
+
+      let redPixelCount = 0;
+      for (let y = searchStartY; y < searchEndY; y++) {
+        for (let x = searchStartX; x < searchEndX; x++) {
+          const i = (y * canvasEl.width + x) * 4;
+          const red = data[i];
+          const green = data[i + 1];
+          const blue = data[i + 2];
+          const alpha = data[i + 3];
+
+          // Check for red-ish pixels (text color)
+          if (red > 200 && green < 100 && blue < 100 && alpha > 50) {
+            redPixelCount++;
+          }
+        }
+      }
+
+      return redPixelCount > 100; // Should have plenty of text rendered
+    });
+
+    expect(hasAllText).toBe(true);
+  });
+
+  test('should properly render text that exceeds box height when finalized', async ({
+    page,
+  }) => {
+    // Click text tool
+    await page.click('[data-tool="text"]');
+
+    // Draw a text box with limited height
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 160; // Only 60px height
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    // Wait for contenteditable to appear
+    await page.waitForSelector('[contenteditable="true"]');
+    const editableDiv = page.locator('[contenteditable="true"]');
+
+    // Type text that will exceed the box height
+    const longText = 'Line 1\nLine 2\nLine 3\nLine 4';
+    await editableDiv.fill(longText);
+
+    // Click outside to finalize
+    await page.mouse.click(canvasBox.x + 50, canvasBox.y + 50);
+
+    // Wait for text to be rendered on canvas
+    await page.waitForTimeout(100);
+
+    // Check that text is rendered on canvas (at least some red pixels in text area)
+    const hasText = await canvas.evaluate((canvasEl) => {
+      if (!(canvasEl instanceof HTMLCanvasElement)) return false;
+      const ctx = canvasEl.getContext('2d');
+      if (!ctx) return false;
+
+      const imageData = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
+      const data = imageData.data;
+      const rect = canvasEl.getBoundingClientRect();
+      const scaleX = canvasEl.width / rect.width;
+      const scaleY = canvasEl.height / rect.height;
+
+      // Check for red text pixels in the text box area
+      const searchStartX = Math.floor(105 * scaleX);
+      const searchEndX = Math.floor(295 * scaleX);
+      const searchStartY = Math.floor(110 * scaleY);
+      const searchEndY = Math.floor(150 * scaleY);
+
+      let redPixelCount = 0;
+      for (let y = searchStartY; y < searchEndY; y++) {
+        for (let x = searchStartX; x < searchEndX; x++) {
+          const i = (y * canvasEl.width + x) * 4;
+          const red = data[i];
+          const green = data[i + 1];
+          const blue = data[i + 2];
+          const alpha = data[i + 3];
+
+          // Check for red-ish pixels (text color)
+          if (red > 200 && green < 100 && blue < 100 && alpha > 50) {
+            redPixelCount++;
+          }
+        }
+      }
+
+      return redPixelCount > 50; // Should have text rendered
+    });
+
+    expect(hasText).toBe(true);
+  });
 });

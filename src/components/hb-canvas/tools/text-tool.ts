@@ -329,7 +329,6 @@ export class TextTool implements Tool {
       border-radius: 4px;
       outline: none;
       padding: 5px;
-      overflow: hidden;
       white-space: pre-wrap;
       overflow-wrap: break-word;
       word-break: break-word;
