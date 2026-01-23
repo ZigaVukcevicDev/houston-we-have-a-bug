@@ -172,7 +172,7 @@ export class TextTool implements Tool {
       ctx.font = `500 ${annotation.fontSize * scaleX}px Inter`;
       // Use a slightly darker color for text to compensate for anti-aliasing making it appear lighter
       ctx.fillStyle = this.darkenColor(annotation.color, 0.05);
-      ctx.textBaseline = 'top';
+      ctx.textBaseline = 'alphabetic';
       ctx.letterSpacing = '0.01em';
 
       // Scale measurements to match canvas coordinate system
@@ -191,23 +191,25 @@ export class TextTool implements Tool {
       const maxWidth = annotation.width - textStartOffsetX * 2;
       const lines = this.wrapText(ctx, annotation.text, maxWidth);
 
+      // With alphabetic baseline, we need to position at the baseline
       // CSS line-height creates a line box and centers text within it
-      // We need to calculate the "half-leading" offset to match this behavior
-      const cssLineHeight = annotation.fontSize * 1.2; // CSS pixels
-      const cssFontSize = annotation.fontSize; // CSS pixels
-      const halfLeading = (cssLineHeight - cssFontSize) / 2; // CSS pixels
-      const halfLeadingCanvas = halfLeading * scaleY; // Convert to canvas pixels
+      // For alphabetic baseline: start Y + (lineHeight - fontSize)/2 + ascent
+      const cssLineHeight = annotation.fontSize * 1.2;
+      const lineHeightCanvas = cssLineHeight * scaleY;
+      const fontSizeCanvas = annotation.fontSize * scaleY;
+      const halfLeadingCanvas = (lineHeightCanvas - fontSizeCanvas) / 2;
 
-      // Text vertical position: box edge + border offset + padding + half-leading
-      let yOffset = annotation.y + textStartOffsetY + halfLeadingCanvas;
+      // Ascent is approximately 0.75-0.8 of fontSize for most fonts
+      // For Inter, it's closer to 0.9
+      const ascentRatio = 0.9;
+      const ascentCanvas = fontSizeCanvas * ascentRatio;
 
-      // Line height in canvas pixels (vertical measurement uses scaleY)
-      // IMPORTANT: Do NOT round - browser doesn't round line-height calculations
-      const lineHeight = cssLineHeight * scaleY;
+      let yOffset =
+        annotation.y + textStartOffsetY + halfLeadingCanvas + ascentCanvas;
 
       lines.forEach((line) => {
         ctx.fillText(line, annotation.x + textStartOffsetX, yOffset);
-        yOffset += lineHeight;
+        yOffset += lineHeightCanvas;
       });
 
       ctx.restore();

@@ -732,18 +732,20 @@ describe('TextTool', () => {
       const renderedX = firstCall[1];
       const renderedY = firstCall[2];
 
-      // Expected position calculation:
+      // Expected position calculation with alphabetic baseline:
       // strokeRect centers 2px border: inner edge at x + 1
       // Textarea padding: 5px
-      // Half-leading offset to match CSS line-height centering: (lineHeight - fontSize) / 2
-      // Total X offset: 1 + 5 = 6px
-      // Total Y offset: 1 + 5 + halfLeading
-      const borderOffset = 1; // borderWidth(2px) / 2
+      // Half-leading: (18 - 15) / 2 = 1.5px
+      // Ascent: 15 * 0.9 = 13.5px
+      // Total Y offset: 1 + 5 + 1.5 + 13.5 = 21px
+      const borderOffset = 1;
       const padding = 5;
-      const cssLineHeight = annotation.fontSize * 1.2; // 15 * 1.2 = 18
-      const halfLeading = (cssLineHeight - annotation.fontSize) / 2; // (18 - 15) / 2 = 1.5
-      const expectedX = annotation.x + borderOffset + padding; // 100 + 6 = 106
-      const expectedY = annotation.y + borderOffset + padding + halfLeading; // 100 + 6 + 1.4 = 107.4
+      const cssLineHeight = annotation.fontSize * 1.2;
+      const halfLeading = (cssLineHeight - annotation.fontSize) / 2;
+      const ascent = annotation.fontSize * 0.9;
+      const expectedX = annotation.x + borderOffset + padding;
+      const expectedY =
+        annotation.y + borderOffset + padding + halfLeading + ascent;
 
       expect(renderedX).toBe(expectedX);
       expect(renderedY).toBe(expectedY);
