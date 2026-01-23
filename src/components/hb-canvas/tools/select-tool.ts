@@ -746,6 +746,23 @@ export class SelectTool implements Tool {
           ctx.stroke();
           ctx.restore();
         }
+      } else if (this.hoveredAnnotationType === 'text') {
+        const hoveredText = this.textAnnotations.find(
+          (t) => t.id === this.hoveredAnnotationId
+        );
+        if (hoveredText) {
+          ctx.save();
+          ctx.globalAlpha = 0.5;
+          ctx.strokeStyle = hoveredText.color;
+          ctx.lineWidth = 2 * dpr;
+          ctx.strokeRect(
+            hoveredText.x,
+            hoveredText.y,
+            hoveredText.width,
+            hoveredText.height
+          );
+          ctx.restore();
+        }
       }
     }
 
@@ -778,6 +795,18 @@ export class SelectTool implements Tool {
         (t) => t.id === this.selectedAnnotationId
       );
       if (selectedText) {
+        // Draw border at full opacity
+        ctx.save();
+        ctx.strokeStyle = selectedText.color;
+        ctx.lineWidth = 2 * dpr;
+        ctx.strokeRect(
+          selectedText.x,
+          selectedText.y,
+          selectedText.width,
+          selectedText.height
+        );
+        ctx.restore();
+
         // Draw corner handles
         renderHandle(ctx, selectedText.x, selectedText.y); // top-left
         renderHandle(ctx, selectedText.x + selectedText.width, selectedText.y); // top-right

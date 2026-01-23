@@ -1775,15 +1775,16 @@ describe('SelectTool', () => {
     });
 
     describe('text annotation handle rendering', () => {
-      it('should render 4 corner handles when text annotation is selected', () => {
+      it('should render border and 4 corner handles when text annotation is selected', () => {
         selectTool['selectedAnnotationId'] = 'text-1';
         selectTool['selectedAnnotationType'] = 'text';
 
         selectTool.render(mockCtx);
 
-        // Should render 4 corner handles
+        // Should render 4 corner handles (fillRect for each)
         expect(mockCtx.fillRect).toHaveBeenCalledTimes(4);
-        expect(mockCtx.strokeRect).toHaveBeenCalledTimes(4);
+        // Should render 1 border + 4 corner handle strokes
+        expect(mockCtx.strokeRect).toHaveBeenCalledTimes(5);
       });
 
       it('should render handles at correct corner positions', () => {

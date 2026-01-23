@@ -1141,13 +1141,15 @@ test.describe('Text tool', () => {
           const alpha = data[i + 3];
 
           // Check for red-ish pixels (text color)
-          if (red > 200 && green < 100 && blue < 100 && alpha > 50) {
+          // Use relaxed criteria to catch anti-aliased text pixels
+          if (red > 180 && red > green && red > blue && alpha > 50) {
             redPixelCount++;
           }
         }
       }
 
-      return redPixelCount > 100; // Should have plenty of text rendered
+      // Text-only threshold (border no longer rendered when deselected)
+      return redPixelCount > 50;
     });
 
     expect(hasAllText).toBe(true);
@@ -1226,5 +1228,455 @@ test.describe('Text tool', () => {
     });
 
     expect(hasText).toBe(true);
+  });
+
+  test.describe('Border visibility', () => {
+    /**
+     * Helper to create a text annotation at a specific position
+     */
+    async function createTextAnnotation(
+      page: any,
+      canvasBox: { x: number; y: number },
+      startOffset: { x: number; y: number },
+      endOffset: { x: number; y: number },
+      text: string
+    ) {
+      await page.click('[data-tool="text"]');
+
+      const startX = canvasBox.x + startOffset.x;
+      const startY = canvasBox.y + startOffset.y;
+      const endX = canvasBox.x + endOffset.x;
+      const endY = canvasBox.y + endOffset.y;
+
+      await page.mouse.move(startX, startY);
+      await page.mouse.down();
+      await page.mouse.move(endX, endY);
+      await page.mouse.up();
+
+      await page.waitForTimeout(100);
+
+      const textDiv = page.locator('div[contenteditable="true"]');
+      await expect(textDiv).toBeVisible();
+      await textDiv.evaluate((el: HTMLElement, t: string) => {
+        el.textContent = t;
+      }, text);
+
+      return { startX, startY, endX, endY };
+    }
+
+    /**
+     * Helper to check border opacity at a specific location on canvas
+     * Returns the estimated opacity (0-255) based on color difference from background
+     *
+     * Since the canvas composites the border onto a white background,
+     * we estimate opacity by how far the pixel deviates from white (255,255,255)
+     * towards the red border color (#E74C3C = 231,76,60)
+     */
+    async function getBorderOpacity(
+      page: any,
+      canvas: any,
+      canvasBox: { x: number; y: number; width: number; height: number },
+      borderX: number,
+      borderY: number
+    ): Promise<number> {
+      return await canvas.evaluate(
+        (
+          canvasEl: HTMLCanvasElement,
+          args: { borderX: number; borderY: number; boxX: number; boxY: number }
+        ) => {
+          const ctx = canvasEl.getContext('2d');
+          if (!ctx) return -1;
+
+          const rect = canvasEl.getBoundingClientRect();
+          const scaleX = canvasEl.width / rect.width;
+          const scaleY = canvasEl.height / rect.height;
+
+          // Convert screen coordinates to canvas coordinates
+          const canvasX = Math.floor((args.borderX - args.boxX) * scaleX);
+          const canvasY = Math.floor((args.borderY - args.boxY) * scaleY);
+
+          // Border color: #E74C3C = RGB(231, 76, 60)
+          // Background: white = RGB(255, 255, 255)
+          const borderR = 231,
+            borderG = 76,
+            borderB = 60;
+          const bgR = 255,
+            bgG = 255,
+            bgB = 255;
+
+          // Sample a small area around the border position
+          const sampleSize = 3;
+          let maxOpacity = 0;
+
+          for (let dy = -sampleSize; dy <= sampleSize; dy++) {
+            for (let dx = -sampleSize; dx <= sampleSize; dx++) {
+              const x = canvasX + dx;
+              const y = canvasY + dy;
+              if (
+                x >= 0 &&
+                x < canvasEl.width &&
+                y >= 0 &&
+                y < canvasEl.height
+              ) {
+                const imageData = ctx.getImageData(x, y, 1, 1);
+                const red = imageData.data[0];
+                const green = imageData.data[1];
+                const blue = imageData.data[2];
+
+                // Estimate opacity based on deviation from white towards border color
+                // For each channel: actual = bg + alpha * (border - bg)
+                // So: alpha = (actual - bg) / (border - bg)
+                // Use green channel as it has largest delta (255 - 76 = 179)
+                const greenDelta = bgG - borderG; // 179
+                const actualGreenDelta = bgG - green;
+                const estimatedOpacity = Math.round(
+                  (actualGreenDelta / greenDelta) * 255
+                );
+
+                // Only consider if the pixel looks reddish (red > green, red > blue)
+                if (
+                  red > green &&
+                  red > blue &&
+                  estimatedOpacity > maxOpacity
+                ) {
+                  maxOpacity = Math.max(0, Math.min(255, estimatedOpacity));
+                }
+              }
+            }
+          }
+
+          return maxOpacity;
+        },
+        { borderX, borderY, boxX: canvasBox.x, boxY: canvasBox.y }
+      );
+    }
+
+    test('should show border at full opacity when text annotation is selected', async ({
+      page,
+    }) => {
+      const canvas = page.locator('canvas');
+      const canvasBox = await canvas.boundingBox();
+      if (!canvasBox) throw new Error('Canvas not found');
+
+      // Create text annotation
+      const { startX, startY, endX, endY } = await createTextAnnotation(
+        page,
+        canvasBox,
+        { x: 100, y: 100 },
+        { x: 300, y: 200 },
+        'Test text'
+      );
+
+      // The annotation should be selected (auto-switched to select tool)
+      await expect(
+        page.locator('[data-tool="select"][aria-selected="true"]')
+      ).toBeVisible();
+
+      // Don't click outside yet - annotation should still be selected with border visible
+      // Check border opacity at the left edge
+      const borderOpacity = await getBorderOpacity(
+        page,
+        canvas,
+        canvasBox,
+        startX,
+        (startY + endY) / 2
+      );
+
+      // Border should be fully visible (alpha > 200 out of 255)
+      expect(borderOpacity).toBeGreaterThan(200);
+    });
+
+    test('should hide border (transparent) when text annotation is deselected', async ({
+      page,
+    }) => {
+      const canvas = page.locator('canvas');
+      const canvasBox = await canvas.boundingBox();
+      if (!canvasBox) throw new Error('Canvas not found');
+
+      // Create text annotation
+      const { startX, startY, endX, endY } = await createTextAnnotation(
+        page,
+        canvasBox,
+        { x: 100, y: 100 },
+        { x: 300, y: 200 },
+        'Test text'
+      );
+
+      // Click outside to finalize and deselect
+      await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+      await page.waitForTimeout(200);
+
+      // Text div should be gone
+      await expect(
+        page.locator('div[contenteditable="true"]')
+      ).not.toBeVisible();
+
+      // Click on empty area to ensure deselection
+      await page.mouse.click(canvasBox.x + 450, canvasBox.y + 450);
+      await page.waitForTimeout(100);
+
+      // Check border opacity at the left edge - should be transparent
+      const borderOpacity = await getBorderOpacity(
+        page,
+        canvas,
+        canvasBox,
+        startX,
+        (startY + endY) / 2
+      );
+
+      // Border should be transparent (alpha close to 0)
+      expect(borderOpacity).toBeLessThan(50);
+    });
+
+    test('should show border at 50% opacity when hovering over deselected text annotation', async ({
+      page,
+    }) => {
+      const canvas = page.locator('canvas');
+      const canvasBox = await canvas.boundingBox();
+      if (!canvasBox) throw new Error('Canvas not found');
+
+      // Create text annotation
+      const { startX, startY, endX, endY } = await createTextAnnotation(
+        page,
+        canvasBox,
+        { x: 100, y: 100 },
+        { x: 300, y: 200 },
+        'Test text'
+      );
+
+      // Click outside to finalize and deselect
+      await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+      await page.waitForTimeout(200);
+
+      // Click on empty area to ensure deselection
+      await page.mouse.click(canvasBox.x + 450, canvasBox.y + 450);
+      await page.waitForTimeout(100);
+
+      // Hover over the text annotation border
+      await page.mouse.move(startX, (startY + endY) / 2);
+      await page.waitForTimeout(100);
+
+      // Check border opacity at the left edge - should be at 50%
+      const borderOpacity = await getBorderOpacity(
+        page,
+        canvas,
+        canvasBox,
+        startX,
+        (startY + endY) / 2
+      );
+
+      // Border should be at approximately 50% opacity (alpha around 127)
+      // Allow some tolerance for anti-aliasing
+      expect(borderOpacity).toBeGreaterThan(100);
+      expect(borderOpacity).toBeLessThan(180);
+    });
+
+    test('should transition from hover (50%) to selected (100%) when clicking', async ({
+      page,
+    }) => {
+      const canvas = page.locator('canvas');
+      const canvasBox = await canvas.boundingBox();
+      if (!canvasBox) throw new Error('Canvas not found');
+
+      // Create text annotation
+      const { startX, startY, endX, endY } = await createTextAnnotation(
+        page,
+        canvasBox,
+        { x: 100, y: 100 },
+        { x: 300, y: 200 },
+        'Test text'
+      );
+
+      // Click outside to finalize and deselect
+      await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+      await page.waitForTimeout(200);
+
+      // Click on empty area to ensure deselection
+      await page.mouse.click(canvasBox.x + 450, canvasBox.y + 450);
+      await page.waitForTimeout(100);
+
+      // Hover over the text annotation border
+      await page.mouse.move(startX, (startY + endY) / 2);
+      await page.waitForTimeout(100);
+
+      // Check hover opacity (should be ~50%)
+      const hoverOpacity = await getBorderOpacity(
+        page,
+        canvas,
+        canvasBox,
+        startX,
+        (startY + endY) / 2
+      );
+      expect(hoverOpacity).toBeGreaterThan(100);
+      expect(hoverOpacity).toBeLessThan(180);
+
+      // Click to select
+      await page.mouse.click(startX, (startY + endY) / 2);
+      await page.waitForTimeout(100);
+
+      // Check selected opacity (should be 100%)
+      const selectedOpacity = await getBorderOpacity(
+        page,
+        canvas,
+        canvasBox,
+        startX,
+        (startY + endY) / 2
+      );
+      expect(selectedOpacity).toBeGreaterThan(200);
+    });
+
+    test('should hide border when switching to another tool', async ({
+      page,
+    }) => {
+      const canvas = page.locator('canvas');
+      const canvasBox = await canvas.boundingBox();
+      if (!canvasBox) throw new Error('Canvas not found');
+
+      // Create text annotation
+      const { startX, startY, endX, endY } = await createTextAnnotation(
+        page,
+        canvasBox,
+        { x: 100, y: 100 },
+        { x: 300, y: 200 },
+        'Test text'
+      );
+
+      // Click outside to finalize
+      await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+      await page.waitForTimeout(200);
+
+      // Switch to arrow tool
+      await page.click('[data-tool="arrow"]');
+      await page.waitForTimeout(100);
+
+      // Border should be hidden (annotation deselected)
+      const borderOpacityAfterSwitch = await getBorderOpacity(
+        page,
+        canvas,
+        canvasBox,
+        startX,
+        (startY + endY) / 2
+      );
+      expect(borderOpacityAfterSwitch).toBeLessThan(50);
+    });
+
+    test('should not show border on text annotation when using other tools', async ({
+      page,
+    }) => {
+      const canvas = page.locator('canvas');
+      const canvasBox = await canvas.boundingBox();
+      if (!canvasBox) throw new Error('Canvas not found');
+
+      // Create text annotation
+      const { startX, startY, endX, endY } = await createTextAnnotation(
+        page,
+        canvasBox,
+        { x: 100, y: 100 },
+        { x: 300, y: 200 },
+        'Test text'
+      );
+
+      // Click outside to finalize
+      await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+      await page.waitForTimeout(200);
+
+      // Switch to rectangle tool
+      await page.click('[data-tool="rectangle"]');
+      await page.waitForTimeout(100);
+
+      // Hover over the text annotation
+      await page.mouse.move(startX, (startY + endY) / 2);
+      await page.waitForTimeout(100);
+
+      // Border should NOT be visible (no hover effect when not in select mode)
+      const borderOpacity = await getBorderOpacity(
+        page,
+        canvas,
+        canvasBox,
+        startX,
+        (startY + endY) / 2
+      );
+      expect(borderOpacity).toBeLessThan(50);
+    });
+
+    test('should handle multiple text annotations with different selection states', async ({
+      page,
+    }) => {
+      const canvas = page.locator('canvas');
+      const canvasBox = await canvas.boundingBox();
+      if (!canvasBox) throw new Error('Canvas not found');
+
+      // Create first text annotation
+      const box1 = await createTextAnnotation(
+        page,
+        canvasBox,
+        { x: 50, y: 50 },
+        { x: 200, y: 150 },
+        'First'
+      );
+
+      // Finalize first annotation
+      await page.mouse.click(canvasBox.x + 450, canvasBox.y + 450);
+      await page.waitForTimeout(200);
+
+      // Create second text annotation
+      const box2 = await createTextAnnotation(
+        page,
+        canvasBox,
+        { x: 250, y: 50 },
+        { x: 400, y: 150 },
+        'Second'
+      );
+
+      // Finalize second annotation
+      await page.mouse.click(canvasBox.x + 450, canvasBox.y + 450);
+      await page.waitForTimeout(200);
+
+      // Deselect all
+      await page.mouse.click(canvasBox.x + 450, canvasBox.y + 450);
+      await page.waitForTimeout(100);
+
+      // Both borders should be transparent
+      const opacity1Deselected = await getBorderOpacity(
+        page,
+        canvas,
+        canvasBox,
+        box1.startX,
+        (box1.startY + box1.endY) / 2
+      );
+      const opacity2Deselected = await getBorderOpacity(
+        page,
+        canvas,
+        canvasBox,
+        box2.startX,
+        (box2.startY + box2.endY) / 2
+      );
+
+      expect(opacity1Deselected).toBeLessThan(50);
+      expect(opacity2Deselected).toBeLessThan(50);
+
+      // Select first annotation
+      await page.mouse.click(box1.startX, (box1.startY + box1.endY) / 2);
+      await page.waitForTimeout(100);
+
+      // First should be fully visible, second still transparent
+      const opacity1Selected = await getBorderOpacity(
+        page,
+        canvas,
+        canvasBox,
+        box1.startX,
+        (box1.startY + box1.endY) / 2
+      );
+      const opacity2StillDeselected = await getBorderOpacity(
+        page,
+        canvas,
+        canvasBox,
+        box2.startX,
+        (box2.startY + box2.endY) / 2
+      );
+
+      expect(opacity1Selected).toBeGreaterThan(200);
+      expect(opacity2StillDeselected).toBeLessThan(50);
+    });
   });
 });

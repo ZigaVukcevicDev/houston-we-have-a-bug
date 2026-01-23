@@ -397,7 +397,7 @@ describe('TextTool', () => {
       expect(mockCtx.strokeRect).toHaveBeenCalledWith(100, 100, 200, 150);
     });
 
-    it('should render saved annotations with border', () => {
+    it('should render saved annotations text (border is rendered by SelectTool)', () => {
       textTool['annotations'] = [
         {
           id: 'test-1',
@@ -413,7 +413,9 @@ describe('TextTool', () => {
 
       textTool.render(mockCtx);
 
-      expect(mockCtx.strokeRect).toHaveBeenCalledWith(50, 50, 200, 100);
+      // Border is now rendered by SelectTool based on selection/hover state
+      // TextTool only renders the text content
+      expect(mockCtx.fillText).toHaveBeenCalled();
     });
 
     it('should render text with wrapping', () => {

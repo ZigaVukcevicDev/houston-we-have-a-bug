@@ -154,17 +154,8 @@ export class TextTool implements Tool {
     scaleX: number,
     scaleY: number
   ): void {
-    // Draw rectangle border
-    ctx.save();
-    ctx.strokeStyle = annotation.color;
-    ctx.lineWidth = 2 * scaleX;
-    ctx.strokeRect(
-      annotation.x,
-      annotation.y,
-      annotation.width,
-      annotation.height
-    );
-    ctx.restore();
+    // Border rendering is handled by SelectTool based on selection/hover state
+    // Text tool only renders the text content
 
     // Render text with wrapping
     if (annotation.text) {
