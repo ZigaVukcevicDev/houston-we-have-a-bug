@@ -1492,7 +1492,7 @@ test.describe('Text tool', () => {
       expect(borderOpacity).toBeLessThan(50);
     });
 
-    test('should show border at 50% opacity when hovering over deselected text annotation', async ({
+    test('should show border at 100% opacity when hovering over deselected text annotation', async ({
       page,
     }) => {
       const canvas = page.locator('canvas');
@@ -1520,7 +1520,7 @@ test.describe('Text tool', () => {
       await page.mouse.move(startX, (startY + endY) / 2);
       await page.waitForTimeout(100);
 
-      // Check border opacity at the left edge - should be at 50%
+      // Check border opacity at the left edge - should be at 100%
       const borderOpacity = await getBorderOpacity(
         page,
         canvas,
@@ -1529,13 +1529,12 @@ test.describe('Text tool', () => {
         (startY + endY) / 2
       );
 
-      // Border should be at approximately 50% opacity (alpha around 127)
+      // Border should be at approximately 100% opacity (alpha around 255)
       // Allow some tolerance for anti-aliasing
-      expect(borderOpacity).toBeGreaterThan(100);
-      expect(borderOpacity).toBeLessThan(180);
+      expect(borderOpacity).toBeGreaterThan(200);
     });
 
-    test('should transition from hover (50%) to selected (100%) when clicking', async ({
+    test('should maintain 100% opacity when transitioning from hover to selected', async ({
       page,
     }) => {
       const canvas = page.locator('canvas');
@@ -1563,7 +1562,7 @@ test.describe('Text tool', () => {
       await page.mouse.move(startX, (startY + endY) / 2);
       await page.waitForTimeout(100);
 
-      // Check hover opacity (should be ~50%)
+      // Check hover opacity (should be 100%)
       const hoverOpacity = await getBorderOpacity(
         page,
         canvas,
@@ -1571,8 +1570,7 @@ test.describe('Text tool', () => {
         startX,
         (startY + endY) / 2
       );
-      expect(hoverOpacity).toBeGreaterThan(100);
-      expect(hoverOpacity).toBeLessThan(180);
+      expect(hoverOpacity).toBeGreaterThan(200);
 
       // Click to select
       await page.mouse.click(startX, (startY + endY) / 2);

@@ -1808,7 +1808,7 @@ describe('SelectTool', () => {
     });
 
     describe('text annotation hover rendering', () => {
-      it('should render hover border with 40% opacity when hovering over unselected text', () => {
+      it('should render hover border with 100% opacity when hovering over unselected text', () => {
         // Set up hover state (not selected)
         selectTool['hoveredAnnotationId'] = 'text-1';
         selectTool['hoveredAnnotationType'] = 'text';
@@ -1817,8 +1817,8 @@ describe('SelectTool', () => {
 
         selectTool.render(mockCtx);
 
-        // Should set globalAlpha to 0.4 for hover border
-        expect(mockCtx.globalAlpha).toBe(0.4);
+        // Should set globalAlpha to 1.0 for hover border
+        expect(mockCtx.globalAlpha).toBe(1.0);
         // Should render the hover border
         expect(mockCtx.strokeRect).toHaveBeenCalledWith(100, 400, 200, 100);
         // Should save and restore context

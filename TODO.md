@@ -135,6 +135,8 @@
 - [ ] text tool - select all / highlight color (update design)
 - [ ] text tool - when deleting text, annotation gets deleted
 - [ ] text tool - if no text entered and try to resize, the annotation disappears
+- [ ] text tool - minimal dimensions should not be applied at init
+- [x] text tool - remove border opacity 40%, it should always be 100%
 - [x] text tool - when typing text, cursor should be for text, not move
 - [x] text tool - revisit if user can't resize in negative directions
 - [x] recheck annotations when scrolling
