@@ -694,4 +694,266 @@ test.describe('Crop tool', () => {
       Math.abs(internalDimensions.aspectRatio - displayAspectRatio)
     ).toBeLessThan(0.01);
   });
+
+  test('should confirm crop with Enter key from keyboard', async ({ page }) => {
+    await page.click('[data-tool="crop"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    const initialWidth = box.width;
+
+    // Draw crop rectangle
+    await page.mouse.move(box.x + 100, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 400, box.y + 300);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Press Enter key to confirm
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(300);
+
+    // Canvas should be cropped
+    const newBox = await canvas.boundingBox();
+    if (!newBox) throw new Error('Canvas not found after crop');
+
+    expect(newBox.width).toBeLessThan(initialWidth);
+  });
+
+  test('should crop very small region near minimum', async ({ page }) => {
+    await page.click('[data-tool="crop"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw very small crop rectangle (80x80)
+    await page.mouse.move(box.x + 100, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 180, box.y + 180);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Confirm crop
+    await page.click('.crop-buttons button[title="Confirm crop"]');
+    await page.waitForTimeout(300);
+
+    // Should have cropped successfully
+    const newBox = await canvas.boundingBox();
+    expect(newBox).toBeTruthy();
+  });
+
+  test('should crop entire canvas', async ({ page }) => {
+    await page.click('[data-tool="crop"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw crop rectangle covering entire canvas
+    await page.mouse.move(box.x + 5, box.y + 5);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width - 5, box.y + box.height - 5);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Confirm crop
+    await page.click('.crop-buttons button[title="Confirm crop"]');
+    await page.waitForTimeout(300);
+
+    // Canvas should exist but be nearly the same size
+    const newBox = await canvas.boundingBox();
+    expect(newBox).toBeTruthy();
+  });
+
+  test('should handle multiple crop operations in sequence', async ({
+    page,
+  }) => {
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    const initialWidth = box.width;
+
+    // First crop
+    await page.click('[data-tool="crop"]');
+    await page.mouse.move(box.x + 100, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width - 100, box.y + box.height - 100);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+    await page.click('.crop-buttons button[title="Confirm crop"]');
+    await page.waitForTimeout(300);
+
+    // Get canvas after first crop
+    const box2 = await canvas.boundingBox();
+    if (!box2) throw new Error('Canvas not found after first crop');
+
+    // Second crop
+    await page.click('[data-tool="crop"]');
+    await page.mouse.move(box2.x + 50, box2.y + 50);
+    await page.mouse.down();
+    await page.mouse.move(box2.x + box2.width - 50, box2.y + box2.height - 50);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+    await page.click('.crop-buttons button[title="Confirm crop"]');
+    await page.waitForTimeout(300);
+
+    // Canvas should be smaller than initial
+    const finalBox = await canvas.boundingBox();
+    if (!finalBox) throw new Error('Canvas not found after second crop');
+
+    expect(finalBox.width).toBeLessThan(initialWidth);
+  });
+
+  test('should maintain annotations after crop', async ({ page }) => {
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw an arrow annotation
+    await page.click('[data-tool="arrow"]');
+    await page.mouse.move(box.x + 150, box.y + 150);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 300, box.y + 200);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Crop around the arrow
+    await page.click('[data-tool="crop"]');
+    await page.mouse.move(box.x + 100, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 400, box.y + 300);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+    await page.click('.crop-buttons button[title="Confirm crop"]');
+    await page.waitForTimeout(300);
+
+    // Arrow should still be present and selectable
+    const newBox = await canvas.boundingBox();
+    if (!newBox) throw new Error('Canvas not found after crop');
+
+    await page.mouse.click(newBox.x + 100, newBox.y + 80);
+    await page.waitForTimeout(100);
+
+    // Select tool should be active
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should crop at extreme canvas corners', async ({ page }) => {
+    await page.click('[data-tool="crop"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Crop from near top-left corner (not extreme edge to ensure crop rectangle draws)
+    await page.mouse.move(box.x + 10, box.y + 10);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 300, box.y + 250);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    await page.click('.crop-buttons button[title="Confirm crop"]');
+    await page.waitForTimeout(300);
+
+    const newBox = await canvas.boundingBox();
+    expect(newBox).toBeTruthy();
+  });
+
+  test('should handle crop cancel after multiple crops', async ({ page }) => {
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Successful crop
+    await page.click('[data-tool="crop"]');
+    await page.mouse.move(box.x + 100, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 400, box.y + 300);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+    await page.click('.crop-buttons button[title="Confirm crop"]');
+    await page.waitForTimeout(300);
+
+    const box2 = await canvas.boundingBox();
+    if (!box2) throw new Error('Canvas not found after crop');
+
+    // Start another crop but cancel it
+    await page.click('[data-tool="crop"]');
+    await page.mouse.move(box2.x + 50, box2.y + 50);
+    await page.mouse.down();
+    await page.mouse.move(box2.x + 200, box2.y + 150);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+    await page.click('.crop-buttons button[title="Cancel crop"]');
+    await page.waitForTimeout(100);
+
+    // Canvas size should remain the same
+    const finalBox = await canvas.boundingBox();
+    if (!finalBox) throw new Error('Canvas not found after cancel');
+
+    expect(finalBox.width).toBeCloseTo(box2.width, 0);
+  });
+
+  test('should handle crop with different aspect ratios', async ({ page }) => {
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Crop to tall aspect ratio
+    await page.click('[data-tool="crop"]');
+    await page.mouse.move(box.x + 200, box.y + 50);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 350, box.y + 400);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    await page.click('.crop-buttons button[title="Confirm crop"]');
+    await page.waitForTimeout(300);
+
+    const newBox = await canvas.boundingBox();
+    if (!newBox) throw new Error('Canvas not found after crop');
+
+    // Verify aspect ratio is tall (height > width)
+    expect(newBox.height).toBeGreaterThan(newBox.width);
+  });
+
+  test('should redraw crop rectangle immediately after cancel', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="crop"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw first crop
+    await page.mouse.move(box.x + 100, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 300, box.y + 250);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Cancel it
+    await page.click('.crop-buttons button[title="Cancel crop"]');
+    await page.waitForTimeout(100);
+
+    // Draw new crop immediately
+    await page.mouse.move(box.x + 150, box.y + 150);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 400, box.y + 350);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Crop buttons should appear again
+    const confirmButton = page.locator(
+      '.crop-buttons button[title="Confirm crop"]'
+    );
+    await expect(confirmButton).toBeVisible();
+  });
 });

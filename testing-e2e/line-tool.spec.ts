@@ -458,4 +458,172 @@ test.describe('Line tool', () => {
       page.locator('[data-tool="select"][aria-selected="true"]')
     ).toBeVisible();
   });
+
+  test('should draw line at extreme angles (diagonal)', async ({ page }) => {
+    await page.click('[data-tool="line"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw 45-degree line (top-left to bottom-right)
+    await page.mouse.move(box.x + 50, box.y + 50);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 250, box.y + 250);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Verify line was created
+    await page.mouse.click(box.x + 150, box.y + 150);
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should draw line at 135-degree angle', async ({ page }) => {
+    await page.click('[data-tool="line"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw line from top-right to bottom-left
+    await page.mouse.move(box.x + 400, box.y + 50);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 200, box.y + 250);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Verify line was created
+    await page.mouse.click(box.x + 300, box.y + 150);
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should draw very short line (minimum length)', async ({ page }) => {
+    await page.click('[data-tool="line"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw very short line (20px)
+    await page.mouse.move(box.x + 100, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 120, box.y + 100);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Should still create line and switch to select tool
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should draw very long line spanning canvas', async ({ page }) => {
+    await page.click('[data-tool="line"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw line from near top-left to near bottom-right
+    await page.mouse.move(box.x + 20, box.y + 20);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width - 20, box.y + box.height - 20);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Verify line was created
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should draw line near canvas edge', async ({ page }) => {
+    await page.click('[data-tool="line"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw line very close to top edge
+    await page.mouse.move(box.x + 100, box.y + 5);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 300, box.y + 5);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Verify line was created
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should handle multiple overlapping lines', async ({ page }) => {
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw first line
+    await page.click('[data-tool="line"]');
+    await page.mouse.move(box.x + 100, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 300, box.y + 200);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Draw second line crossing the first
+    await page.click('[data-tool="line"]');
+    await page.mouse.move(box.x + 100, box.y + 200);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 300, box.y + 100);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Both lines should exist
+    // Click on first line
+    await page.mouse.click(box.x + 200, box.y + 150);
+    await page.waitForTimeout(100);
+
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should draw multiple parallel lines', async ({ page }) => {
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw first horizontal line
+    await page.click('[data-tool="line"]');
+    await page.mouse.move(box.x + 100, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 400, box.y + 100);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Draw second parallel horizontal line
+    await page.click('[data-tool="line"]');
+    await page.mouse.move(box.x + 100, box.y + 150);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 400, box.y + 150);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Draw third parallel horizontal line
+    await page.click('[data-tool="line"]');
+    await page.mouse.move(box.x + 100, box.y + 200);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 400, box.y + 200);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // All lines should be created
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
 });

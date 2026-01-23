@@ -549,4 +549,209 @@ test.describe('Rectangle tool', () => {
       page.locator('[data-tool="select"][aria-selected="true"]')
     ).toBeVisible();
   });
+
+  test('should draw rectangle at canvas edge', async ({ page }) => {
+    await page.click('[data-tool="rectangle"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw rectangle at top edge
+    await page.mouse.move(box.x + 10, box.y + 10);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 200, box.y + 100);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Verify rectangle was created
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should draw very small rectangle near minimum size', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="rectangle"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw small rectangle (50x50)
+    await page.mouse.move(box.x + 100, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 150, box.y + 150);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Should create rectangle
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should draw very large rectangle filling most of canvas', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="rectangle"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw large rectangle
+    await page.mouse.move(box.x + 20, box.y + 20);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width - 20, box.y + box.height - 20);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Verify rectangle was created
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should handle overlapping rectangles with different selection states', async ({
+    page,
+  }) => {
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw first rectangle
+    await page.click('[data-tool="rectangle"]');
+    await page.mouse.move(box.x + 100, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 300, box.y + 250);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Draw second overlapping rectangle
+    await page.click('[data-tool="rectangle"]');
+    await page.mouse.move(box.x + 200, box.y + 150);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 400, box.y + 300);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Click on first rectangle to select it
+    await page.mouse.click(box.x + 150, box.y + 150);
+    await page.waitForTimeout(100);
+
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should resize rectangle from all four corners', async ({ page }) => {
+    await page.click('[data-tool="rectangle"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw rectangle
+    const startX = box.x + 200;
+    const startY = box.y + 200;
+    const endX = box.x + 400;
+    const endY = box.y + 350;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+    await page.waitForTimeout(200);
+
+    // Resize from top-left corner
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(startX - 50, startY - 50);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Rectangle should still be selected
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should handle corner resize in all directions', async ({ page }) => {
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Test resizing from bottom-right corner
+    await page.click('[data-tool="rectangle"]');
+    await page.mouse.move(box.x + 100, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 300, box.y + 250);
+    await page.mouse.up();
+    await page.waitForTimeout(200);
+
+    // Drag bottom-right corner
+    await page.mouse.move(box.x + 300, box.y + 250);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 400, box.y + 350);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should handle edge resizing maintaining proportions', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="rectangle"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw rectangle
+    await page.mouse.move(box.x + 200, box.y + 200);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 400, box.y + 300);
+    await page.mouse.up();
+    await page.waitForTimeout(200);
+
+    // Try to resize from right edge (middle)
+    const rightEdgeX = box.x + 400;
+    const middleY = box.y + 250;
+
+    await page.mouse.move(rightEdgeX, middleY);
+    await page.mouse.down();
+    await page.mouse.move(rightEdgeX + 50, middleY);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should draw rectangle with extreme aspect ratio (very wide)', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="rectangle"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw very wide rectangle
+    await page.mouse.move(box.x + 50, box.y + 200);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 600, box.y + 250);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
 });

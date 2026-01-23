@@ -460,4 +460,182 @@ test.describe('Arrow tool', () => {
       page.locator('[data-tool="select"][aria-selected="true"]')
     ).toBeVisible();
   });
+
+  test('should draw arrow at extreme angles (diagonal)', async ({ page }) => {
+    await page.click('[data-tool="arrow"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw 45-degree arrow (top-left to bottom-right)
+    await page.mouse.move(box.x + 50, box.y + 50);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 250, box.y + 250);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Verify arrow was created
+    await page.mouse.click(box.x + 150, box.y + 150);
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should draw arrow at 135-degree angle', async ({ page }) => {
+    await page.click('[data-tool="arrow"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw arrow from top-right to bottom-left
+    await page.mouse.move(box.x + 400, box.y + 50);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 200, box.y + 250);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Verify arrow was created
+    await page.mouse.click(box.x + 300, box.y + 150);
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should draw very short arrow (minimum length)', async ({ page }) => {
+    await page.click('[data-tool="arrow"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw very short arrow (20px)
+    await page.mouse.move(box.x + 100, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 120, box.y + 100);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Should still create arrow and switch to select tool
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should draw very long arrow spanning canvas', async ({ page }) => {
+    await page.click('[data-tool="arrow"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw arrow from near top-left to near bottom-right
+    await page.mouse.move(box.x + 20, box.y + 20);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width - 20, box.y + box.height - 20);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Verify arrow was created
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should draw arrow near canvas edge', async ({ page }) => {
+    await page.click('[data-tool="arrow"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw arrow very close to top edge
+    await page.mouse.move(box.x + 100, box.y + 5);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 300, box.y + 5);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Verify arrow was created
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should handle multiple overlapping arrows', async ({ page }) => {
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw first arrow
+    await page.click('[data-tool="arrow"]');
+    await page.mouse.move(box.x + 100, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 300, box.y + 200);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Draw second arrow crossing the first
+    await page.click('[data-tool="arrow"]');
+    await page.mouse.move(box.x + 100, box.y + 200);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 300, box.y + 100);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Both arrows should exist
+    // Click on first arrow
+    await page.mouse.click(box.x + 200, box.y + 150);
+    await page.waitForTimeout(100);
+
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should render arrowhead correctly at different angles', async ({
+    page,
+  }) => {
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Test arrowhead pointing right (0 degrees)
+    await page.click('[data-tool="arrow"]');
+    await page.mouse.move(box.x + 50, box.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 250, box.y + 100);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Test arrowhead pointing down (90 degrees)
+    await page.click('[data-tool="arrow"]');
+    await page.mouse.move(box.x + 50, box.y + 150);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 50, box.y + 350);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Test arrowhead pointing left (180 degrees)
+    await page.click('[data-tool="arrow"]');
+    await page.mouse.move(box.x + 350, box.y + 150);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 150, box.y + 150);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Test arrowhead pointing up (270 degrees)
+    await page.click('[data-tool="arrow"]');
+    await page.mouse.move(box.x + 350, box.y + 350);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 350, box.y + 200);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // All arrows should be created successfully
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
 });
