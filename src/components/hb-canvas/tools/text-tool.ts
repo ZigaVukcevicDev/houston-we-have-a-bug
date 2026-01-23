@@ -304,10 +304,10 @@ export class TextTool implements Tool {
 
     this.textDiv = document.createElement('div');
     this.textDiv.contentEditable = 'true';
-    
+
     // Apply darkened color for better visibility
     const darkenedColor = this.darkenColor(this.color, 0.02);
-    
+
     this.textDiv.style.cssText = `
       position: fixed;
       box-sizing: border-box;
