@@ -172,6 +172,7 @@ export class HBCanvas extends LitElement {
           this.handleToolChange(tool, annotationId)
       )
     );
+    const textTool = this.tools.get('text') as TextTool;
     this.tools.set(
       'select',
       new SelectTool(
@@ -179,7 +180,8 @@ export class HBCanvas extends LitElement {
         this.arrowAnnotations,
         this.rectangleAnnotations,
         this.textAnnotations,
-        () => this.redraw()
+        () => this.redraw(),
+        textTool
       )
     );
     this.tools.set(

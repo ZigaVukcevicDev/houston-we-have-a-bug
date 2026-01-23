@@ -2381,6 +2381,92 @@ describe('SelectTool', () => {
 
       expect(mockCanvas.style.cursor).toBe('move');
     });
+
+    it('should set text cursor when hovering over selected text box while editing', () => {
+      const textAnnotations: TextAnnotation[] = [
+        {
+          id: 'text-1',
+          x: 100,
+          y: 100,
+          width: 200,
+          height: 100,
+          text: 'Test',
+          color: '#E74C3C',
+          fontSize: 15,
+        },
+      ];
+
+      // Create a mock text tool that simulates active editing
+      const mockTextTool = {
+        isTextEditingActive: vi.fn().mockReturnValue(true),
+        getEditingAnnotationId: vi.fn().mockReturnValue('text-1'),
+      };
+
+      const selectTool = new SelectTool(
+        [],
+        [],
+        [],
+        textAnnotations,
+        mockRedraw,
+        mockTextTool as any
+      );
+
+      // Select the text annotation
+      selectTool['selectedAnnotationId'] = 'text-1';
+      selectTool['selectedAnnotationType'] = 'text';
+
+      // Hover over the selected text box while editing
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(mockCanvas.style.cursor).toBe('text');
+    });
+
+    it('should set move cursor when hovering over selected text box not being edited', () => {
+      const textAnnotations: TextAnnotation[] = [
+        {
+          id: 'text-1',
+          x: 100,
+          y: 100,
+          width: 200,
+          height: 100,
+          text: 'Test',
+          color: '#E74C3C',
+          fontSize: 15,
+        },
+      ];
+
+      // Create a mock text tool that simulates no active editing
+      const mockTextTool = {
+        isTextEditingActive: vi.fn().mockReturnValue(false),
+        getEditingAnnotationId: vi.fn().mockReturnValue(null),
+      };
+
+      const selectTool = new SelectTool(
+        [],
+        [],
+        [],
+        textAnnotations,
+        mockRedraw,
+        mockTextTool as any
+      );
+
+      // Select the text annotation
+      selectTool['selectedAnnotationId'] = 'text-1';
+      selectTool['selectedAnnotationType'] = 'text';
+
+      // Hover over the selected text box (not being edited)
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(mockCanvas.style.cursor).toBe('move');
+    });
   });
 
   describe('text box dragging on mouseDown', () => {

@@ -285,7 +285,17 @@ test.describe('Text tool', () => {
       page.locator('[data-tool="select"][aria-selected="true"]')
     ).toBeVisible();
 
-    // Wait for canvas to update (mode-select has default cursor, not crosshair)
+    // Type some text and click outside to finalize (stop editing)
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+    await textDiv.evaluate((el, text) => (el.textContent = text), 'Test');
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await expect(textDiv).not.toBeVisible();
+
+    // Now click on the text annotation to select it (but not edit it)
+    await page.mouse.click(startX + 50, startY + 50);
+    
+    // Wait for canvas to update
     await page.waitForFunction(() => {
       const hbAnnotation = document.querySelector('hb-annotation');
       if (!hbAnnotation || !hbAnnotation.shadowRoot) return false;
@@ -295,7 +305,7 @@ test.describe('Text tool', () => {
       return canvas && window.getComputedStyle(canvas).cursor !== 'crosshair';
     });
 
-    // Hover over left border (not on handle)
+    // Hover over left border (not on handle) - should show move cursor when NOT editing
     const midY = (startY + endY) / 2;
     await page.mouse.move(startX, midY);
     await page.waitForTimeout(50);
@@ -303,6 +313,60 @@ test.describe('Text tool', () => {
       (el) => window.getComputedStyle(el).cursor
     );
     expect(cursor).toBe('move');
+  });
+
+  test('should show text cursor when hovering over text box while editing', async ({
+    page,
+  }) => {
+    // Select text tool
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    // Draw text box
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    // Wait for tool switch to select
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+
+    // Verify textDiv is visible and focused
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+    await expect(textDiv).toBeFocused();
+
+    // Wait for canvas to update
+    await page.waitForFunction(() => {
+      const hbAnnotation = document.querySelector('hb-annotation');
+      if (!hbAnnotation || !hbAnnotation.shadowRoot) return false;
+      const hbCanvas = hbAnnotation.shadowRoot.querySelector('hb-canvas');
+      if (!hbCanvas || !hbCanvas.shadowRoot) return false;
+      const canvas = hbCanvas.shadowRoot.querySelector('canvas');
+      return canvas && window.getComputedStyle(canvas).cursor !== 'crosshair';
+    });
+
+    // Hover over the text box while it's being edited
+    const midX = (startX + endX) / 2;
+    const midY = (startY + endY) / 2;
+    await page.mouse.move(midX, midY);
+    await page.waitForTimeout(50);
+    
+    // Should show text cursor when editing
+    const cursor = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).cursor
+    );
+    expect(cursor).toBe('text');
   });
 
   test('should show pointer cursor when hovering over unselected text box', async ({

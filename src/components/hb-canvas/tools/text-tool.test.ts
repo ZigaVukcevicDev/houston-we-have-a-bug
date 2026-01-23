@@ -1867,4 +1867,116 @@ describe('TextTool', () => {
       expect(calls.length).toBeGreaterThanOrEqual(3);
     });
   });
+
+  describe('text editing state detection', () => {
+    it('should return false for isTextEditingActive when no textDiv exists', () => {
+      expect(textTool.isTextEditingActive()).toBe(false);
+    });
+
+    it('should return true for isTextEditingActive when textDiv is focused', () => {
+      const mockCanvas = {
+        getBoundingClientRect: vi.fn().mockReturnValue({
+          left: 0,
+          top: 0,
+          width: 800,
+          height: 600,
+        }),
+        width: 800,
+        height: 600,
+      } as unknown as HTMLCanvasElement;
+
+      // Simulate drawing a text box
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+
+      // Text div should be created and focused
+      expect(textTool.isTextEditingActive()).toBe(true);
+    });
+
+    it('should return null for getEditingAnnotationId when no textDiv exists', () => {
+      expect(textTool.getEditingAnnotationId()).toBeNull();
+    });
+
+    it('should return annotation ID when textDiv is active', () => {
+      const mockCanvas = {
+        getBoundingClientRect: vi.fn().mockReturnValue({
+          left: 0,
+          top: 0,
+          width: 800,
+          height: 600,
+        }),
+        width: 800,
+        height: 600,
+      } as unknown as HTMLCanvasElement;
+
+      // Simulate drawing a text box
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+
+      const annotationId = textTool.getEditingAnnotationId();
+      expect(annotationId).not.toBeNull();
+      expect(typeof annotationId).toBe('string');
+    });
+
+    it('should return false for isTextEditingActive after textDiv is blurred', async () => {
+      const mockCanvas = {
+        getBoundingClientRect: vi.fn().mockReturnValue({
+          left: 0,
+          top: 0,
+          width: 800,
+          height: 600,
+        }),
+        width: 800,
+        height: 600,
+      } as unknown as HTMLCanvasElement;
+
+      // Simulate drawing a text box
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+
+      // Initially should be active
+      expect(textTool.isTextEditingActive()).toBe(true);
+
+      // Blur the text div
+      const textDiv = document.querySelector(
+        '[contenteditable="true"]'
+      ) as HTMLDivElement;
+      expect(textDiv).not.toBeNull();
+      textDiv.blur();
+
+      // Wait for blur handler to execute (it has a 100ms timeout)
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      expect(textTool.isTextEditingActive()).toBe(false);
+    });
+  });
 });

@@ -443,4 +443,14 @@ export class TextTool implements Tool {
       this.finalizeTextDiv();
     }
   }
+
+  // Public method to check if text editing is currently active
+  isTextEditingActive(): boolean {
+    return this.textDiv !== null && document.activeElement === this.textDiv;
+  }
+
+  // Public method to get the annotation ID being edited
+  getEditingAnnotationId(): string | null {
+    return this.textDiv?.dataset.annotationId || null;
+  }
 }

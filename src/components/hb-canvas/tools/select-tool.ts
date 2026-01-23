@@ -4,6 +4,7 @@ import type {
   RectangleAnnotation,
   TextAnnotation,
 } from '../../../interfaces/annotation.interface';
+import type { TextTool } from './text-tool';
 import { renderHandle, isPointOnHandle } from '../../../utils/render-handle';
 import { getCanvasCoordinates } from '../../../utils/get-canvas-coordinates';
 import {
@@ -16,6 +17,7 @@ export class SelectTool implements Tool {
   private arrowAnnotations: LineAnnotation[] = [];
   private rectangleAnnotations: RectangleAnnotation[] = [];
   private textAnnotations: TextAnnotation[] = [];
+  private textTool?: TextTool;
   private selectedAnnotationId: string | null = null;
   private selectedAnnotationType: 'line' | 'rectangle' | 'text' | null = null;
   private hoveredAnnotationId: string | null = null;
@@ -39,13 +41,15 @@ export class SelectTool implements Tool {
     arrowAnnotations: LineAnnotation[],
     rectangleAnnotations: RectangleAnnotation[],
     textAnnotations: TextAnnotation[],
-    onRedraw: () => void
+    onRedraw: () => void,
+    textTool?: TextTool
   ) {
     this.lineAnnotations = lineAnnotations;
     this.arrowAnnotations = arrowAnnotations;
     this.rectangleAnnotations = rectangleAnnotations;
     this.textAnnotations = textAnnotations;
     this.onRedraw = onRedraw;
+    this.textTool = textTool;
   }
 
   // Helper to get all lines (including arrows) for iteration
@@ -476,7 +480,16 @@ export class SelectTool implements Tool {
 
         // If hovering over selected text box body (not handle)
         if (this.isPointOnTextBox(x, y, selectedText)) {
-          canvas.style.cursor = 'move';
+          // Check if text is being actively edited
+          if (
+            this.textTool?.isTextEditingActive() &&
+            this.textTool?.getEditingAnnotationId() === selectedText.id
+          ) {
+            // When editing text, show text cursor instead of move cursor
+            canvas.style.cursor = 'text';
+          } else {
+            canvas.style.cursor = 'move';
+          }
           this.hoveredAnnotationId = null;
           this.onRedraw();
           return;
