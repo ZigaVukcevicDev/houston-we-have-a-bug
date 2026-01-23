@@ -1750,14 +1750,16 @@ describe('SelectTool', () => {
         expect(mockRedraw).toHaveBeenCalled();
       });
 
-      it('should not select text annotation when clicking inside (not on edge)', () => {
-        // Click inside the text box (not near edges)
+      it('should select text annotation when clicking inside the box', () => {
+        // Click inside the text box - should now select (changed from edge-only detection)
         selectTool.handleClick(
           { clientX: 200, clientY: 450 } as MouseEvent,
           mockCanvas
         );
 
-        expect(selectTool['selectedAnnotationId']).toBeNull();
+        // Text boxes now detect clicks anywhere inside, not just on edges
+        expect(selectTool['selectedAnnotationId']).toBe('text-1');
+        expect(selectTool['selectedAnnotationType']).toBe('text');
       });
 
       it('should deselect text annotation when clicking empty space', () => {
@@ -1852,9 +1854,10 @@ describe('SelectTool', () => {
         expect(selectTool['selectedAnnotationId']).toBe('text-1');
       });
 
-      it('should not detect click far from edges', () => {
+      it('should not detect click outside the text box', () => {
+        // Click outside the text box (text box is at x:100-300, y:400-500)
         selectTool.handleClick(
-          { clientX: 150, clientY: 450 } as MouseEvent,
+          { clientX: 50, clientY: 450 } as MouseEvent,
           mockCanvas
         );
         expect(selectTool['selectedAnnotationId']).toBeNull();

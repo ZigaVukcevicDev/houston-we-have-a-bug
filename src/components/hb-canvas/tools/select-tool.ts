@@ -948,27 +948,9 @@ export class SelectTool implements Tool {
     textBox: TextAnnotation
   ): boolean {
     const { x, y, width, height } = textBox;
-    // Use 2px border width + 2px threshold, similar to rectangles
-    const threshold = 4;
 
-    // Check if point is near any of the four edges
-    const nearLeft =
-      Math.abs(px - x) <= threshold &&
-      py >= y - threshold &&
-      py <= y + height + threshold;
-    const nearRight =
-      Math.abs(px - (x + width)) <= threshold &&
-      py >= y - threshold &&
-      py <= y + height + threshold;
-    const nearTop =
-      Math.abs(py - y) <= threshold &&
-      px >= x - threshold &&
-      px <= x + width + threshold;
-    const nearBottom =
-      Math.abs(py - (y + height)) <= threshold &&
-      px >= x - threshold &&
-      px <= x + width + threshold;
-
-    return nearLeft || nearRight || nearTop || nearBottom;
+    // For text boxes, detect hover anywhere inside the box (not just on the border)
+    // This allows the border to appear when hovering over text content
+    return px >= x && px <= x + width && py >= y && py <= y + height;
   }
 }
