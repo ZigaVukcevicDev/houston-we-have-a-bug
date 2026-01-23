@@ -303,6 +303,10 @@ export class TextTool implements Tool {
 
     this.textDiv = document.createElement('div');
     this.textDiv.contentEditable = 'true';
+
+    // Apply darkened color for better visibility
+    const darkenedColor = this.darkenColor(this.color, 0.05);
+
     this.textDiv.style.cssText = `
       position: fixed;
       box-sizing: border-box;
@@ -317,7 +321,8 @@ export class TextTool implements Tool {
       font-weight: 500;
       letter-spacing: 0.01em;
       line-height: 1.2;
-      color: ${this.color};
+      color: ${darkenedColor};
+      caret-color: ${darkenedColor};
       background: transparent;
       border: ${borderWidth}px solid transparent;
       border-radius: 4px;

@@ -126,7 +126,7 @@
 - [ ] text tool - double click to edit
 - [x] text tool - increase font size to 15px
 - [ ] text tool - no antialiasing? different font?
-- [ ] text tool - darkenColor is not applied when writing text, also cursor
+- [x] text tool - darkenColor is not applied when writing text, also cursor
 - [ ] text tool - fix text not to be scrollable when not fitting vertically (it works ok when clicking outside)
 - [x] text tool - set minimum width and height of 40px when creating or resizing
 - [ ] text tool - make border transparent when clicking outside
