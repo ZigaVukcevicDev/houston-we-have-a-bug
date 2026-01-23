@@ -294,7 +294,7 @@ test.describe('Text tool', () => {
 
     // Now click on the text annotation to select it (but not edit it)
     await page.mouse.click(startX + 50, startY + 50);
-    
+
     // Wait for canvas to update
     await page.waitForFunction(() => {
       const hbAnnotation = document.querySelector('hb-annotation');
@@ -361,7 +361,7 @@ test.describe('Text tool', () => {
     const midY = (startY + endY) / 2;
     await page.mouse.move(midX, midY);
     await page.waitForTimeout(50);
-    
+
     // Should show text cursor when editing
     const cursor = await canvas.evaluate(
       (el) => window.getComputedStyle(el).cursor
