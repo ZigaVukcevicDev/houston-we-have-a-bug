@@ -2589,4 +2589,44 @@ describe('SelectTool', () => {
       expect(result).toBe(false);
     });
   });
+
+  describe('text cursor without textTool reference', () => {
+    it('should show move cursor when hovering over selected text box without textTool', () => {
+      const textAnnotations: TextAnnotation[] = [
+        {
+          id: 'text-1',
+          x: 100,
+          y: 100,
+          width: 200,
+          height: 100,
+          text: 'Test',
+          color: '#E74C3C',
+          fontSize: 15,
+        },
+      ];
+
+      // Create SelectTool without textTool parameter
+      const selectTool = new SelectTool(
+        [],
+        [],
+        [],
+        textAnnotations,
+        mockRedraw
+      );
+
+      // Select the text annotation
+      selectTool['selectedAnnotationId'] = 'text-1';
+      selectTool['selectedAnnotationType'] = 'text';
+
+      // Hover over the selected text box
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      // Should default to move cursor when textTool is not provided
+      expect(mockCanvas.style.cursor).toBe('move');
+    });
+  });
 });
