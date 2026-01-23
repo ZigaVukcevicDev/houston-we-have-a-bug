@@ -752,7 +752,7 @@ export class SelectTool implements Tool {
         );
         if (hoveredText) {
           ctx.save();
-          ctx.globalAlpha = 0.5;
+          ctx.globalAlpha = 0.4;
           ctx.strokeStyle = hoveredText.color;
           ctx.lineWidth = 2 * dpr;
           ctx.strokeRect(

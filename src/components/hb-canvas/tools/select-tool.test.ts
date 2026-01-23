@@ -1807,6 +1807,43 @@ describe('SelectTool', () => {
       });
     });
 
+    describe('text annotation hover rendering', () => {
+      it('should render hover border with 40% opacity when hovering over unselected text', () => {
+        // Set up hover state (not selected)
+        selectTool['hoveredAnnotationId'] = 'text-1';
+        selectTool['hoveredAnnotationType'] = 'text';
+        selectTool['selectedAnnotationId'] = null;
+        selectTool['selectedAnnotationType'] = null;
+
+        selectTool.render(mockCtx);
+
+        // Should set globalAlpha to 0.4 for hover border
+        expect(mockCtx.globalAlpha).toBe(0.4);
+        // Should render the hover border
+        expect(mockCtx.strokeRect).toHaveBeenCalledWith(100, 400, 200, 100);
+        // Should save and restore context
+        expect(mockCtx.save).toHaveBeenCalled();
+        expect(mockCtx.restore).toHaveBeenCalled();
+      });
+
+      it('should not render hover border when text annotation is selected', () => {
+        // Set up both hover and selected state for the same annotation
+        selectTool['hoveredAnnotationId'] = 'text-1';
+        selectTool['hoveredAnnotationType'] = 'text';
+        selectTool['selectedAnnotationId'] = 'text-1';
+        selectTool['selectedAnnotationType'] = 'text';
+
+        const strokeRectCalls = mockCtx.strokeRect as Mock;
+        strokeRectCalls.mockClear();
+
+        selectTool.render(mockCtx);
+
+        // Should render selection border and handles (5 strokeRect calls)
+        // But hover border should be skipped
+        expect(mockCtx.strokeRect).toHaveBeenCalledTimes(5);
+      });
+    });
+
     describe('text annotation deletion', () => {
       it('should delete selected text annotation when Delete key is pressed', () => {
         selectTool.selectAnnotation('text-1');
