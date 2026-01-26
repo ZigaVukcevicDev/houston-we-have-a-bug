@@ -314,11 +314,11 @@ test.describe('Mixed annotations', () => {
       await page.mouse.up();
       await page.waitForTimeout(50);
 
-      // Text (without typing)
+      // Text (must exceed minimum 40x60)
       await page.click('[data-tool="text"]');
       await page.mouse.move(box.x + 50 + i * 120, box.y + 350);
       await page.mouse.down();
-      await page.mouse.move(box.x + 140 + i * 120, box.y + 390);
+      await page.mouse.move(box.x + 140 + i * 120, box.y + 420);
       await page.mouse.up();
       await page.waitForTimeout(50);
 

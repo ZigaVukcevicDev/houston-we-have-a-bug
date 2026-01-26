@@ -856,114 +856,6 @@ test.describe('Text tool', () => {
     expect(hasAnnotation).toBe(true);
   });
 
-  test('should enforce minimum width of 40px when drawing', async ({
-    page,
-  }) => {
-    await page.click('[data-tool="text"]');
-
-    const canvas = page.locator('canvas');
-    const canvasBox = await canvas.boundingBox();
-    if (!canvasBox) throw new Error('Canvas not found');
-
-    const startX = canvasBox.x + 100;
-    const startY = canvasBox.y + 100;
-    // Try to drag only 5px to the right
-    const endX = canvasBox.x + 105;
-    const endY = canvasBox.y + 200;
-
-    await page.mouse.move(startX, startY);
-    await page.mouse.down();
-    await page.mouse.move(endX, endY);
-
-    // Check that the box is at least 20px wide during drawing
-    await page.waitForTimeout(50);
-
-    const drawnWidth = await canvas.evaluate((canvasEl) => {
-      if (!(canvasEl instanceof HTMLCanvasElement)) return null;
-      const ctx = canvasEl.getContext('2d');
-      if (!ctx) return null;
-
-      // The text tool draws a red rectangle border while drawing
-      const imageData = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
-      const data = imageData.data;
-      const rect = canvasEl.getBoundingClientRect();
-      const scaleX = canvasEl.width / rect.width;
-
-      // Find the rightmost red pixel in the drawing area
-      let maxX = 0;
-      const startCanvasX = 100 * scaleX;
-
-      for (let y = 0; y < canvasEl.height; y++) {
-        for (let x = Math.floor(startCanvasX); x < canvasEl.width; x++) {
-          const i = (y * canvasEl.width + x) * 4;
-          const red = data[i];
-          const alpha = data[i + 3];
-          if (red > 200 && alpha > 50) {
-            maxX = Math.max(maxX, x);
-          }
-        }
-      }
-
-      return (maxX - startCanvasX) / scaleX;
-    });
-
-    expect(drawnWidth).toBeGreaterThanOrEqual(39); // Allow 1px tolerance
-
-    await page.mouse.up();
-  });
-
-  test('should enforce minimum height of 40px when drawing', async ({
-    page,
-  }) => {
-    await page.click('[data-tool="text"]');
-
-    const canvas = page.locator('canvas');
-    const canvasBox = await canvas.boundingBox();
-    if (!canvasBox) throw new Error('Canvas not found');
-
-    const startX = canvasBox.x + 100;
-    const startY = canvasBox.y + 100;
-    const endX = canvasBox.x + 200;
-    // Try to drag only 5px down
-    const endY = canvasBox.y + 105;
-
-    await page.mouse.move(startX, startY);
-    await page.mouse.down();
-    await page.mouse.move(endX, endY);
-
-    await page.waitForTimeout(50);
-
-    const drawnHeight = await canvas.evaluate((canvasEl) => {
-      if (!(canvasEl instanceof HTMLCanvasElement)) return null;
-      const ctx = canvasEl.getContext('2d');
-      if (!ctx) return null;
-
-      const imageData = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
-      const data = imageData.data;
-      const rect = canvasEl.getBoundingClientRect();
-      const scaleY = canvasEl.height / rect.height;
-
-      let maxY = 0;
-      const startCanvasY = 100 * scaleY;
-
-      for (let y = Math.floor(startCanvasY); y < canvasEl.height; y++) {
-        for (let x = 0; x < canvasEl.width; x++) {
-          const i = (y * canvasEl.width + x) * 4;
-          const red = data[i];
-          const alpha = data[i + 3];
-          if (red > 200 && alpha > 50) {
-            maxY = Math.max(maxY, y);
-          }
-        }
-      }
-
-      return (maxY - startCanvasY) / scaleY;
-    });
-
-    expect(drawnHeight).toBeGreaterThanOrEqual(39);
-
-    await page.mouse.up();
-  });
 
   test('should enforce minimum width of 40px when resizing', async ({
     page,
@@ -1749,10 +1641,10 @@ test.describe('Text tool', () => {
     const canvasBox = await canvas.boundingBox();
     if (!canvasBox) throw new Error('Canvas not found');
 
-    // Create first text annotation
+    // Create first text annotation (must meet minimum 40x60)
     await page.mouse.move(canvasBox.x + 100, canvasBox.y + 100);
     await page.mouse.down();
-    await page.mouse.move(canvasBox.x + 250, canvasBox.y + 150);
+    await page.mouse.move(canvasBox.x + 250, canvasBox.y + 180);
     await page.mouse.up();
 
     let textDiv = page.locator('div[contenteditable="true"]');
@@ -1761,11 +1653,11 @@ test.describe('Text tool', () => {
     await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
     await expect(textDiv).not.toBeVisible();
 
-    // Create second text annotation
+    // Create second text annotation (must meet minimum 40x60)
     await page.click('[data-tool="text"]');
-    await page.mouse.move(canvasBox.x + 100, canvasBox.y + 200);
+    await page.mouse.move(canvasBox.x + 100, canvasBox.y + 220);
     await page.mouse.down();
-    await page.mouse.move(canvasBox.x + 250, canvasBox.y + 250);
+    await page.mouse.move(canvasBox.x + 250, canvasBox.y + 300);
     await page.mouse.up();
 
     textDiv = page.locator('div[contenteditable="true"]');
@@ -1774,12 +1666,12 @@ test.describe('Text tool', () => {
     await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
 
     // Both annotations should be selectable
-    await page.mouse.click(canvasBox.x + 150, canvasBox.y + 125);
+    await page.mouse.click(canvasBox.x + 150, canvasBox.y + 140);
     await expect(
       page.locator('[data-tool="select"][aria-selected="true"]')
     ).toBeVisible();
 
-    await page.mouse.click(canvasBox.x + 150, canvasBox.y + 225);
+    await page.mouse.click(canvasBox.x + 150, canvasBox.y + 260);
     await expect(
       page.locator('[data-tool="select"][aria-selected="true"]')
     ).toBeVisible();
@@ -1974,14 +1866,16 @@ test.describe('Text tool', () => {
     ).toBeVisible();
   });
 
-  test('should not create text box if drag is too small', async ({ page }) => {
+  test('should not create text box if drag never exceeds minimum dimensions', async ({
+    page,
+  }) => {
     await page.click('[data-tool="text"]');
 
     const canvas = page.locator('canvas');
     const canvasBox = await canvas.boundingBox();
     if (!canvasBox) throw new Error('Canvas not found');
 
-    // Try to draw a very small text box (below minimum 40x40)
+    // Draw a very small text box (below minimum 40x60)
     await page.mouse.move(canvasBox.x + 100, canvasBox.y + 100);
     await page.mouse.down();
     await page.mouse.move(canvasBox.x + 120, canvasBox.y + 120);
@@ -1989,7 +1883,199 @@ test.describe('Text tool', () => {
 
     await page.waitForTimeout(100);
 
-    // TextDiv should still be created (enforcing minimum size)
+    // TextDiv should NOT be created since drag never exceeded minimum
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).not.toBeVisible();
+  });
+
+  test('should show actual drag size before exceeding minimum dimensions', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    // Drag only 10px to the right and 15px down (below minimum 40x60)
+    const endX = canvasBox.x + 110;
+    const endY = canvasBox.y + 115;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+
+    // While still holding mouse down, check that the preview box shows actual drag size
+    await page.waitForTimeout(50);
+
+    const drawnDimensions = await canvas.evaluate(
+      (canvasEl, { searchStartX, searchStartY }) => {
+        if (!(canvasEl instanceof HTMLCanvasElement)) return null;
+        const ctx = canvasEl.getContext('2d');
+        if (!ctx) return null;
+
+        const imageData = ctx.getImageData(
+          0,
+          0,
+          canvasEl.width,
+          canvasEl.height
+        );
+        const data = imageData.data;
+        const rect = canvasEl.getBoundingClientRect();
+        const scaleX = canvasEl.width / rect.width;
+        const scaleY = canvasEl.height / rect.height;
+
+        const canvasStartX = Math.floor(searchStartX * scaleX) - 5;
+        const canvasStartY = Math.floor(searchStartY * scaleY) - 5;
+        const searchWidth = 100 * scaleX;
+        const searchHeight = 100 * scaleY;
+
+        let minX = canvasEl.width;
+        let maxX = 0;
+        let minY = canvasEl.height;
+        let maxY = 0;
+
+        for (
+          let y = canvasStartY;
+          y < Math.min(canvasStartY + searchHeight, canvasEl.height);
+          y++
+        ) {
+          for (
+            let x = canvasStartX;
+            x < Math.min(canvasStartX + searchWidth, canvasEl.width);
+            x++
+          ) {
+            const i = (y * canvasEl.width + x) * 4;
+            const red = data[i];
+            const green = data[i + 1];
+            const blue = data[i + 2];
+            const alpha = data[i + 3];
+            if (red > 200 && green < 100 && blue < 100 && alpha > 50) {
+              minX = Math.min(minX, x);
+              maxX = Math.max(maxX, x);
+              minY = Math.min(minY, y);
+              maxY = Math.max(maxY, y);
+            }
+          }
+        }
+
+        if (maxX === 0 || maxY === 0) return null;
+
+        const width = (maxX - minX) / scaleX;
+        const height = (maxY - minY) / scaleY;
+
+        return { width, height };
+      },
+      { searchStartX: 100, searchStartY: 100 }
+    );
+
+    // During drawing below minimum, preview should show actual drag size
+    expect(drawnDimensions?.width).toBeLessThan(30); // Should be ~10, not 40
+    expect(drawnDimensions?.height).toBeLessThan(30); // Should be ~15, not 60
+
+    await page.mouse.up();
+
+    // No text box created since minimum was never exceeded
+    await page.waitForTimeout(100);
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).not.toBeVisible();
+  });
+
+  test('should enforce minimum once drag exceeds it and create text box', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+
+    // First drag beyond minimum (40x60)
+    await page.mouse.move(canvasBox.x + 150, canvasBox.y + 170);
+    await page.waitForTimeout(50);
+
+    // Then drag back to smaller size
+    await page.mouse.move(canvasBox.x + 120, canvasBox.y + 130);
+    await page.waitForTimeout(50);
+
+    // Check that minimum is still enforced after exceeding it
+    const drawnDimensions = await canvas.evaluate(
+      (canvasEl, { searchStartX, searchStartY }) => {
+        if (!(canvasEl instanceof HTMLCanvasElement)) return null;
+        const ctx = canvasEl.getContext('2d');
+        if (!ctx) return null;
+
+        const imageData = ctx.getImageData(
+          0,
+          0,
+          canvasEl.width,
+          canvasEl.height
+        );
+        const data = imageData.data;
+        const rect = canvasEl.getBoundingClientRect();
+        const scaleX = canvasEl.width / rect.width;
+        const scaleY = canvasEl.height / rect.height;
+
+        const canvasStartX = Math.floor(searchStartX * scaleX) - 5;
+        const canvasStartY = Math.floor(searchStartY * scaleY) - 5;
+        const searchWidth = 100 * scaleX;
+        const searchHeight = 100 * scaleY;
+
+        let minX = canvasEl.width;
+        let maxX = 0;
+        let minY = canvasEl.height;
+        let maxY = 0;
+
+        for (
+          let y = canvasStartY;
+          y < Math.min(canvasStartY + searchHeight, canvasEl.height);
+          y++
+        ) {
+          for (
+            let x = canvasStartX;
+            x < Math.min(canvasStartX + searchWidth, canvasEl.width);
+            x++
+          ) {
+            const i = (y * canvasEl.width + x) * 4;
+            const red = data[i];
+            const green = data[i + 1];
+            const blue = data[i + 2];
+            const alpha = data[i + 3];
+            if (red > 200 && green < 100 && blue < 100 && alpha > 50) {
+              minX = Math.min(minX, x);
+              maxX = Math.max(maxX, x);
+              minY = Math.min(minY, y);
+              maxY = Math.max(maxY, y);
+            }
+          }
+        }
+
+        if (maxX === 0 || maxY === 0) return null;
+
+        const width = (maxX - minX) / scaleX;
+        const height = (maxY - minY) / scaleY;
+
+        return { width, height };
+      },
+      { searchStartX: 100, searchStartY: 100 }
+    );
+
+    // After exceeding minimum, it should stay at minimum even when dragging smaller
+    expect(drawnDimensions?.width).toBeGreaterThanOrEqual(39); // ~40px minimum
+    expect(drawnDimensions?.height).toBeGreaterThanOrEqual(59); // ~60px minimum
+
+    await page.mouse.up();
+
+    // Text box should be created since minimum was exceeded
+    await page.waitForTimeout(100);
     const textDiv = page.locator('div[contenteditable="true"]');
     await expect(textDiv).toBeVisible();
 

@@ -89,11 +89,12 @@ describe('TextTool', () => {
         mockCanvas
       );
 
+      // During drawing, shows actual drag size (minimum not enforced until mouseup)
       expect(textTool['currentBox']).toEqual({
         x: 100,
         y: 100,
         width: 100,
-        height: 60,
+        height: 50,
       });
     });
 
@@ -109,9 +110,9 @@ describe('TextTool', () => {
         mockCanvas
       );
 
-      // Width and height should be minimum size (40px width, 60px height), not 0
-      expect(textTool['currentBox']?.width).toBe(40);
-      expect(textTool['currentBox']?.height).toBe(60);
+      // Width and height should be 0 (clamped, not negative) - minimum is only enforced on mouseup
+      expect(textTool['currentBox']?.width).toBe(0);
+      expect(textTool['currentBox']?.height).toBe(0);
     });
 
     it('should call redraw during mousemove', () => {
@@ -160,7 +161,7 @@ describe('TextTool', () => {
       expect(textDiv?.contentEditable).toBe('true');
     });
 
-    it('should create textDiv with minimum 40px dimensions even when dragging small', () => {
+    it('should not create textDiv when drag never exceeds minimum dimensions', () => {
       textTool.handleMouseDown(
         { clientX: 100, clientY: 100 } as MouseEvent,
         mockCanvas
@@ -174,10 +175,30 @@ describe('TextTool', () => {
         mockCanvas
       );
 
+      // No textDiv since drag never exceeded minimum 40x60
+      const textDiv = getTextDiv();
+      expect(textDiv).toBeNull();
+    });
+
+    it('should create textDiv when drag exceeds minimum dimensions', () => {
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      // Drag to exceed minimum (40x60)
+      textTool.handleMouseMove(
+        { clientX: 150, clientY: 170 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 150, clientY: 170 } as MouseEvent,
+        mockCanvas
+      );
+
       const textDiv = getTextDiv();
       expect(textDiv).toBeTruthy();
-      expect(textDiv?.dataset.canvasWidth).toBe('40');
-      expect(textDiv?.dataset.canvasHeight).toBe('60');
+      expect(textDiv?.dataset.canvasWidth).toBe('50');
+      expect(textDiv?.dataset.canvasHeight).toBe('70');
     });
 
     it('should auto-focus textDiv on creation', () => {
@@ -555,7 +576,7 @@ describe('TextTool', () => {
       expect(mockToolChange).toHaveBeenCalledWith('select', expect.any(String));
     });
 
-    it('should call onToolChange even with small drags (enforces 40px minimum)', () => {
+    it('should not call onToolChange when drag never exceeds minimum', () => {
       textTool.handleMouseDown(
         { clientX: 100, clientY: 100 } as MouseEvent,
         mockCanvas
@@ -570,7 +591,8 @@ describe('TextTool', () => {
         mockCanvas
       );
 
-      expect(mockToolChange).toHaveBeenCalledWith('select', expect.any(String));
+      // No tool change since drag never exceeded minimum 40x60
+      expect(mockToolChange).not.toHaveBeenCalled();
     });
 
     it('should create annotation and switch to select tool immediately', () => {
@@ -1070,7 +1092,7 @@ describe('TextTool', () => {
       expect(getTextDiv()).toBeNull();
     });
 
-    it('should set keepTextDivActive even with small drags (enforces 40px minimum)', () => {
+    it('should not set keepTextDivActive when drag never exceeds minimum', () => {
       textTool.handleMouseDown(
         { clientX: 100, clientY: 100 } as MouseEvent,
         mockCanvas
@@ -1084,8 +1106,8 @@ describe('TextTool', () => {
         mockCanvas
       );
 
-      // Flag should be true due to 40px minimum enforcement
-      expect(textTool['keepTextDivActive']).toBe(true);
+      // Flag should be false since no textDiv created (drag never exceeded minimum)
+      expect(textTool['keepTextDivActive']).toBe(false);
     });
   });
 

@@ -21,6 +21,7 @@ export class TextTool implements Tool {
     height: number;
   } | null = null;
   private keepTextDivActive: boolean = false;
+  private hasExceededMinimum: boolean = false; // Track if drag exceeded minimum dimensions
 
   constructor(
     annotations: TextAnnotation[],
@@ -47,6 +48,7 @@ export class TextTool implements Tool {
 
     // Start drawing new text box
     this.isDrawing = true;
+    this.hasExceededMinimum = false;
     this.startPoint = { x, y };
     this.currentBox = { x, y, width: 0, height: 0 };
   }
@@ -57,12 +59,24 @@ export class TextTool implements Tool {
     // Handle drawing new text box
     if (!this.isDrawing || !this.startPoint) return;
 
-    // Constrain to only right and down
-    // Use minimum size for text box dimensions
     const MIN_WIDTH = 40;
     const MIN_HEIGHT = 60;
-    const width = Math.max(MIN_WIDTH, x - this.startPoint.x);
-    const height = Math.max(MIN_HEIGHT, y - this.startPoint.y);
+
+    const rawWidth = Math.max(0, x - this.startPoint.x);
+    const rawHeight = Math.max(0, y - this.startPoint.y);
+
+    // Once drag exceeds minimum dimensions, start enforcing them
+    if (rawWidth >= MIN_WIDTH && rawHeight >= MIN_HEIGHT) {
+      this.hasExceededMinimum = true;
+    }
+
+    // If minimum was exceeded, enforce it; otherwise show actual drag size
+    const width = this.hasExceededMinimum
+      ? Math.max(MIN_WIDTH, rawWidth)
+      : rawWidth;
+    const height = this.hasExceededMinimum
+      ? Math.max(MIN_HEIGHT, rawHeight)
+      : rawHeight;
 
     this.currentBox = {
       x: this.startPoint.x,
@@ -80,36 +94,41 @@ export class TextTool implements Tool {
 
     this.isDrawing = false;
 
-    // Only create textarea if box has minimum size
-    if (this.currentBox.width >= 40 && this.currentBox.height >= 60) {
-      // Create the annotation immediately
-      const newAnnotation = {
-        id: crypto.randomUUID(),
-        x: this.currentBox.x,
-        y: this.currentBox.y,
-        width: this.currentBox.width,
-        height: this.currentBox.height,
-        text: '', // Start with empty text
-        color: this.color,
-        fontSize: this.fontSize,
-      };
-
-      // IMPORTANT: Use push() to modify the shared array reference
-      this.annotations.push(newAnnotation);
-
-      // Create text div for editing
-      this.createTextDiv(canvas, this.currentBox);
-
-      // Store the annotation ID in the text div for later updates
-      this.textDiv!.dataset.annotationId = newAnnotation.id;
-
-      // Keep text div active when switching to select tool
-      this.keepTextDivActive = true;
-
-      // Switch to select tool and select the annotation (shows handles)
-      this.onToolChange('select', newAnnotation.id);
+    // Only create text box if minimum dimensions were exceeded during drawing
+    if (!this.hasExceededMinimum) {
+      this.currentBox = null;
+      this.startPoint = null;
       this.onRedraw();
+      return;
     }
+
+    // Create the annotation (minimum is already enforced in currentBox)
+    const newAnnotation = {
+      id: crypto.randomUUID(),
+      x: this.currentBox.x,
+      y: this.currentBox.y,
+      width: this.currentBox.width,
+      height: this.currentBox.height,
+      text: '', // Start with empty text
+      color: this.color,
+      fontSize: this.fontSize,
+    };
+
+    // IMPORTANT: Use push() to modify the shared array reference
+    this.annotations.push(newAnnotation);
+
+    // Create text div for editing
+    this.createTextDiv(canvas, this.currentBox);
+
+    // Store the annotation ID in the text div for later updates
+    this.textDiv!.dataset.annotationId = newAnnotation.id;
+
+    // Keep text div active when switching to select tool
+    this.keepTextDivActive = true;
+
+    // Switch to select tool and select the annotation (shows handles)
+    this.onToolChange('select', newAnnotation.id);
+    this.onRedraw();
 
     this.currentBox = null;
     this.startPoint = null;

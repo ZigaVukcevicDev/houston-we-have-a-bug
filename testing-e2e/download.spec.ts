@@ -96,10 +96,10 @@ test.describe('Download functionality', () => {
     const box = await canvas.boundingBox();
     if (!box) throw new Error('Canvas not found');
 
-    // Draw text box
+    // Draw text box (must exceed minimum 40x60)
     await page.mouse.move(box.x + 100, box.y + 100);
     await page.mouse.down();
-    await page.mouse.move(box.x + 300, box.y + 150);
+    await page.mouse.move(box.x + 300, box.y + 170);
     await page.mouse.up();
     await page.waitForTimeout(100);
 
@@ -197,10 +197,10 @@ test.describe('Download functionality', () => {
     const box = await canvas.boundingBox();
     if (!box) throw new Error('Canvas not found');
 
-    // Draw small text box
+    // Draw small text box (must exceed minimum 40x60)
     await page.mouse.move(box.x + 100, box.y + 100);
     await page.mouse.down();
-    await page.mouse.move(box.x + 200, box.y + 130);
+    await page.mouse.move(box.x + 200, box.y + 170);
     await page.mouse.up();
     await page.waitForTimeout(100);
 

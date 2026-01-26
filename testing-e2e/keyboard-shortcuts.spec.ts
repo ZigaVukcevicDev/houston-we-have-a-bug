@@ -93,10 +93,10 @@ test.describe('Keyboard shortcuts', () => {
     const box = await canvas.boundingBox();
     if (!box) throw new Error('Canvas not found');
 
-    // Draw text box
+    // Draw text box (must exceed minimum 40x60)
     await page.mouse.move(box.x + 100, box.y + 100);
     await page.mouse.down();
-    await page.mouse.move(box.x + 300, box.y + 150);
+    await page.mouse.move(box.x + 300, box.y + 170);
     await page.mouse.up();
     await page.waitForTimeout(100);
 
@@ -109,7 +109,7 @@ test.describe('Keyboard shortcuts', () => {
     await page.waitForTimeout(100);
 
     // Click on text to select
-    await page.mouse.click(box.x + 200, box.y + 125);
+    await page.mouse.click(box.x + 200, box.y + 135);
     await page.waitForTimeout(100);
 
     // Press Delete
