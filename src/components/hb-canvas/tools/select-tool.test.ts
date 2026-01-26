@@ -1856,6 +1856,56 @@ describe('SelectTool', () => {
         expect(textAnnotations.find((t) => t.id === 'text-1')).toBeUndefined();
         expect(selectTool['selectedAnnotationId']).toBeNull();
       });
+
+      it('should not delete annotation when Delete/Backspace is pressed in contenteditable element', () => {
+        selectTool.selectAnnotation('text-1');
+        const initialLength = textAnnotations.length;
+
+        // Create a contenteditable div to simulate text editing
+        const editableDiv = document.createElement('div');
+        editableDiv.contentEditable = 'true';
+        document.body.appendChild(editableDiv);
+        editableDiv.focus();
+
+        // Dispatch Delete key event from contenteditable element
+        const deleteEvent = new KeyboardEvent('keydown', {
+          key: 'Delete',
+          bubbles: true,
+        });
+        editableDiv.dispatchEvent(deleteEvent);
+
+        // Annotation should NOT be deleted
+        expect(textAnnotations.length).toBe(initialLength);
+        expect(textAnnotations.find((t) => t.id === 'text-1')).toBeDefined();
+
+        // Clean up
+        document.body.removeChild(editableDiv);
+      });
+
+      it('should not delete annotation when Backspace is pressed in contenteditable element', () => {
+        selectTool.selectAnnotation('text-1');
+        const initialLength = textAnnotations.length;
+
+        // Create a contenteditable div to simulate text editing
+        const editableDiv = document.createElement('div');
+        editableDiv.contentEditable = 'true';
+        document.body.appendChild(editableDiv);
+        editableDiv.focus();
+
+        // Dispatch Backspace key event from contenteditable element
+        const backspaceEvent = new KeyboardEvent('keydown', {
+          key: 'Backspace',
+          bubbles: true,
+        });
+        editableDiv.dispatchEvent(backspaceEvent);
+
+        // Annotation should NOT be deleted
+        expect(textAnnotations.length).toBe(initialLength);
+        expect(textAnnotations.find((t) => t.id === 'text-1')).toBeDefined();
+
+        // Clean up
+        document.body.removeChild(editableDiv);
+      });
     });
 
     describe('text box edge detection', () => {

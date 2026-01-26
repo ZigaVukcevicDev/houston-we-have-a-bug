@@ -1850,6 +1850,98 @@ test.describe('Text tool', () => {
     ).toBeVisible();
   });
 
+  test('should not delete annotation when using Backspace to delete text characters', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    // Draw text box
+    await page.mouse.move(canvasBox.x + 100, canvasBox.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(canvasBox.x + 300, canvasBox.y + 200);
+    await page.mouse.up();
+
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+
+    // Type some text
+    await page.keyboard.type('Hello World');
+
+    // Use Backspace to delete some characters
+    await page.keyboard.press('Backspace');
+    await page.keyboard.press('Backspace');
+    await page.keyboard.press('Backspace');
+
+    // TextDiv should still be visible (annotation not deleted)
+    await expect(textDiv).toBeVisible();
+
+    // Text should be partially deleted
+    const textContent = await textDiv.textContent();
+    expect(textContent).toBe('Hello Wo');
+
+    // Click outside to finalize
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await page.waitForTimeout(200);
+
+    // Annotation should still exist - verify by clicking on it
+    await page.mouse.click(canvasBox.x + 200, canvasBox.y + 150);
+    await page.waitForTimeout(100);
+
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should not delete annotation when using Delete key to delete text characters', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    // Draw text box
+    await page.mouse.move(canvasBox.x + 100, canvasBox.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(canvasBox.x + 300, canvasBox.y + 200);
+    await page.mouse.up();
+
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+
+    // Type some text
+    await page.keyboard.type('Hello');
+
+    // Move cursor to beginning and use Delete to remove characters
+    await page.keyboard.press('Home');
+    await page.keyboard.press('Delete');
+    await page.keyboard.press('Delete');
+
+    // TextDiv should still be visible (annotation not deleted)
+    await expect(textDiv).toBeVisible();
+
+    // Text should be partially deleted from the beginning
+    const textContent = await textDiv.textContent();
+    expect(textContent).toBe('llo');
+
+    // Click outside to finalize
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await page.waitForTimeout(200);
+
+    // Annotation should still exist
+    await page.mouse.click(canvasBox.x + 200, canvasBox.y + 150);
+    await page.waitForTimeout(100);
+
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
   test('should handle rapid tool switching while editing text', async ({
     page,
   }) => {

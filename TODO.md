@@ -133,7 +133,7 @@
 - [x] text tool - make border 50% visible when hovering - update to 40%
 - [ ] text tool - when hovering over textbox and showing border, it should work also for hovering over overflown text
 - [ ] text tool - select all / highlight color (update design)
-- [ ] text tool - when deleting text, annotation gets deleted
+- [x] text tool - when deleting text, annotation gets deleted
 - [x] text tool - if no text entered and try to resize, the annotation disappears
 - [x] text tool - minimal dimensions should not be applied at init
 - [x] text tool - remove border opacity 40%, it should always be 100%

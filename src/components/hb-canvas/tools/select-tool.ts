@@ -89,6 +89,11 @@ export class SelectTool implements Tool {
     // Add keyboard listener for Delete/Backspace keys
     this.keydownHandler = (e: KeyboardEvent) => {
       if (e.key === 'Delete' || e.key === 'Backspace') {
+        // Don't delete annotation if user is editing text in a contenteditable element
+        const target = e.target as HTMLElement;
+        if (target?.isContentEditable) {
+          return;
+        }
         this.deleteSelectedAnnotation();
       }
     };
