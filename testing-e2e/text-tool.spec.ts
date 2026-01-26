@@ -103,7 +103,9 @@ test.describe('Text tool', () => {
     expect(text).toBe('Quick test');
   });
 
-  test('should remove annotation if no text is entered', async ({ page }) => {
+  test('should keep empty annotation after clicking outside (allows resize)', async ({
+    page,
+  }) => {
     // Select text tool
     await page.click('[data-tool="text"]');
 
@@ -126,9 +128,14 @@ test.describe('Text tool', () => {
     // Textarea should be gone
     await expect(page.locator('div[contenteditable="true"]')).not.toBeVisible();
 
-    // Annotation should not exist - verify by checking canvas doesn't have the annotation
-    // We can verify this by taking a snapshot of the annotations array
-    // This would require exposing the state for testing
+    // Empty annotation should remain - verify by clicking on it to select
+    await page.mouse.click(canvasBox.x + 200, canvasBox.y + 150);
+    await page.waitForTimeout(100);
+
+    // Should be able to select the empty annotation
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
   });
 
   test('should remove annotation on Escape key', async ({ page }) => {
@@ -194,6 +201,52 @@ test.describe('Text tool', () => {
 
     // Verify the text box was resized
     // This would require checking the canvas rendering or component state
+  });
+
+  test('should allow resizing empty text annotation without it disappearing', async ({
+    page,
+  }) => {
+    // Select text tool
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    // Draw text box (don't enter any text)
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 200;
+    const endY = canvasBox.y + 180;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    // Wait for handles to appear
+    await page.waitForTimeout(100);
+
+    // Verify textDiv is visible (annotation exists)
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+
+    // Try to resize by dragging bottom-right handle (without entering text)
+    await page.mouse.move(endX, endY);
+    await page.mouse.down();
+    await page.mouse.move(endX + 50, endY + 50);
+    await page.mouse.up();
+
+    await page.waitForTimeout(200);
+
+    // Annotation should still exist - click on it to verify it's selectable
+    await page.mouse.click(startX + 50, startY + 50);
+    await page.waitForTimeout(100);
+
+    // Should be able to select the annotation (proves it wasn't deleted)
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
   });
 
   test('should show resize cursor when hovering over handles', async ({

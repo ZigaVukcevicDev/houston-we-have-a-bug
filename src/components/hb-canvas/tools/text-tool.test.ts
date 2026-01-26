@@ -277,7 +277,7 @@ describe('TextTool', () => {
       });
     });
 
-    it('should not create annotation if text is empty', async () => {
+    it('should keep annotation with empty text after blur (allows resize)', async () => {
       textTool.handleMouseDown(
         { clientX: 100, clientY: 100 } as MouseEvent,
         mockCanvas
@@ -297,7 +297,9 @@ describe('TextTool', () => {
 
       await new Promise((resolve) => setTimeout(resolve, 150));
 
-      expect(textTool['annotations']).toHaveLength(0);
+      // Annotation should remain (even with empty text) to allow resize operations
+      expect(textTool['annotations']).toHaveLength(1);
+      expect(textTool['annotations'][0].text).toBe('');
     });
 
     it('should trim whitespace from text', async () => {
@@ -500,7 +502,7 @@ describe('TextTool', () => {
       expect(getTextDiv()).toBeNull();
     });
 
-    it('should remove annotation when finalizing with empty text', () => {
+    it('should remove empty annotation only when creating a new text box', () => {
       textTool.handleMouseDown(
         { clientX: 100, clientY: 100 } as MouseEvent,
         mockCanvas
@@ -520,13 +522,13 @@ describe('TextTool', () => {
       const textDiv = getTextDiv()!;
       textDiv.textContent = ''; // Empty text
 
-      // Finalize by clicking outside
+      // Start creating a new text box - this should remove the empty annotation
       textTool.handleMouseDown(
         { clientX: 400, clientY: 400 } as MouseEvent,
         mockCanvas
       );
 
-      // Annotation should be removed since text is empty
+      // Empty annotation should be removed when creating new text box
       expect(textTool['annotations']).toHaveLength(0);
     });
 

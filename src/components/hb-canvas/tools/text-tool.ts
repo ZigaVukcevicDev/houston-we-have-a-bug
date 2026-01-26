@@ -43,7 +43,21 @@ export class TextTool implements Tool {
 
     // If there's an active text div, finalize it before starting a new box
     if (this.textDiv) {
+      const annotationId = this.textDiv.dataset.annotationId;
       this.finalizeTextDiv();
+
+      // Remove the previous annotation if it was empty (when creating new box)
+      if (annotationId) {
+        const annotation = this.annotations.find((a) => a.id === annotationId);
+        if (annotation && !annotation.text) {
+          const index = this.annotations.findIndex(
+            (a) => a.id === annotationId
+          );
+          if (index !== -1) {
+            this.annotations.splice(index, 1);
+          }
+        }
+      }
     }
 
     // Start drawing new text box
@@ -400,18 +414,9 @@ export class TextTool implements Tool {
       // Find and update the existing annotation
       const annotation = this.annotations.find((a) => a.id === annotationId);
       if (annotation) {
-        if (text) {
-          // Update the annotation with the entered text
-          annotation.text = text;
-        } else {
-          // Remove annotation if no text was entered
-          const index = this.annotations.findIndex(
-            (a) => a.id === annotationId
-          );
-          if (index !== -1) {
-            this.annotations.splice(index, 1);
-          }
-        }
+        // Update the annotation text (even if empty - user can delete with Escape/Delete)
+        // Don't remove empty annotations here as it interferes with resize operations
+        annotation.text = text;
       }
     }
 
