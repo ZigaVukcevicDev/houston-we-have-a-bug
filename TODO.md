@@ -146,7 +146,7 @@
 - [x] write e2e tests for crop tool
 - [x] write e2e tests for download and system info
 - [x] add license
-- [ ] align canvas to the right in test file
+- [x] align canvas to the center in test file
 
 ## Ongoing
 
