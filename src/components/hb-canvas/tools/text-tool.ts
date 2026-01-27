@@ -474,4 +474,46 @@ export class TextTool implements Tool {
   getEditingAnnotationId(): string | null {
     return this.textDiv?.dataset.annotationId || null;
   }
+
+  // Public method to start editing an existing annotation
+  startEditingAnnotation(annotationId: string, canvas: HTMLCanvasElement): void {
+    const annotation = this.annotations.find((a) => a.id === annotationId);
+    if (!annotation) return;
+
+    // If there's already an active text div, finalize it first
+    if (this.textDiv) {
+      this.finalizeTextDiv();
+    }
+
+    // Create the text div for this annotation
+    const box = {
+      x: annotation.x,
+      y: annotation.y,
+      width: annotation.width,
+      height: annotation.height,
+    };
+
+    this.createTextDiv(canvas, box);
+
+    if (this.textDiv) {
+      // Set the annotation ID so changes are saved back to the annotation
+      this.textDiv.dataset.annotationId = annotationId;
+
+      // Set the existing text content
+      this.textDiv.innerText = annotation.text || '';
+
+      // Enable pointer events for editing
+      this.textDiv.style.pointerEvents = 'auto';
+
+      // Move cursor to end of text
+      const range = document.createRange();
+      const selection = window.getSelection();
+      range.selectNodeContents(this.textDiv);
+      range.collapse(false);
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+    }
+
+    this.onRedraw();
+  }
 }

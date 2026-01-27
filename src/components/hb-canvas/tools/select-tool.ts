@@ -165,7 +165,22 @@ export class SelectTool implements Tool {
     // Check text annotations first (iterate backwards for most recent)
     for (let i = this.textAnnotations.length - 1; i >= 0; i--) {
       if (this.isPointOnTextBox(x, y, this.textAnnotations[i], canvas)) {
-        this.selectedAnnotationId = this.textAnnotations[i].id;
+        const clickedAnnotationId = this.textAnnotations[i].id;
+
+        // If clicking on an already-selected text annotation, enter edit mode
+        // (but only if not already editing this annotation)
+        if (
+          this.selectedAnnotationId === clickedAnnotationId &&
+          this.selectedAnnotationType === 'text' &&
+          this.textTool &&
+          !this.textTool.isTextEditingActive()
+        ) {
+          this.textTool.startEditingAnnotation(clickedAnnotationId, canvas);
+          return;
+        }
+
+        // Otherwise, just select it
+        this.selectedAnnotationId = clickedAnnotationId;
         this.selectedAnnotationType = 'text';
         this.onRedraw();
         return;
@@ -485,16 +500,8 @@ export class SelectTool implements Tool {
 
         // If hovering over selected text box body (not handle)
         if (this.isPointOnTextBox(x, y, selectedText, canvas)) {
-          // Check if text is being actively edited
-          if (
-            this.textTool?.isTextEditingActive() &&
-            this.textTool?.getEditingAnnotationId() === selectedText.id
-          ) {
-            // When editing text, show text cursor instead of move cursor
-            canvas.style.cursor = 'text';
-          } else {
-            canvas.style.cursor = 'move';
-          }
+          // Show text cursor to indicate clicking will enter edit mode
+          canvas.style.cursor = 'text';
           this.hoveredAnnotationId = null;
           this.onRedraw();
           return;

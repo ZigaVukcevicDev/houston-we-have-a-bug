@@ -2429,7 +2429,8 @@ describe('SelectTool', () => {
         mockCtx
       );
 
-      expect(mockCanvas.style.cursor).toBe('move');
+      // Text cursor indicates clicking will enter edit mode
+      expect(mockCanvas.style.cursor).toBe('text');
     });
 
     it('should set text cursor when hovering over selected text box while editing', () => {
@@ -2515,7 +2516,8 @@ describe('SelectTool', () => {
         mockCtx
       );
 
-      expect(mockCanvas.style.cursor).toBe('move');
+      // Text cursor indicates clicking will enter edit mode
+      expect(mockCanvas.style.cursor).toBe('text');
     });
   });
 
@@ -2675,8 +2677,8 @@ describe('SelectTool', () => {
         mockCtx
       );
 
-      // Should default to move cursor when textTool is not provided
-      expect(mockCanvas.style.cursor).toBe('move');
+      // Text cursor indicates clicking will enter edit mode
+      expect(mockCanvas.style.cursor).toBe('text');
     });
   });
 

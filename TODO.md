@@ -123,7 +123,8 @@
 - [x] text tool - changing textarea to editable div
 - [x] text tool - when I draw text area and click outside, the text jumps up
 - [x] text tool - less padding space in editable div, 5px
-- [ ] text tool - double click to edit
+- [x] text tool - it should be moveable (upon hover and clicking/dragging over border)
+- [x] text tool - it should show text cursor when hovering over rect, when clicking it should be editable
 - [x] text tool - increase font size to 15px
 - [x] text tool - darkenColor is not applied when writing text, also cursor
 - [x] text tool - fix text not to be scrollable when not fitting vertically (it works ok when clicking outside)

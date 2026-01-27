@@ -312,7 +312,7 @@ test.describe('Text tool', () => {
     expect(cursor).toBe('nesw-resize');
   });
 
-  test('should show move cursor when hovering over text box border', async ({
+  test('should show text cursor when hovering over selected text box', async ({
     page,
   }) => {
     // Select text tool
@@ -345,7 +345,7 @@ test.describe('Text tool', () => {
     await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
     await expect(textDiv).not.toBeVisible();
 
-    // Now click on the text annotation to select it (but not edit it)
+    // Now click on the text annotation to select it
     await page.mouse.click(startX + 50, startY + 50);
 
     // Wait for canvas to update
@@ -358,14 +358,14 @@ test.describe('Text tool', () => {
       return canvas && window.getComputedStyle(canvas).cursor !== 'crosshair';
     });
 
-    // Hover over left border (not on handle) - should show move cursor when NOT editing
+    // Hover over the text box body - should show text cursor (click will enter edit mode)
     const midY = (startY + endY) / 2;
     await page.mouse.move(startX, midY);
     await page.waitForTimeout(50);
     const cursor = await canvas.evaluate(
       (el) => window.getComputedStyle(el).cursor
     );
-    expect(cursor).toBe('move');
+    expect(cursor).toBe('text');
   });
 
   test('should show text cursor when hovering over text box while editing', async ({
@@ -2546,5 +2546,285 @@ test.describe('Text tool', () => {
     );
 
     expect(hasBorder).toBe(true);
+  });
+
+  test('should move text annotation by dragging from the border', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    // Create text annotation
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+    await textDiv.evaluate((el) => (el.textContent = 'Drag from border'));
+
+    // Click outside to finalize
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await expect(textDiv).not.toBeVisible();
+
+    // Select the annotation by clicking on it
+    await page.mouse.click(startX + 50, startY + 50);
+    await page.waitForTimeout(100);
+
+    // Verify it's selected
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+
+    // Wait for cursor to update
+    await page.waitForFunction(() => {
+      const hbAnnotation = document.querySelector('hb-annotation');
+      if (!hbAnnotation || !hbAnnotation.shadowRoot) return false;
+      const hbCanvas = hbAnnotation.shadowRoot.querySelector('hb-canvas');
+      if (!hbCanvas || !hbCanvas.shadowRoot) return false;
+      const canvas = hbCanvas.shadowRoot.querySelector('canvas');
+      return canvas && window.getComputedStyle(canvas).cursor !== 'crosshair';
+    });
+
+    // Move to left border (not on corner handle) and verify text cursor
+    // (text cursor indicates clickability for edit mode, but dragging still moves)
+    const midY = (startY + endY) / 2;
+    await page.mouse.move(startX, midY);
+    await page.waitForTimeout(50);
+
+    let cursor = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).cursor
+    );
+    expect(cursor).toBe('text');
+
+    // Drag from the left border to move the annotation
+    await page.mouse.down();
+    await page.mouse.move(startX + 100, midY + 50);
+    await page.mouse.up();
+
+    await page.waitForTimeout(100);
+
+    // Verify annotation moved - click on new position
+    await page.mouse.click(startX + 150, midY + 50);
+    await page.waitForTimeout(100);
+
+    // Should still be able to select it at the new position
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+
+    // Verify old position is empty - click should deselect
+    await page.mouse.click(startX + 50, startY + 50);
+    await page.waitForTimeout(100);
+
+    // Click on empty area deselects but select tool remains active
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should move text annotation by dragging from top border', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    // Create text annotation
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+    await textDiv.evaluate((el) => (el.textContent = 'Drag from top border'));
+
+    // Click outside to finalize
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await expect(textDiv).not.toBeVisible();
+
+    // Select the annotation
+    await page.mouse.click(startX + 50, startY + 50);
+    await page.waitForTimeout(100);
+
+    // Move to top border (middle of top edge, not on corner handles)
+    const midX = (startX + endX) / 2;
+    await page.mouse.move(midX, startY);
+    await page.waitForTimeout(50);
+
+    // Drag from top border to move annotation down
+    await page.mouse.down();
+    await page.mouse.move(midX, startY + 80);
+    await page.mouse.up();
+
+    await page.waitForTimeout(100);
+
+    // Verify annotation moved - should be selectable at new position
+    await page.mouse.click(midX, startY + 130);
+    await page.waitForTimeout(100);
+
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
+  test('should show text cursor when hovering over text annotation interior and clicking makes it editable', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    // Create text annotation
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    // Initially after creation, the textDiv is visible and we're in edit mode
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+    await expect(textDiv).toBeFocused();
+
+    // Type initial text
+    await textDiv.evaluate((el) => (el.textContent = 'Click me to edit'));
+
+    // Click outside to finalize
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await expect(textDiv).not.toBeVisible();
+
+    // Now we have an existing text annotation that is not being edited
+    // Click on the annotation to select it
+    const midX = (startX + endX) / 2;
+    const midY = (startY + endY) / 2;
+    await page.mouse.click(midX, midY);
+    await page.waitForTimeout(100);
+
+    // Verify annotation is selected
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+
+    // Wait for cursor to update
+    await page.waitForFunction(() => {
+      const hbAnnotation = document.querySelector('hb-annotation');
+      if (!hbAnnotation || !hbAnnotation.shadowRoot) return false;
+      const hbCanvas = hbAnnotation.shadowRoot.querySelector('hb-canvas');
+      if (!hbCanvas || !hbCanvas.shadowRoot) return false;
+      const canvas = hbCanvas.shadowRoot.querySelector('canvas');
+      return canvas && window.getComputedStyle(canvas).cursor !== 'crosshair';
+    });
+
+    // Hover over the interior of the selected text box - should show text cursor
+    await page.mouse.move(midX, midY);
+    await page.waitForTimeout(50);
+
+    let cursor = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).cursor
+    );
+    expect(cursor).toBe('text');
+
+    // Click on the text annotation again to enter edit mode
+    await page.mouse.click(midX, midY);
+    await page.waitForTimeout(100);
+
+    // Should now show the contenteditable div for editing
+    const editableDiv = page.locator('div[contenteditable="true"]');
+    await expect(editableDiv).toBeVisible();
+    await expect(editableDiv).toBeFocused();
+
+    // Cursor should still be text while editing
+    await page.mouse.move(midX + 10, midY + 10);
+    await page.waitForTimeout(50);
+
+    cursor = await canvas.evaluate((el) => window.getComputedStyle(el).cursor);
+    expect(cursor).toBe('text');
+  });
+
+  test('should allow editing existing text annotation by clicking on it', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    // Create text annotation
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+
+    // Type initial text
+    await page.keyboard.type('Original text');
+
+    // Click outside to finalize
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await expect(textDiv).not.toBeVisible();
+
+    // Click on the annotation to select and potentially edit it
+    const midX = (startX + endX) / 2;
+    const midY = (startY + endY) / 2;
+    await page.mouse.click(midX, midY);
+    await page.waitForTimeout(100);
+
+    // Click again to enter edit mode (first click selects, second click edits)
+    await page.mouse.click(midX, midY);
+    await page.waitForTimeout(100);
+
+    // Contenteditable should be visible and editable
+    const editableDiv = page.locator('div[contenteditable="true"]');
+    await expect(editableDiv).toBeVisible();
+
+    // Verify we can continue editing by appending text
+    await page.keyboard.type(' - modified');
+
+    // Check the text content
+    const textContent = await editableDiv.textContent();
+    expect(textContent).toContain('Original text');
+
+    // Finalize by clicking outside
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await expect(editableDiv).not.toBeVisible();
+
+    // Verify the annotation still exists with updated text
+    await page.mouse.click(midX, midY);
+    await page.waitForTimeout(100);
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
   });
 });
