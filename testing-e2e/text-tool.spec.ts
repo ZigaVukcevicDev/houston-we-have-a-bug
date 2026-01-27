@@ -2827,4 +2827,124 @@ test.describe('Text tool', () => {
       page.locator('[data-tool="select"][aria-selected="true"]')
     ).toBeVisible();
   });
+
+  test('should not render text on canvas while editing (avoid double rendering)', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    // Create text annotation
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+
+    // Type distinctive text
+    await page.keyboard.type('UNIQUE_TEST_TEXT');
+
+    // Click outside to finalize - text should now be rendered on canvas
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await expect(textDiv).not.toBeVisible();
+
+    // Get canvas pixel data where text is rendered (should have text pixels)
+    const hasTextOnCanvas = await page.evaluate(
+      ({ x, y }) => {
+        const hbAnnotation = document.querySelector('hb-annotation');
+        if (!hbAnnotation || !hbAnnotation.shadowRoot) return false;
+        const hbCanvas = hbAnnotation.shadowRoot.querySelector('hb-canvas');
+        if (!hbCanvas || !hbCanvas.shadowRoot) return false;
+        const canvasEl = hbCanvas.shadowRoot.querySelector('canvas');
+        if (!canvasEl) return false;
+        const ctx = canvasEl.getContext('2d');
+        if (!ctx) return false;
+
+        // Sample a small area where text should be rendered
+        const dpr = window.devicePixelRatio || 1;
+        const sampleX = Math.floor((x + 10) * dpr);
+        const sampleY = Math.floor((y + 20) * dpr);
+        const imageData = ctx.getImageData(sampleX, sampleY, 50, 30);
+
+        // Check if there are any non-background pixels (text is red #E74C3C)
+        for (let i = 0; i < imageData.data.length; i += 4) {
+          const r = imageData.data[i];
+          const g = imageData.data[i + 1];
+          const b = imageData.data[i + 2];
+          // Check for red text color
+          if (r > 200 && g < 100 && b < 100) {
+            return true;
+          }
+        }
+        return false;
+      },
+      { x: 100, y: 100 }
+    );
+
+    // Text should be on canvas when not editing
+    expect(hasTextOnCanvas).toBe(true);
+
+    // Now click to select and edit
+    const midX = (startX + endX) / 2;
+    const midY = (startY + endY) / 2;
+    await page.mouse.click(midX, midY);
+    await page.waitForTimeout(100);
+
+    // Click again to enter edit mode
+    await page.mouse.click(midX, midY);
+    await page.waitForTimeout(100);
+
+    // Should now show the contenteditable div
+    const editableDiv = page.locator('div[contenteditable="true"]');
+    await expect(editableDiv).toBeVisible();
+
+    // Check that text is NOT rendered on canvas while editing (to avoid double rendering)
+    const hasTextOnCanvasWhileEditing = await page.evaluate(
+      ({ x, y }) => {
+        const hbAnnotation = document.querySelector('hb-annotation');
+        if (!hbAnnotation || !hbAnnotation.shadowRoot) return false;
+        const hbCanvas = hbAnnotation.shadowRoot.querySelector('hb-canvas');
+        if (!hbCanvas || !hbCanvas.shadowRoot) return false;
+        const canvasEl = hbCanvas.shadowRoot.querySelector('canvas');
+        if (!canvasEl) return false;
+        const ctx = canvasEl.getContext('2d');
+        if (!ctx) return false;
+
+        // Sample the same area
+        const dpr = window.devicePixelRatio || 1;
+        const sampleX = Math.floor((x + 10) * dpr);
+        const sampleY = Math.floor((y + 20) * dpr);
+        const imageData = ctx.getImageData(sampleX, sampleY, 50, 30);
+
+        // Check if there are any red text pixels
+        for (let i = 0; i < imageData.data.length; i += 4) {
+          const r = imageData.data[i];
+          const g = imageData.data[i + 1];
+          const b = imageData.data[i + 2];
+          if (r > 200 && g < 100 && b < 100) {
+            return true;
+          }
+        }
+        return false;
+      },
+      { x: 100, y: 100 }
+    );
+
+    // Text should NOT be on canvas while editing (it's shown in contenteditable div only)
+    expect(hasTextOnCanvasWhileEditing).toBe(false);
+
+    // Verify the text is in the contenteditable div
+    const divText = await editableDiv.textContent();
+    expect(divText).toBe('UNIQUE_TEST_TEXT');
+  });
 });

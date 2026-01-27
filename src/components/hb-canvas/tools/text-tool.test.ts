@@ -441,6 +441,115 @@ describe('TextTool', () => {
       expect(mockCtx.fillText).toHaveBeenCalled();
     });
 
+    it('should skip rendering annotation that is currently being edited (avoid double rendering)', () => {
+      // Create annotation
+      textTool['annotations'] = [
+        {
+          id: 'editing-annotation',
+          x: 50,
+          y: 50,
+          width: 200,
+          height: 100,
+          text: 'Existing text',
+          color: '#E74C3C',
+          fontSize: 15,
+        },
+      ];
+
+      // Start editing the annotation
+      textTool.startEditingAnnotation('editing-annotation', mockCanvas);
+
+      // Verify textDiv is active and has the annotation ID
+      expect(textTool.isTextEditingActive()).toBe(true);
+      expect(textTool.getEditingAnnotationId()).toBe('editing-annotation');
+
+      // Clear mock and render
+      (mockCtx.fillText as Mock).mockClear();
+      textTool.render(mockCtx);
+
+      // fillText should NOT be called because the annotation is being edited
+      expect(mockCtx.fillText).not.toHaveBeenCalled();
+    });
+
+    it('should render other annotations while one is being edited', () => {
+      // Create multiple annotations
+      textTool['annotations'] = [
+        {
+          id: 'annotation-1',
+          x: 50,
+          y: 50,
+          width: 200,
+          height: 100,
+          text: 'First annotation',
+          color: '#E74C3C',
+          fontSize: 15,
+        },
+        {
+          id: 'annotation-2',
+          x: 300,
+          y: 50,
+          width: 200,
+          height: 100,
+          text: 'Second annotation',
+          color: '#E74C3C',
+          fontSize: 15,
+        },
+      ];
+
+      // Start editing the first annotation
+      textTool.startEditingAnnotation('annotation-1', mockCanvas);
+
+      // Clear mock and render
+      (mockCtx.fillText as Mock).mockClear();
+      textTool.render(mockCtx);
+
+      // fillText should be called for the second annotation only
+      expect(mockCtx.fillText).toHaveBeenCalled();
+      // The second annotation text should be rendered
+      const fillTextCalls = (mockCtx.fillText as Mock).mock.calls;
+      expect(fillTextCalls.length).toBeGreaterThan(0);
+    });
+
+    it('should render all annotations when none are being edited', () => {
+      // Create multiple annotations
+      textTool['annotations'] = [
+        {
+          id: 'annotation-1',
+          x: 50,
+          y: 50,
+          width: 200,
+          height: 100,
+          text: 'First',
+          color: '#E74C3C',
+          fontSize: 15,
+        },
+        {
+          id: 'annotation-2',
+          x: 300,
+          y: 50,
+          width: 200,
+          height: 100,
+          text: 'Second',
+          color: '#E74C3C',
+          fontSize: 15,
+        },
+      ];
+
+      // No textDiv active
+      expect(textTool.isTextEditingActive()).toBe(false);
+      expect(textTool.getEditingAnnotationId()).toBeNull();
+
+      // Clear mock and render
+      (mockCtx.fillText as Mock).mockClear();
+      textTool.render(mockCtx);
+
+      // Both annotations should be rendered
+      expect(mockCtx.fillText).toHaveBeenCalled();
+      const fillTextCalls = (mockCtx.fillText as Mock).mock.calls;
+      // Each annotation text should have at least one fillText call
+      expect(fillTextCalls.length).toBeGreaterThanOrEqual(2);
+    });
+
     it('should render text with wrapping', () => {
       textTool['annotations'] = [
         {

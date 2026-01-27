@@ -157,8 +157,11 @@ export class TextTool implements Tool {
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
 
-    // Render saved annotations
+    // Render saved annotations (skip the one being edited to avoid double rendering)
+    const editingId = this.getEditingAnnotationId();
     this.annotations.forEach((annotation) => {
+      // Skip rendering text for the annotation being edited (textDiv shows it instead)
+      if (annotation.id === editingId) return;
       this.renderTextBox(ctx, annotation, scaleX, scaleY);
     });
 
