@@ -280,14 +280,10 @@ export class TextTool implements Tool {
               charLine = testChar;
             }
 
-            if (charLine) {
-              allLines.push(charLine);
-              remainingWord = remainingWord.slice(charLine.length);
-            } else {
-              // Single character exceeds width, push it anyway
-              allLines.push(remainingWord[0]);
-              remainingWord = remainingWord.slice(1);
-            }
+            // charLine always has at least the first character because the
+            // break condition above requires charLine to be non-empty
+            allLines.push(charLine);
+            remainingWord = remainingWord.slice(charLine.length);
           }
         } else {
           // Word fits, try to add it to current line
@@ -408,7 +404,8 @@ export class TextTool implements Tool {
     if (!this.textDiv) return;
 
     const annotationId = this.textDiv.dataset.annotationId;
-    const text = this.textDiv.textContent?.trim() || '';
+    // Use innerText to preserve newlines from Enter key presses
+    const text = this.textDiv.innerText?.trim() || '';
 
     if (annotationId) {
       // Find and update the existing annotation

@@ -164,7 +164,7 @@ export class SelectTool implements Tool {
 
     // Check text annotations first (iterate backwards for most recent)
     for (let i = this.textAnnotations.length - 1; i >= 0; i--) {
-      if (this.isPointOnTextBox(x, y, this.textAnnotations[i])) {
+      if (this.isPointOnTextBox(x, y, this.textAnnotations[i], canvas)) {
         this.selectedAnnotationId = this.textAnnotations[i].id;
         this.selectedAnnotationType = 'text';
         this.onRedraw();
@@ -315,7 +315,7 @@ export class SelectTool implements Tool {
         }
 
         // Check if clicking on the text box border (to drag entire text box)
-        if (this.isPointOnTextBox(x, y, textBox)) {
+        if (this.isPointOnTextBox(x, y, textBox, canvas)) {
           this.draggingLine = true; // Reusing draggingLine flag for text box dragging
           this.dragOffset = { x, y };
           return;
@@ -484,7 +484,7 @@ export class SelectTool implements Tool {
         }
 
         // If hovering over selected text box body (not handle)
-        if (this.isPointOnTextBox(x, y, selectedText)) {
+        if (this.isPointOnTextBox(x, y, selectedText, canvas)) {
           // Check if text is being actively edited
           if (
             this.textTool?.isTextEditingActive() &&
@@ -530,7 +530,7 @@ export class SelectTool implements Tool {
 
       // Check if hovering over any text box (iterate backwards for most recent)
       for (let i = this.textAnnotations.length - 1; i >= 0; i--) {
-        if (this.isPointOnTextBox(x, y, this.textAnnotations[i])) {
+        if (this.isPointOnTextBox(x, y, this.textAnnotations[i], canvas)) {
           canvas.style.cursor = 'pointer';
           if (this.hoveredAnnotationId !== this.textAnnotations[i].id) {
             this.hoveredAnnotationId = this.textAnnotations[i].id;
@@ -963,12 +963,131 @@ export class SelectTool implements Tool {
   private isPointOnTextBox(
     px: number,
     py: number,
-    textBox: TextAnnotation
+    textBox: TextAnnotation,
+    canvas?: HTMLCanvasElement
   ): boolean {
-    const { x, y, width, height } = textBox;
+    const { x, y, width, height, text, fontSize } = textBox;
 
     // For text boxes, detect hover anywhere inside the box (not just on the border)
     // This allows the border to appear when hovering over text content
-    return px >= x && px <= x + width && py >= y && py <= y + height;
+    const inBoxWidth = px >= x && px <= x + width;
+    const inBoxHeight = py >= y && py <= y + height;
+
+    // Quick check for box area
+    if (inBoxWidth && inBoxHeight) {
+      return true;
+    }
+
+    // Check for overflow text area (only if we have canvas and text)
+    if (canvas && text && inBoxWidth) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        // Set up font for measuring (match text-tool.ts rendering)
+        ctx.save();
+        ctx.font = `500 ${fontSize * scaleX}px Inter`;
+
+        // Calculate text area dimensions
+        const borderWidthX = 2 * scaleX;
+        const borderOffsetX = borderWidthX / 2;
+        const textPaddingX = 5 * scaleX;
+        const textStartOffsetX = borderOffsetX + textPaddingX;
+        const maxWidth = width - textStartOffsetX * 2;
+
+        // Count actual rendered lines (including word wrap)
+        const lineCount = this.countTextLines(ctx, text, maxWidth);
+
+        ctx.restore();
+
+        // Calculate actual text height using line count
+        const cssLineHeight = fontSize * 1.2;
+        const lineHeightCanvas = cssLineHeight * scaleY;
+        const borderWidthY = 2 * scaleY;
+        const borderOffsetY = borderWidthY / 2;
+        const textPaddingY = 5 * scaleY;
+        const textStartOffsetY = borderOffsetY + textPaddingY;
+
+        // Total rendered text height
+        const actualTextHeight =
+          textStartOffsetY * 2 + lineCount * lineHeightCanvas;
+
+        // Check if point is in the overflow area
+        if (py >= y && py <= y + actualTextHeight) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  // Count the number of rendered lines (including word wrap)
+  // Mirrors the wrapText logic from text-tool.ts
+  private countTextLines(
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    maxWidth: number
+  ): number {
+    const paragraphs = text.split('\n');
+    let lineCount = 0;
+
+    paragraphs.forEach((paragraph) => {
+      if (paragraph === '') {
+        lineCount++; // Empty line
+        return;
+      }
+
+      const words = paragraph.split(' ');
+      let currentLine = '';
+
+      words.forEach((word) => {
+        const wordMetrics = ctx.measureText(word);
+
+        if (wordMetrics.width > maxWidth) {
+          // Word is too long, will be broken
+          if (currentLine) {
+            lineCount++;
+            currentLine = '';
+          }
+
+          // Count lines for character-by-character breaking
+          let remainingWord = word;
+          while (remainingWord) {
+            let charLine = '';
+            for (let i = 0; i < remainingWord.length; i++) {
+              const testChar = charLine + remainingWord[i];
+              const charMetrics = ctx.measureText(testChar);
+              if (charMetrics.width > maxWidth && charLine) {
+                break;
+              }
+              charLine = testChar;
+            }
+            // charLine always has at least the first character because the
+            // break condition above requires charLine to be non-empty
+            lineCount++;
+            remainingWord = remainingWord.slice(charLine.length);
+          }
+        } else {
+          const testLine = currentLine ? `${currentLine} ${word}` : word;
+          const metrics = ctx.measureText(testLine);
+
+          if (metrics.width > maxWidth && currentLine) {
+            lineCount++;
+            currentLine = word;
+          } else {
+            currentLine = testLine;
+          }
+        }
+      });
+
+      if (currentLine) {
+        lineCount++;
+      }
+    });
+
+    return lineCount > 0 ? lineCount : 1;
   }
 }

@@ -2679,4 +2679,164 @@ describe('SelectTool', () => {
       expect(mockCanvas.style.cursor).toBe('move');
     });
   });
+
+  describe('text overflow hover detection', () => {
+    let textAnnotations: TextAnnotation[];
+    let mockCanvasWithContext: HTMLCanvasElement;
+    let mockMeasureText: Mock;
+
+    beforeEach(() => {
+      // Text with multiple lines that will overflow
+      textAnnotations = [
+        {
+          id: 'text-overflow',
+          x: 100,
+          y: 100,
+          width: 200,
+          height: 60, // Small height to cause overflow
+          text: 'Line 1\nLine 2\nLine 3\nLine 4\nLine 5\nLine 6\nLine 7',
+          color: '#E74C3C',
+          fontSize: 15,
+        },
+      ];
+
+      mockMeasureText = vi.fn().mockReturnValue({ width: 50 });
+
+      // Create canvas mock with getContext that returns a working context
+      mockCanvasWithContext = {
+        getBoundingClientRect: vi.fn().mockReturnValue({
+          left: 0,
+          top: 0,
+          width: 800,
+          height: 600,
+        }),
+        width: 800,
+        height: 600,
+        style: {
+          cursor: 'default',
+        },
+        getContext: vi.fn().mockReturnValue({
+          save: vi.fn(),
+          restore: vi.fn(),
+          font: '',
+          measureText: mockMeasureText,
+        }),
+      } as unknown as HTMLCanvasElement;
+
+      selectTool.deactivate();
+      selectTool = new SelectTool(
+        [],
+        [],
+        [],
+        textAnnotations,
+        mockRedraw
+      );
+      selectTool.activate();
+    });
+
+    it('should detect hover inside the text box', () => {
+      // Hover inside the box (y=130 is within height of 60)
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 130 } as MouseEvent,
+        mockCanvasWithContext,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBe('text-overflow');
+      expect(mockCanvasWithContext.style.cursor).toBe('pointer');
+    });
+
+    it('should detect hover in overflow area below the text box', () => {
+      // Hover below the box (y=100+60=160, so y=200 is in overflow area)
+      // With 7 lines at 15*1.2=18px each = 126px, plus padding
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 200 } as MouseEvent,
+        mockCanvasWithContext,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBe('text-overflow');
+      expect(mockCanvasWithContext.style.cursor).toBe('pointer');
+    });
+
+    it('should not detect hover outside the text width', () => {
+      // Hover outside the box width (x=100+200=300, so x=350 is outside)
+      selectTool.handleMouseMove(
+        { clientX: 350, clientY: 200 } as MouseEvent,
+        mockCanvasWithContext,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBeNull();
+    });
+
+    it('should not detect hover far below the overflow area', () => {
+      // Hover way below the overflow area (y=500 is too far)
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 500 } as MouseEvent,
+        mockCanvasWithContext,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBeNull();
+    });
+
+    it('should select text annotation when clicking in overflow area', () => {
+      // Click in the overflow area
+      selectTool.handleClick(
+        { clientX: 150, clientY: 200 } as MouseEvent,
+        mockCanvasWithContext
+      );
+
+      expect(selectTool['selectedAnnotationId']).toBe('text-overflow');
+      expect(selectTool['selectedAnnotationType']).toBe('text');
+    });
+
+    it('should handle text with word wrap overflow', () => {
+      // Text without newlines but long enough to wrap
+      textAnnotations[0].text = 'This is a long text that will wrap to multiple lines';
+      textAnnotations[0].width = 100; // Narrow width to force wrapping
+
+      // Mock measureText to return width that forces wrapping
+      // With 8px per char and maxWidth ~88px (100 - padding), text wraps to ~6 lines
+      // actualTextHeight = 12 + 6 * 18 = 120, so max y = 100 + 120 = 220
+      mockMeasureText.mockImplementation((text: string) => ({
+        width: text.length * 8, // ~8px per character
+      }));
+
+      // Hover in overflow area (box ends at y=160, text extends to y=220)
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 200 } as MouseEvent,
+        mockCanvasWithContext,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBe('text-overflow');
+    });
+
+    it('should handle empty text annotation', () => {
+      textAnnotations[0].text = '';
+
+      // Hover below the box - should not detect since no text to overflow
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 200 } as MouseEvent,
+        mockCanvasWithContext,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBeNull();
+    });
+
+    it('should handle text with empty lines', () => {
+      textAnnotations[0].text = 'Line 1\n\nLine 3\n\nLine 5';
+
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 200 } as MouseEvent,
+        mockCanvasWithContext,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBe('text-overflow');
+    });
+  });
 });

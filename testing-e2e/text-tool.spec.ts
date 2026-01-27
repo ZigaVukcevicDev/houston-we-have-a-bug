@@ -2227,4 +2227,324 @@ test.describe('Text tool', () => {
     // Clean up
     await page.keyboard.press('Escape');
   });
+
+  test('should show border when hovering over overflown text with newlines', async ({
+    page,
+  }) => {
+    // Click text tool
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    // Draw a text box with limited height (60px - minimum)
+    const boxHeight = 60;
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 100 + boxHeight;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    // Wait for contenteditable to appear
+    await page.waitForSelector('[contenteditable="true"]');
+    const editableDiv = page.locator('[contenteditable="true"]');
+
+    // Type text that will overflow beyond the box height (matching existing overflow test pattern)
+    await editableDiv.type('a');
+    await editableDiv.press('Enter');
+    await editableDiv.type('b');
+    await editableDiv.press('Enter');
+    await editableDiv.type('c');
+    await editableDiv.press('Enter');
+    await editableDiv.type('d');
+    await editableDiv.press('Enter');
+    await editableDiv.type('e');
+    await editableDiv.press('Enter');
+    await editableDiv.type('f');
+    await editableDiv.press('Enter');
+    await editableDiv.type('g');
+
+    // Click outside to finalize
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await page.waitForTimeout(100);
+
+    // Verify we're in select mode after clicking outside
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+
+    // Wait for canvas cursor to not be crosshair (select mode)
+    await page.waitForFunction(() => {
+      const hbAnnotation = document.querySelector('hb-annotation');
+      if (!hbAnnotation || !hbAnnotation.shadowRoot) return false;
+      const hbCanvas = hbAnnotation.shadowRoot.querySelector('hb-canvas');
+      if (!hbCanvas || !hbCanvas.shadowRoot) return false;
+      const canvas = hbCanvas.shadowRoot.querySelector('canvas');
+      return canvas && window.getComputedStyle(canvas).cursor !== 'crosshair';
+    });
+
+    // Click on empty area to ensure deselection
+    await page.mouse.click(canvasBox.x + 450, canvasBox.y + 450);
+    await page.waitForTimeout(100);
+
+    // Verify text overflows beyond the box (same method as existing overflow test)
+    const hasOverflowText = await canvas.evaluate((canvasEl) => {
+      if (!(canvasEl instanceof HTMLCanvasElement)) return false;
+      const ctx = canvasEl.getContext('2d');
+      if (!ctx) return false;
+
+      const imageData = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
+      const data = imageData.data;
+      const rect = canvasEl.getBoundingClientRect();
+      const scaleX = canvasEl.width / rect.width;
+      const scaleY = canvasEl.height / rect.height;
+
+      // Check for red text pixels in extended area (including beyond box)
+      // Box is at y=100, height=60, so ends at y=160. Search beyond that.
+      const searchStartX = Math.floor(105 * scaleX);
+      const searchEndX = Math.floor(295 * scaleX);
+      const searchStartY = Math.floor(105 * scaleY);
+      const searchEndY = Math.floor(250 * scaleY); // Extended beyond box
+
+      let redPixelCount = 0;
+      for (let y = searchStartY; y < searchEndY; y++) {
+        for (let x = searchStartX; x < searchEndX; x++) {
+          const i = (y * canvasEl.width + x) * 4;
+          const red = data[i];
+          const green = data[i + 1];
+          const blue = data[i + 2];
+          const alpha = data[i + 3];
+
+          if (red > 180 && red > green && red > blue && alpha > 50) {
+            redPixelCount++;
+          }
+        }
+      }
+      return redPixelCount > 50;
+    });
+    expect(hasOverflowText).toBe(true);
+
+    // First verify basic hover inside the box works
+    const insideHoverX = startX + 100;
+    const insideHoverY = startY + 30; // Inside the 60px box
+    await page.mouse.move(insideHoverX, insideHoverY);
+    await page.waitForTimeout(150);
+
+    const cursorInside = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).cursor
+    );
+    expect(cursorInside).toBe('pointer');
+
+    // Now hover over the overflow area (below the box but on the text)
+    // Box ends at y=160 (100 + 60), so hover at y=180 (20px below box bottom)
+    const hoverX = startX + 100; // Middle of box width
+    const hoverY = startY + boxHeight + 20; // 20px below the box bottom
+    await page.mouse.move(hoverX, hoverY);
+    await page.waitForTimeout(150);
+
+    // Check that cursor changes to pointer (indicating hover is detected in overflow area)
+    const cursorAfter = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).cursor
+    );
+    expect(cursorAfter).toBe('pointer');
+
+    // Verify border is visible by checking for red border pixels at the top of the box
+    const hasBorder = await canvas.evaluate(
+      (canvasEl, { x, y }) => {
+        if (!(canvasEl instanceof HTMLCanvasElement)) return false;
+        const ctx = canvasEl.getContext('2d');
+        if (!ctx) return false;
+
+        const rect = canvasEl.getBoundingClientRect();
+        const scaleX = canvasEl.width / rect.width;
+        const scaleY = canvasEl.height / rect.height;
+
+        const borderX = Math.floor((x - rect.x) * scaleX);
+        const borderY = Math.floor((y - rect.y) * scaleY);
+
+        // Sample around the border position
+        const sampleSize = 5;
+        for (let dy = -sampleSize; dy <= sampleSize; dy++) {
+          for (let dx = -sampleSize; dx <= sampleSize; dx++) {
+            const px = borderX + dx;
+            const py = borderY + dy;
+            if (px >= 0 && px < canvasEl.width && py >= 0 && py < canvasEl.height) {
+              const imageData = ctx.getImageData(px, py, 1, 1);
+              const red = imageData.data[0];
+              const green = imageData.data[1];
+              const blue = imageData.data[2];
+              // Check for red border color
+              if (red > 200 && green < 100 && blue < 100) {
+                return true;
+              }
+            }
+          }
+        }
+        return false;
+      },
+      { x: startX, y: startY + 30 }
+    );
+
+    expect(hasBorder).toBe(true);
+  });
+
+  test('should show border when hovering over overflown text with word wrap', async ({
+    page,
+  }) => {
+    // Click text tool
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    // Draw a narrow text box with limited height to force word wrapping
+    const boxWidth = 100; // Narrow width to force wrapping
+    const boxHeight = 60; // Minimum height
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 100 + boxWidth;
+    const endY = canvasBox.y + 100 + boxHeight;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    // Wait for contenteditable to appear
+    await page.waitForSelector('[contenteditable="true"]');
+    const editableDiv = page.locator('[contenteditable="true"]');
+
+    // Type a long text that will wrap multiple times without explicit newlines
+    // This text should wrap to many lines in a 100px wide box
+    await editableDiv.type(
+      'This is a long paragraph of text that will wrap to multiple lines because the box is narrow'
+    );
+
+    // Click outside to finalize
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await page.waitForTimeout(100);
+
+    // Verify we're in select mode after clicking outside
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+
+    // Wait for canvas cursor to not be crosshair (select mode)
+    await page.waitForFunction(() => {
+      const hbAnnotation = document.querySelector('hb-annotation');
+      if (!hbAnnotation || !hbAnnotation.shadowRoot) return false;
+      const hbCanvas = hbAnnotation.shadowRoot.querySelector('hb-canvas');
+      if (!hbCanvas || !hbCanvas.shadowRoot) return false;
+      const canvas = hbCanvas.shadowRoot.querySelector('canvas');
+      return canvas && window.getComputedStyle(canvas).cursor !== 'crosshair';
+    });
+
+    // Click on empty area to ensure deselection
+    await page.mouse.click(canvasBox.x + 450, canvasBox.y + 450);
+    await page.waitForTimeout(100);
+
+    // Verify text overflows by checking for red pixels in the extended area
+    const hasOverflowText = await canvas.evaluate((canvasEl) => {
+      if (!(canvasEl instanceof HTMLCanvasElement)) return false;
+      const ctx = canvasEl.getContext('2d');
+      if (!ctx) return false;
+
+      const imageData = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
+      const data = imageData.data;
+      const rect = canvasEl.getBoundingClientRect();
+      const scaleX = canvasEl.width / rect.width;
+      const scaleY = canvasEl.height / rect.height;
+
+      // Box is at y=100, height=60, so ends at y=160. Search beyond that for overflow.
+      const searchStartX = Math.floor(105 * scaleX);
+      const searchEndX = Math.floor(195 * scaleX); // box is 100px wide
+      const searchStartY = Math.floor(165 * scaleY); // Just below box bottom
+      const searchEndY = Math.floor(250 * scaleY);
+
+      let redPixelCount = 0;
+      for (let y = searchStartY; y < searchEndY; y++) {
+        for (let x = searchStartX; x < searchEndX; x++) {
+          const i = (y * canvasEl.width + x) * 4;
+          const red = data[i];
+          const green = data[i + 1];
+          const blue = data[i + 2];
+          const alpha = data[i + 3];
+
+          if (red > 180 && red > green && red > blue && alpha > 50) {
+            redPixelCount++;
+          }
+        }
+      }
+      return redPixelCount > 20;
+    });
+    expect(hasOverflowText).toBe(true);
+
+    // Hover inside the box first to verify basic hover works
+    const insideHoverX = startX + 50;
+    const insideHoverY = startY + 30;
+    await page.mouse.move(insideHoverX, insideHoverY);
+    await page.waitForTimeout(150);
+
+    const cursorInside = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).cursor
+    );
+    expect(cursorInside).toBe('pointer');
+
+    // Now hover over the overflow area (below the box but on wrapped text)
+    const hoverX = startX + 50; // Middle of box width
+    const hoverY = startY + boxHeight + 30; // 30px below the box bottom
+    await page.mouse.move(hoverX, hoverY);
+    await page.waitForTimeout(150);
+
+    // Check that cursor changes to pointer (indicating hover is detected in overflow area)
+    const cursorAfter = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).cursor
+    );
+    expect(cursorAfter).toBe('pointer');
+
+    // Verify border is visible by checking for red border pixels at the top of the box
+    const hasBorder = await canvas.evaluate(
+      (canvasEl, { x, y }) => {
+        if (!(canvasEl instanceof HTMLCanvasElement)) return false;
+        const ctx = canvasEl.getContext('2d');
+        if (!ctx) return false;
+
+        const rect = canvasEl.getBoundingClientRect();
+        const scaleX = canvasEl.width / rect.width;
+        const scaleY = canvasEl.height / rect.height;
+
+        const borderX = Math.floor((x - rect.x) * scaleX);
+        const borderY = Math.floor((y - rect.y) * scaleY);
+
+        // Sample around the border position
+        const sampleSize = 5;
+        for (let dy = -sampleSize; dy <= sampleSize; dy++) {
+          for (let dx = -sampleSize; dx <= sampleSize; dx++) {
+            const px = borderX + dx;
+            const py = borderY + dy;
+            if (px >= 0 && px < canvasEl.width && py >= 0 && py < canvasEl.height) {
+              const imageData = ctx.getImageData(px, py, 1, 1);
+              const red = imageData.data[0];
+              const green = imageData.data[1];
+              const blue = imageData.data[2];
+              // Check for red border color
+              if (red > 200 && green < 100 && blue < 100) {
+                return true;
+              }
+            }
+          }
+        }
+        return false;
+      },
+      { x: startX, y: startY + 30 }
+    );
+
+    expect(hasBorder).toBe(true);
+  });
 });
