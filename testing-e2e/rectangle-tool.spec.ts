@@ -323,6 +323,49 @@ test.describe('Rectangle tool', () => {
     expect(cursor).toBe('pointer');
   });
 
+  test('should change cursor to move immediately when clicking to select rectangle', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="rectangle"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    const startX = box.x + 100;
+    const startY = box.y + 100;
+    const endX = box.x + 300;
+    const endY = box.y + 200;
+
+    // Draw rectangle
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Deselect by clicking elsewhere
+    await page.mouse.click(box.x + 400, box.y + 400);
+    await page.waitForTimeout(50);
+
+    // Verify cursor is not 'move' before clicking
+    let cursor = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).cursor
+    );
+    expect(cursor).not.toBe('move');
+
+    // Click on rectangle edge to select (without moving mouse afterward)
+    const midY = (startY + endY) / 2;
+    await page.mouse.click(startX, midY);
+    await page.waitForTimeout(50);
+
+    // Cursor should immediately be 'move' without needing to move mouse
+    cursor = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).cursor
+    );
+    expect(cursor).toBe('move');
+  });
+
   test('should draw multiple rectangles and select between them', async ({
     page,
   }) => {

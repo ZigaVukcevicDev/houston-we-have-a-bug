@@ -145,7 +145,7 @@
 - [x] write e2e tests for download and system info
 - [x] add license
 - [x] align canvas to the center in test file
-- [ ] array, line and rectangle tool - when select it (click), change pointer cursor to move cursor
+- [x] array, line and rectangle tool - when select it (click), change pointer cursor to move cursor
 
 ## Ongoing
 

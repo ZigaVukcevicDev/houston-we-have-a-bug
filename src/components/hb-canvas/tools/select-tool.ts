@@ -183,6 +183,7 @@ export class SelectTool implements Tool {
         // Otherwise, just select it (single click selects)
         this.selectedAnnotationId = clickedAnnotationId;
         this.selectedAnnotationType = 'text';
+        canvas.style.cursor = 'move';
         this.onRedraw();
         return;
       }
@@ -193,6 +194,7 @@ export class SelectTool implements Tool {
       if (this.isPointOnRectangle(x, y, this.rectangleAnnotations[i])) {
         this.selectedAnnotationId = this.rectangleAnnotations[i].id;
         this.selectedAnnotationType = 'rectangle';
+        canvas.style.cursor = 'move';
         this.onRedraw();
         return;
       }
@@ -204,6 +206,7 @@ export class SelectTool implements Tool {
       if (this.isPointOnLine(x, y, allLines[i])) {
         this.selectedAnnotationId = allLines[i].id;
         this.selectedAnnotationType = 'line';
+        canvas.style.cursor = 'move';
         this.onRedraw();
         return;
       }
@@ -212,6 +215,7 @@ export class SelectTool implements Tool {
     // Click on empty space - deselect
     this.selectedAnnotationId = null;
     this.selectedAnnotationType = null;
+    canvas.style.cursor = '';
     this.onRedraw();
   }
 

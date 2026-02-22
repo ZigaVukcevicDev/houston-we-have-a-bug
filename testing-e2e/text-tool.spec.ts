@@ -470,6 +470,52 @@ test.describe('Text tool', () => {
     expect(cursor).toBe('pointer');
   });
 
+  test('should change cursor to move immediately when clicking to select text box', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    // Draw text box
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    // Type some text and click outside to finalize
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+    await textDiv.evaluate((el, text) => (el.textContent = text), 'Test');
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await expect(textDiv).not.toBeVisible();
+
+    // Verify cursor is not 'move' before clicking
+    let cursor = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).cursor
+    );
+    expect(cursor).not.toBe('move');
+
+    // Click on text box to select (without moving mouse afterward)
+    const midX = (startX + endX) / 2;
+    const midY = (startY + endY) / 2;
+    await page.mouse.click(midX, midY);
+    await page.waitForTimeout(50);
+
+    // Cursor should immediately be 'move' without needing to move mouse
+    cursor = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).cursor
+    );
+    expect(cursor).toBe('move');
+  });
+
   test('should not have text position jump when finalizing', async ({
     page,
   }) => {
