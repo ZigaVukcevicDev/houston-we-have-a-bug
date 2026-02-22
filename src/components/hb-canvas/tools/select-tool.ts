@@ -167,9 +167,10 @@ export class SelectTool implements Tool {
       if (this.isPointOnTextBox(x, y, this.textAnnotations[i], canvas)) {
         const clickedAnnotationId = this.textAnnotations[i].id;
 
-        // If clicking on an already-selected text annotation, enter edit mode
+        // If double-clicking on an already-selected text annotation, enter edit mode
         // (but only if not already editing this annotation)
         if (
+          event.detail === 2 &&
           this.selectedAnnotationId === clickedAnnotationId &&
           this.selectedAnnotationType === 'text' &&
           this.textTool &&
@@ -179,7 +180,7 @@ export class SelectTool implements Tool {
           return;
         }
 
-        // Otherwise, just select it
+        // Otherwise, just select it (single click selects)
         this.selectedAnnotationId = clickedAnnotationId;
         this.selectedAnnotationType = 'text';
         this.onRedraw();
@@ -500,8 +501,8 @@ export class SelectTool implements Tool {
 
         // If hovering over selected text box body (not handle)
         if (this.isPointOnTextBox(x, y, selectedText, canvas)) {
-          // Show text cursor to indicate clicking will enter edit mode
-          canvas.style.cursor = 'text';
+          // Show move cursor - drag to move, double-click to edit
+          canvas.style.cursor = 'move';
           this.hoveredAnnotationId = null;
           this.onRedraw();
           return;

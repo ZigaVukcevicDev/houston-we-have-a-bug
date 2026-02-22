@@ -312,7 +312,7 @@ test.describe('Text tool', () => {
     expect(cursor).toBe('nesw-resize');
   });
 
-  test('should show text cursor when hovering over selected text box', async ({
+  test('should show move cursor when hovering over selected text box', async ({
     page,
   }) => {
     // Select text tool
@@ -358,17 +358,17 @@ test.describe('Text tool', () => {
       return canvas && window.getComputedStyle(canvas).cursor !== 'crosshair';
     });
 
-    // Hover over the text box body - should show text cursor (click will enter edit mode)
+    // Hover over the text box body - should show move cursor (drag to move, double-click to edit)
     const midY = (startY + endY) / 2;
     await page.mouse.move(startX, midY);
     await page.waitForTimeout(50);
     const cursor = await canvas.evaluate(
       (el) => window.getComputedStyle(el).cursor
     );
-    expect(cursor).toBe('text');
+    expect(cursor).toBe('move');
   });
 
-  test('should show text cursor when hovering over text box while editing', async ({
+  test('should show move cursor when hovering over text box while editing', async ({
     page,
   }) => {
     // Select text tool
@@ -415,11 +415,11 @@ test.describe('Text tool', () => {
     await page.mouse.move(midX, midY);
     await page.waitForTimeout(50);
 
-    // Should show text cursor when editing
+    // Should show move cursor (canvas still allows dragging even while textDiv is active)
     const cursor = await canvas.evaluate(
       (el) => window.getComputedStyle(el).cursor
     );
-    expect(cursor).toBe('text');
+    expect(cursor).toBe('move');
   });
 
   test('should show pointer cursor when hovering over unselected text box', async ({
@@ -2595,8 +2595,8 @@ test.describe('Text tool', () => {
       return canvas && window.getComputedStyle(canvas).cursor !== 'crosshair';
     });
 
-    // Move to left border (not on corner handle) and verify text cursor
-    // (text cursor indicates clickability for edit mode, but dragging still moves)
+    // Move to left border (not on corner handle) and verify move cursor
+    // (move cursor indicates dragging will move, double-click to edit)
     const midY = (startY + endY) / 2;
     await page.mouse.move(startX, midY);
     await page.waitForTimeout(50);
@@ -2604,7 +2604,7 @@ test.describe('Text tool', () => {
     let cursor = await canvas.evaluate(
       (el) => window.getComputedStyle(el).cursor
     );
-    expect(cursor).toBe('text');
+    expect(cursor).toBe('move');
 
     // Drag from the left border to move the annotation
     await page.mouse.down();
@@ -2685,7 +2685,7 @@ test.describe('Text tool', () => {
     ).toBeVisible();
   });
 
-  test('should show text cursor when hovering over text annotation interior and clicking makes it editable', async ({
+  test('should show move cursor when hovering over text annotation interior and double-clicking makes it editable', async ({
     page,
   }) => {
     await page.click('[data-tool="text"]');
@@ -2711,7 +2711,7 @@ test.describe('Text tool', () => {
     await expect(textDiv).toBeFocused();
 
     // Type initial text
-    await textDiv.evaluate((el) => (el.textContent = 'Click me to edit'));
+    await textDiv.evaluate((el) => (el.textContent = 'Double-click me to edit'));
 
     // Click outside to finalize
     await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
@@ -2739,17 +2739,17 @@ test.describe('Text tool', () => {
       return canvas && window.getComputedStyle(canvas).cursor !== 'crosshair';
     });
 
-    // Hover over the interior of the selected text box - should show text cursor
+    // Hover over the interior of the selected text box - should show move cursor
     await page.mouse.move(midX, midY);
     await page.waitForTimeout(50);
 
     let cursor = await canvas.evaluate(
       (el) => window.getComputedStyle(el).cursor
     );
-    expect(cursor).toBe('text');
+    expect(cursor).toBe('move');
 
-    // Click on the text annotation again to enter edit mode
-    await page.mouse.click(midX, midY);
+    // Double-click on the text annotation to enter edit mode
+    await page.mouse.dblclick(midX, midY);
     await page.waitForTimeout(100);
 
     // Should now show the contenteditable div for editing
@@ -2757,15 +2757,15 @@ test.describe('Text tool', () => {
     await expect(editableDiv).toBeVisible();
     await expect(editableDiv).toBeFocused();
 
-    // Cursor should still be text while editing
+    // Cursor should still be move while editing (hovering over canvas)
     await page.mouse.move(midX + 10, midY + 10);
     await page.waitForTimeout(50);
 
     cursor = await canvas.evaluate((el) => window.getComputedStyle(el).cursor);
-    expect(cursor).toBe('text');
+    expect(cursor).toBe('move');
   });
 
-  test('should allow editing existing text annotation by clicking on it', async ({
+  test('should allow editing existing text annotation by double-clicking on it', async ({
     page,
   }) => {
     await page.click('[data-tool="text"]');
@@ -2795,14 +2795,14 @@ test.describe('Text tool', () => {
     await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
     await expect(textDiv).not.toBeVisible();
 
-    // Click on the annotation to select and potentially edit it
+    // Click on the annotation to select it
     const midX = (startX + endX) / 2;
     const midY = (startY + endY) / 2;
     await page.mouse.click(midX, midY);
     await page.waitForTimeout(100);
 
-    // Click again to enter edit mode (first click selects, second click edits)
-    await page.mouse.click(midX, midY);
+    // Double-click to enter edit mode
+    await page.mouse.dblclick(midX, midY);
     await page.waitForTimeout(100);
 
     // Contenteditable should be visible and editable
@@ -2894,14 +2894,14 @@ test.describe('Text tool', () => {
     // Text should be on canvas when not editing
     expect(hasTextOnCanvas).toBe(true);
 
-    // Now click to select and edit
+    // Now click to select, then double-click to edit
     const midX = (startX + endX) / 2;
     const midY = (startY + endY) / 2;
     await page.mouse.click(midX, midY);
     await page.waitForTimeout(100);
 
-    // Click again to enter edit mode
-    await page.mouse.click(midX, midY);
+    // Double-click to enter edit mode
+    await page.mouse.dblclick(midX, midY);
     await page.waitForTimeout(100);
 
     // Should now show the contenteditable div

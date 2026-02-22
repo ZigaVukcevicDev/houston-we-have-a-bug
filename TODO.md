@@ -124,14 +124,11 @@
 - [x] text tool - when I draw text area and click outside, the text jumps up
 - [x] text tool - less padding space in editable div, 5px
 - [x] text tool - it should be moveable (upon hover and clicking/dragging over border)
-- [x] text tool - it should show text cursor when hovering over rect, when clicking it should be editable
 - [x] text tool - increase font size to 15px
 - [x] text tool - darkenColor is not applied when writing text, also cursor
 - [x] text tool - fix text not to be scrollable when not fitting vertically (it works ok when clicking outside)
 - [x] text tool - set minimum width and height of 40px when creating or resizing
 - [x] text tool - make border transparent when clicking outside
-- [x] text tool - make border 50% visible when hovering
-- [x] text tool - make border 50% visible when hovering - update to 40%
 - [x] text tool - when hovering over textbox and showing border, it should work also for hovering over overflown text
 - [ ] text tool - select all / highlight color (update design)
 - [x] text tool - when deleting text, annotation gets deleted
@@ -148,6 +145,7 @@
 - [x] write e2e tests for download and system info
 - [x] add license
 - [x] align canvas to the center in test file
+- [ ] array, line and rectangle tool - when select it (click), change pointer cursor to move cursor
 
 ## Ongoing
 

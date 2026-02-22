@@ -2429,11 +2429,11 @@ describe('SelectTool', () => {
         mockCtx
       );
 
-      // Text cursor indicates clicking will enter edit mode
-      expect(mockCanvas.style.cursor).toBe('text');
+      // Move cursor indicates dragging will move, double-click to edit
+      expect(mockCanvas.style.cursor).toBe('move');
     });
 
-    it('should set text cursor when hovering over selected text box while editing', () => {
+    it('should set move cursor when hovering over selected text box while editing', () => {
       const textAnnotations: TextAnnotation[] = [
         {
           id: 'text-1',
@@ -2473,7 +2473,8 @@ describe('SelectTool', () => {
         mockCtx
       );
 
-      expect(mockCanvas.style.cursor).toBe('text');
+      // Move cursor - canvas still allows dragging even while textDiv is active
+      expect(mockCanvas.style.cursor).toBe('move');
     });
 
     it('should set move cursor when hovering over selected text box not being edited', () => {
@@ -2516,8 +2517,8 @@ describe('SelectTool', () => {
         mockCtx
       );
 
-      // Text cursor indicates clicking will enter edit mode
-      expect(mockCanvas.style.cursor).toBe('text');
+      // Move cursor indicates dragging will move, double-click to edit
+      expect(mockCanvas.style.cursor).toBe('move');
     });
   });
 
@@ -2677,8 +2678,8 @@ describe('SelectTool', () => {
         mockCtx
       );
 
-      // Text cursor indicates clicking will enter edit mode
-      expect(mockCanvas.style.cursor).toBe('text');
+      // Move cursor indicates dragging will move, double-click to edit
+      expect(mockCanvas.style.cursor).toBe('move');
     });
   });
 
