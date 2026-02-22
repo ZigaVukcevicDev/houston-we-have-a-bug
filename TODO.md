@@ -137,6 +137,8 @@
 - [x] text tool - remove border opacity 40%, it should always be 100%
 - [x] text tool - when typing text, cursor should be for text, not move
 - [x] text tool - revisit if user can't resize in negative directions
+- [x] text tool - when resizing, selection disappears.
+- [ ] text tool - direct move missing
 - [x] recheck annotations when scrolling
 - [x] screenshot is horizontally scrollable
 - [x] does test html needs to be in build/dist?

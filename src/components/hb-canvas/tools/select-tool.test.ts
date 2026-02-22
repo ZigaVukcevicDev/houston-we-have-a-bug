@@ -510,7 +510,16 @@ describe('SelectTool', () => {
       selectTool.handleMouseUp();
       expect(selectTool['draggingHandle']).toBeNull();
 
-      // 4. Deselect
+      // 3b. Browser fires automatic click event after mouseup (at drag-end position)
+      // This click is skipped due to wasDragging flag, which prevents accidental deselection
+      selectTool.handleClick(
+        { clientX: 220, clientY: 220 } as MouseEvent,
+        mockCanvas
+      );
+      // Should still be selected (click was skipped)
+      expect(selectTool['selectedAnnotationId']).toBe('line-1');
+
+      // 4. User clicks elsewhere to deselect (new gesture)
       selectTool.handleClick(
         { clientX: 500, clientY: 500 } as MouseEvent,
         mockCanvas

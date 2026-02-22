@@ -203,6 +203,345 @@ test.describe('Text tool', () => {
     // This would require checking the canvas rendering or component state
   });
 
+  test('should maintain selection after resizing text box from bottom-right', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    // Create text annotation
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    // Type some text and finalize
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+    await textDiv.evaluate((el, text) => (el.textContent = text), 'Resize me');
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await expect(textDiv).not.toBeVisible();
+
+    // Click to select the text annotation
+    await page.mouse.click(startX + 50, startY + 50);
+    await page.waitForTimeout(100);
+
+    // Verify it's selected (select tool should be active)
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+
+    // Check cursor is 'move' indicating selection
+    let cursor = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).cursor
+    );
+    expect(cursor).toBe('move');
+
+    // Now resize from bottom-right corner
+    await page.mouse.move(endX, endY);
+    await page.waitForTimeout(50);
+
+    // Verify resize cursor
+    cursor = await canvas.evaluate((el) => window.getComputedStyle(el).cursor);
+    expect(cursor).toBe('nwse-resize');
+
+    // Drag to resize
+    await page.mouse.down();
+    await page.mouse.move(endX + 50, endY + 50);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // After resize, the annotation should still be selected
+    // Move to the center of the original position to check cursor
+    await page.mouse.move(startX + 50, startY + 50);
+    await page.waitForTimeout(50);
+
+    cursor = await canvas.evaluate((el) => window.getComputedStyle(el).cursor);
+    // Should still show 'move' cursor because annotation is still selected
+    expect(cursor).toBe('move');
+  });
+
+  test('should keep selection border visible after resizing text box from bottom-right handle', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    // Create text annotation
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    // Type some text and finalize
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+    await textDiv.evaluate((el, text) => (el.textContent = text), 'Test');
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await expect(textDiv).not.toBeVisible();
+
+    // Click to select the text annotation
+    await page.mouse.click(startX + 50, startY + 50);
+    await page.waitForTimeout(100);
+
+    // Verify it's selected
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+
+    // Check that handles are rendered by verifying cursor changes to resize on handle
+    await page.mouse.move(endX, endY);
+    await page.waitForTimeout(50);
+    let cursor = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).cursor
+    );
+    expect(cursor).toBe('nwse-resize');
+
+    // Now drag the bottom-right handle to resize
+    await page.mouse.down();
+    await page.mouse.move(endX + 50, endY + 50);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // After resize, check that handles are STILL rendered (cursor should be resize on new handle position)
+    const newEndX = endX + 50;
+    const newEndY = endY + 50;
+    await page.mouse.move(newEndX, newEndY);
+    await page.waitForTimeout(50);
+    cursor = await canvas.evaluate((el) => window.getComputedStyle(el).cursor);
+    // Should show resize cursor because annotation is still selected and we're on the handle
+    expect(cursor).toBe('nwse-resize');
+  });
+
+  test('should maintain selection when resizing text box while textDiv is active', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    // Create text annotation
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    // TextDiv should be visible
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+
+    // Verify select tool is active
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+
+    // Now resize from bottom-right corner WITHOUT clicking away first
+    await page.mouse.move(endX, endY);
+    await page.waitForTimeout(50);
+
+    // Verify resize cursor
+    let cursor = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).cursor
+    );
+    expect(cursor).toBe('nwse-resize');
+
+    // Drag to resize
+    await page.mouse.down();
+    await page.mouse.move(endX + 50, endY + 50);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // After resize, the annotation should still be selected
+    // The select tool should still be active
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+
+    // Move to the center to check cursor
+    await page.mouse.move(startX + 50, startY + 50);
+    await page.waitForTimeout(50);
+
+    cursor = await canvas.evaluate((el) => window.getComputedStyle(el).cursor);
+    // Should show 'move' cursor because annotation is still selected
+    expect(cursor).toBe('move');
+  });
+
+  test('should maintain selection after resizing text box from top-left', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 150;
+    const startY = canvasBox.y + 150;
+    const endX = canvasBox.x + 350;
+    const endY = canvasBox.y + 250;
+
+    // Create text annotation
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    // Type some text and finalize
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+    await textDiv.evaluate((el, text) => (el.textContent = text), 'Test');
+    await page.mouse.click(canvasBox.x + 500, canvasBox.y + 400);
+    await expect(textDiv).not.toBeVisible();
+
+    // Click to select the text annotation
+    await page.mouse.click(startX + 50, startY + 50);
+    await page.waitForTimeout(100);
+
+    // Resize from top-left corner
+    await page.mouse.move(startX, startY);
+    await page.waitForTimeout(50);
+
+    // Drag to resize (move top-left corner up and left)
+    await page.mouse.down();
+    await page.mouse.move(startX - 30, startY - 30);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // After resize, annotation should still be selected
+    await page.mouse.move(startX + 50, startY + 50);
+    await page.waitForTimeout(50);
+
+    const cursor = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).cursor
+    );
+    expect(cursor).toBe('move');
+  });
+
+  test('should maintain selection after resizing text box from top-right', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 150;
+    const startY = canvasBox.y + 150;
+    const endX = canvasBox.x + 350;
+    const endY = canvasBox.y + 250;
+
+    // Create text annotation
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    // Type some text and finalize
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+    await textDiv.evaluate((el, text) => (el.textContent = text), 'Test');
+    await page.mouse.click(canvasBox.x + 500, canvasBox.y + 400);
+    await expect(textDiv).not.toBeVisible();
+
+    // Click to select the text annotation
+    await page.mouse.click(startX + 50, startY + 50);
+    await page.waitForTimeout(100);
+
+    // Resize from top-right corner
+    await page.mouse.move(endX, startY);
+    await page.waitForTimeout(50);
+
+    // Drag to resize
+    await page.mouse.down();
+    await page.mouse.move(endX + 30, startY - 30);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // After resize, annotation should still be selected
+    await page.mouse.move(startX + 50, startY + 50);
+    await page.waitForTimeout(50);
+
+    const cursor = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).cursor
+    );
+    expect(cursor).toBe('move');
+  });
+
+  test('should maintain selection after resizing text box from bottom-left', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 150;
+    const startY = canvasBox.y + 150;
+    const endX = canvasBox.x + 350;
+    const endY = canvasBox.y + 250;
+
+    // Create text annotation
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    // Type some text and finalize
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+    await textDiv.evaluate((el, text) => (el.textContent = text), 'Test');
+    await page.mouse.click(canvasBox.x + 500, canvasBox.y + 400);
+    await expect(textDiv).not.toBeVisible();
+
+    // Click to select the text annotation
+    await page.mouse.click(startX + 50, startY + 50);
+    await page.waitForTimeout(100);
+
+    // Resize from bottom-left corner
+    await page.mouse.move(startX, endY);
+    await page.waitForTimeout(50);
+
+    // Drag to resize
+    await page.mouse.down();
+    await page.mouse.move(startX - 30, endY + 30);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // After resize, annotation should still be selected
+    await page.mouse.move(startX + 50, startY + 50);
+    await page.waitForTimeout(50);
+
+    const cursor = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).cursor
+    );
+    expect(cursor).toBe('move');
+  });
+
   test('should allow resizing empty text annotation without it disappearing', async ({
     page,
   }) => {
@@ -2992,5 +3331,56 @@ test.describe('Text tool', () => {
     // Verify the text is in the contenteditable div
     const divText = await editableDiv.textContent();
     expect(divText).toBe('UNIQUE_TEST_TEXT');
+  });
+
+  test('should allow clicking inside newly created text box to position cursor', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    // Create text annotation
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+    await expect(textDiv).toBeFocused();
+
+    // Type some text
+    await page.keyboard.type('Hello World');
+
+    // Get the text content
+    let content = await textDiv.textContent();
+    expect(content).toBe('Hello World');
+
+    // Now click inside the text box (middle of the text) to position cursor
+    const textDivBox = await textDiv.boundingBox();
+    if (!textDivBox) throw new Error('TextDiv not found');
+
+    // Click in the middle of the text div
+    await page.mouse.click(textDivBox.x + textDivBox.width / 2, textDivBox.y + textDivBox.height / 2);
+    await page.waitForTimeout(50);
+
+    // The textDiv should still be focused and visible after clicking inside it
+    await expect(textDiv).toBeVisible();
+    await expect(textDiv).toBeFocused();
+
+    // Type more text - it should be inserted at cursor position
+    await page.keyboard.type('TEST');
+
+    // Verify text was inserted
+    content = await textDiv.textContent();
+    expect(content).toContain('TEST');
   });
 });

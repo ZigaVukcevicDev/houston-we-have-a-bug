@@ -395,8 +395,13 @@ export class TextTool implements Tool {
       this.removeTextDiv();
       this.currentBox = null;
       this.onRedraw();
+      return;
     }
-    // Don't finalize on Enter - allow multiline text
+
+    // Enable pointer-events after user starts typing (allows clicking inside to position cursor)
+    if (this.textDiv && this.textDiv.style.pointerEvents === 'none') {
+      this.textDiv.style.pointerEvents = 'auto';
+    }
   };
 
   private handleTextDivBlur = () => {

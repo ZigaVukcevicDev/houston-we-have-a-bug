@@ -32,6 +32,7 @@ export class SelectTool implements Tool {
     | null = null;
   private draggingLine: boolean = false;
   private dragOffset: { x: number; y: number } = { x: 0, y: 0 };
+  private wasDragging: boolean = false; // Track if a drag operation occurred (to prevent click from deselecting)
   private keydownHandler: ((event: KeyboardEvent) => void) | null = null;
 
   private onRedraw: () => void;
@@ -160,6 +161,13 @@ export class SelectTool implements Tool {
   }
 
   handleClick(event: MouseEvent, canvas: HTMLCanvasElement): void {
+    // Skip click handling if this click is the end of a drag operation
+    // (browser fires click after mouseup, which would incorrectly deselect)
+    if (this.wasDragging) {
+      this.wasDragging = false;
+      return;
+    }
+
     const { x, y } = getCanvasCoordinates(event, canvas);
 
     // Check text annotations first (iterate backwards for most recent)
@@ -565,6 +573,7 @@ export class SelectTool implements Tool {
 
     // Handle dragging (cursor doesn't change during drag)
     if (this.draggingLine) {
+      this.wasDragging = true; // Mark that actual dragging occurred
       const { x, y } = getCanvasCoordinates(event, canvas);
 
       const dx = x - this.dragOffset.x;
@@ -608,6 +617,7 @@ export class SelectTool implements Tool {
 
     // Handle dragging handles (line endpoints or rectangle corners)
     if (this.draggingHandle) {
+      this.wasDragging = true; // Mark that actual dragging occurred
       let { x, y } = getCanvasCoordinates(event, canvas);
 
       // Subtract drag offset

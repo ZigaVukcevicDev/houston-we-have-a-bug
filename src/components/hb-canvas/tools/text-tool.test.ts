@@ -550,6 +550,42 @@ describe('TextTool', () => {
       expect(fillTextCalls.length).toBeGreaterThanOrEqual(2);
     });
 
+    it('should finalize active textDiv when starting to edit another annotation', () => {
+      // Create two annotations
+      textTool['annotations'] = [
+        {
+          id: 'annotation-1',
+          x: 50,
+          y: 50,
+          width: 200,
+          height: 100,
+          text: 'First annotation',
+          color: '#E74C3C',
+          fontSize: 15,
+        },
+        {
+          id: 'annotation-2',
+          x: 300,
+          y: 50,
+          width: 200,
+          height: 100,
+          text: 'Second annotation',
+          color: '#E74C3C',
+          fontSize: 15,
+        },
+      ];
+
+      // Start editing the first annotation
+      textTool.startEditingAnnotation('annotation-1', mockCanvas);
+      expect(textTool.isTextEditingActive()).toBe(true);
+      expect(textTool.getEditingAnnotationId()).toBe('annotation-1');
+
+      // Now start editing the second annotation (should finalize the first)
+      textTool.startEditingAnnotation('annotation-2', mockCanvas);
+      expect(textTool.isTextEditingActive()).toBe(true);
+      expect(textTool.getEditingAnnotationId()).toBe('annotation-2');
+    });
+
     it('should render text with wrapping', () => {
       textTool['annotations'] = [
         {
