@@ -139,6 +139,8 @@
 - [x] text tool - revisit if user can't resize in negative directions
 - [x] text tool - when resizing, selection disappears.
 - [ ] text tool - direct move missing
+- [ ] text tool - text still jumps
+- [ ] text tool - increase font again (update design as well, also presentation)
 - [x] recheck annotations when scrolling
 - [x] screenshot is horizontally scrollable
 - [x] does test html needs to be in build/dist?
