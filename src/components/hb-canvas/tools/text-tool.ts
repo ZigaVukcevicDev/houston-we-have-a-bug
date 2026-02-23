@@ -327,6 +327,21 @@ export class TextTool implements Tool {
 
     this.textDiv = document.createElement('div');
     this.textDiv.contentEditable = 'true';
+    this.textDiv.className = 'hb-text-annotation-input';
+
+    // Add selection styling if not already present
+    if (!document.getElementById('hb-text-selection-style')) {
+      const style = document.createElement('style');
+      style.id = 'hb-text-selection-style';
+      style.textContent = `
+        .hb-text-annotation-input::selection,
+        .hb-text-annotation-input *::selection {
+          background-color: #FFD257 !important;
+          color: #000000 !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
 
     // Apply darkened color for better visibility
     const darkenedColor = this.darkenColor(this.color, 0.02);
@@ -484,7 +499,10 @@ export class TextTool implements Tool {
   }
 
   // Public method to start editing an existing annotation
-  startEditingAnnotation(annotationId: string, canvas: HTMLCanvasElement): void {
+  startEditingAnnotation(
+    annotationId: string,
+    canvas: HTMLCanvasElement
+  ): void {
     const annotation = this.annotations.find((a) => a.id === annotationId);
     if (!annotation) return;
 

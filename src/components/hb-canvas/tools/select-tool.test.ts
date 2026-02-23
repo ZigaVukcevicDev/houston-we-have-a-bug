@@ -1732,7 +1732,7 @@ describe('SelectTool', () => {
           height: 100,
           text: 'Test text',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
       ];
       selectTool.deactivate();
@@ -2201,7 +2201,7 @@ describe('SelectTool', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
       ];
 
@@ -2235,7 +2235,7 @@ describe('SelectTool', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
       ];
       const selectTool = new SelectTool(
@@ -2268,7 +2268,7 @@ describe('SelectTool', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
       ];
       const selectTool = new SelectTool(
@@ -2334,7 +2334,7 @@ describe('SelectTool', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
       ];
       const selectTool = new SelectTool(
@@ -2367,7 +2367,7 @@ describe('SelectTool', () => {
           height: 50,
           text: 'Test 1',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
         {
           id: 'text-2',
@@ -2377,7 +2377,7 @@ describe('SelectTool', () => {
           height: 50,
           text: 'Test 2',
           color: '#3498DB',
-          fontSize: 15,
+          fontSize: 16,
         },
       ];
       const selectTool = new SelectTool(
@@ -2416,7 +2416,7 @@ describe('SelectTool', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
       ];
       const selectTool = new SelectTool(
@@ -2452,7 +2452,7 @@ describe('SelectTool', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
       ];
 
@@ -2496,7 +2496,7 @@ describe('SelectTool', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
       ];
 
@@ -2542,7 +2542,7 @@ describe('SelectTool', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
       ];
       const selectTool = new SelectTool(
@@ -2579,7 +2579,7 @@ describe('SelectTool', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
       ];
       const selectTool = new SelectTool(
@@ -2613,7 +2613,7 @@ describe('SelectTool', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
       ];
       const selectTool = new SelectTool(
@@ -2663,7 +2663,7 @@ describe('SelectTool', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
       ];
 
@@ -2708,7 +2708,7 @@ describe('SelectTool', () => {
           height: 60, // Small height to cause overflow
           text: 'Line 1\nLine 2\nLine 3\nLine 4\nLine 5\nLine 6\nLine 7',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
       ];
 
@@ -2849,6 +2849,115 @@ describe('SelectTool', () => {
       );
 
       expect(selectTool['hoveredAnnotationId']).toBe('text-overflow');
+    });
+  });
+
+  describe('isPointNearLineSegment edge cases', () => {
+    it('should handle zero-length line segment (point segment)', () => {
+      const selectTool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        [],
+        mockRedraw
+      );
+
+      // Test point near the zero-length segment (within threshold of 5)
+      const result = selectTool['isPointNearLineSegment'](102, 102, 100, 100, 100, 100, 5);
+      expect(result).toBe(true);
+
+      // Test point far from the zero-length segment
+      const result2 = selectTool['isPointNearLineSegment'](150, 150, 100, 100, 100, 100, 5);
+      expect(result2).toBe(false);
+    });
+
+    it('should detect point near normal line segment', () => {
+      const selectTool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        [],
+        mockRedraw
+      );
+
+      // Test point near the middle of a line segment
+      const result = selectTool['isPointNearLineSegment'](150, 150, 100, 100, 200, 200, 5);
+      expect(result).toBe(true);
+
+      // Test point far from the line segment
+      const result2 = selectTool['isPointNearLineSegment'](300, 300, 100, 100, 200, 200, 5);
+      expect(result2).toBe(false);
+    });
+  });
+
+  describe('countTextLines with long word breaking', () => {
+    it('should count lines when a single word is longer than maxWidth', () => {
+      const selectTool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        [],
+        mockRedraw
+      );
+
+      // Create a mock canvas context where each character is 10px wide
+      const mockCtx = {
+        measureText: vi.fn((text: string) => ({
+          width: text.length * 10, // Each character is 10px wide
+        })),
+      } as unknown as CanvasRenderingContext2D;
+
+      // maxWidth of 50px means max 5 characters per line
+      // "verylongword" is 12 characters = ~3 lines (5+5+2)
+      const lineCount = selectTool['countTextLines'](
+        mockCtx,
+        'verylongword',
+        50
+      );
+      expect(lineCount).toBeGreaterThanOrEqual(2);
+    });
+
+    it('should count lines when text has word before long word', () => {
+      const selectTool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        [],
+        mockRedraw
+      );
+
+      const mockCtx = {
+        measureText: vi.fn((text: string) => ({
+          width: text.length * 10,
+        })),
+      } as unknown as CanvasRenderingContext2D;
+
+      // "hi verylongword" - "hi" fits on first line, then "verylongword" is broken
+      const lineCount = selectTool['countTextLines'](
+        mockCtx,
+        'hi verylongword',
+        50
+      );
+      expect(lineCount).toBeGreaterThanOrEqual(3);
+    });
+
+    it('should handle empty text', () => {
+      const selectTool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        [],
+        mockRedraw
+      );
+
+      const mockCtx = {
+        measureText: vi.fn((text: string) => ({
+          width: text.length * 10,
+        })),
+      } as unknown as CanvasRenderingContext2D;
+
+      const lineCount = selectTool['countTextLines'](mockCtx, '', 100);
+      expect(lineCount).toBe(1);
     });
   });
 });

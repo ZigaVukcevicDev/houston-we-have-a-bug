@@ -130,7 +130,7 @@
 - [x] text tool - set minimum width and height of 40px when creating or resizing
 - [x] text tool - make border transparent when clicking outside
 - [x] text tool - when hovering over textbox and showing border, it should work also for hovering over overflown text
-- [ ] text tool - select all / highlight color (update design)
+- [x] text tool - select all / highlight color (update design)
 - [x] text tool - when deleting text, annotation gets deleted
 - [x] text tool - if no text entered and try to resize, the annotation disappears
 - [x] text tool - minimal dimensions should not be applied at init
@@ -140,7 +140,7 @@
 - [x] text tool - when resizing, selection disappears.
 - [ ] text tool - direct move missing
 - [ ] text tool - text still jumps
-- [ ] text tool - increase font again (update design as well, also presentation)
+- [x] text tool - increase font again (update design as well, also presentation)
 - [x] recheck annotations when scrolling
 - [x] screenshot is horizontally scrollable
 - [x] does test html needs to be in build/dist?

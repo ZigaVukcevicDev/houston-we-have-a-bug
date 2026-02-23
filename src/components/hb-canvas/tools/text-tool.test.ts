@@ -273,7 +273,7 @@ describe('TextTool', () => {
         height: 150,
         text: 'Test text',
         color: '#E74C3C',
-        fontSize: 15,
+        fontSize: 16,
       });
     });
 
@@ -430,7 +430,7 @@ describe('TextTool', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
       ];
 
@@ -452,7 +452,7 @@ describe('TextTool', () => {
           height: 100,
           text: 'Existing text',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
       ];
 
@@ -482,7 +482,7 @@ describe('TextTool', () => {
           height: 100,
           text: 'First annotation',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
         {
           id: 'annotation-2',
@@ -492,7 +492,7 @@ describe('TextTool', () => {
           height: 100,
           text: 'Second annotation',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
       ];
 
@@ -521,7 +521,7 @@ describe('TextTool', () => {
           height: 100,
           text: 'First',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
         {
           id: 'annotation-2',
@@ -531,7 +531,7 @@ describe('TextTool', () => {
           height: 100,
           text: 'Second',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
       ];
 
@@ -561,7 +561,7 @@ describe('TextTool', () => {
           height: 100,
           text: 'First annotation',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
         {
           id: 'annotation-2',
@@ -571,7 +571,7 @@ describe('TextTool', () => {
           height: 100,
           text: 'Second annotation',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
       ];
 
@@ -586,6 +586,29 @@ describe('TextTool', () => {
       expect(textTool.getEditingAnnotationId()).toBe('annotation-2');
     });
 
+    it('should do nothing when starting to edit non-existent annotation', () => {
+      // Create one annotation
+      textTool['annotations'] = [
+        {
+          id: 'annotation-1',
+          x: 50,
+          y: 50,
+          width: 200,
+          height: 100,
+          text: 'First annotation',
+          color: '#E74C3C',
+          fontSize: 16,
+        },
+      ];
+
+      // Try to edit a non-existent annotation
+      textTool.startEditingAnnotation('non-existent-id', mockCanvas);
+
+      // Should not activate editing
+      expect(textTool.isTextEditingActive()).toBe(false);
+      expect(textTool.getEditingAnnotationId()).toBeNull();
+    });
+
     it('should render text with wrapping', () => {
       textTool['annotations'] = [
         {
@@ -596,7 +619,7 @@ describe('TextTool', () => {
           height: 100,
           text: 'Test text',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         },
       ];
 
@@ -885,7 +908,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'Test text',
         color: '#E74C3C',
-        fontSize: 15,
+        fontSize: 16,
       };
 
       const annotations = [annotation];
@@ -931,7 +954,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'Long text for wrapping test',
         color: '#E74C3C',
-        fontSize: 15,
+        fontSize: 16,
       };
 
       const annotations = [annotation];
@@ -997,7 +1020,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'Test',
         color: '#E74C3C',
-        fontSize: 15,
+        fontSize: 16,
       };
 
       textTool['annotations'] = [annotation];
@@ -1068,7 +1091,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'Test',
         color: '#E74C3C',
-        fontSize: 15,
+        fontSize: 16,
       };
 
       textTool['annotations'] = [annotation];
@@ -1140,6 +1163,106 @@ describe('TextTool', () => {
 
       expect(() => textTool.deactivate()).not.toThrow();
       expect(annotations.length).toBe(0);
+    });
+  });
+
+  describe('text selection styling', () => {
+    it('should add selection style element to document head', () => {
+      // Remove any existing style element first
+      const existingStyle = document.getElementById('hb-text-selection-style');
+      if (existingStyle) {
+        existingStyle.remove();
+      }
+
+      const annotations: TextAnnotation[] = [];
+      const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      // Create a text box which triggers createTextDiv
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+
+      // Verify style element was created
+      const styleElement = document.getElementById('hb-text-selection-style');
+      expect(styleElement).toBeTruthy();
+      expect(styleElement?.tagName).toBe('STYLE');
+      expect(styleElement?.textContent).toContain('::selection');
+      expect(styleElement?.textContent).toContain('#FFD257');
+    });
+
+    it('should add class name to textDiv for selection styling', () => {
+      const annotations: TextAnnotation[] = [];
+      const textTool = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+
+      const textDiv = getTextDiv();
+      expect(textDiv?.className).toBe('hb-text-annotation-input');
+    });
+
+    it('should not create duplicate style elements', () => {
+      const annotations: TextAnnotation[] = [];
+      const textTool1 = new TextTool(annotations, mockRedraw, mockToolChange);
+      const textTool2 = new TextTool(annotations, mockRedraw, mockToolChange);
+
+      // Create first text box
+      textTool1.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool1.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      textTool1.handleMouseUp(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+
+      // Finalize first text box
+      const textDiv1 = getTextDiv();
+      textDiv1!.textContent = 'First';
+      textTool1.deactivate();
+
+      // Create second text box
+      textTool2.handleMouseDown(
+        { clientX: 300, clientY: 300 } as MouseEvent,
+        mockCanvas
+      );
+      textTool2.handleMouseMove(
+        { clientX: 450, clientY: 400 } as MouseEvent,
+        mockCanvas
+      );
+      textTool2.handleMouseUp(
+        { clientX: 450, clientY: 400 } as MouseEvent,
+        mockCanvas
+      );
+
+      // Should still only have one style element
+      const styleElements = document.querySelectorAll(
+        '#hb-text-selection-style'
+      );
+      expect(styleElements.length).toBe(1);
     });
   });
 
@@ -1575,7 +1698,7 @@ describe('TextTool', () => {
         height: 100,
         text: '',
         color: '#E74C3C',
-        fontSize: 15,
+        fontSize: 16,
       });
       expect(annotations[0].id).toBeTruthy();
     });
@@ -1721,14 +1844,14 @@ describe('TextTool', () => {
         height: 100,
         text: 'Scaled text',
         color: '#E74C3C',
-        fontSize: 15,
+        fontSize: 16,
       };
 
       textTool['annotations'] = [annotation];
       textTool.render(mockCtx);
 
-      // Font should be scaled: 15 * scaleX = 15 * 2 = 30
-      const expectedFontSize = 15 * 2;
+      // Font should be scaled: 16 * scaleX = 16 * 2 = 32
+      const expectedFontSize = 16 * 2;
       expect(mockCtx.font).toContain(`${expectedFontSize}px`);
     });
   });
@@ -1743,7 +1866,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'This is a very long text that needs wrapping',
         color: '#E74C3C',
-        fontSize: 15,
+        fontSize: 16,
       };
 
       const annotations = [annotation];
@@ -1764,7 +1887,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'Line 1\n\nLine 3',
         color: '#E74C3C',
-        fontSize: 15,
+        fontSize: 16,
       };
 
       const annotations = [annotation];
@@ -1817,7 +1940,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'A B C', // Each char will exceed width when measured alone
         color: '#E74C3C',
-        fontSize: 15,
+        fontSize: 16,
       };
 
       const annotations = [annotation];
@@ -1868,7 +1991,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'WWWWW', // Word too wide, and chars also too wide
         color: '#E74C3C',
-        fontSize: 15,
+        fontSize: 16,
       };
 
       const annotations = [annotation];
@@ -1918,7 +2041,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'ABC',
         color: '#E74C3C',
-        fontSize: 15,
+        fontSize: 16,
       };
 
       const annotations = [annotation];
@@ -1973,7 +2096,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'W',
         color: '#E74C3C',
-        fontSize: 15,
+        fontSize: 16,
       };
 
       const annotations = [annotation];
@@ -2020,7 +2143,7 @@ describe('TextTool', () => {
         height: 100,
         text: 'Line1\n\nLine3',
         color: '#E74C3C',
-        fontSize: 15,
+        fontSize: 16,
       };
 
       const annotations = [annotation];

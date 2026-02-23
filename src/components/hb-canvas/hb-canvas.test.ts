@@ -1001,7 +1001,7 @@ describe('HBCanvas', () => {
           height: 100,
           text: 'Test',
           color: '#E74C3C',
-          fontSize: 15,
+          fontSize: 16,
         });
 
         const selectTool = canvas['tools'].get('select') as SelectTool;
@@ -1233,7 +1233,7 @@ describe('HBCanvas', () => {
         height: 100,
         text: 'Test',
         color: '#E74C3C',
-        fontSize: 15,
+        fontSize: 16,
       });
 
       // Verify SelectTool can select text annotations
