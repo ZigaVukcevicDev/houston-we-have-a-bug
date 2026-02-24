@@ -3710,4 +3710,206 @@ test.describe('Text tool', () => {
     await context.close();
   });
 
+  test('should preserve text when switching tools while editing', async ({ page }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(canvasBox.x + 300, canvasBox.y + 200);
+    await page.mouse.up();
+
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+    await textDiv.evaluate((el, text) => (el.textContent = text), 'Saved text');
+
+    // Switch to rectangle tool while still editing
+    await page.click('[data-tool="rectangle"]');
+    await expect(textDiv).not.toBeVisible();
+
+    await page.waitForTimeout(100);
+
+    // Switch back to select tool and click where the annotation was
+    await page.click('[data-tool="select"]');
+    await page.mouse.click(startX + 50, startY + 50);
+    await page.waitForTimeout(100);
+
+    // Annotation should still exist and be selectable
+    await expect(page.locator('[data-tool="select"][aria-selected="true"]')).toBeVisible();
+  });
+
+  test('should support Enter key creating new lines while editing', async ({ page }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    await page.mouse.move(canvasBox.x + 100, canvasBox.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(canvasBox.x + 300, canvasBox.y + 250);
+    await page.mouse.up();
+
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+    await expect(textDiv).toBeFocused();
+
+    // Type text with Enter key to create multiple lines
+    await page.keyboard.type('Line one');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('Line two');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('Line three');
+
+    // Finalize
+    await page.mouse.click(canvasBox.x + 450, canvasBox.y + 450);
+    await expect(textDiv).not.toBeVisible();
+
+    await page.waitForTimeout(100);
+
+    // Canvas should have rendered text (annotation exists)
+    const hasText = await canvas.evaluate((canvasEl) => {
+      if (!(canvasEl instanceof HTMLCanvasElement)) return false;
+      const ctx = canvasEl.getContext('2d');
+      if (!ctx) return false;
+      const imageData = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
+      for (let i = 3; i < imageData.data.length; i += 4) {
+        if (imageData.data[i] !== 0) return true;
+      }
+      return false;
+    });
+    expect(hasText).toBe(true);
+  });
+
+  test('should not create annotation when drag is too small', async ({ page }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    // Drag just a tiny amount (below the 40x60 minimum)
+    await page.mouse.move(canvasBox.x + 100, canvasBox.y + 100);
+    await page.mouse.down();
+    await page.mouse.move(canvasBox.x + 110, canvasBox.y + 110);
+    await page.mouse.up();
+
+    await page.waitForTimeout(100);
+
+    // No contenteditable div should appear
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).not.toBeVisible();
+
+    // Nothing to select at that position
+    await page.click('[data-tool="select"]');
+    await page.mouse.click(canvasBox.x + 105, canvasBox.y + 105);
+    await page.waitForTimeout(50);
+
+    const cursor = await canvas.evaluate((el) => window.getComputedStyle(el).cursor);
+    expect(cursor).not.toBe('move');
+    expect(cursor).not.toBe('pointer');
+  });
+
+  test('should keep text content after re-entering edit mode via double-click and clicking away', async ({ page }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 350;
+    const endY = canvasBox.y + 220;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+    await textDiv.evaluate((el, text) => (el.textContent = text), 'Original text');
+
+    // Finalize
+    await page.mouse.click(canvasBox.x + 450, canvasBox.y + 400);
+    await expect(textDiv).not.toBeVisible();
+    await page.waitForTimeout(100);
+
+    // Select the annotation
+    await page.mouse.click(startX + 80, startY + 40);
+    await page.waitForTimeout(100);
+
+    // Double-click to re-enter edit mode
+    await page.mouse.dblclick(startX + 80, startY + 40);
+    await page.waitForTimeout(100);
+
+    await expect(textDiv).toBeVisible();
+
+    // Verify the existing text is still there
+    const currentText = await textDiv.evaluate((el) => el.textContent);
+    expect(currentText).toBe('Original text');
+
+    // Click away to finalize without changing text
+    await page.mouse.click(canvasBox.x + 450, canvasBox.y + 400);
+    await expect(textDiv).not.toBeVisible();
+    await page.waitForTimeout(100);
+
+    // Annotation should still be selectable and text should persist on canvas
+    await page.mouse.click(startX + 80, startY + 40);
+    await page.waitForTimeout(100);
+    await expect(page.locator('[data-tool="select"][aria-selected="true"]')).toBeVisible();
+  });
+
+  test('should deselect text annotation when clicking empty canvas', async ({ page }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(canvasBox.x + 300, canvasBox.y + 200);
+    await page.mouse.up();
+
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+    await textDiv.evaluate((el, text) => (el.textContent = text), 'Some text');
+
+    // Finalize
+    await page.mouse.click(canvasBox.x + 450, canvasBox.y + 400);
+    await expect(textDiv).not.toBeVisible();
+    await page.waitForTimeout(100);
+
+    // Select the annotation
+    await page.mouse.click(startX + 50, startY + 30);
+    await page.waitForTimeout(100);
+
+    // Verify selected (move cursor)
+    await page.mouse.move(startX + 50, startY + 30);
+    await page.waitForTimeout(50);
+    let cursor = await canvas.evaluate((el) => window.getComputedStyle(el).cursor);
+    expect(cursor).toBe('move');
+
+    // Click empty area to deselect
+    await page.mouse.click(canvasBox.x + 450, canvasBox.y + 400);
+    await page.waitForTimeout(100);
+
+    // Hovering over annotation should now show pointer (hover), not move (selected)
+    await page.mouse.move(startX + 50, startY + 30);
+    await page.waitForTimeout(50);
+    cursor = await canvas.evaluate((el) => window.getComputedStyle(el).cursor);
+    expect(cursor).toBe('pointer');
+  });
+
 });
