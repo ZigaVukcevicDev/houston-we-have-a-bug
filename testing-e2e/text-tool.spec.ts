@@ -3383,4 +3383,331 @@ test.describe('Text tool', () => {
     content = await textDiv.textContent();
     expect(content).toContain('TEST');
   });
+
+  test('text should not jump position when entering edit mode (double-click)', async ({
+    page,
+  }) => {
+    // Select text tool
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    // Draw a text box
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+
+    // Type some text
+    await page.keyboard.type('Test position');
+
+    // Get textDiv position while editing (first edit)
+    const textDivBoxDuringFirstEdit = await textDiv.boundingBox();
+    if (!textDivBoxDuringFirstEdit) throw new Error('TextDiv not found');
+
+    // Click outside to finalize (text renders on canvas)
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await page.waitForTimeout(150);
+
+    // Verify textDiv is removed
+    await expect(textDiv).not.toBeVisible();
+
+    // Double-click on the text annotation to enter edit mode again
+    await page.mouse.dblclick(startX + 100, startY + 50);
+    await page.waitForTimeout(100);
+
+    // TextDiv should reappear
+    await expect(textDiv).toBeVisible();
+
+    // Get textDiv position during second edit
+    const textDivBoxDuringSecondEdit = await textDiv.boundingBox();
+    if (!textDivBoxDuringSecondEdit) throw new Error('TextDiv not found during second edit');
+
+    // The positions should match exactly (no jumping)
+    // Allow 1px tolerance for rounding
+    expect(Math.abs(textDivBoxDuringFirstEdit.x - textDivBoxDuringSecondEdit.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(textDivBoxDuringFirstEdit.y - textDivBoxDuringSecondEdit.y)).toBeLessThanOrEqual(1);
+    expect(Math.abs(textDivBoxDuringFirstEdit.width - textDivBoxDuringSecondEdit.width)).toBeLessThanOrEqual(1);
+    expect(Math.abs(textDivBoxDuringFirstEdit.height - textDivBoxDuringSecondEdit.height)).toBeLessThanOrEqual(1);
+  });
+
+
+  test('text should not visually jump when toggling edit mode (screenshot comparison)', async ({
+    page,
+  }) => {
+    // Select text tool
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    // Draw a text box
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+
+    // Type a single character for easier position comparison
+    await page.keyboard.type('A');
+    await page.waitForTimeout(50);
+
+    // Take screenshot while editing (shows textDiv)
+    const screenshotEditing = await page.screenshot({
+      clip: { x: startX - 10, y: startY - 10, width: 250, height: 150 },
+    });
+
+    // Click outside to finalize
+    await page.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await page.waitForTimeout(150);
+
+    // Take screenshot of canvas-rendered text
+    const screenshotCanvas = await page.screenshot({
+      clip: { x: startX - 10, y: startY - 10, width: 250, height: 150 },
+    });
+
+    // Double-click to re-enter edit mode
+    await page.mouse.dblclick(startX + 100, startY + 50);
+    await page.waitForTimeout(100);
+
+    await expect(textDiv).toBeVisible();
+
+    // Take screenshot while editing again
+    const screenshotEditingAgain = await page.screenshot({
+      clip: { x: startX - 10, y: startY - 10, width: 250, height: 150 },
+    });
+
+    // Compare screenshots - editing should look nearly identical before and after
+    // Convert to buffers and compare
+    const editingBuffer1 = Buffer.from(screenshotEditing);
+    const editingBuffer2 = Buffer.from(screenshotEditingAgain);
+
+    // Simple comparison: the screenshots should be very similar
+    // We compare the two editing screenshots (not canvas vs editing, as rendering differs)
+    let diffPixels = 0;
+    const minLen = Math.min(editingBuffer1.length, editingBuffer2.length);
+    for (let i = 0; i < minLen; i++) {
+      if (Math.abs(editingBuffer1[i] - editingBuffer2[i]) > 5) {
+        diffPixels++;
+      }
+    }
+
+    // Allow very small differences (anti-aliasing, etc.)
+    // But if text jumped significantly, there will be many different pixels
+    const diffPercentage = (diffPixels / minLen) * 100;
+    console.log(`Screenshot diff: ${diffPixels} pixels (${diffPercentage.toFixed(2)}%)`);
+
+    // If more than 1% of pixels differ significantly, the text likely jumped
+    expect(diffPercentage).toBeLessThan(1);
+  });
+
+  test('text should not jump on retina display (devicePixelRatio 2)', async ({
+    page,
+    browser,
+  }) => {
+    // Create a new context with device scale factor 2 (retina)
+    const context = await browser.newContext({
+      deviceScaleFactor: 2,
+    });
+    const retinaPage = await context.newPage();
+    await retinaPage.goto('http://localhost:8080/test-page.html');
+
+    // Select text tool
+    await retinaPage.click('[data-tool="text"]');
+
+    const canvas = retinaPage.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    // Draw a text box
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    await retinaPage.mouse.move(startX, startY);
+    await retinaPage.mouse.down();
+    await retinaPage.mouse.move(endX, endY);
+    await retinaPage.mouse.up();
+
+    const textDiv = retinaPage.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+
+    // Type text
+    await retinaPage.keyboard.type('Test retina');
+    await retinaPage.waitForTimeout(50);
+
+    // Get textDiv position while editing
+    const positionDuringFirstEdit = await textDiv.boundingBox();
+    if (!positionDuringFirstEdit) throw new Error('TextDiv not found');
+
+    // Click outside to finalize
+    await retinaPage.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await retinaPage.waitForTimeout(150);
+
+    // Verify textDiv is removed
+    await expect(textDiv).not.toBeVisible();
+
+    // Double-click to re-enter edit mode
+    await retinaPage.mouse.dblclick(startX + 100, startY + 50);
+    await retinaPage.waitForTimeout(100);
+
+    await expect(textDiv).toBeVisible();
+
+    // Get textDiv position during second edit
+    const positionDuringSecondEdit = await textDiv.boundingBox();
+    if (!positionDuringSecondEdit) throw new Error('TextDiv not found');
+
+    // Log positions for debugging
+    console.log('Retina test - First edit position:', positionDuringFirstEdit);
+    console.log('Retina test - Second edit position:', positionDuringSecondEdit);
+
+    const xDiff = Math.abs(positionDuringFirstEdit.x - positionDuringSecondEdit.x);
+    const yDiff = Math.abs(positionDuringFirstEdit.y - positionDuringSecondEdit.y);
+    console.log('Retina test - X diff:', xDiff, 'Y diff:', yDiff);
+
+    // Positions should match within 1px tolerance
+    expect(xDiff).toBeLessThanOrEqual(1);
+    expect(yDiff).toBeLessThanOrEqual(1);
+
+    await context.close();
+  });
+
+  test('canvas text pixel position matches textDiv on retina (devicePixelRatio 2)', async ({
+    browser,
+  }) => {
+    // Create a new context with device scale factor 2 (retina)
+    const context = await browser.newContext({
+      deviceScaleFactor: 2,
+    });
+    const retinaPage = await context.newPage();
+    await retinaPage.goto('http://localhost:8080/test-page.html');
+
+    // Select text tool
+    await retinaPage.click('[data-tool="text"]');
+
+    const canvas = retinaPage.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    // Draw a text box
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    await retinaPage.mouse.move(startX, startY);
+    await retinaPage.mouse.down();
+    await retinaPage.mouse.move(endX, endY);
+    await retinaPage.mouse.up();
+
+    const textDiv = retinaPage.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+
+    // Type text
+    await retinaPage.keyboard.type('X');
+
+    // Click outside to finalize
+    await retinaPage.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await retinaPage.waitForTimeout(150);
+
+    // Measure topmost red pixel on canvas
+    const canvasTopPixel = await canvas.evaluate((canvasEl) => {
+      if (!(canvasEl instanceof HTMLCanvasElement)) return null;
+      const ctx = canvasEl.getContext('2d');
+      if (!ctx) return null;
+
+      const rect = canvasEl.getBoundingClientRect();
+      const scaleY = canvasEl.height / rect.height;
+
+      const imageData = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
+      const data = imageData.data;
+
+      for (let y = 0; y < canvasEl.height; y++) {
+        for (let x = 0; x < canvasEl.width; x++) {
+          const i = (y * canvasEl.width + x) * 4;
+          const red = data[i];
+          const green = data[i + 1];
+          const blue = data[i + 2];
+          const alpha = data[i + 3];
+
+          if (red > 200 && green < 100 && blue < 100 && alpha > 100) {
+            return { canvasY: y, screenY: y / scaleY + rect.top, scaleY };
+          }
+        }
+      }
+      return null;
+    });
+
+    if (!canvasTopPixel) throw new Error('No text found on canvas');
+
+    // Double-click to enter edit mode
+    await retinaPage.mouse.dblclick(startX + 100, startY + 50);
+    await retinaPage.waitForTimeout(100);
+    await expect(textDiv).toBeVisible();
+
+    // Click outside again to finalize (with textDiv text)
+    await retinaPage.mouse.click(canvasBox.x + 400, canvasBox.y + 400);
+    await retinaPage.waitForTimeout(150);
+
+    // Measure topmost red pixel on canvas again (after round-trip through textDiv)
+    const canvasTopPixelAfter = await canvas.evaluate((canvasEl) => {
+      if (!(canvasEl instanceof HTMLCanvasElement)) return null;
+      const ctx = canvasEl.getContext('2d');
+      if (!ctx) return null;
+
+      const rect = canvasEl.getBoundingClientRect();
+      const scaleY = canvasEl.height / rect.height;
+
+      const imageData = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
+      const data = imageData.data;
+
+      for (let y = 0; y < canvasEl.height; y++) {
+        for (let x = 0; x < canvasEl.width; x++) {
+          const i = (y * canvasEl.width + x) * 4;
+          const red = data[i];
+          const green = data[i + 1];
+          const blue = data[i + 2];
+          const alpha = data[i + 3];
+
+          if (red > 200 && green < 100 && blue < 100 && alpha > 100) {
+            return { canvasY: y, screenY: y / scaleY + rect.top, scaleY };
+          }
+        }
+      }
+      return null;
+    });
+
+    if (!canvasTopPixelAfter) throw new Error('No text found on canvas after round-trip');
+
+    console.log('Retina - Canvas text Y before:', canvasTopPixel.screenY);
+    console.log('Retina - Canvas text Y after:', canvasTopPixelAfter.screenY);
+
+    const yDiff = Math.abs(canvasTopPixel.screenY - canvasTopPixelAfter.screenY);
+    console.log('Retina - Y difference:', yDiff);
+
+    // Text should render at the same position before and after editing
+    expect(yDiff).toBeLessThanOrEqual(1);
+
+    await context.close();
+  });
+
 });

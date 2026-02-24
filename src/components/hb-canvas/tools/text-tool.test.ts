@@ -926,20 +926,18 @@ describe('TextTool', () => {
       const renderedX = firstCall[1];
       const renderedY = firstCall[2];
 
-      // Expected position calculation with alphabetic baseline:
+      // Expected position calculation with textBaseline = 'top':
       // strokeRect centers 2px border: inner edge at x + 1
       // Textarea padding: 5px
-      // Half-leading: (18 - 15) / 2 = 1.5px
-      // Ascent: 15 * 0.9 = 13.5px
-      // Total Y offset: 1 + 5 + 1.5 + 13.5 = 21px
+      // Half-leading: (19.2 - 16) / 2 = 1.6px
+      // No ascent needed — textBaseline='top' aligns em-square top, matching CSS em-box top
+      // Total Y offset: 1 + 5 + 1.6 = 7.6px
       const borderOffset = 1;
       const padding = 5;
       const cssLineHeight = annotation.fontSize * 1.2;
       const halfLeading = (cssLineHeight - annotation.fontSize) / 2;
-      const ascent = annotation.fontSize * 0.9;
       const expectedX = annotation.x + borderOffset + padding;
-      const expectedY =
-        annotation.y + borderOffset + padding + halfLeading + ascent;
+      const expectedY = annotation.y + borderOffset + padding + halfLeading;
 
       expect(renderedX).toBe(expectedX);
       expect(renderedY).toBe(expectedY);
