@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trip to the Moon — Book Your Journey</title>
+<title>Book Your Journey</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --yellow: #F5C300;
-    --red: #D63B2F;
-    --dark: #0a0a0f;
-    --mid: #14141e;
-    --light: #f0ece0;
-    --gray: #888;
+    --yellow: #ffffff;
+    --red: #cccccc;
+    --dark: #0a0a0a;
+    --mid: #141414;
+    --light: #e8e8e8;
+    --gray: #666666;
   }
 
   body {
@@ -24,14 +24,15 @@
     min-height: 100vh;
   }
 
-  /* NAV */
+  /* NET */
   nav {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 18px 48px;
+    justify-content: flex-start;
+    gap: 48px;
+    padding: 18px 120px;
     background: var(--dark);
-    border-bottom: 1px solid #1e1e2e;
+    border-bottom: 1px solid #1e1e1e;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -58,7 +59,7 @@
   .nav-links a:hover { opacity: 1; }
   .nav-cta {
     background: var(--yellow);
-    color: var(--dark);
+    color: #0a0a0a;
     border: none;
     padding: 10px 24px;
     font-family: 'DM Sans', sans-serif;
@@ -76,12 +77,12 @@
     overflow: hidden;
   }
   .hero-left {
-    padding: 72px 48px;
+    padding: 72px 120px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     gap: 24px;
-    background: linear-gradient(135deg, #0a0a0f 60%, #14141e);
+    background: linear-gradient(135deg, #07090f 60%, #0d1a10);
   }
   .hero-tag {
     display: inline-block;
@@ -111,12 +112,12 @@
   .hero-actions {
     display: flex;
     gap: 12px;
-    align-items: center;
+    align-items: stretch;
     margin-top: 8px;
   }
   .btn-primary {
     background: var(--yellow);
-    color: var(--dark);
+    color: #0a0a0a;
     border: none;
     padding: 14px 32px;
     font-family: 'DM Sans', sans-serif;
@@ -131,7 +132,7 @@
   .btn-secondary {
     background: transparent;
     color: var(--light);
-    border: 1px solid #333;
+    border: 1px solid #2a2a2a;
     padding: 14px 32px;
     font-family: 'DM Sans', sans-serif;
     font-weight: 500;
@@ -153,13 +154,14 @@
   /* STATS BAR */
   .stats {
     display: flex;
-    background: var(--yellow);
-    color: var(--dark);
+    background: #ffffff;
+    color: #0a0a0a;
   }
   .stat {
     flex: 1;
     padding: 20px 32px;
     border-right: 1px solid rgba(0,0,0,0.15);
+    text-align: center;
   }
   .stat:last-child { border-right: none; }
   .stat-num {
@@ -178,7 +180,7 @@
 
   /* DESTINATIONS */
   .section {
-    padding: 72px 48px;
+    padding: 72px 120px;
   }
   .section-header {
     display: flex;
@@ -211,7 +213,7 @@
     background: var(--mid);
     border-radius: 6px;
     overflow: hidden;
-    border: 1px solid #1e1e2e;
+    border: 1px solid #1e1e1e;
     cursor: pointer;
     transition: transform 0.2s, border-color 0.2s;
   }
@@ -269,7 +271,7 @@
   }
   .btn-book {
     background: var(--yellow);
-    color: var(--dark);
+    color: #0a0a0a;
     border: none;
     padding: 8px 18px;
     font-family: 'DM Sans', sans-serif;
@@ -282,14 +284,14 @@
   /* BOOKING FORM */
   .booking-section {
     background: var(--mid);
-    border-top: 1px solid #1e1e2e;
-    border-bottom: 1px solid #1e1e2e;
+    border-top: 1px solid #1e1e1e;
+    border-bottom: 1px solid #1e1e1e;
   }
   .booking-inner {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 64px;
-    padding: 72px 48px;
+    padding: 72px 120px;
   }
   .form-title {
     font-family: 'Bebas Neue', sans-serif;
@@ -321,7 +323,7 @@
     background: #0a0a0f;
     border: 1px solid #2a2a3a;
     color: var(--light);
-    padding: 12px 16px;
+    padding: 12px 40px 12px 16px;
     font-family: 'DM Sans', sans-serif;
     font-size: 14px;
     border-radius: 4px;
@@ -330,6 +332,14 @@
   }
   input:focus, select:focus {
     border-color: var(--yellow);
+  }
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 44px;
   }
   select option { background: #0a0a0f; }
   .form-row {
@@ -340,7 +350,7 @@
   .btn-submit {
     width: 100%;
     background: var(--yellow);
-    color: var(--dark);
+    color: #0a0a0a;
     border: none;
     padding: 16px;
     font-family: 'DM Sans', sans-serif;
@@ -355,7 +365,7 @@
   /* ORDER SUMMARY */
   .order-summary {
     background: #0a0a0f;
-    border: 1px solid #1e1e2e;
+    border: 1px solid #1e1e1e;
     border-radius: 6px;
     padding: 32px;
     height: fit-content;
@@ -366,7 +376,7 @@
     letter-spacing: 1px;
     margin-bottom: 24px;
     padding-bottom: 16px;
-    border-bottom: 1px solid #1e1e2e;
+    border-bottom: 1px solid #1e1e1e;
   }
   .summary-dest {
     background: url('https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=600&q=80') center/cover;
@@ -395,7 +405,7 @@
   .summary-row .label { color: var(--gray); }
   .summary-divider {
     border: none;
-    border-top: 1px solid #1e1e2e;
+    border-top: 1px solid #1e1e1e;
     margin: 16px 0;
   }
   .summary-total {
@@ -415,7 +425,7 @@
   }
   .review-card {
     background: var(--mid);
-    border: 1px solid #1e1e2e;
+    border: 1px solid #1e1e1e;
     border-radius: 6px;
     padding: 24px;
   }
@@ -459,8 +469,8 @@
   /* FOOTER */
   footer {
     background: var(--mid);
-    border-top: 1px solid #1e1e2e;
-    padding: 32px 48px;
+    border-top: 1px solid #1e1e1e;
+    padding: 32px 120px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -487,21 +497,20 @@
   }
 
   /* intentional "bugs" for demo */
-  .broken-icon::before { content: '🛒'; } /* wrong icon - should be rocket */
-  .misaligned { margin-top: -6px; } /* slight misalignment */
+  .broken-icon::before { content: '»'; font-size: 26px; line-height: 1; } /* wrong icon - should be rocket */
+  .misaligned { margin-top: -14px; margin-left: 8px; } /* obvious misalignment */
 </style>
 </head>
 <body>
 
 <nav>
-  <div class="nav-logo">🚀 TRIP TO THE MOON</div>
-  <ul class="nav-links">
+  <ul class="nav-links" style="flex: 1;">
     <li><a href="#">Destinations</a></li>
     <li><a href="#">How it works</a></li>
     <li><a href="#">About</a></li>
     <li><a href="#">FAQ</a></li>
   </ul>
-  <button class="nav-cta">Sign in</button>
+
 </nav>
 
 <section class="hero">
@@ -520,7 +529,7 @@
 
 <div class="stats">
   <div class="stat">
-    <div class="stat-num">1,240</div>
+    <div class="stat-num">1.240</div>
     <div class="stat-label">Travelers launched</div>
   </div>
   <div class="stat">
@@ -528,44 +537,44 @@
     <div class="stat-label">Destinations</div>
   </div>
   <div class="stat">
-    <div class="stat-num">98.7%</div>
+    <div class="stat-num">98,7%</div>
     <div class="stat-label">Safe return rate</div>
   </div>
   <div class="stat">
     <!-- BUG: misaligned stat number -->
-    <div class="stat-num misaligned">4.9★</div>
+    <div class="stat-num misaligned">4,9★</div>
     <div class="stat-label">Average rating</div>
   </div>
 </div>
 
 <section class="section">
   <div class="section-header">
-    <h2 class="section-title">AVAILABLE <span>DESTINATIONS</span></h2>
+    <h2 class="section-title">ETAILABLE <span>DESTINATIONS</span></h2>
     <a class="view-all">View all →</a>
   </div>
   <div class="destinations">
     <div class="dest-card">
       <div class="dest-img" style="background-image: url('https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?w=600&q=80')">
-        <span class="dest-badge">Most popular</span>
+        <span class="dest-badge" style="background: transparent; color: #ffffff; border: 1px solid #ffffff;">Most popular</span>
       </div>
       <div class="dest-info">
-        <div class="dest-name">LUNAR BASE ALPHA</div>
+        <div class="dest-name">Lunar base alpha</div>
         <div class="dest-meta">Moon · 3 days · Departs weekly</div>
         <div class="dest-footer">
-          <div class="dest-price">$240,000 <span>/ person</span></div>
+          <div class="dest-price">240.000 € <span>/ person</span></div>
           <button class="btn-book">Book now</button>
         </div>
       </div>
     </div>
     <div class="dest-card">
       <div class="dest-img" style="background-image: url('https://images.unsplash.com/photo-1545156521-77bd85671d30?w=600&q=80')">
-        <span class="dest-badge" style="background: #1a6b3a;">New route</span>
+        <span class="dest-badge" style="background: transparent; color: #ffffff; border: 1px solid #ffffff;">New route</span>
       </div>
       <div class="dest-info">
-        <div class="dest-name">MARS COLONY ONE</div>
+        <div class="dest-name">Mars colony one</div>
         <div class="dest-meta">Mars · 14 days · Monthly departures</div>
         <div class="dest-footer">
-          <div class="dest-price">$1,800,000 <span>/ person</span></div>
+          <div class="dest-price">1.800.000 € <span>/ person</span></div>
           <button class="btn-book">Book now</button>
         </div>
       </div>
@@ -574,10 +583,10 @@
       <div class="dest-img" style="background-image: url('https://images.unsplash.com/photo-1610296669228-602fa827fc1f?w=600&q=80')">
       </div>
       <div class="dest-info">
-        <div class="dest-name">ISS ORBITAL STAY</div>
-        <div class="dest-meta">Low Earth Orbit · 7 days · Biweekly</div>
+        <div class="dest-name">Orbital hotel zenith</div>
+        <div class="dest-meta">Low earth orbit · 7 days · Biweekly</div>
         <div class="dest-footer">
-          <div class="dest-price">$95,000 <span>/ person</span></div>
+          <div class="dest-price">95.000 € <span>/ person</span></div>
           <button class="btn-book">Book now</button>
         </div>
       </div>
@@ -594,24 +603,24 @@
         <div class="form-row">
           <div class="form-group">
             <label>First name</label>
-            <input type="text" placeholder="Neil">
+            <input type="text" placeholder="James">
           </div>
           <div class="form-group">
             <label>Last name</label>
-            <input type="text" placeholder="Armstrong">
+            <input type="text" placeholder="Carter">
           </div>
         </div>
         <div class="form-group">
           <label>Email address</label>
-          <input type="email" placeholder="neil@nasa.gov">
+          <input type="email" placeholder="james.carter@email.com">
         </div>
         <div class="form-row">
           <div class="form-group">
             <label>Destination</label>
             <select>
-              <option>Lunar Base Alpha</option>
-              <option>Mars Colony One</option>
-              <option>ISS Orbital Stay</option>
+              <option>Lunar base alpha</option>
+              <option>Mars colony one</option>
+              <option>Orbital hotel zenith</option>
             </select>
           </div>
           <div class="form-group">
@@ -633,11 +642,11 @@
     <div class="order-summary">
       <div class="summary-title">ORDER SUMMARY</div>
       <div class="summary-dest">
-        <div class="summary-dest-label">Lunar Base Alpha</div>
+        <div class="summary-dest-label">Lunar base alpha</div>
       </div>
       <div class="summary-row">
         <span class="label">Destination</span>
-        <span>Lunar Base Alpha</span>
+        <span>Lunar base alpha</span>
       </div>
       <div class="summary-row">
         <span class="label">Duration</span>
@@ -654,16 +663,16 @@
       <hr class="summary-divider">
       <div class="summary-row">
         <span class="label">Subtotal</span>
-        <span>$240,000</span>
+        <span>240.000 €</span>
       </div>
       <div class="summary-row">
         <span class="label">Space tax (5%)</span>
-        <span>$12,000</span>
+        <span>12.000 €</span>
       </div>
       <hr class="summary-divider">
       <div class="summary-total">
         <span>Total</span>
-        <span>$252,000</span>
+        <span>252.000 €</span>
       </div>
     </div>
   </div>
@@ -671,28 +680,28 @@
 
 <section class="section">
   <div class="section-header">
-    <h2 class="section-title">TRAVELER <span>REVIEWS</span></h2>
+    <h2 class="section-title">TREVELER <span>REVIEWS</span></h2>
   </div>
   <div class="reviews">
     <div class="review-card">
       <div class="review-stars">★★★★★</div>
       <p class="review-text">"Watching Earth from the lunar surface was the most humbling experience of my life. The crew was professional and the facilities exceeded expectations."</p>
       <div class="review-author">
-        <div class="review-avatar">JK</div>
+        <div class="review-avatar">SM</div>
         <div>
-          <div class="review-name">Jana Kovač</div>
-          <div class="review-date">Lunar Base Alpha · Feb 2025</div>
+          <div class="review-name">Sarah Mitchell</div>
+          
         </div>
       </div>
     </div>
     <div class="review-card">
       <div class="review-stars">★★★★★</div>
-      <p class="review-text">"Zero gravity breakfast is something I'll never forget. The ISS stay was worth every penny. Already planning my Mars trip for next year."</p>
+      <p class="review-text">"Zero gravity breakfast is something I'll never forget. The orbital stay was worth every penny. Already planning my Mars trip for next year."</p>
       <div class="review-author">
-        <div class="review-avatar">MP</div>
+        <div class="review-avatar">DR</div>
         <div>
-          <div class="review-name">Marko Petrovič</div>
-          <div class="review-date">ISS Orbital Stay · Jan 2025</div>
+          <div class="review-name">David Reynolds</div>
+          
         </div>
       </div>
     </div>
@@ -700,10 +709,10 @@
       <div class="review-stars">★★★★☆</div>
       <p class="review-text">"Incredible journey to Mars. The 14-day trip felt too short. My only complaint — the booking button icon doesn't match what I expected."</p>
       <div class="review-author">
-        <div class="review-avatar">AV</div>
+        <div class="review-avatar">ET</div>
         <div>
-          <div class="review-name">Ana Vidmar</div>
-          <div class="review-date">Mars Colony One · Dec 2024</div>
+          <div class="review-name">Emily Torres</div>
+          
         </div>
       </div>
     </div>
@@ -711,13 +720,9 @@
 </section>
 
 <footer>
-  <div class="footer-logo">🚀 TRIP TO THE MOON</div>
-  <ul class="footer-links">
-    <li><a href="#">Privacy</a></li>
-    <li><a href="#">Terms</a></li>
-    <li><a href="#">Contact</a></li>
-  </ul>
-  <div class="footer-copy">© 2025 Trip to the Moon Inc.</div>
+  <div></div>
+
+  <div class="footer-copy">© All rights reserved.</div>
 </footer>
 
 </body>
