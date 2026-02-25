@@ -3912,4 +3912,68 @@ test.describe('Text tool', () => {
     expect(cursor).toBe('pointer');
   });
 
+  test('should drag text box without selecting it first', async ({ page }) => {
+    await page.click('[data-tool="text"]');
+
+    const canvas = page.locator('canvas');
+    const canvasBox = await canvas.boundingBox();
+    if (!canvasBox) throw new Error('Canvas not found');
+
+    const startX = canvasBox.x + 100;
+    const startY = canvasBox.y + 100;
+    const endX = canvasBox.x + 300;
+    const endY = canvasBox.y + 200;
+
+    // Draw text box
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+
+    // Type some text and click outside to deselect
+    const textDiv = page.locator('div[contenteditable="true"]');
+    await expect(textDiv).toBeVisible();
+    await textDiv.evaluate((el, text) => (el.textContent = text), 'Drag me');
+    await page.mouse.click(canvasBox.x + 450, canvasBox.y + 400);
+    await expect(textDiv).not.toBeVisible();
+
+    // Click empty area to ensure annotation is deselected
+    await page.mouse.click(canvasBox.x + 450, canvasBox.y + 400);
+    await page.waitForTimeout(100);
+
+    // Without clicking to select first, drag the text box from its center
+    const centerX = startX + 100;
+    const centerY = startY + 50;
+    const dragDeltaX = 150;
+    const dragDeltaY = 100;
+
+    await page.mouse.move(centerX, centerY);
+    await page.waitForTimeout(50);
+
+    // Verify hover cursor (pointer) before drag starts
+    let cursor = await canvas.evaluate((el) => window.getComputedStyle(el).cursor);
+    expect(cursor).toBe('pointer');
+
+    // Start drag without prior click-to-select
+    await page.mouse.down();
+    await page.mouse.move(centerX + dragDeltaX, centerY + dragDeltaY, { steps: 5 });
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // The annotation should now be at the new position — verify by checking
+    // that the cursor is 'move' at the new position (annotation is selected and hovered)
+    await page.mouse.move(centerX + dragDeltaX, centerY + dragDeltaY);
+    await page.waitForTimeout(50);
+    cursor = await canvas.evaluate((el) => window.getComputedStyle(el).cursor);
+    expect(cursor).toBe('move');
+
+    // Original position should no longer contain the annotation (cursor resets to default)
+    await page.mouse.click(canvasBox.x + 450, canvasBox.y + 400); // deselect
+    await page.waitForTimeout(50);
+    await page.mouse.move(centerX, centerY); // hover over original position
+    await page.waitForTimeout(50);
+    cursor = await canvas.evaluate((el) => window.getComputedStyle(el).cursor);
+    expect(cursor).not.toBe('pointer');
+  });
+
 });

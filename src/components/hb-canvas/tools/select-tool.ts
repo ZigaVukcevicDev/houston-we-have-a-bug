@@ -352,7 +352,20 @@ export class SelectTool implements Tool {
     }
 
     // Allow dragging hovered (not selected) annotations immediately
-    // Check rectangles first (iterate backwards for most recent)
+    // Check text boxes first (iterate backwards for most recent)
+    for (let i = this.textAnnotations.length - 1; i >= 0; i--) {
+      if (this.isPointOnTextBox(x, y, this.textAnnotations[i], canvas)) {
+        this.selectedAnnotationId = this.textAnnotations[i].id;
+        this.selectedAnnotationType = 'text';
+        this.draggingLine = true;
+        this.dragOffset = { x, y };
+        canvas.style.cursor = 'move';
+        this.onRedraw();
+        return;
+      }
+    }
+
+    // Check rectangles (iterate backwards for most recent)
     for (let i = this.rectangleAnnotations.length - 1; i >= 0; i--) {
       if (this.isPointOnRectangle(x, y, this.rectangleAnnotations[i])) {
         this.selectedAnnotationId = this.rectangleAnnotations[i].id;
