@@ -1463,6 +1463,314 @@ describe('SelectTool', () => {
       expect(textAnnotations[0].y).toBe(originalY + 30);
     });
 
+    it('should set move cursor immediately when starting text box direct drag', () => {
+      const textAnnotations: TextAnnotation[] = [
+        {
+          id: 'text-1',
+          x: 100,
+          y: 400,
+          width: 200,
+          height: 100,
+          text: 'Hello',
+          color: '#E74C3C',
+          fontSize: 16,
+        },
+      ];
+      const tool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        textAnnotations,
+        mockRedraw
+      );
+
+      tool.handleMouseDown(
+        { clientX: 150, clientY: 450 } as MouseEvent,
+        mockCanvas
+      );
+
+      expect(mockCanvas.style.cursor).toBe('move');
+    });
+
+    it('should select topmost text box when multiple overlap on direct drag', () => {
+      const textAnnotations: TextAnnotation[] = [
+        {
+          id: 'text-bottom',
+          x: 100,
+          y: 400,
+          width: 200,
+          height: 100,
+          text: 'Bottom',
+          color: '#E74C3C',
+          fontSize: 16,
+        },
+        {
+          id: 'text-top',
+          x: 120,
+          y: 420,
+          width: 160,
+          height: 60,
+          text: 'Top',
+          color: '#E74C3C',
+          fontSize: 16,
+        },
+      ];
+      const tool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        textAnnotations,
+        mockRedraw
+      );
+
+      // Click inside both boxes — should pick the topmost (last in array)
+      tool.handleMouseDown(
+        { clientX: 150, clientY: 450 } as MouseEvent,
+        mockCanvas
+      );
+
+      expect(tool['selectedAnnotationId']).toBe('text-top');
+      expect(tool['draggingLine']).toBe(true);
+    });
+
+    it('should set wasDragging after moving an unselected text box', () => {
+      const textAnnotations: TextAnnotation[] = [
+        {
+          id: 'text-1',
+          x: 100,
+          y: 400,
+          width: 200,
+          height: 100,
+          text: 'Hello',
+          color: '#E74C3C',
+          fontSize: 16,
+        },
+      ];
+      const tool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        textAnnotations,
+        mockRedraw
+      );
+
+      tool.handleMouseDown(
+        { clientX: 150, clientY: 450 } as MouseEvent,
+        mockCanvas
+      );
+      tool.handleMouseMove(
+        { clientX: 170, clientY: 460 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(tool['wasDragging']).toBe(true);
+    });
+
+    it('should clear drag state on mouseUp after text box direct drag', () => {
+      const textAnnotations: TextAnnotation[] = [
+        {
+          id: 'text-1',
+          x: 100,
+          y: 400,
+          width: 200,
+          height: 100,
+          text: 'Hello',
+          color: '#E74C3C',
+          fontSize: 16,
+        },
+      ];
+      const tool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        textAnnotations,
+        mockRedraw
+      );
+
+      tool.handleMouseDown(
+        { clientX: 150, clientY: 450 } as MouseEvent,
+        mockCanvas
+      );
+      tool.handleMouseMove(
+        { clientX: 170, clientY: 460 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+      tool.handleMouseUp();
+
+      expect(tool['draggingLine']).toBe(false);
+      expect(tool['draggingHandle']).toBeNull();
+    });
+
+    it('should suppress the post-drag click and keep text box selected', () => {
+      const textAnnotations: TextAnnotation[] = [
+        {
+          id: 'text-1',
+          x: 100,
+          y: 400,
+          width: 200,
+          height: 100,
+          text: 'Hello',
+          color: '#E74C3C',
+          fontSize: 16,
+        },
+      ];
+      const tool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        textAnnotations,
+        mockRedraw
+      );
+
+      // Simulate direct drag
+      tool.handleMouseDown(
+        { clientX: 150, clientY: 450 } as MouseEvent,
+        mockCanvas
+      );
+      tool.handleMouseMove(
+        { clientX: 170, clientY: 460 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+      tool.handleMouseUp();
+
+      // Browser fires a click event after mouseup at an empty position
+      tool.handleClick(
+        { clientX: 500, clientY: 500 } as MouseEvent,
+        mockCanvas
+      );
+
+      // click should have been suppressed — text box stays selected
+      expect(tool['selectedAnnotationId']).toBe('text-1');
+      expect(tool['wasDragging']).toBe(false); // flag is consumed
+    });
+
+    it('should switch to another text box when a different one is selected and not hit', () => {
+      const textAnnotations: TextAnnotation[] = [
+        {
+          id: 'text-1',
+          x: 100,
+          y: 400,
+          width: 100,
+          height: 60,
+          text: 'First',
+          color: '#E74C3C',
+          fontSize: 16,
+        },
+        {
+          id: 'text-2',
+          x: 400,
+          y: 400,
+          width: 100,
+          height: 60,
+          text: 'Second',
+          color: '#E74C3C',
+          fontSize: 16,
+        },
+      ];
+      const tool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        textAnnotations,
+        mockRedraw
+      );
+
+      // text-1 is currently selected
+      tool['selectedAnnotationId'] = 'text-1';
+      tool['selectedAnnotationType'] = 'text';
+
+      // Click inside text-2 (not the selected one)
+      tool.handleMouseDown(
+        { clientX: 430, clientY: 430 } as MouseEvent,
+        mockCanvas
+      );
+
+      // Should switch to text-2 and start dragging
+      expect(tool['selectedAnnotationId']).toBe('text-2');
+      expect(tool['selectedAnnotationType']).toBe('text');
+      expect(tool['draggingLine']).toBe(true);
+    });
+
+    it('should not start drag when clicking empty space with no text box', () => {
+      const textAnnotations: TextAnnotation[] = [
+        {
+          id: 'text-1',
+          x: 100,
+          y: 400,
+          width: 200,
+          height: 100,
+          text: 'Hello',
+          color: '#E74C3C',
+          fontSize: 16,
+        },
+      ];
+      const tool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        textAnnotations,
+        mockRedraw
+      );
+
+      // Click outside the text box, outside any line or rectangle
+      tool.handleMouseDown(
+        { clientX: 500, clientY: 500 } as MouseEvent,
+        mockCanvas
+      );
+
+      expect(tool['draggingLine']).toBe(false);
+      expect(tool['draggingHandle']).toBeNull();
+      expect(tool['selectedAnnotationId']).toBeNull();
+    });
+
+    it('should accumulate position correctly across multiple move events', () => {
+      const textAnnotations: TextAnnotation[] = [
+        {
+          id: 'text-1',
+          x: 100,
+          y: 400,
+          width: 200,
+          height: 100,
+          text: 'Hello',
+          color: '#E74C3C',
+          fontSize: 16,
+        },
+      ];
+      const tool = new SelectTool(
+        lineAnnotations,
+        arrowAnnotations,
+        rectangleAnnotations,
+        textAnnotations,
+        mockRedraw
+      );
+
+      const originalX = textAnnotations[0].x;
+      const originalY = textAnnotations[0].y;
+
+      tool.handleMouseDown(
+        { clientX: 150, clientY: 450 } as MouseEvent,
+        mockCanvas
+      );
+      // First move: +20, +10
+      tool.handleMouseMove(
+        { clientX: 170, clientY: 460 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+      // Second move: +30, +20
+      tool.handleMouseMove(
+        { clientX: 200, clientY: 480 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(textAnnotations[0].x).toBe(originalX + 50);
+      expect(textAnnotations[0].y).toBe(originalY + 30);
+    });
+
     it('should prioritize selected annotation over hovered annotation', () => {
       // Select line-1
       selectTool['selectedAnnotationId'] = 'line-1';
