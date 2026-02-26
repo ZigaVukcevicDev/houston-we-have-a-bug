@@ -402,6 +402,80 @@ describe('TextTool', () => {
       // Textarea should still exist for multiline input
       expect(getTextDiv()).toBeTruthy();
     });
+
+    it('should press Escape without removing annotation when textDiv has no annotationId', () => {
+      // Create a textDiv manually without annotationId
+      const div = document.createElement('div');
+      div.contentEditable = 'true';
+      document.body.appendChild(div);
+      textTool['textDiv'] = div;
+
+      const annotation = {
+        id: 'test-no-escape-id',
+        x: 50, y: 50, width: 200, height: 100,
+        text: 'Keep me', color: '#E74C3C', fontSize: 16,
+      };
+      textTool['annotations'] = [annotation];
+
+      // Call handler directly since listener isn't registered on manually created div
+      const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
+      Object.defineProperty(escapeEvent, 'preventDefault', { value: vi.fn() });
+      textTool['handleTextDivKeydown'](escapeEvent);
+
+      // Annotation should remain since no annotationId was set
+      expect(textTool['annotations']).toHaveLength(1);
+      expect(annotation.text).toBe('Keep me');
+    });
+
+    it('should press Escape with non-existent annotationId without crashing', () => {
+      // Create a textDiv with an annotationId that doesn't match any annotation
+      const div = document.createElement('div');
+      div.contentEditable = 'true';
+      div.dataset.annotationId = 'non-existent-id';
+      document.body.appendChild(div);
+      textTool['textDiv'] = div;
+
+      const annotation = {
+        id: 'other-id',
+        x: 50, y: 50, width: 200, height: 100,
+        text: 'Keep me', color: '#E74C3C', fontSize: 16,
+      };
+      textTool['annotations'] = [annotation];
+
+      // Call handler directly since listener isn't registered on manually created div
+      const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
+      Object.defineProperty(escapeEvent, 'preventDefault', { value: vi.fn() });
+      textTool['handleTextDivKeydown'](escapeEvent);
+
+      // The 'other-id' annotation should remain since 'non-existent-id' was not found
+      expect(textTool['annotations']).toHaveLength(1);
+    });
+
+    it('should not change pointerEvents when Enter is pressed and pointerEvents is already auto', () => {
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseMove(
+        { clientX: 300, clientY: 250 } as MouseEvent,
+        mockCanvas
+      );
+      textTool.handleMouseUp(
+        { clientX: 300, clientY: 250 } as MouseEvent,
+        mockCanvas
+      );
+
+      const textDiv = getTextDiv()!;
+      // Manually set pointerEvents to 'auto' (already enabled)
+      textDiv.style.pointerEvents = 'auto';
+
+      // Call handler directly to exercise the `pointerEvents !== 'none'` false branch
+      const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
+      textTool['handleTextDivKeydown'](enterEvent);
+
+      // pointerEvents should still be 'auto'
+      expect(textDiv.style.pointerEvents).toBe('auto');
+    });
   });
 
   describe('rendering', () => {
@@ -439,6 +513,28 @@ describe('TextTool', () => {
       // Border is now rendered by SelectTool based on selection/hover state
       // TextTool only renders the text content
       expect(mockCtx.fillText).toHaveBeenCalled();
+    });
+
+    it('should skip text rendering for annotation with empty text', () => {
+      textTool['annotations'] = [
+        {
+          id: 'test-empty',
+          x: 50,
+          y: 50,
+          width: 200,
+          height: 100,
+          text: '',
+          color: '#E74C3C',
+          fontSize: 16,
+        },
+      ];
+
+      const fillTextCalls = mockCtx.fillText as Mock;
+      fillTextCalls.mockClear();
+      textTool.render(mockCtx);
+
+      // No text should be rendered for empty annotation
+      expect(mockCtx.fillText).not.toHaveBeenCalled();
     });
 
     it('should skip rendering annotation that is currently being edited (avoid double rendering)', () => {
@@ -607,6 +703,99 @@ describe('TextTool', () => {
       // Should not activate editing
       expect(textTool.isTextEditingActive()).toBe(false);
       expect(textTool.getEditingAnnotationId()).toBeNull();
+    });
+
+    it('should use empty string fallback when annotation text is falsy', () => {
+      textTool['annotations'] = [
+        {
+          id: 'annotation-empty',
+          x: 50,
+          y: 50,
+          width: 200,
+          height: 100,
+          text: '',
+          color: '#E74C3C',
+          fontSize: 16,
+        },
+      ];
+
+      textTool.startEditingAnnotation('annotation-empty', mockCanvas);
+
+      expect(textTool.isTextEditingActive()).toBe(true);
+      expect(textTool.getEditingAnnotationId()).toBe('annotation-empty');
+    });
+
+    it('should update annotation text when finalizing a text div with annotationId set', () => {
+      const annotation = {
+        id: 'ann-update',
+        x: 50,
+        y: 50,
+        width: 200,
+        height: 100,
+        text: 'Original',
+        color: '#E74C3C',
+        fontSize: 16,
+      };
+      textTool['annotations'] = [annotation];
+
+      // startEditingAnnotation sets dataset.annotationId on the textDiv
+      textTool.startEditingAnnotation('ann-update', mockCanvas);
+      expect(textTool.isTextEditingActive()).toBe(true);
+
+      // Directly call finalizeTextDiv to exercise the annotationId branch
+      textTool['finalizeTextDiv']();
+
+      // annotation.text should have been touched (set to innerText value, likely '')
+      expect(annotation.text).toBeDefined();
+      expect(textTool.isTextEditingActive()).toBe(false);
+    });
+
+    it('should do nothing when finalizeTextDiv is called with no textDiv', () => {
+      // Ensure textDiv is null
+      textTool['textDiv'] = null;
+      // Should not throw
+      expect(() => textTool['finalizeTextDiv']()).not.toThrow();
+    });
+
+    it('should skip annotation update when textDiv has no annotationId', () => {
+      // Create a textDiv manually without annotationId
+      const div = document.createElement('div');
+      div.contentEditable = 'true';
+      textTool['textDiv'] = div;
+
+      const annotation = {
+        id: 'test-no-id',
+        x: 50, y: 50, width: 200, height: 100,
+        text: 'Original', color: '#E74C3C', fontSize: 16,
+      };
+      textTool['annotations'] = [annotation];
+
+      // dataset.annotationId is not set, so if (annotationId) should be false
+      textTool['finalizeTextDiv']();
+
+      // annotation.text should remain unchanged
+      expect(annotation.text).toBe('Original');
+    });
+
+    it('should skip annotation update when annotationId does not match any annotation', () => {
+      // Create a textDiv with a non-existent annotationId
+      const div = document.createElement('div');
+      div.contentEditable = 'true';
+      div.dataset.annotationId = 'non-existent-id';
+      textTool['textDiv'] = div;
+
+      const annotation = {
+        id: 'test-id',
+        x: 50, y: 50, width: 200, height: 100,
+        text: 'Original', color: '#E74C3C', fontSize: 16,
+      };
+      textTool['annotations'] = [annotation];
+
+      // annotationId is set but doesn't match any annotation
+      textTool['finalizeTextDiv']();
+
+      // annotation.text should remain unchanged
+      expect(annotation.text).toBe('Original');
     });
 
     it('should render text with wrapping', () => {
@@ -1604,6 +1793,30 @@ describe('TextTool', () => {
       // New drawing should have started
       expect(textTool['isDrawing']).toBe(true);
       expect(textTool['startPoint']).toEqual({ x: 300, y: 300 });
+    });
+
+    it('should proceed without annotation lookup when textDiv has no annotationId on mouseDown', () => {
+      // Manually set a textDiv without annotationId to cover line 50 false branch
+      const div = document.createElement('div');
+      div.contentEditable = 'true';
+      textTool['textDiv'] = div;
+
+      const annotation = {
+        id: 'existing-ann',
+        x: 50, y: 50, width: 200, height: 100,
+        text: 'Keep me', color: '#E74C3C', fontSize: 16,
+      };
+      textTool['annotations'] = [annotation];
+
+      // handleMouseDown will finalize the textDiv (no annotationId) and start drawing
+      textTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+
+      // Annotation should remain since no annotationId was set on the textDiv
+      expect(textTool['annotations']).toContain(annotation);
+      expect(textTool['isDrawing']).toBe(true);
     });
 
     it('should remove first annotation if empty when starting second annotation', () => {

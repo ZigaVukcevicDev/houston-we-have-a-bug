@@ -551,4 +551,49 @@ describe('RectangleTool', () => {
       expect(mockCtx.rect).toHaveBeenCalledWith(100, 100, 50, -50);
     });
   });
+
+  describe('keyboard handling during drawing', () => {
+    it('should cancel drawing when Escape is pressed', () => {
+      rectangleTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      expect(rectangleTool['isDrawing']).toBe(true);
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+
+      expect(rectangleTool['isDrawing']).toBe(false);
+    });
+
+    it('should not cancel drawing when a non-Escape key is pressed', () => {
+      rectangleTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      expect(rectangleTool['isDrawing']).toBe(true);
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+
+      expect(rectangleTool['isDrawing']).toBe(true);
+    });
+  });
+
+  describe('cleanupDrawingState', () => {
+    it('should remove keydown listener when one is registered', () => {
+      // handleMouseDown registers the listener
+      rectangleTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      expect(rectangleTool['keydownHandler']).not.toBeNull();
+
+      // handleMouseUp calls cleanupDrawingState which removes it
+      rectangleTool.handleMouseUp(
+        { clientX: 200, clientY: 200, shiftKey: false } as MouseEvent,
+        mockCanvas
+      );
+
+      expect(rectangleTool['keydownHandler']).toBeNull();
+    });
+  });
 });

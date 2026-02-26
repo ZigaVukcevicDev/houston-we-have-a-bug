@@ -3513,7 +3513,6 @@ test.describe('Text tool', () => {
     // Allow very small differences (anti-aliasing, etc.)
     // But if text jumped significantly, there will be many different pixels
     const diffPercentage = (diffPixels / minLen) * 100;
-    console.log(`Screenshot diff: ${diffPixels} pixels (${diffPercentage.toFixed(2)}%)`);
 
     // If more than 1% of pixels differ significantly, the text likely jumped
     expect(diffPercentage).toBeLessThan(1);
@@ -3576,13 +3575,8 @@ test.describe('Text tool', () => {
     const positionDuringSecondEdit = await textDiv.boundingBox();
     if (!positionDuringSecondEdit) throw new Error('TextDiv not found');
 
-    // Log positions for debugging
-    console.log('Retina test - First edit position:', positionDuringFirstEdit);
-    console.log('Retina test - Second edit position:', positionDuringSecondEdit);
-
     const xDiff = Math.abs(positionDuringFirstEdit.x - positionDuringSecondEdit.x);
     const yDiff = Math.abs(positionDuringFirstEdit.y - positionDuringSecondEdit.y);
-    console.log('Retina test - X diff:', xDiff, 'Y diff:', yDiff);
 
     // Positions should match within 1px tolerance
     expect(xDiff).toBeLessThanOrEqual(1);
@@ -3698,11 +3692,7 @@ test.describe('Text tool', () => {
 
     if (!canvasTopPixelAfter) throw new Error('No text found on canvas after round-trip');
 
-    console.log('Retina - Canvas text Y before:', canvasTopPixel.screenY);
-    console.log('Retina - Canvas text Y after:', canvasTopPixelAfter.screenY);
-
     const yDiff = Math.abs(canvasTopPixel.screenY - canvasTopPixelAfter.screenY);
-    console.log('Retina - Y difference:', yDiff);
 
     // Text should render at the same position before and after editing
     expect(yDiff).toBeLessThanOrEqual(1);

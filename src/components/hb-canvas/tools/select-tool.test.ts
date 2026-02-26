@@ -1028,6 +1028,32 @@ describe('SelectTool', () => {
       expect(mockCtx.fillRect).toHaveBeenCalledTimes(4);
     });
 
+    it('should not render handles when selected rectangle annotation id does not match any rectangle', () => {
+      selectTool['selectedAnnotationId'] = 'non-existent-rect-id';
+      selectTool['selectedAnnotationType'] = 'rectangle';
+
+      const fillRectCalls = mockCtx.fillRect as Mock;
+      fillRectCalls.mockClear();
+
+      selectTool.render(mockCtx);
+
+      // No handles should be rendered since rectangle was not found
+      expect(mockCtx.fillRect).not.toHaveBeenCalled();
+    });
+
+    it('should not render handles when selected line annotation id does not match any line', () => {
+      selectTool['selectedAnnotationId'] = 'non-existent-line-id';
+      selectTool['selectedAnnotationType'] = 'line';
+
+      const fillRectCalls = mockCtx.fillRect as Mock;
+      fillRectCalls.mockClear();
+
+      selectTool.render(mockCtx);
+
+      // No handles should be rendered since line was not found
+      expect(mockCtx.fillRect).not.toHaveBeenCalled();
+    });
+
     it('should detect hover near top-left corner (vertical edge)', () => {
       // Test hovering slightly above the top-left corner on the left edge
       selectTool.handleMouseMove(
@@ -1048,6 +1074,52 @@ describe('SelectTool', () => {
       );
 
       expect(selectTool['hoveredAnnotationId']).toBe('rect-1');
+    });
+
+    it('should detect hover near right edge of rectangle', () => {
+      // Right edge of rect-1 is at x=200; threshold=7 so px=200 is within threshold
+      // py=320 is within [300-7=293, 350+7=357]
+      selectTool.handleMouseMove(
+        { clientX: 200, clientY: 320 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBe('rect-1');
+    });
+
+    it('should not detect hover when near right edge x but py is out of range', () => {
+      // px=200 is near right edge but py=280 < 300-7=293 (above the rectangle)
+      selectTool.handleMouseMove(
+        { clientX: 200, clientY: 280 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBeNull();
+    });
+
+    it('should detect hover near bottom edge of rectangle', () => {
+      // Bottom edge of rect-1 is at y=350; threshold=7 so py=350 is within threshold
+      // px=150 is within [100-7=93, 200+7=207]
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 350 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBe('rect-1');
+    });
+
+    it('should not detect hover when near bottom edge y but px is out of range', () => {
+      // py=350 is near bottom edge but px=80 < 100-7=93 (to the left of the rectangle)
+      selectTool.handleMouseMove(
+        { clientX: 80, clientY: 350 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBeNull();
     });
   });
 
@@ -2169,6 +2241,39 @@ describe('SelectTool', () => {
         expect(selectTool['selectedAnnotationId']).toBeNull();
         expect(selectTool['selectedAnnotationType']).toBeNull();
       });
+
+      it('should start text editing on double-click of already-selected text annotation', () => {
+        const mockTextTool = {
+          isTextEditingActive: vi.fn().mockReturnValue(false),
+          startEditingAnnotation: vi.fn(),
+        };
+
+        selectTool.deactivate();
+        selectTool = new SelectTool(
+          lineAnnotations,
+          arrowAnnotations,
+          rectangleAnnotations,
+          textAnnotations,
+          mockRedraw,
+          mockTextTool as any
+        );
+        selectTool.activate();
+
+        // Pre-select the text annotation
+        selectTool['selectedAnnotationId'] = 'text-1';
+        selectTool['selectedAnnotationType'] = 'text';
+
+        // Double-click (detail: 2) on the same annotation
+        selectTool.handleClick(
+          { clientX: 150, clientY: 450, detail: 2 } as unknown as MouseEvent,
+          mockCanvas
+        );
+
+        expect(mockTextTool.startEditingAnnotation).toHaveBeenCalledWith(
+          'text-1',
+          mockCanvas
+        );
+      });
     });
 
     describe('text annotation handle rendering', () => {
@@ -2182,6 +2287,20 @@ describe('SelectTool', () => {
         expect(mockCtx.fillRect).toHaveBeenCalledTimes(4);
         // Should render 1 border + 4 corner handle strokes
         expect(mockCtx.strokeRect).toHaveBeenCalledTimes(5);
+      });
+
+      it('should not render handles when selected text annotation id does not match any annotation', () => {
+        // selectedAnnotationId set to 'text' type but with a non-existent ID
+        selectTool['selectedAnnotationId'] = 'non-existent-text-id';
+        selectTool['selectedAnnotationType'] = 'text';
+
+        const fillRectCalls = mockCtx.fillRect as Mock;
+        fillRectCalls.mockClear();
+
+        selectTool.render(mockCtx);
+
+        // No handles should be rendered since annotation was not found
+        expect(mockCtx.fillRect).not.toHaveBeenCalled();
       });
 
       it('should render handles at correct corner positions', () => {
@@ -3219,6 +3338,24 @@ describe('SelectTool', () => {
       selectTool.handleMouseMove(
         { clientX: 150, clientY: 200 } as MouseEvent,
         mockCanvasWithContext,
+        mockCtx
+      );
+
+      expect(selectTool['hoveredAnnotationId']).toBeNull();
+    });
+
+    it('should not detect overflow hover when canvas context is null', () => {
+      // Canvas returns null for getContext (e.g. when context is unavailable)
+      const canvasWithNullCtx = {
+        ...mockCanvasWithContext,
+        getContext: vi.fn().mockReturnValue(null),
+        style: { cursor: 'default' },
+      } as unknown as HTMLCanvasElement;
+
+      // Hover below the box - should not detect since ctx is null
+      selectTool.handleMouseMove(
+        { clientX: 150, clientY: 200 } as MouseEvent,
+        canvasWithNullCtx,
         mockCtx
       );
 

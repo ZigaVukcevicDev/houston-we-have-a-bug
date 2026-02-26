@@ -2,8 +2,8 @@
 
 ![Status](https://img.shields.io/badge/status-work_in_progress-orange)
 ![Coverage](https://img.shields.io/badge/coverage-99%25-brightgreen)
-![Tests](https://img.shields.io/badge/tests-615%20passing-success)
-![E2E](https://img.shields.io/badge/e2e-271%20passing-success)
+![Tests](https://img.shields.io/badge/tests-653%20passing-success)
+![E2E](https://img.shields.io/badge/e2e-273%20passing-success)
 ![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Chrome_extension-blue)
 ![Lit](https://img.shields.io/badge/framework-Lit-324FFF?logo=lit)

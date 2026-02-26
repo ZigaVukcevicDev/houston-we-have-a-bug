@@ -150,6 +150,7 @@
 - [x] add license
 - [x] align canvas to the center in test file
 - [x] array, line and rectangle tool - when select it (click), change pointer cursor to move cursor
+- [ ] add changelog file
 
 ## Ongoing
 

@@ -524,6 +524,14 @@ describe('HBCanvas', () => {
       );
     });
 
+    it('should download without crashing when select tool is unavailable', () => {
+      canvas['tools'].delete('select');
+      const mockLink = { download: '', href: '', click: vi.fn() };
+      vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
+      canvas.download();
+      expect(mockLink.click).toHaveBeenCalled();
+    });
+
     it('should deselect all annotations before downloading', () => {
       const selectTool = canvas['tools'].get('select') as SelectTool;
       const deselectAllSpy = vi.spyOn(selectTool, 'deselectAll');
@@ -1404,6 +1412,37 @@ describe('HBCanvas', () => {
 
       canvas['handleCropConfirm']();
       // Should not crash when confirmCrop returns null
+    });
+
+    it('should skip annotation transformation when cropRect is null', () => {
+      const mockCanvasEl = {
+        getBoundingClientRect: vi.fn().mockReturnValue({ left: 0, top: 0, width: 800, height: 600 }),
+        width: 800,
+        height: 600,
+        style: {},
+        getContext: vi.fn().mockReturnValue({
+          canvas: { width: 800, height: 600, getBoundingClientRect: vi.fn().mockReturnValue({ left: 0, top: 0, width: 800, height: 600 }) },
+          clearRect: vi.fn(), drawImage: vi.fn(), strokeStyle: '', lineWidth: 0, lineCap: '',
+          beginPath: vi.fn(), moveTo: vi.fn(), lineTo: vi.fn(), stroke: vi.fn(),
+          save: vi.fn(), restore: vi.fn(), fillRect: vi.fn(), strokeRect: vi.fn(), setLineDash: vi.fn(),
+        }),
+      };
+      Object.defineProperty(canvas, 'canvas', { value: mockCanvasEl, writable: true });
+      canvas['firstUpdated']();
+      canvas['originalImage'] = { width: 800, height: 600 } as HTMLImageElement;
+
+      // No cropRect set → getCropRect() returns null
+      const cropTool = canvas['tools'].get('crop') as CropTool;
+      canvas['lineAnnotations'].push({ id: 'line-1', x1: 50, y1: 50, x2: 100, y2: 100, color: '#000', width: 2 });
+
+      const mockImage = new Image();
+      vi.spyOn(cropTool, 'confirmCrop').mockReturnValue(mockImage);
+
+      canvas['handleCropConfirm']();
+      mockImage.onload?.({} as Event);
+
+      // Annotations should be untouched (no offset applied)
+      expect(canvas['lineAnnotations'][0].x1).toBe(50);
     });
   });
 

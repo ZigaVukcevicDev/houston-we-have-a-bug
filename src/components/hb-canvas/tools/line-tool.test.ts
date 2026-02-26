@@ -623,5 +623,24 @@ describe('LineTool', () => {
       expect(mockRedraw).toHaveBeenCalled();
     });
   });
+
+  describe('cleanupDrawingState', () => {
+    it('should remove keydown listener when one is registered', () => {
+      // handleMouseDown registers the listener
+      lineTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      expect(lineTool['keydownHandler']).not.toBeNull();
+
+      // handleMouseUp calls cleanupDrawingState which removes it
+      lineTool.handleMouseUp(
+        { clientX: 200, clientY: 200, shiftKey: false } as MouseEvent,
+        mockCanvas
+      );
+
+      expect(lineTool['keydownHandler']).toBeNull();
+    });
+  });
 });
 

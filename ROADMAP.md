@@ -15,11 +15,13 @@ The focus is on keeping the tool **simple, fast, and genuinely useful for bug re
 The goal is to cover **real-world bug reporting needs** with a small, reliable toolset.
 
 ### Core actions
+
 - Automatic system info
 - Screenshot capture
 - Download annotated screenshot
 
 ### Annotation tools
+
 - Select
 - Text
 - Line
@@ -31,20 +33,17 @@ This version prioritizes **stability, clarity, and performance**.
 
 ## Version 2
 
-### Annotation tools
-- Marker for highlighting
+### Core actions
+
 - Undo / Redo
 - Keyboard shortcuts
-
-## Version 3
-
-### Annotation tools
-- Blur
-- Numbered markers
 
 ## Future versions ideas
 
 - Localization
 - Language of browser
-- Submit bug to Azure DevOps
+- Submit bug to Azure DevOps + settings
 - Console errors - collect errors
+- Tool: numbered markers
+- Tool: marker for highlighting
+- Tool: blur

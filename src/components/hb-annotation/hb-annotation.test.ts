@@ -659,5 +659,15 @@ describe('HBAnnotation', () => {
 
       document.body.removeChild(annotation);
     });
+
+    it('should render "Copied" text in copy button when isCopyingDisabled is true', async () => {
+      annotation['isCopyingDisabled'] = true;
+      await annotation.updateComplete;
+
+      const button = annotation.shadowRoot?.querySelector(
+        '[title="Copy to clipboard"]'
+      );
+      expect(button?.textContent?.trim()).toContain('Copied');
+    });
   });
 });
