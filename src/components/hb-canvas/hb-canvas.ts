@@ -343,6 +343,7 @@ export class HBCanvas extends LitElement {
   private handleCropConfirm(): void {
     const cropTool = this.tools.get('crop') as CropTool;
     if (!cropTool || !this.originalImage) return;
+    const cropRect = cropTool.getCropRect();
     const croppedImage = cropTool.confirmCrop(this.canvas, this.originalImage);
     if (croppedImage) {
       croppedImage.onload = () => {
@@ -374,6 +375,10 @@ export class HBCanvas extends LitElement {
         this.canvas.style.minWidth = `${finalWidth}px`;
         this.canvas.style.minHeight = `${finalHeight}px`;
 
+        if (cropRect) {
+          this.transformAnnotationsAfterCrop(cropRect);
+        }
+
         cropTool.cancelCrop();
         this.redraw();
         this.activeTool = 'select';
@@ -388,6 +393,62 @@ export class HBCanvas extends LitElement {
         );
       };
     }
+  }
+
+  private transformAnnotationsAfterCrop(cropRect: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }): void {
+    const { x: cx, y: cy, width: cw, height: ch } = cropRect;
+
+    const overlaps = (
+      minX: number,
+      minY: number,
+      maxX: number,
+      maxY: number
+    ): boolean => maxX > cx && minX < cx + cw && maxY > cy && minY < cy + ch;
+
+    const transformedLines = this.lineAnnotations
+      .filter(({ x1, y1, x2, y2 }) =>
+        overlaps(Math.min(x1, x2), Math.min(y1, y2), Math.max(x1, x2), Math.max(y1, y2))
+      )
+      .map((line) => ({
+        ...line,
+        x1: line.x1 - cx,
+        y1: line.y1 - cy,
+        x2: line.x2 - cx,
+        y2: line.y2 - cy,
+      }));
+    this.lineAnnotations.splice(0, this.lineAnnotations.length, ...transformedLines);
+
+    const transformedArrows = this.arrowAnnotations
+      .filter(({ x1, y1, x2, y2 }) =>
+        overlaps(Math.min(x1, x2), Math.min(y1, y2), Math.max(x1, x2), Math.max(y1, y2))
+      )
+      .map((arrow) => ({
+        ...arrow,
+        x1: arrow.x1 - cx,
+        y1: arrow.y1 - cy,
+        x2: arrow.x2 - cx,
+        y2: arrow.y2 - cy,
+      }));
+    this.arrowAnnotations.splice(0, this.arrowAnnotations.length, ...transformedArrows);
+
+    const transformedRects = this.rectangleAnnotations
+      .filter(({ x, y, width, height }) =>
+        overlaps(x, y, x + width, y + height)
+      )
+      .map((rect) => ({ ...rect, x: rect.x - cx, y: rect.y - cy }));
+    this.rectangleAnnotations.splice(0, this.rectangleAnnotations.length, ...transformedRects);
+
+    const transformedTexts = this.textAnnotations
+      .filter(({ x, y, width, height }) =>
+        overlaps(x, y, x + width, y + height)
+      )
+      .map((text) => ({ ...text, x: text.x - cx, y: text.y - cy }));
+    this.textAnnotations.splice(0, this.textAnnotations.length, ...transformedTexts);
   }
 }
 

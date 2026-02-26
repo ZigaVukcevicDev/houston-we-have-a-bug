@@ -1436,4 +1436,259 @@ describe('HBCanvas', () => {
       expect(() => canvas.deselectAll()).not.toThrow();
     });
   });
+
+  describe('transformAnnotationsAfterCrop', () => {
+    const cropRect = { x: 100, y: 100, width: 300, height: 200 };
+
+    it('should offset line coordinates by crop origin', () => {
+      canvas['lineAnnotations'].push({
+        id: 'line-1',
+        x1: 150,
+        y1: 150,
+        x2: 300,
+        y2: 250,
+        color: '#000',
+        width: 2,
+      });
+
+      canvas['transformAnnotationsAfterCrop'](cropRect);
+
+      expect(canvas['lineAnnotations']).toHaveLength(1);
+      expect(canvas['lineAnnotations'][0]).toMatchObject({
+        x1: 50,
+        y1: 50,
+        x2: 200,
+        y2: 150,
+      });
+    });
+
+    it('should remove lines whose bounding box is completely outside the crop area', () => {
+      canvas['lineAnnotations'].push({
+        id: 'line-outside',
+        x1: 10,
+        y1: 10,
+        x2: 50,
+        y2: 50,
+        color: '#000',
+        width: 2,
+      });
+
+      canvas['transformAnnotationsAfterCrop'](cropRect);
+
+      expect(canvas['lineAnnotations']).toHaveLength(0);
+    });
+
+    it('should keep lines that straddle the crop boundary', () => {
+      canvas['lineAnnotations'].push({
+        id: 'line-straddling',
+        x1: 50,
+        y1: 150,
+        x2: 200,
+        y2: 150,
+        color: '#000',
+        width: 2,
+      });
+
+      canvas['transformAnnotationsAfterCrop'](cropRect);
+
+      expect(canvas['lineAnnotations']).toHaveLength(1);
+      expect(canvas['lineAnnotations'][0]).toMatchObject({
+        x1: -50,
+        y1: 50,
+        x2: 100,
+        y2: 50,
+      });
+    });
+
+    it('should offset arrow coordinates by crop origin', () => {
+      canvas['arrowAnnotations'].push({
+        id: 'arrow-1',
+        x1: 120,
+        y1: 120,
+        x2: 350,
+        y2: 270,
+        color: '#000',
+        width: 2,
+      });
+
+      canvas['transformAnnotationsAfterCrop'](cropRect);
+
+      expect(canvas['arrowAnnotations']).toHaveLength(1);
+      expect(canvas['arrowAnnotations'][0]).toMatchObject({
+        x1: 20,
+        y1: 20,
+        x2: 250,
+        y2: 170,
+      });
+    });
+
+    it('should remove arrows completely outside the crop area', () => {
+      canvas['arrowAnnotations'].push({
+        id: 'arrow-outside',
+        x1: 450,
+        y1: 350,
+        x2: 500,
+        y2: 400,
+        color: '#000',
+        width: 2,
+      });
+
+      canvas['transformAnnotationsAfterCrop'](cropRect);
+
+      expect(canvas['arrowAnnotations']).toHaveLength(0);
+    });
+
+    it('should offset rectangle coordinates by crop origin', () => {
+      canvas['rectangleAnnotations'].push({
+        id: 'rect-1',
+        x: 150,
+        y: 150,
+        width: 100,
+        height: 80,
+        color: '#000',
+        strokeWidth: 2,
+      });
+
+      canvas['transformAnnotationsAfterCrop'](cropRect);
+
+      expect(canvas['rectangleAnnotations']).toHaveLength(1);
+      expect(canvas['rectangleAnnotations'][0]).toMatchObject({ x: 50, y: 50 });
+    });
+
+    it('should remove rectangles completely outside the crop area', () => {
+      canvas['rectangleAnnotations'].push({
+        id: 'rect-outside',
+        x: 10,
+        y: 10,
+        width: 80,
+        height: 60,
+        color: '#000',
+        strokeWidth: 2,
+      });
+
+      canvas['transformAnnotationsAfterCrop'](cropRect);
+
+      expect(canvas['rectangleAnnotations']).toHaveLength(0);
+    });
+
+    it('should offset text annotation coordinates by crop origin', () => {
+      canvas['textAnnotations'].push({
+        id: 'text-1',
+        x: 200,
+        y: 200,
+        width: 100,
+        height: 30,
+        text: 'Hello',
+        color: '#000',
+        fontSize: 16,
+      });
+
+      canvas['transformAnnotationsAfterCrop'](cropRect);
+
+      expect(canvas['textAnnotations']).toHaveLength(1);
+      expect(canvas['textAnnotations'][0]).toMatchObject({ x: 100, y: 100 });
+    });
+
+    it('should remove text annotations completely outside the crop area', () => {
+      canvas['textAnnotations'].push({
+        id: 'text-outside',
+        x: 500,
+        y: 400,
+        width: 100,
+        height: 30,
+        text: 'Gone',
+        color: '#000',
+        fontSize: 16,
+      });
+
+      canvas['transformAnnotationsAfterCrop'](cropRect);
+
+      expect(canvas['textAnnotations']).toHaveLength(0);
+    });
+
+    it('should handle multiple annotations, keeping only overlapping ones', () => {
+      canvas['lineAnnotations'].push(
+        { id: 'inside', x1: 150, y1: 150, x2: 300, y2: 250, color: '#000', width: 2 },
+        { id: 'outside', x1: 10, y1: 10, x2: 50, y2: 50, color: '#000', width: 2 }
+      );
+
+      canvas['transformAnnotationsAfterCrop'](cropRect);
+
+      expect(canvas['lineAnnotations']).toHaveLength(1);
+      expect(canvas['lineAnnotations'][0].id).toBe('inside');
+    });
+
+    it('should mutate the arrays in-place so tool references stay valid', () => {
+      const originalRef = canvas['lineAnnotations'];
+      canvas['lineAnnotations'].push({
+        id: 'line-1',
+        x1: 150,
+        y1: 150,
+        x2: 300,
+        y2: 250,
+        color: '#000',
+        width: 2,
+      });
+
+      canvas['transformAnnotationsAfterCrop'](cropRect);
+
+      expect(canvas['lineAnnotations']).toBe(originalRef);
+    });
+
+    it('should transform annotations during crop confirmation', () => {
+      // Set up a mock canvas element so handleCropConfirm can run fully
+      const mockCanvasEl = {
+        getBoundingClientRect: vi.fn().mockReturnValue({ left: 0, top: 0, width: 800, height: 600 }),
+        width: 800,
+        height: 600,
+        style: {},
+        getContext: vi.fn().mockReturnValue({
+          canvas: { width: 800, height: 600, getBoundingClientRect: vi.fn().mockReturnValue({ left: 0, top: 0, width: 800, height: 600 }) },
+          clearRect: vi.fn(),
+          drawImage: vi.fn(),
+          strokeStyle: '',
+          lineWidth: 0,
+          lineCap: '',
+          beginPath: vi.fn(),
+          moveTo: vi.fn(),
+          lineTo: vi.fn(),
+          stroke: vi.fn(),
+          save: vi.fn(),
+          restore: vi.fn(),
+          fillRect: vi.fn(),
+          strokeRect: vi.fn(),
+          setLineDash: vi.fn(),
+        }),
+      };
+      Object.defineProperty(canvas, 'canvas', { value: mockCanvasEl, writable: true });
+      canvas['firstUpdated']();
+      canvas['originalImage'] = { width: 800, height: 600 } as HTMLImageElement;
+
+      const cropTool = canvas['tools'].get('crop') as CropTool;
+      cropTool['cropRect'] = { x: 100, y: 100, width: 300, height: 200 };
+
+      canvas['lineAnnotations'].push({
+        id: 'line-1',
+        x1: 150,
+        y1: 150,
+        x2: 300,
+        y2: 250,
+        color: '#000',
+        width: 2,
+      });
+
+      const mockImage = new Image();
+      vi.spyOn(cropTool, 'confirmCrop').mockReturnValue(mockImage);
+
+      canvas['handleCropConfirm']();
+      mockImage.onload?.({} as Event);
+
+      expect(canvas['lineAnnotations'][0]).toMatchObject({
+        x1: 50,
+        y1: 50,
+        x2: 200,
+        y2: 150,
+      });
+    });
+  });
 });

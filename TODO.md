@@ -95,7 +95,7 @@
   - [x] clicking button
   - [x] with escape
   - [x] by selecting other tool
-- [ ] cropping through annotations
+- [x] cropping through annotations
 
 7. Download
 
