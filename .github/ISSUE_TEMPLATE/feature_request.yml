@@ -1,20 +1,21 @@
 name: 💡 Enhancement
 description: Propose an enhancement
-title: "Enhancement: "
-labels: ["enhancement"]
+title: 'Enhancement: '
+labels: ['enhancement']
 
 body:
   - type: markdown
     attributes:
       value: |
 
-        ⚠️ Read before submitting
+        💡 Thanks for taking the time to suggest an improvement!
 
-        This extension is built for **clear and fast bug reporting**.
-        It intentionally stays minimal.
+        This extension is built for clear bug reporting
+        and intentionally stays focused and minimal.
 
-        Requests that significantly increase complexity or turn this into
-        a general drawing or design tool are likely to be closed.
+        Please note that requests which significantly increase complexity
+        or shift the tool toward general image editing may not be a good fit
+        and are likely to be closed.
 
   - type: textarea
     id: problem

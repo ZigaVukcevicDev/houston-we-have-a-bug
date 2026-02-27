@@ -1,17 +1,18 @@
 name: 🐞 Bug report
 description: Report a reproducible problem with the extension
-title: "Bug: "
-labels: ["bug"]
+title: 'Bug: '
+labels: ['bug']
 
 body:
   - type: markdown
     attributes:
       value: |
-        
-        ⚠️ Read before submitting
 
-        This project prioritizes **reproducible, well-described bugs**.
-        Issues without clear report may be closed.
+        🐞 Thanks for helping make this extension better!
+
+        Please fill out the form below as thoroughly as possible.
+        Issues that are hard to reproduce may need a bit more information
+        before they can be looked into.
 
   - type: input
     id: extension_version
