@@ -20,6 +20,10 @@ A Chrome extension to capture bugs clearly. Annotate screenshots and gather syst
   alt="Houston, we have a bug"
 />
 
+## Demo of extension
+
+[![Houston, we have a bug – demo of extension](https://img.youtube.com/vi/feHEi44MhD8/maxresdefault.jpg)](https://www.youtube.com/watch?v=feHEi44MhD8)
+
 <details>
   <summary>See presentation images</summary>
 
