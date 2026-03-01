@@ -161,7 +161,7 @@
 ## Final
 
 - test all annotations
-  - [ ] on non-retina white background
-  - [ ] on non-retina dark background
-  - [ ] on retina white background
-  - [ ] on retina dark background
+  - [x] on non-retina white background
+  - [x] on non-retina dark background
+  - [x] on retina white background
+  - [x] on retina dark background
