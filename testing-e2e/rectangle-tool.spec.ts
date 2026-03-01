@@ -777,6 +777,58 @@ test.describe('Rectangle tool', () => {
     ).toBeVisible();
   });
 
+  test('should remain selectable after dragging corner handle past opposite corner', async ({
+    page,
+  }) => {
+    await page.click('[data-tool="rectangle"]');
+
+    const canvas = page.locator('canvas');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas not found');
+
+    // Draw rectangle from (150,150) to (300,250)
+    const startX = box.x + 150;
+    const startY = box.y + 150;
+    const endX = box.x + 300;
+    const endY = box.y + 250;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(endX, endY);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Drag the top-left handle (150,150) past the bottom-right corner (300,250)
+    // to (400,350) — well past the opposite corner in both axes
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 400, box.y + 350);
+    await page.mouse.up();
+    await page.waitForTimeout(100);
+
+    // Deselect by clicking empty area
+    await page.mouse.click(box.x + 50, box.y + 50);
+    await page.waitForTimeout(50);
+
+    // The normalized rectangle should now span from (300,250) to (400,350).
+    // Hover over its left edge to verify hover detection works.
+    await page.mouse.move(box.x + 300, box.y + 300);
+    await page.waitForTimeout(50);
+
+    const cursor = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).cursor
+    );
+    expect(cursor).toBe('pointer');
+
+    // Click on the left edge to select it
+    await page.mouse.click(box.x + 300, box.y + 300);
+    await page.waitForTimeout(50);
+
+    await expect(
+      page.locator('[data-tool="select"][aria-selected="true"]')
+    ).toBeVisible();
+  });
+
   test('should draw rectangle with extreme aspect ratio (very wide)', async ({
     page,
   }) => {

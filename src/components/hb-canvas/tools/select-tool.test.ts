@@ -983,6 +983,123 @@ describe('SelectTool', () => {
 
       expect(selectTool['draggingHandle']).toBeNull();
     });
+
+    describe('resize normalization when dragging past opposite corner', () => {
+      // rect-1: x:100, y:300, width:100, height:50 → right=200, bottom=350
+      // Anchors (fixed opposite corner): top-left→(200,350), top-right→(100,350),
+      //   bottom-left→(200,300), bottom-right→(100,300)
+
+      it('should normalize to positive dimensions when dragging top-left past bottom-right', () => {
+        // anchor=(200,350), drag to (300,500) → x=200, y=350, w=100, h=150
+        selectTool.handleMouseDown(
+          { clientX: 100, clientY: 300 } as MouseEvent,
+          mockCanvas
+        );
+        selectTool.handleMouseMove(
+          { clientX: 300, clientY: 500 } as MouseEvent,
+          mockCanvas,
+          mockCtx
+        );
+
+        expect(rectangleAnnotations[0].x).toBe(200);
+        expect(rectangleAnnotations[0].y).toBe(350);
+        expect(rectangleAnnotations[0].width).toBe(100);
+        expect(rectangleAnnotations[0].height).toBe(150);
+      });
+
+      it('should normalize width when dragging top-right past left edge', () => {
+        // anchor=(100,350), drag to (50,320) → x=50, y=320, w=50, h=30
+        selectTool.handleMouseDown(
+          { clientX: 200, clientY: 300 } as MouseEvent,
+          mockCanvas
+        );
+        selectTool.handleMouseMove(
+          { clientX: 50, clientY: 320 } as MouseEvent,
+          mockCanvas,
+          mockCtx
+        );
+
+        expect(rectangleAnnotations[0].x).toBe(50);
+        expect(rectangleAnnotations[0].width).toBe(50);
+        expect(rectangleAnnotations[0].y).toBe(320);
+        expect(rectangleAnnotations[0].height).toBe(30);
+      });
+
+      it('should normalize height when dragging top-right past bottom edge', () => {
+        // anchor=(100,350), drag to (220,500) → x=100, y=350, w=120, h=150
+        selectTool.handleMouseDown(
+          { clientX: 200, clientY: 300 } as MouseEvent,
+          mockCanvas
+        );
+        selectTool.handleMouseMove(
+          { clientX: 220, clientY: 500 } as MouseEvent,
+          mockCanvas,
+          mockCtx
+        );
+
+        expect(rectangleAnnotations[0].y).toBe(350);
+        expect(rectangleAnnotations[0].height).toBe(150);
+        expect(rectangleAnnotations[0].width).toBe(120);
+      });
+
+      it('should normalize width when dragging bottom-left past right edge', () => {
+        // anchor=(200,300), drag to (300,370) → x=200, y=300, w=100, h=70
+        selectTool.handleMouseDown(
+          { clientX: 100, clientY: 350 } as MouseEvent,
+          mockCanvas
+        );
+        selectTool.handleMouseMove(
+          { clientX: 300, clientY: 370 } as MouseEvent,
+          mockCanvas,
+          mockCtx
+        );
+
+        expect(rectangleAnnotations[0].x).toBe(200);
+        expect(rectangleAnnotations[0].width).toBe(100);
+        expect(rectangleAnnotations[0].height).toBe(70);
+      });
+
+      it('should normalize height when dragging bottom-right past top edge', () => {
+        // anchor=(100,300), drag to (220,100) → x=100, y=100, w=120, h=200
+        selectTool.handleMouseDown(
+          { clientX: 200, clientY: 350 } as MouseEvent,
+          mockCanvas
+        );
+        selectTool.handleMouseMove(
+          { clientX: 220, clientY: 100 } as MouseEvent,
+          mockCanvas,
+          mockCtx
+        );
+
+        expect(rectangleAnnotations[0].y).toBe(100);
+        expect(rectangleAnnotations[0].height).toBe(200);
+        expect(rectangleAnnotations[0].x).toBe(100);
+      });
+
+      it('should still detect hover on rectangle after resize past opposite corner', () => {
+        // Drag top-left past bottom-right → normalized rect at x=200, y=350, w=100, h=150
+        selectTool.handleMouseDown(
+          { clientX: 100, clientY: 300 } as MouseEvent,
+          mockCanvas
+        );
+        selectTool.handleMouseMove(
+          { clientX: 300, clientY: 500 } as MouseEvent,
+          mockCanvas,
+          mockCtx
+        );
+        selectTool.handleMouseUp();
+
+        // Deselect and hover over the normalized rectangle's left edge (x=200)
+        selectTool.deselectAll();
+        selectTool.handleMouseMove(
+          { clientX: 200, clientY: 400 } as MouseEvent,
+          mockCanvas,
+          mockCtx
+        );
+
+        expect(selectTool['hoveredAnnotationId']).toBe('rect-1');
+      });
+    });
   });
 
   describe('rectangle hover detection', () => {

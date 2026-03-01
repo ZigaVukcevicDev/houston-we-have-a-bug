@@ -32,6 +32,7 @@ export class SelectTool implements Tool {
     | null = null;
   private draggingLine: boolean = false;
   private dragOffset: { x: number; y: number } = { x: 0, y: 0 };
+  private resizeAnchor: { x: number; y: number } | null = null; // Fixed opposite corner during rectangle resize
   private wasDragging: boolean = false; // Track if a drag operation occurred (to prevent click from deselecting)
   private keydownHandler: ((event: KeyboardEvent) => void) | null = null;
 
@@ -280,21 +281,25 @@ export class SelectTool implements Tool {
         if (isPointOnHandle(x, y, topLeft.x, topLeft.y)) {
           this.draggingHandle = 'top-left';
           this.dragOffset = { x: x - topLeft.x, y: y - topLeft.y };
+          this.resizeAnchor = { x: bottomRight.x, y: bottomRight.y };
           return;
         }
         if (isPointOnHandle(x, y, topRight.x, topRight.y)) {
           this.draggingHandle = 'top-right';
           this.dragOffset = { x: x - topRight.x, y: y - topRight.y };
+          this.resizeAnchor = { x: bottomLeft.x, y: bottomLeft.y };
           return;
         }
         if (isPointOnHandle(x, y, bottomLeft.x, bottomLeft.y)) {
           this.draggingHandle = 'bottom-left';
           this.dragOffset = { x: x - bottomLeft.x, y: y - bottomLeft.y };
+          this.resizeAnchor = { x: topRight.x, y: topRight.y };
           return;
         }
         if (isPointOnHandle(x, y, bottomRight.x, bottomRight.y)) {
           this.draggingHandle = 'bottom-right';
           this.dragOffset = { x: x - bottomRight.x, y: y - bottomRight.y };
+          this.resizeAnchor = { x: topLeft.x, y: topLeft.y };
           return;
         }
 
@@ -656,27 +661,15 @@ export class SelectTool implements Tool {
         );
         if (!rectangle) return;
 
-        // Store original rectangle bounds
-        const originalRight = rectangle.x + rectangle.width;
-        const originalBottom = rectangle.y + rectangle.height;
-
-        // Resize based on which corner is being dragged
-        if (this.draggingHandle === 'top-left') {
-          rectangle.width = originalRight - x;
-          rectangle.height = originalBottom - y;
-          rectangle.x = x;
-          rectangle.y = y;
-        } else if (this.draggingHandle === 'top-right') {
-          rectangle.width = x - rectangle.x;
-          rectangle.height = originalBottom - y;
-          rectangle.y = y;
-        } else if (this.draggingHandle === 'bottom-left') {
-          rectangle.width = originalRight - x;
-          rectangle.height = y - rectangle.y;
-          rectangle.x = x;
-        } else if (this.draggingHandle === 'bottom-right') {
-          rectangle.width = x - rectangle.x;
-          rectangle.height = y - rectangle.y;
+        // Normalize resize using the fixed opposite corner (resizeAnchor).
+        // Computes the bounding box between the anchor and the mouse position,
+        // so dragging past the opposite corner naturally flips the rectangle
+        // while always keeping width/height positive for correct hit detection.
+        if (this.resizeAnchor) {
+          rectangle.x = Math.min(this.resizeAnchor.x, x);
+          rectangle.y = Math.min(this.resizeAnchor.y, y);
+          rectangle.width = Math.max(Math.abs(this.resizeAnchor.x - x), 1);
+          rectangle.height = Math.max(Math.abs(this.resizeAnchor.y - y), 1);
         }
       } else if (this.selectedAnnotationType === 'text') {
         const textBox = this.textAnnotations.find(
@@ -739,6 +732,7 @@ export class SelectTool implements Tool {
     this.draggingHandle = null;
     this.draggingLine = false;
     this.dragOffset = { x: 0, y: 0 };
+    this.resizeAnchor = null;
     this.onRedraw();
   }
 
