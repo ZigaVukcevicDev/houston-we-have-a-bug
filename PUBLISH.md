@@ -74,10 +74,6 @@ The purpose of this extension is to capture and annotate screenshots and collect
 
 The activeTab permission is used to capture a screenshot of the currently active tab and read the page URL only when the user explicitly triggers the extension. This permission is granted temporarily by Chrome and is required to collect visual context for bug reporting. The extension does not access any page content without direct user action.
 
-**tabs justification**
-
-The tabs permission is used to retrieve basic metadata about the active tab, such as the current URL and viewport dimensions, so that bug reports include accurate system information. The extension does not read browsing history, track tab changes, or monitor user activity.
-
 **scripting justification**
 
 The scripting permission is required to inject scripts into the active tab only after user activation. This is used to collect system information related to the current page, such as visible area size and device pixel ratio, and to display temporary UI elements needed for screenshot annotation. No scripts run automatically or persist after the action is completed.
