@@ -37,12 +37,12 @@ Output goes to the `dist/` folder.
 ### 6. Create a ZIP
 
 ```bash
-cd dist && zip -r ../houston-we-have-a-bug-1-0-1.zip . && cd ..
+cd dist && zip -r ../houston-we-have-a-bug-X-X-X.zip . && cd ..
 ```
 
 ## Publishing to GitHub releases
 
-1. Go to the repository on GitHub → **Releases** → **Draft a new release**
+1. Go to the [repository's releases](https://github.com/ZigaVukcevicDev/houston-we-have-a-bug/releases) on GitHub → **Releases** → **Draft a new release**
 2. In the **Choose a tag** dropdown, type a new tag (e.g. `vX.X.X`) — GitHub will create it on publish
 3. Set the release title to `vX.X.X`
 4. Copy the relevant section from `CHANGELOG.md` into the release notes
