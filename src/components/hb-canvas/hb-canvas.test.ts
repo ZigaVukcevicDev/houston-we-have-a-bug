@@ -427,7 +427,7 @@ describe('HBCanvas', () => {
 
     beforeEach(() => {
       mockCanvasElement = {
-        toDataURL: vi.fn().mockReturnValue('data:image/jpeg;base64,mock'),
+        toDataURL: vi.fn().mockReturnValue('data:image/png;base64,mock'),
       };
 
       Object.defineProperty(canvas, 'canvas', {
@@ -448,11 +448,10 @@ describe('HBCanvas', () => {
       canvas.download();
 
       expect(mockCanvasElement.toDataURL).toHaveBeenCalledWith(
-        'image/jpeg',
-        0.85
+        'image/png'
       );
-      expect(mockLink.download).toBe('screenshot.jpg');
-      expect(mockLink.href).toBe('data:image/jpeg;base64,mock');
+      expect(mockLink.download).toBe('screenshot.png');
+      expect(mockLink.href).toBe('data:image/png;base64,mock');
       expect(mockLink.click).toHaveBeenCalled();
     });
 
@@ -465,16 +464,15 @@ describe('HBCanvas', () => {
 
       vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
 
-      canvas.download('custom-name.png', 0.95);
+      canvas.download('custom-name.jpg');
 
       expect(mockCanvasElement.toDataURL).toHaveBeenCalledWith(
-        'image/jpeg',
-        0.95
+        'image/png'
       );
-      expect(mockLink.download).toBe('custom-name.jpg');
+      expect(mockLink.download).toBe('custom-name.png');
     });
 
-    it('should replace .png extension with .jpg (case insensitive)', () => {
+    it('should replace .jpg extension with .png (case insensitive)', () => {
       const mockLink = {
         download: '',
         href: '',
@@ -483,12 +481,12 @@ describe('HBCanvas', () => {
 
       vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
 
-      canvas.download('test.PNG');
+      canvas.download('test.JPEG');
 
-      expect(mockLink.download).toBe('test.jpg');
+      expect(mockLink.download).toBe('test.png');
     });
 
-    it('should handle filenames without .png extension', () => {
+    it('should handle filenames without extension', () => {
       const mockLink = {
         download: '',
         href: '',
@@ -502,7 +500,7 @@ describe('HBCanvas', () => {
       expect(mockLink.download).toBe('my-screenshot');
     });
 
-    it('should handle various quality values', () => {
+    it('should call toDataURL with png format', () => {
       const mockLink = {
         download: '',
         href: '',
@@ -511,16 +509,14 @@ describe('HBCanvas', () => {
 
       vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
 
-      canvas.download('test.jpg', 1.0);
+      canvas.download('test.png');
       expect(mockCanvasElement.toDataURL).toHaveBeenCalledWith(
-        'image/jpeg',
-        1.0
+        'image/png'
       );
 
-      canvas.download('test.jpg', 0.1);
+      canvas.download('test.png');
       expect(mockCanvasElement.toDataURL).toHaveBeenCalledWith(
-        'image/jpeg',
-        0.1
+        'image/png'
       );
     });
 

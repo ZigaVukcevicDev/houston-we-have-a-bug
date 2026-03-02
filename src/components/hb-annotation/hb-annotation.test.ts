@@ -175,7 +175,7 @@ describe('HBAnnotation', () => {
 
       expect(mockCanvas.download).toHaveBeenCalledWith(
         expect.stringMatching(
-          /^bug \d{4}-\d{2}-\d{2} at \d{2}-\d{2}-\d{2}\.jpg$/
+          /^bug \d{4}-\d{2}-\d{2} at \d{2}-\d{2}-\d{2}\.png$/
         )
       );
     });

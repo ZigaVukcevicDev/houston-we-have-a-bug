@@ -157,7 +157,7 @@ export class HBAnnotation extends LitElement {
 
   private handleDownload() {
     const canvas = this.shadowRoot?.querySelector('hb-canvas') as HBCanvas;
-    canvas?.download(`bug ${getDateTimeForFilename()}.jpg`);
+    canvas?.download(`bug ${getDateTimeForFilename()}.png`);
   }
 
   private async toggleSystemInfo() {

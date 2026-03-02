@@ -1,4 +1,4 @@
-# Publish
+# Publish details for Chrome Web Store
 
 These are the information which are needed to publish the extension at [Chrome Web Store](https://chrome.google.com/webstore).
 
@@ -8,7 +8,7 @@ These are the information which are needed to publish the extension at [Chrome W
 
 #### 1.1.1 Product details
 
-**Title from package** 
+**Title from package**
 
 Houston, we have a bug
 

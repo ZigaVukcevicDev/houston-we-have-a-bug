@@ -483,6 +483,6 @@ test.describe('Mixed annotations', () => {
     await downloadButton.click();
     const download = await downloadPromise;
 
-    expect(download.suggestedFilename()).toMatch(/^bug .+\.jpg$/);
+    expect(download.suggestedFilename()).toMatch(/^bug .+\.png$/);
   });
 });

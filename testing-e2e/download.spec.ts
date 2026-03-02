@@ -17,7 +17,7 @@ test.describe('Download functionality', () => {
     const download = await downloadPromise;
 
     // Verify download filename format
-    expect(download.suggestedFilename()).toMatch(/^bug .+\.jpg$/);
+    expect(download.suggestedFilename()).toMatch(/^bug .+\.png$/);
   });
 
   test('should download with arrow annotation', async ({ page }) => {
@@ -40,7 +40,7 @@ test.describe('Download functionality', () => {
     await downloadButton.click();
     const download = await downloadPromise;
 
-    expect(download.suggestedFilename()).toMatch(/^bug .+\.jpg$/);
+    expect(download.suggestedFilename()).toMatch(/^bug .+\.png$/);
   });
 
   test('should download with line annotation', async ({ page }) => {
@@ -63,7 +63,7 @@ test.describe('Download functionality', () => {
     await downloadButton.click();
     const download = await downloadPromise;
 
-    expect(download.suggestedFilename()).toMatch(/^bug .+\.jpg$/);
+    expect(download.suggestedFilename()).toMatch(/^bug .+\.png$/);
   });
 
   test('should download with rectangle annotation', async ({ page }) => {
@@ -86,7 +86,7 @@ test.describe('Download functionality', () => {
     await downloadButton.click();
     const download = await downloadPromise;
 
-    expect(download.suggestedFilename()).toMatch(/^bug .+\.jpg$/);
+    expect(download.suggestedFilename()).toMatch(/^bug .+\.png$/);
   });
 
   test('should download with text annotation', async ({ page }) => {
@@ -117,7 +117,7 @@ test.describe('Download functionality', () => {
     await downloadButton.click();
     const download = await downloadPromise;
 
-    expect(download.suggestedFilename()).toMatch(/^bug .+\.jpg$/);
+    expect(download.suggestedFilename()).toMatch(/^bug .+\.png$/);
   });
 
   test('should download with multiple mixed annotations', async ({ page }) => {
@@ -155,7 +155,7 @@ test.describe('Download functionality', () => {
     await downloadButton.click();
     const download = await downloadPromise;
 
-    expect(download.suggestedFilename()).toMatch(/^bug .+\.jpg$/);
+    expect(download.suggestedFilename()).toMatch(/^bug .+\.png$/);
   });
 
   test('should deselect annotation before downloading', async ({ page }) => {
@@ -184,7 +184,7 @@ test.describe('Download functionality', () => {
     const download = await downloadPromise;
 
     // Verify download occurred
-    expect(download.suggestedFilename()).toMatch(/^bug .+\.jpg$/);
+    expect(download.suggestedFilename()).toMatch(/^bug .+\.png$/);
 
     // Note: We can't easily verify visual deselection in the downloaded image,
     // but this test ensures the download flow works with selected annotations
@@ -220,7 +220,7 @@ test.describe('Download functionality', () => {
     await downloadButton.click();
     const download = await downloadPromise;
 
-    expect(download.suggestedFilename()).toMatch(/^bug .+\.jpg$/);
+    expect(download.suggestedFilename()).toMatch(/^bug .+\.png$/);
   });
 
   test('should download after crop operation', async ({ page }) => {
@@ -255,7 +255,7 @@ test.describe('Download functionality', () => {
     await downloadButton.click();
     const download = await downloadPromise;
 
-    expect(download.suggestedFilename()).toMatch(/^bug .+\.jpg$/);
+    expect(download.suggestedFilename()).toMatch(/^bug .+\.png$/);
   });
 
   test('should generate unique filename for each download', async ({
@@ -280,7 +280,7 @@ test.describe('Download functionality', () => {
 
     // Filenames should be different (due to timestamp)
     expect(filename1).not.toBe(filename2);
-    expect(filename1).toMatch(/^bug .+\.jpg$/);
-    expect(filename2).toMatch(/^bug .+\.jpg$/);
+    expect(filename1).toMatch(/^bug .+\.png$/);
+    expect(filename2).toMatch(/^bug .+\.png$/);
   });
 });

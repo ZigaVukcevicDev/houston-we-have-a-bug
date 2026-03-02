@@ -285,18 +285,16 @@ export class HBCanvas extends LitElement {
     this.currentTool?.handleMouseUp?.(event, this.canvas);
   }
 
-  public download(filename: string = 'screenshot.jpg', quality: number = 0.85) {
+  public download(filename: string = 'screenshot.png') {
     // Deselect all annotations before downloading
     const selectTool = this.tools.get('select') as SelectTool;
     if (selectTool) {
       selectTool.deselectAll();
     }
 
-    // Use JPEG with quality compression for smaller file sizes
-    // Quality 0.85 provides good balance between size and quality
-    const dataUrl = this.canvas.toDataURL('image/jpeg', quality);
+    const dataUrl = this.canvas.toDataURL('image/png');
     const link = document.createElement('a');
-    link.download = filename.replace(/\.png$/i, '.jpg');
+    link.download = filename.replace(/\.jpe?g$/i, '.png');
     link.href = dataUrl;
     link.click();
   }
