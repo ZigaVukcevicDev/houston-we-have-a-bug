@@ -22,7 +22,11 @@ npm run test:all
 
 All tests must pass before building.
 
-### 4. Build
+### 4. Commit and push
+
+Commit the CHANGELOG and version bumps, then push code before building.
+
+### 5. Build
 
 ```bash
 npm run build
@@ -30,7 +34,7 @@ npm run build
 
 Output goes to the `dist/` folder.
 
-### 5. Create a ZIP
+### 6. Create a ZIP
 
 ```bash
 cd dist && zip -r ../houston-we-have-a-bug-1-0-1.zip . && cd ..
