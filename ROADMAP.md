@@ -35,7 +35,7 @@ This version prioritizes **stability, clarity, and performance**.
 
 ### Core actions
 
-- Undo / Redo
+- Blur tool
 - Keyboard shortcuts
 
 ## Future versions ideas
@@ -46,4 +46,3 @@ This version prioritizes **stability, clarity, and performance**.
 - Console errors - collect errors
 - Tool: numbered markers
 - Tool: marker for highlighting
-- Tool: blur
