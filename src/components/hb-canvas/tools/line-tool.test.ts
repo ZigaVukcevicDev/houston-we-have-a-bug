@@ -86,7 +86,10 @@ describe('LineTool', () => {
     });
 
     it('should draw preview line when dragging', () => {
-      lineTool.handleMouseDown({ clientX: 50, clientY: 50 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseDown(
+        { clientX: 50, clientY: 50 } as MouseEvent,
+        mockCanvas
+      );
 
       const event = {
         clientX: 100,
@@ -505,11 +508,17 @@ describe('LineTool', () => {
   describe('tool change callback', () => {
     it('should call onToolChange with "select" after drawing a line', () => {
       const mockToolChange = vi.fn();
-      const lineToolWithCallback = new LineTool([], () => { }, mockToolChange);
+      const lineToolWithCallback = new LineTool([], () => {}, mockToolChange);
 
       // Draw a line
-      lineToolWithCallback.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      lineToolWithCallback.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
+      lineToolWithCallback.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      lineToolWithCallback.handleMouseUp(
+        { clientX: 200, clientY: 200, shiftKey: false } as MouseEvent,
+        mockCanvas
+      );
 
       expect(mockToolChange).toHaveBeenCalledWith('select', expect.any(String));
       expect(mockToolChange).toHaveBeenCalledTimes(1);
@@ -517,21 +526,33 @@ describe('LineTool', () => {
 
     it('should not call onToolChange if callback not provided', () => {
       // Should not crash without callback
-      const lineToolNoCallback = new LineTool([], () => { });
+      const lineToolNoCallback = new LineTool([], () => {});
 
       expect(() => {
-        lineToolNoCallback.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-        lineToolNoCallback.handleMouseUp({ clientX: 200, clientY: 200, shiftKey: false } as MouseEvent, mockCanvas);
+        lineToolNoCallback.handleMouseDown(
+          { clientX: 100, clientY: 100 } as MouseEvent,
+          mockCanvas
+        );
+        lineToolNoCallback.handleMouseUp(
+          { clientX: 200, clientY: 200, shiftKey: false } as MouseEvent,
+          mockCanvas
+        );
       }).not.toThrow();
     });
 
     it('should not call onToolChange for zero-length lines', () => {
       const mockToolChange = vi.fn();
-      const lineToolWithCallback = new LineTool([], () => { }, mockToolChange);
+      const lineToolWithCallback = new LineTool([], () => {}, mockToolChange);
 
       // Try to draw zero-length line (single click)
-      lineToolWithCallback.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      lineToolWithCallback.handleMouseUp({ clientX: 100, clientY: 100, shiftKey: false } as MouseEvent, mockCanvas);
+      lineToolWithCallback.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      lineToolWithCallback.handleMouseUp(
+        { clientX: 100, clientY: 100, shiftKey: false } as MouseEvent,
+        mockCanvas
+      );
 
       expect(mockToolChange).not.toHaveBeenCalled();
     });
@@ -546,10 +567,17 @@ describe('LineTool', () => {
         value: undefined,
       });
 
-      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
 
       (mockCtx.stroke as any).mockClear();
-      lineTool.handleMouseMove({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas, mockCtx);
+      lineTool.handleMouseMove(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(mockCtx.stroke).toHaveBeenCalled();
 
@@ -570,8 +598,14 @@ describe('LineTool', () => {
       });
 
       // Create a line first
-      lineTool.handleMouseDown({ clientX: 50, clientY: 50 } as MouseEvent, mockCanvas);
-      lineTool.handleMouseUp({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseDown(
+        { clientX: 50, clientY: 50 } as MouseEvent,
+        mockCanvas
+      );
+      lineTool.handleMouseUp(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
 
       (mockCtx.stroke as any).mockClear();
       lineTool.render(mockCtx);
@@ -592,16 +626,25 @@ describe('LineTool', () => {
       const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
 
       // Start drawing to set up keydownHandler
-      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
 
       // Verify keydownHandler was set
       expect(lineTool['keydownHandler']).not.toBeNull();
 
       // Complete the line (this calls cleanupDrawingState)
-      lineTool.handleMouseUp({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseUp(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       // Should have removed the event listener
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        'keydown',
+        expect.any(Function)
+      );
       expect(lineTool['keydownHandler']).toBeNull();
 
       removeEventListenerSpy.mockRestore();
@@ -614,7 +657,10 @@ describe('LineTool', () => {
       const lineTool = new LineTool([], mockRedraw);
 
       // Start drawing
-      lineTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      lineTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
       mockRedraw.mockClear();
 
       lineTool.deactivate();
@@ -643,4 +689,3 @@ describe('LineTool', () => {
     });
   });
 });
-

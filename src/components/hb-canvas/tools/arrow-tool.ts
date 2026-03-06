@@ -6,7 +6,11 @@ export class ArrowTool extends LineTool {
   private currentPreviewX: number = 0;
   private currentPreviewY: number = 0;
 
-  handleMouseMove(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
+  handleMouseMove(
+    event: MouseEvent,
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D
+  ): void {
     let { x, y } = getCanvasCoordinates(event, canvas);
 
     // Apply shift-key constraints (use parent method)
@@ -29,8 +33,17 @@ export class ArrowTool extends LineTool {
     const dpr = window.devicePixelRatio || 1;
 
     // Add arrowheads to all annotations (they're all arrows in this array now)
-    this.lineAnnotations.forEach(arrow => {
-      renderArrowhead(ctx, arrow.x1, arrow.y1, arrow.x2, arrow.y2, arrow.color, arrow.width, dpr);
+    this.lineAnnotations.forEach((arrow) => {
+      renderArrowhead(
+        ctx,
+        arrow.x1,
+        arrow.y1,
+        arrow.x2,
+        arrow.y2,
+        arrow.color,
+        arrow.width,
+        dpr
+      );
     });
 
     // Also draw arrowhead on preview during drawing

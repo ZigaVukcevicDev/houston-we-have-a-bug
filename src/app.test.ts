@@ -14,10 +14,10 @@ describe('HoustonWeHaveABug', () => {
     const element = new HoustonWeHaveABug();
     document.body.appendChild(element);
     await element.updateComplete;
-    
+
     const popup = element.shadowRoot?.querySelector('hb-popup');
     expect(popup).toBeTruthy();
-    
+
     document.body.removeChild(element);
   });
 });

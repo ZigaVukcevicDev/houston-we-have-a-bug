@@ -46,7 +46,7 @@ describe('Background service worker', () => {
   beforeEach(() => {
     messageListener = listeners[0];
     vi.clearAllMocks();
-    Object.keys(storageData).forEach(key => delete storageData[key]);
+    Object.keys(storageData).forEach((key) => delete storageData[key]);
   });
 
   it('should store screenshot data in session storage and create tab', async () => {
@@ -88,8 +88,12 @@ describe('Background service worker', () => {
     expect(result).toBe(true);
 
     await vi.waitFor(() => {
-      expect(mockChrome.storage.session.get).toHaveBeenCalledWith('screenshot_test-session');
-      expect(mockChrome.storage.session.remove).toHaveBeenCalledWith('screenshot_test-session');
+      expect(mockChrome.storage.session.get).toHaveBeenCalledWith(
+        'screenshot_test-session'
+      );
+      expect(mockChrome.storage.session.remove).toHaveBeenCalledWith(
+        'screenshot_test-session'
+      );
       expect(sendResponse).toHaveBeenCalledWith({
         dataUrl: 'data:image/png;base64,test',
         systemInfo: { url: 'https://example.com' },
@@ -123,7 +127,7 @@ describe('Background service worker', () => {
   });
 
   it('should handle errors when storing screenshot', async () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const sendResponse = vi.fn();
     const message = {
       type: 'STORE_SCREENSHOT',
@@ -132,7 +136,9 @@ describe('Background service worker', () => {
     };
 
     // Simulate storage error
-    mockChrome.storage.session.set.mockRejectedValueOnce(new Error('Storage error'));
+    mockChrome.storage.session.set.mockRejectedValueOnce(
+      new Error('Storage error')
+    );
 
     const result = messageListener(message, {}, sendResponse);
 
@@ -148,7 +154,7 @@ describe('Background service worker', () => {
   });
 
   it('should handle errors when retrieving screenshot', async () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const sendResponse = vi.fn();
     const getMessage = {
       type: 'GET_SCREENSHOT',
@@ -156,7 +162,9 @@ describe('Background service worker', () => {
     };
 
     // Simulate retrieval error
-    mockChrome.storage.session.get.mockRejectedValueOnce(new Error('Retrieval error'));
+    mockChrome.storage.session.get.mockRejectedValueOnce(
+      new Error('Retrieval error')
+    );
 
     const result = messageListener(getMessage, {}, sendResponse);
 
@@ -190,4 +198,3 @@ describe('Background service worker', () => {
     });
   });
 });
-

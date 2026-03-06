@@ -447,9 +447,7 @@ describe('HBCanvas', () => {
 
       canvas.download();
 
-      expect(mockCanvasElement.toDataURL).toHaveBeenCalledWith(
-        'image/png'
-      );
+      expect(mockCanvasElement.toDataURL).toHaveBeenCalledWith('image/png');
       expect(mockLink.download).toBe('screenshot.png');
       expect(mockLink.href).toBe('data:image/png;base64,mock');
       expect(mockLink.click).toHaveBeenCalled();
@@ -466,9 +464,7 @@ describe('HBCanvas', () => {
 
       canvas.download('custom-name.jpg');
 
-      expect(mockCanvasElement.toDataURL).toHaveBeenCalledWith(
-        'image/png'
-      );
+      expect(mockCanvasElement.toDataURL).toHaveBeenCalledWith('image/png');
       expect(mockLink.download).toBe('custom-name.png');
     });
 
@@ -510,14 +506,10 @@ describe('HBCanvas', () => {
       vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
 
       canvas.download('test.png');
-      expect(mockCanvasElement.toDataURL).toHaveBeenCalledWith(
-        'image/png'
-      );
+      expect(mockCanvasElement.toDataURL).toHaveBeenCalledWith('image/png');
 
       canvas.download('test.png');
-      expect(mockCanvasElement.toDataURL).toHaveBeenCalledWith(
-        'image/png'
-      );
+      expect(mockCanvasElement.toDataURL).toHaveBeenCalledWith('image/png');
     });
 
     it('should download without crashing when select tool is unavailable', () => {
@@ -1412,24 +1404,54 @@ describe('HBCanvas', () => {
 
     it('should skip annotation transformation when cropRect is null', () => {
       const mockCanvasEl = {
-        getBoundingClientRect: vi.fn().mockReturnValue({ left: 0, top: 0, width: 800, height: 600 }),
+        getBoundingClientRect: vi
+          .fn()
+          .mockReturnValue({ left: 0, top: 0, width: 800, height: 600 }),
         width: 800,
         height: 600,
         style: {},
         getContext: vi.fn().mockReturnValue({
-          canvas: { width: 800, height: 600, getBoundingClientRect: vi.fn().mockReturnValue({ left: 0, top: 0, width: 800, height: 600 }) },
-          clearRect: vi.fn(), drawImage: vi.fn(), strokeStyle: '', lineWidth: 0, lineCap: '',
-          beginPath: vi.fn(), moveTo: vi.fn(), lineTo: vi.fn(), stroke: vi.fn(),
-          save: vi.fn(), restore: vi.fn(), fillRect: vi.fn(), strokeRect: vi.fn(), setLineDash: vi.fn(),
+          canvas: {
+            width: 800,
+            height: 600,
+            getBoundingClientRect: vi
+              .fn()
+              .mockReturnValue({ left: 0, top: 0, width: 800, height: 600 }),
+          },
+          clearRect: vi.fn(),
+          drawImage: vi.fn(),
+          strokeStyle: '',
+          lineWidth: 0,
+          lineCap: '',
+          beginPath: vi.fn(),
+          moveTo: vi.fn(),
+          lineTo: vi.fn(),
+          stroke: vi.fn(),
+          save: vi.fn(),
+          restore: vi.fn(),
+          fillRect: vi.fn(),
+          strokeRect: vi.fn(),
+          setLineDash: vi.fn(),
         }),
       };
-      Object.defineProperty(canvas, 'canvas', { value: mockCanvasEl, writable: true });
+      Object.defineProperty(canvas, 'canvas', {
+        value: mockCanvasEl,
+        writable: true,
+      });
       canvas['firstUpdated']();
       canvas['originalImage'] = { width: 800, height: 600 } as HTMLImageElement;
 
       // No cropRect set → getCropRect() returns null
       const cropTool = canvas['tools'].get('crop') as CropTool;
-      canvas['lineAnnotations'].push({ id: 'line-1', x1: 50, y1: 50, x2: 100, y2: 100, color: '#000', width: 2 });
+      canvas['lineAnnotations'].push({
+        id: 'line-1',
+        x1: 50,
+        y1: 50,
+        x2: 100,
+        y2: 100,
+        color: '#000',
+        width: 2,
+      });
 
       const mockImage = new Image();
       vi.spyOn(cropTool, 'confirmCrop').mockReturnValue(mockImage);
@@ -1643,8 +1665,24 @@ describe('HBCanvas', () => {
 
     it('should handle multiple annotations, keeping only overlapping ones', () => {
       canvas['lineAnnotations'].push(
-        { id: 'inside', x1: 150, y1: 150, x2: 300, y2: 250, color: '#000', width: 2 },
-        { id: 'outside', x1: 10, y1: 10, x2: 50, y2: 50, color: '#000', width: 2 }
+        {
+          id: 'inside',
+          x1: 150,
+          y1: 150,
+          x2: 300,
+          y2: 250,
+          color: '#000',
+          width: 2,
+        },
+        {
+          id: 'outside',
+          x1: 10,
+          y1: 10,
+          x2: 50,
+          y2: 50,
+          color: '#000',
+          width: 2,
+        }
       );
 
       canvas['transformAnnotationsAfterCrop'](cropRect);
@@ -1673,12 +1711,20 @@ describe('HBCanvas', () => {
     it('should transform annotations during crop confirmation', () => {
       // Set up a mock canvas element so handleCropConfirm can run fully
       const mockCanvasEl = {
-        getBoundingClientRect: vi.fn().mockReturnValue({ left: 0, top: 0, width: 800, height: 600 }),
+        getBoundingClientRect: vi
+          .fn()
+          .mockReturnValue({ left: 0, top: 0, width: 800, height: 600 }),
         width: 800,
         height: 600,
         style: {},
         getContext: vi.fn().mockReturnValue({
-          canvas: { width: 800, height: 600, getBoundingClientRect: vi.fn().mockReturnValue({ left: 0, top: 0, width: 800, height: 600 }) },
+          canvas: {
+            width: 800,
+            height: 600,
+            getBoundingClientRect: vi
+              .fn()
+              .mockReturnValue({ left: 0, top: 0, width: 800, height: 600 }),
+          },
           clearRect: vi.fn(),
           drawImage: vi.fn(),
           strokeStyle: '',
@@ -1695,7 +1741,10 @@ describe('HBCanvas', () => {
           setLineDash: vi.fn(),
         }),
       };
-      Object.defineProperty(canvas, 'canvas', { value: mockCanvasEl, writable: true });
+      Object.defineProperty(canvas, 'canvas', {
+        value: mockCanvasEl,
+        writable: true,
+      });
       canvas['firstUpdated']();
       canvas['originalImage'] = { width: 800, height: 600 } as HTMLImageElement;
 

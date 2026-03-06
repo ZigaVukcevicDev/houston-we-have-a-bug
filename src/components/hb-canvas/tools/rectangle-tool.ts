@@ -13,7 +13,11 @@ export class RectangleTool implements Tool {
   private onToolChange?: (tool: string, annotationId?: string) => void;
   private keydownHandler: ((event: KeyboardEvent) => void) | null = null;
 
-  constructor(rectangleAnnotations: RectangleAnnotation[], onRedraw: () => void, onToolChange?: (tool: string, annotationId?: string) => void) {
+  constructor(
+    rectangleAnnotations: RectangleAnnotation[],
+    onRedraw: () => void,
+    onToolChange?: (tool: string, annotationId?: string) => void
+  ) {
     this.rectangleAnnotations = rectangleAnnotations;
     this.onRedraw = onRedraw;
     this.onToolChange = onToolChange;
@@ -33,7 +37,11 @@ export class RectangleTool implements Tool {
     document.addEventListener('keydown', this.keydownHandler);
   }
 
-  handleMouseMove(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
+  handleMouseMove(
+    event: MouseEvent,
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D
+  ): void {
     if (!this.isDrawing || !this.startPoint) return;
 
     const { x, y } = getCanvasCoordinates(event, canvas);
@@ -92,7 +100,8 @@ export class RectangleTool implements Tool {
       this.onRedraw();
 
       // Switch to select tool after drawing and select the newly created rectangle
-      const newRectId = this.rectangleAnnotations[this.rectangleAnnotations.length - 1].id;
+      const newRectId =
+        this.rectangleAnnotations[this.rectangleAnnotations.length - 1].id;
       this.onToolChange?.('select', newRectId);
     } else {
       this.cancelDrawing();

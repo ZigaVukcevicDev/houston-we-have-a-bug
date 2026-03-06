@@ -3,7 +3,11 @@ export interface Tool {
 
   handleMouseDown?(event: MouseEvent, canvas: HTMLCanvasElement): void;
 
-  handleMouseMove?(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void;
+  handleMouseMove?(
+    event: MouseEvent,
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D
+  ): void;
 
   handleMouseUp?(event: MouseEvent, canvas: HTMLCanvasElement): void;
 

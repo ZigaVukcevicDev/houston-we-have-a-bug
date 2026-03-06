@@ -13,7 +13,11 @@ export class LineTool implements Tool {
   protected onToolChange?: (tool: string, annotationId?: string) => void;
   private keydownHandler: ((event: KeyboardEvent) => void) | null = null;
 
-  constructor(lineAnnotations: LineAnnotation[], onRedraw: () => void, onToolChange?: (tool: string, annotationId?: string) => void) {
+  constructor(
+    lineAnnotations: LineAnnotation[],
+    onRedraw: () => void,
+    onToolChange?: (tool: string, annotationId?: string) => void
+  ) {
     this.lineAnnotations = lineAnnotations;
     this.onRedraw = onRedraw;
     this.onToolChange = onToolChange;
@@ -35,7 +39,11 @@ export class LineTool implements Tool {
     document.addEventListener('keydown', this.keydownHandler);
   }
 
-  handleMouseMove(event: MouseEvent, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
+  handleMouseMove(
+    event: MouseEvent,
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D
+  ): void {
     if (!this.isDrawing || !this.startPoint) return;
 
     let { x, y } = getCanvasCoordinates(event, canvas);
@@ -68,7 +76,9 @@ export class LineTool implements Tool {
     }
 
     // Check if line is too short (prevent zero-length lines from single clicks)
-    const lineLength = Math.sqrt((x - this.startPoint.x) ** 2 + (y - this.startPoint.y) ** 2);
+    const lineLength = Math.sqrt(
+      (x - this.startPoint.x) ** 2 + (y - this.startPoint.y) ** 2
+    );
     if (lineLength < 2) {
       // Too short, don't create line
       this.cleanupDrawingState();

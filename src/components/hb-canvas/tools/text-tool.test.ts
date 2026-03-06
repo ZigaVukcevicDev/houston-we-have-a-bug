@@ -412,8 +412,13 @@ describe('TextTool', () => {
 
       const annotation = {
         id: 'test-no-escape-id',
-        x: 50, y: 50, width: 200, height: 100,
-        text: 'Keep me', color: '#E74C3C', fontSize: 16,
+        x: 50,
+        y: 50,
+        width: 200,
+        height: 100,
+        text: 'Keep me',
+        color: '#E74C3C',
+        fontSize: 16,
       };
       textTool['annotations'] = [annotation];
 
@@ -437,8 +442,13 @@ describe('TextTool', () => {
 
       const annotation = {
         id: 'other-id',
-        x: 50, y: 50, width: 200, height: 100,
-        text: 'Keep me', color: '#E74C3C', fontSize: 16,
+        x: 50,
+        y: 50,
+        width: 200,
+        height: 100,
+        text: 'Keep me',
+        color: '#E74C3C',
+        fontSize: 16,
       };
       textTool['annotations'] = [annotation];
 
@@ -765,8 +775,13 @@ describe('TextTool', () => {
 
       const annotation = {
         id: 'test-no-id',
-        x: 50, y: 50, width: 200, height: 100,
-        text: 'Original', color: '#E74C3C', fontSize: 16,
+        x: 50,
+        y: 50,
+        width: 200,
+        height: 100,
+        text: 'Original',
+        color: '#E74C3C',
+        fontSize: 16,
       };
       textTool['annotations'] = [annotation];
 
@@ -786,8 +801,13 @@ describe('TextTool', () => {
 
       const annotation = {
         id: 'test-id',
-        x: 50, y: 50, width: 200, height: 100,
-        text: 'Original', color: '#E74C3C', fontSize: 16,
+        x: 50,
+        y: 50,
+        width: 200,
+        height: 100,
+        text: 'Original',
+        color: '#E74C3C',
+        fontSize: 16,
       };
       textTool['annotations'] = [annotation];
 
@@ -1803,8 +1823,13 @@ describe('TextTool', () => {
 
       const annotation = {
         id: 'existing-ann',
-        x: 50, y: 50, width: 200, height: 100,
-        text: 'Keep me', color: '#E74C3C', fontSize: 16,
+        x: 50,
+        y: 50,
+        width: 200,
+        height: 100,
+        text: 'Keep me',
+        color: '#E74C3C',
+        fontSize: 16,
       };
       textTool['annotations'] = [annotation];
 

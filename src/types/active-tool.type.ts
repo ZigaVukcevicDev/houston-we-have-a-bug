@@ -1,1 +1,7 @@
-export type ActiveTool = 'select' | 'text' | 'line' | 'arrow' | 'rectangle' | 'crop';
+export type ActiveTool =
+  | 'select'
+  | 'text'
+  | 'line'
+  | 'arrow'
+  | 'rectangle'
+  | 'crop';

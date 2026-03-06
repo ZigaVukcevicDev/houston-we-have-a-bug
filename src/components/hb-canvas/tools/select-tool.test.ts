@@ -3358,13 +3358,7 @@ describe('SelectTool', () => {
       } as unknown as HTMLCanvasElement;
 
       selectTool.deactivate();
-      selectTool = new SelectTool(
-        [],
-        [],
-        [],
-        textAnnotations,
-        mockRedraw
-      );
+      selectTool = new SelectTool([], [], [], textAnnotations, mockRedraw);
       selectTool.activate();
     });
 
@@ -3428,7 +3422,8 @@ describe('SelectTool', () => {
 
     it('should handle text with word wrap overflow', () => {
       // Text without newlines but long enough to wrap
-      textAnnotations[0].text = 'This is a long text that will wrap to multiple lines';
+      textAnnotations[0].text =
+        'This is a long text that will wrap to multiple lines';
       textAnnotations[0].width = 100; // Narrow width to force wrapping
 
       // Mock measureText to return width that forces wrapping
@@ -3503,11 +3498,27 @@ describe('SelectTool', () => {
       );
 
       // Test point near the zero-length segment (within threshold of 5)
-      const result = selectTool['isPointNearLineSegment'](102, 102, 100, 100, 100, 100, 5);
+      const result = selectTool['isPointNearLineSegment'](
+        102,
+        102,
+        100,
+        100,
+        100,
+        100,
+        5
+      );
       expect(result).toBe(true);
 
       // Test point far from the zero-length segment
-      const result2 = selectTool['isPointNearLineSegment'](150, 150, 100, 100, 100, 100, 5);
+      const result2 = selectTool['isPointNearLineSegment'](
+        150,
+        150,
+        100,
+        100,
+        100,
+        100,
+        5
+      );
       expect(result2).toBe(false);
     });
 
@@ -3521,11 +3532,27 @@ describe('SelectTool', () => {
       );
 
       // Test point near the middle of a line segment
-      const result = selectTool['isPointNearLineSegment'](150, 150, 100, 100, 200, 200, 5);
+      const result = selectTool['isPointNearLineSegment'](
+        150,
+        150,
+        100,
+        100,
+        200,
+        200,
+        5
+      );
       expect(result).toBe(true);
 
       // Test point far from the line segment
-      const result2 = selectTool['isPointNearLineSegment'](300, 300, 100, 100, 200, 200, 5);
+      const result2 = selectTool['isPointNearLineSegment'](
+        300,
+        300,
+        100,
+        100,
+        200,
+        200,
+        5
+      );
       expect(result2).toBe(false);
     });
   });

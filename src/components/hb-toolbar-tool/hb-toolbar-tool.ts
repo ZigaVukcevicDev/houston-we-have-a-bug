@@ -17,14 +17,22 @@ export class HBToolbarTool extends LitElement {
 
   render() {
     return html`
-      <button 
-        class="${this.isActive ? 'activated' : ''}" 
+      <button
+        class="${this.isActive ? 'activated' : ''}"
         title=${this.title}
         data-tool=${this.icon}
         aria-selected=${this.isActive}
       >
-        <img src="../images/${this.icon}-black.svg" alt=${this.icon} class="icon-default" />
-        <img src="../images/${this.icon}-white.svg" alt=${this.icon} class="icon-hover-and-activated" />
+        <img
+          src="../images/${this.icon}-black.svg"
+          alt=${this.icon}
+          class="icon-default"
+        />
+        <img
+          src="../images/${this.icon}-white.svg"
+          alt=${this.icon}
+          class="icon-hover-and-activated"
+        />
       </button>
     `;
   }

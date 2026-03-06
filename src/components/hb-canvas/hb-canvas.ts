@@ -410,7 +410,12 @@ export class HBCanvas extends LitElement {
 
     const transformedLines = this.lineAnnotations
       .filter(({ x1, y1, x2, y2 }) =>
-        overlaps(Math.min(x1, x2), Math.min(y1, y2), Math.max(x1, x2), Math.max(y1, y2))
+        overlaps(
+          Math.min(x1, x2),
+          Math.min(y1, y2),
+          Math.max(x1, x2),
+          Math.max(y1, y2)
+        )
       )
       .map((line) => ({
         ...line,
@@ -419,11 +424,20 @@ export class HBCanvas extends LitElement {
         x2: line.x2 - cx,
         y2: line.y2 - cy,
       }));
-    this.lineAnnotations.splice(0, this.lineAnnotations.length, ...transformedLines);
+    this.lineAnnotations.splice(
+      0,
+      this.lineAnnotations.length,
+      ...transformedLines
+    );
 
     const transformedArrows = this.arrowAnnotations
       .filter(({ x1, y1, x2, y2 }) =>
-        overlaps(Math.min(x1, x2), Math.min(y1, y2), Math.max(x1, x2), Math.max(y1, y2))
+        overlaps(
+          Math.min(x1, x2),
+          Math.min(y1, y2),
+          Math.max(x1, x2),
+          Math.max(y1, y2)
+        )
       )
       .map((arrow) => ({
         ...arrow,
@@ -432,21 +446,33 @@ export class HBCanvas extends LitElement {
         x2: arrow.x2 - cx,
         y2: arrow.y2 - cy,
       }));
-    this.arrowAnnotations.splice(0, this.arrowAnnotations.length, ...transformedArrows);
+    this.arrowAnnotations.splice(
+      0,
+      this.arrowAnnotations.length,
+      ...transformedArrows
+    );
 
     const transformedRects = this.rectangleAnnotations
       .filter(({ x, y, width, height }) =>
         overlaps(x, y, x + width, y + height)
       )
       .map((rect) => ({ ...rect, x: rect.x - cx, y: rect.y - cy }));
-    this.rectangleAnnotations.splice(0, this.rectangleAnnotations.length, ...transformedRects);
+    this.rectangleAnnotations.splice(
+      0,
+      this.rectangleAnnotations.length,
+      ...transformedRects
+    );
 
     const transformedTexts = this.textAnnotations
       .filter(({ x, y, width, height }) =>
         overlaps(x, y, x + width, y + height)
       )
       .map((text) => ({ ...text, x: text.x - cx, y: text.y - cy }));
-    this.textAnnotations.splice(0, this.textAnnotations.length, ...transformedTexts);
+    this.textAnnotations.splice(
+      0,
+      this.textAnnotations.length,
+      ...transformedTexts
+    );
   }
 }
 

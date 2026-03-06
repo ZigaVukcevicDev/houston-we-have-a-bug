@@ -27,8 +27,18 @@ describe('render-handle utility', () => {
       renderHandle(mockCtx, 100, 150);
 
       expect(mockCtx.save).toHaveBeenCalled();
-      expect(mockCtx.fillRect).toHaveBeenCalledWith(96, 146, handleSize, handleSize);
-      expect(mockCtx.strokeRect).toHaveBeenCalledWith(96, 146, handleSize, handleSize);
+      expect(mockCtx.fillRect).toHaveBeenCalledWith(
+        96,
+        146,
+        handleSize,
+        handleSize
+      );
+      expect(mockCtx.strokeRect).toHaveBeenCalledWith(
+        96,
+        146,
+        handleSize,
+        handleSize
+      );
       expect(mockCtx.restore).toHaveBeenCalled();
     });
 
@@ -147,7 +157,12 @@ describe('render-handle utility', () => {
       renderHandle(mockCtx, 100, 100);
 
       // With DPR=1, handle size is 8, so centered rectangle starts at 96,96
-      expect(mockCtx.fillRect).toHaveBeenCalledWith(96, 96, handleSize, handleSize);
+      expect(mockCtx.fillRect).toHaveBeenCalledWith(
+        96,
+        96,
+        handleSize,
+        handleSize
+      );
 
       // Reset
       Object.defineProperty(window, 'devicePixelRatio', {
@@ -168,7 +183,12 @@ describe('render-handle utility', () => {
       renderHandle(mockCtx, 100, 100);
 
       // With DPR=1 (fallback), handle size is 8
-      expect(mockCtx.fillRect).toHaveBeenCalledWith(96, 96, handleSize, handleSize);
+      expect(mockCtx.fillRect).toHaveBeenCalledWith(
+        96,
+        96,
+        handleSize,
+        handleSize
+      );
 
       // Reset
       Object.defineProperty(window, 'devicePixelRatio', {
