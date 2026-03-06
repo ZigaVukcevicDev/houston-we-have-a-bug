@@ -30,6 +30,9 @@ export class HBAnnotation extends LitElement {
   @state()
   private showReportBugDrawer: boolean = false;
 
+  @state()
+  private isClosingReportBugDrawer: boolean = false;
+
   render() {
     if (!this.dataUrl) {
       return html`
@@ -98,20 +101,31 @@ export class HBAnnotation extends LitElement {
       ${this.showReportBugDrawer
         ? html`
             <div
-              class="drawer-overlay"
+              class="drawer-overlay ${this.isClosingReportBugDrawer
+                ? 'closing'
+                : ''}"
               @click=${this.handleCloseReportBugDrawer}
             ></div>
-            <div class="report-bug-drawer">
+            <div
+              class="report-bug-drawer ${this.isClosingReportBugDrawer
+                ? 'closing'
+                : ''}"
+              @animationend=${this.handleDrawerAnimationEnd}
+            >
               <div class="drawer-header">
                 <button
                   class="drawer-icon-button"
                   @click=${this.handleCloseReportBugDrawer}
                   title="Close"
                 >
-                  <img src="../images/close-black.svg" alt="close" />
+                  Close
+                  <!-- <img src="../images/close-black.svg" alt="close" /> -->
                 </button>
+              </div>
+              <div class="drawer-body">
                 <button class="drawer-icon-button" title="Settings">
-                  <img src="../images/settings-black.svg" alt="settings" />
+                  Settings
+                  <!-- <img src="../images/settings-black.svg" alt="settings" /> -->
                 </button>
               </div>
             </div>
@@ -218,10 +232,18 @@ export class HBAnnotation extends LitElement {
 
   private handleReportBug() {
     this.showReportBugDrawer = true;
+    this.isClosingReportBugDrawer = false;
   }
 
   private handleCloseReportBugDrawer() {
-    this.showReportBugDrawer = false;
+    this.isClosingReportBugDrawer = true;
+  }
+
+  private handleDrawerAnimationEnd(e: AnimationEvent) {
+    if (e.animationName === 'slide-out-to-right') {
+      this.showReportBugDrawer = false;
+      this.isClosingReportBugDrawer = false;
+    }
   }
 
   private async toggleSystemInfo() {
