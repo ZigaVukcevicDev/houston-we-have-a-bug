@@ -61,7 +61,10 @@ describe('CropTool', () => {
 
   describe('handleMouseDown', () => {
     it('should start drawing on mouse down', () => {
-      cropTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(cropTool['isDrawing']).toBe(true);
       expect(cropTool['startPoint']).toEqual({ x: 100, y: 100 });
@@ -70,7 +73,10 @@ describe('CropTool', () => {
     it('should clear existing crop rectangle on new mouse down', () => {
       cropTool['cropRect'] = { x: 50, y: 50, width: 100, height: 100 };
 
-      cropTool.handleMouseDown({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(cropTool['cropRect']).toBeNull();
     });
@@ -83,7 +89,10 @@ describe('CropTool', () => {
         height: 300,
       });
 
-      cropTool.handleMouseDown({ clientX: 110, clientY: 120 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 110, clientY: 120 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(cropTool['startPoint']).toEqual({ x: 200, y: 200 });
     });
@@ -91,19 +100,30 @@ describe('CropTool', () => {
 
   describe('handleMouseMove', () => {
     beforeEach(() => {
-      cropTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
     });
 
     it('should not draw if not in drawing mode', () => {
       cropTool['isDrawing'] = false;
 
-      cropTool.handleMouseMove({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseMove(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(mockRedraw).not.toHaveBeenCalled();
     });
 
     it('should update crop rectangle during drag', () => {
-      cropTool.handleMouseMove({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseMove(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(cropTool['cropRect']).toEqual({
         x: 100,
@@ -115,7 +135,11 @@ describe('CropTool', () => {
 
     it('should handle drag in opposite direction (top-left to bottom-right)', () => {
       cropTool['startPoint'] = { x: 200, y: 200 };
-      cropTool.handleMouseMove({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseMove(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(cropTool['cropRect']).toEqual({
         x: 100,
@@ -126,7 +150,11 @@ describe('CropTool', () => {
     });
 
     it('should call redraw and render during drag', () => {
-      cropTool.handleMouseMove({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseMove(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(mockRedraw).toHaveBeenCalled();
     });
@@ -167,11 +195,17 @@ describe('CropTool', () => {
 
   describe('handleMouseUp', () => {
     beforeEach(() => {
-      cropTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
     });
 
     it('should finalize crop rectangle on mouse up', () => {
-      cropTool.handleMouseUp({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseUp(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(cropTool['isDrawing']).toBe(false);
       expect(cropTool['startPoint']).toBeNull();
@@ -184,7 +218,10 @@ describe('CropTool', () => {
     });
 
     it('should expand tiny crop rectangles to minimum dimensions', () => {
-      cropTool.handleMouseUp({ clientX: 101, clientY: 101 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseUp(
+        { clientX: 101, clientY: 101 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(cropTool['cropRect']).not.toBeNull();
       expect(cropTool['cropRect']!.width).toBeGreaterThanOrEqual(61);
@@ -192,7 +229,10 @@ describe('CropTool', () => {
     });
 
     it('should keep crop rectangle if size is sufficient', () => {
-      cropTool.handleMouseUp({ clientX: 160, clientY: 135 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseUp(
+        { clientX: 160, clientY: 135 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(cropTool['cropRect']).not.toBeNull();
     });
@@ -208,7 +248,10 @@ describe('CropTool', () => {
 
     it('should call redraw on mouse up', () => {
       mockRedraw.mockClear();
-      cropTool.handleMouseUp({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseUp(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(mockRedraw).toHaveBeenCalled();
     });
@@ -217,7 +260,10 @@ describe('CropTool', () => {
       cropTool['isDrawing'] = false;
       mockRedraw.mockClear();
 
-      cropTool.handleMouseUp({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseUp(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(mockRedraw).not.toHaveBeenCalled();
     });
@@ -225,7 +271,10 @@ describe('CropTool', () => {
 
   describe('handleClick', () => {
     it('should not perform any action on click', () => {
-      cropTool.handleClick({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      cropTool.handleClick(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
 
       // Crop tool uses drag interaction, click should be no-op
       expect(cropTool['cropRect']).toBeNull();
@@ -236,13 +285,22 @@ describe('CropTool', () => {
     it('should add keyboard listener on mouse down', () => {
       const addEventListenerSpy = vi.spyOn(document, 'addEventListener');
 
-      cropTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
 
-      expect(addEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+      expect(addEventListenerSpy).toHaveBeenCalledWith(
+        'keydown',
+        expect.any(Function)
+      );
     });
 
     it('should cancel crop when Escape is pressed', () => {
-      cropTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
       cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
       mockRedraw.mockClear();
 
@@ -257,7 +315,10 @@ describe('CropTool', () => {
     it('should cancel crop without switching tools on Escape', () => {
       // Set up a crop rectangle first
       cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
-      cropTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
 
       const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
       cropTool['keydownHandler']?.(escapeEvent);
@@ -268,7 +329,10 @@ describe('CropTool', () => {
     });
 
     it('should not handle Escape when no crop rectangle exists', () => {
-      cropTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
       cropTool['cropRect'] = null;
 
       const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
@@ -281,7 +345,10 @@ describe('CropTool', () => {
       const mockConfirmCrop = vi.fn();
       cropTool = new CropTool(mockRedraw, mockToolChange, mockConfirmCrop);
       cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
-      cropTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
 
       const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
       cropTool['keydownHandler']?.(enterEvent);
@@ -292,7 +359,10 @@ describe('CropTool', () => {
     it('should not handle Enter when no crop rectangle exists', () => {
       const mockConfirmCrop = vi.fn();
       cropTool = new CropTool(mockRedraw, mockToolChange, mockConfirmCrop);
-      cropTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
       cropTool['cropRect'] = null;
 
       const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
@@ -304,7 +374,10 @@ describe('CropTool', () => {
     it('should not handle Enter when no confirm callback provided', () => {
       // cropTool created without confirm callback
       cropTool['cropRect'] = { x: 100, y: 100, width: 200, height: 150 };
-      cropTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
 
       const enterEvent = new KeyboardEvent('keydown', { key: 'Enter' });
       cropTool['keydownHandler']?.(enterEvent);
@@ -457,9 +530,15 @@ describe('CropTool', () => {
 
     it('should remove keyboard listener', () => {
       const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
-      cropTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
       cropTool.cancelCrop();
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        'keydown',
+        expect.any(Function)
+      );
       expect(cropTool['keydownHandler']).toBeNull();
     });
 
@@ -495,7 +574,9 @@ describe('CropTool', () => {
         }),
         toDataURL: vi.fn().mockReturnValue('data:image/png;base64,mock'),
       };
-      vi.spyOn(document, 'createElement').mockReturnValue(mockCreatedCanvas as any);
+      vi.spyOn(document, 'createElement').mockReturnValue(
+        mockCreatedCanvas as any
+      );
       const result = cropTool.confirmCrop(mockCanvas, mockImage);
       expect(result).toBeInstanceOf(HTMLImageElement);
     });
@@ -527,10 +608,17 @@ describe('CropTool', () => {
     });
 
     it('should resize from top-left handle', () => {
-      cropTool.handleMouseDown({ clientX: 200, clientY: 150 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 200, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
       expect(cropTool['draggedHandle']).toBe('top-left');
 
-      cropTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(cropTool['cropRect']?.x).toBeGreaterThan(200);
       expect(cropTool['cropRect']?.y).toBeGreaterThan(150);
@@ -539,20 +627,34 @@ describe('CropTool', () => {
     });
 
     it('should resize from bottom-right handle', () => {
-      cropTool.handleMouseDown({ clientX: 600, clientY: 450 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 600, clientY: 450 } as MouseEvent,
+        mockCanvas
+      );
       expect(cropTool['draggedHandle']).toBe('bottom-right');
 
-      cropTool.handleMouseMove({ clientX: 650, clientY: 500 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseMove(
+        { clientX: 650, clientY: 500 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(cropTool['cropRect']?.width).toBeGreaterThan(400);
       expect(cropTool['cropRect']?.height).toBeGreaterThan(300);
     });
 
     it('should resize from left edge handle', () => {
-      cropTool.handleMouseDown({ clientX: 200, clientY: 300 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 200, clientY: 300 } as MouseEvent,
+        mockCanvas
+      );
       expect(cropTool['draggedHandle']).toBe('left');
 
-      cropTool.handleMouseMove({ clientX: 220, clientY: 300 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseMove(
+        { clientX: 220, clientY: 300 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(cropTool['cropRect']?.x).toBe(220);
       expect(cropTool['cropRect']?.width).toBeLessThan(400);
@@ -563,16 +665,30 @@ describe('CropTool', () => {
       const minWidth = 61 * dpr;
       const minHeight = 34 * dpr;
 
-      cropTool.handleMouseDown({ clientX: 600, clientY: 450 } as MouseEvent, mockCanvas);
-      cropTool.handleMouseMove({ clientX: 210, clientY: 160 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseDown(
+        { clientX: 600, clientY: 450 } as MouseEvent,
+        mockCanvas
+      );
+      cropTool.handleMouseMove(
+        { clientX: 210, clientY: 160 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(cropTool['cropRect']?.width).toBeGreaterThanOrEqual(minWidth);
       expect(cropTool['cropRect']?.height).toBeGreaterThanOrEqual(minHeight);
     });
 
     it('should finalize handle drag on mouseUp', () => {
-      cropTool.handleMouseDown({ clientX: 200, clientY: 150 } as MouseEvent, mockCanvas);
-      cropTool.handleMouseMove({ clientX: 250, clientY: 200 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseDown(
+        { clientX: 200, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
+      cropTool.handleMouseMove(
+        { clientX: 250, clientY: 200 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
       cropTool.handleMouseUp({} as MouseEvent, mockCanvas);
 
       expect(cropTool['draggedHandle']).toBeNull();
@@ -587,26 +703,47 @@ describe('CropTool', () => {
     });
 
     it('should move crop rectangle when dragging inside', () => {
-      cropTool.handleMouseDown({ clientX: 400, clientY: 300 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 400, clientY: 300 } as MouseEvent,
+        mockCanvas
+      );
       expect(cropTool['isDraggingCrop']).toBe(true);
 
-      cropTool.handleMouseMove({ clientX: 450, clientY: 350 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseMove(
+        { clientX: 450, clientY: 350 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(cropTool['cropRect']?.x).toBe(250);
       expect(cropTool['cropRect']?.y).toBe(200);
     });
 
     it('should preserve size when moving', () => {
-      cropTool.handleMouseDown({ clientX: 400, clientY: 300 } as MouseEvent, mockCanvas);
-      cropTool.handleMouseMove({ clientX: 450, clientY: 350 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseDown(
+        { clientX: 400, clientY: 300 } as MouseEvent,
+        mockCanvas
+      );
+      cropTool.handleMouseMove(
+        { clientX: 450, clientY: 350 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(cropTool['cropRect']?.width).toBe(400);
       expect(cropTool['cropRect']?.height).toBe(300);
     });
 
     it('should finalize move on mouseUp', () => {
-      cropTool.handleMouseDown({ clientX: 400, clientY: 300 } as MouseEvent, mockCanvas);
-      cropTool.handleMouseMove({ clientX: 450, clientY: 350 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseDown(
+        { clientX: 400, clientY: 300 } as MouseEvent,
+        mockCanvas
+      );
+      cropTool.handleMouseMove(
+        { clientX: 450, clientY: 350 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
       cropTool.handleMouseUp({} as MouseEvent, mockCanvas);
 
       expect(cropTool['isDraggingCrop']).toBe(false);
@@ -621,17 +758,29 @@ describe('CropTool', () => {
     });
 
     it('should change cursor to resize on handle hover', () => {
-      cropTool.handleMouseMove({ clientX: 200, clientY: 150 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseMove(
+        { clientX: 200, clientY: 150 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
       expect(mockCanvas.style.cursor).toBe('nwse-resize');
     });
 
     it('should change cursor to move when hovering inside crop', () => {
-      cropTool.handleMouseMove({ clientX: 400, clientY: 300 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseMove(
+        { clientX: 400, clientY: 300 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
       expect(mockCanvas.style.cursor).toBe('move');
     });
 
     it('should change cursor to crosshair when outside crop', () => {
-      cropTool.handleMouseMove({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseMove(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
       expect(mockCanvas.style.cursor).toBe('crosshair');
     });
 
@@ -657,11 +806,17 @@ describe('CropTool', () => {
 
     it('should remove keyboard listener', () => {
       const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
-      cropTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
 
       cropTool.deactivate();
 
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        'keydown',
+        expect.any(Function)
+      );
       expect(cropTool['keydownHandler']).toBeNull();
     });
 
@@ -690,9 +845,19 @@ describe('CropTool', () => {
 
   describe('Edge cases for maximum coverage', () => {
     it('should adjust position when drawing small crop right-to-left', () => {
-      cropTool.handleMouseDown({ clientX: 300, clientY: 200 } as MouseEvent, mockCanvas);
-      cropTool.handleMouseMove({ clientX: 295, clientY: 195 } as MouseEvent, mockCanvas, mockCtx);
-      cropTool.handleMouseUp({ clientX: 295, clientY: 195 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 300, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
+      cropTool.handleMouseMove(
+        { clientX: 295, clientY: 195 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+      cropTool.handleMouseUp(
+        { clientX: 295, clientY: 195 } as MouseEvent,
+        mockCanvas
+      );
 
       const dpr = window.devicePixelRatio || 1;
       const minWidth = 61 * dpr;
@@ -701,9 +866,19 @@ describe('CropTool', () => {
     });
 
     it('should adjust position when drawing small crop bottom-to-top', () => {
-      cropTool.handleMouseDown({ clientX: 200, clientY: 300 } as MouseEvent, mockCanvas);
-      cropTool.handleMouseMove({ clientX: 195, clientY: 295 } as MouseEvent, mockCanvas, mockCtx);
-      cropTool.handleMouseUp({ clientX: 195, clientY: 295 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 200, clientY: 300 } as MouseEvent,
+        mockCanvas
+      );
+      cropTool.handleMouseMove(
+        { clientX: 195, clientY: 295 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
+      cropTool.handleMouseUp(
+        { clientX: 195, clientY: 295 } as MouseEvent,
+        mockCanvas
+      );
 
       const dpr = window.devicePixelRatio || 1;
       const minHeight = 34 * dpr;
@@ -716,8 +891,15 @@ describe('CropTool', () => {
       const dpr = window.devicePixelRatio || 1;
       const minWidth = 61 * dpr;
 
-      cropTool.handleMouseDown({ clientX: 200, clientY: 300 } as MouseEvent, mockCanvas);
-      cropTool.handleMouseMove({ clientX: 590, clientY: 300 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseDown(
+        { clientX: 200, clientY: 300 } as MouseEvent,
+        mockCanvas
+      );
+      cropTool.handleMouseMove(
+        { clientX: 590, clientY: 300 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(cropTool['cropRect']?.width).toBe(minWidth);
       expect(cropTool['cropRect']?.x).toBe(200 + 400 - minWidth);
@@ -728,8 +910,15 @@ describe('CropTool', () => {
       const dpr = window.devicePixelRatio || 1;
       const minHeight = 34 * dpr;
 
-      cropTool.handleMouseDown({ clientX: 400, clientY: 150 } as MouseEvent, mockCanvas);
-      cropTool.handleMouseMove({ clientX: 400, clientY: 440 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseDown(
+        { clientX: 400, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
+      cropTool.handleMouseMove(
+        { clientX: 400, clientY: 440 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(cropTool['cropRect']?.height).toBe(minHeight);
       expect(cropTool['cropRect']?.y).toBe(150 + 300 - minHeight);
@@ -768,10 +957,17 @@ describe('CropTool', () => {
 
     it('should resize from right edge handle', () => {
       cropTool['cropRect'] = { x: 200, y: 150, width: 400, height: 300 };
-      cropTool.handleMouseDown({ clientX: 600, clientY: 300 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 600, clientY: 300 } as MouseEvent,
+        mockCanvas
+      );
       expect(cropTool['draggedHandle']).toBe('right');
 
-      cropTool.handleMouseMove({ clientX: 650, clientY: 300 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseMove(
+        { clientX: 650, clientY: 300 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(cropTool['cropRect']?.width).toBeGreaterThan(400);
       expect(cropTool['cropRect']?.x).toBe(200);
@@ -779,10 +975,17 @@ describe('CropTool', () => {
 
     it('should resize from bottom edge handle', () => {
       cropTool['cropRect'] = { x: 200, y: 150, width: 400, height: 300 };
-      cropTool.handleMouseDown({ clientX: 400, clientY: 450 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 400, clientY: 450 } as MouseEvent,
+        mockCanvas
+      );
       expect(cropTool['draggedHandle']).toBe('bottom');
 
-      cropTool.handleMouseMove({ clientX: 400, clientY: 500 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseMove(
+        { clientX: 400, clientY: 500 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(cropTool['cropRect']?.height).toBeGreaterThan(300);
       expect(cropTool['cropRect']?.y).toBe(150);
@@ -790,10 +993,17 @@ describe('CropTool', () => {
 
     it('should resize from top edge handle', () => {
       cropTool['cropRect'] = { x: 200, y: 150, width: 400, height: 300 };
-      cropTool.handleMouseDown({ clientX: 400, clientY: 150 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 400, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
       expect(cropTool['draggedHandle']).toBe('top');
 
-      cropTool.handleMouseMove({ clientX: 400, clientY: 100 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseMove(
+        { clientX: 400, clientY: 100 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(cropTool['cropRect']?.y).toBeLessThan(150);
       expect(cropTool['cropRect']?.height).toBeGreaterThan(300);
@@ -801,10 +1011,17 @@ describe('CropTool', () => {
 
     it('should resize from top-right handle', () => {
       cropTool['cropRect'] = { x: 200, y: 150, width: 400, height: 300 };
-      cropTool.handleMouseDown({ clientX: 600, clientY: 150 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 600, clientY: 150 } as MouseEvent,
+        mockCanvas
+      );
       expect(cropTool['draggedHandle']).toBe('top-right');
 
-      cropTool.handleMouseMove({ clientX: 650, clientY: 100 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseMove(
+        { clientX: 650, clientY: 100 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(cropTool['cropRect']?.width).toBeGreaterThan(400);
       expect(cropTool['cropRect']?.y).toBeLessThan(150);
@@ -812,10 +1029,17 @@ describe('CropTool', () => {
 
     it('should resize from bottom-left handle', () => {
       cropTool['cropRect'] = { x: 200, y: 150, width: 400, height: 300 };
-      cropTool.handleMouseDown({ clientX: 200, clientY: 450 } as MouseEvent, mockCanvas);
+      cropTool.handleMouseDown(
+        { clientX: 200, clientY: 450 } as MouseEvent,
+        mockCanvas
+      );
       expect(cropTool['draggedHandle']).toBe('bottom-left');
 
-      cropTool.handleMouseMove({ clientX: 150, clientY: 500 } as MouseEvent, mockCanvas, mockCtx);
+      cropTool.handleMouseMove(
+        { clientX: 150, clientY: 500 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(cropTool['cropRect']?.x).toBeLessThan(200);
       expect(cropTool['cropRect']?.height).toBeGreaterThan(300);

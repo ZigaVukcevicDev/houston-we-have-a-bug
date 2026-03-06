@@ -40,11 +40,11 @@ export class HBPopup extends LitElement {
       <div class="popup">
         <div class="logo-with-heading">
           <img class="logo" src="../images/rocket.svg" alt="rocket" />
-          <img class="heading"src="../images/hb.svg" alt="hb" />
+          <img class="heading" src="../images/hb.svg" alt="hb" />
         </div>
 
         <div class="ml-lg">
-        <button
+          <button
             class="action-button primary"
             @click=${this.annotateScreenshot}
             ?disabled=${this.isOnAnnotationPage}

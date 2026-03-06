@@ -61,7 +61,9 @@ describe('HBPopup', () => {
     });
 
     it('should handle errors gracefully', async () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
       mockChrome.tabs.query.mockRejectedValue(
         new Error('Screenshot capture failed')
       );
@@ -95,7 +97,9 @@ describe('HBPopup', () => {
     });
 
     it('should detect annotation page when on tab.html', async () => {
-      mockChrome.tabs.query.mockResolvedValue([{ url: 'chrome-extension://id/tab.html' }]);
+      mockChrome.tabs.query.mockResolvedValue([
+        { url: 'chrome-extension://id/tab.html' },
+      ]);
 
       await popup['checkIfOnAnnotationPage']();
 

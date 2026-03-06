@@ -15,7 +15,7 @@ describe('tab entrypoint', () => {
   });
 
   it('should register hb-annotation custom element', async () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     // Import the entrypoint (which imports the component)
     await import('../entrypoints/tab');
 

@@ -1,12 +1,21 @@
 import type { Tool } from '../../../interfaces/tool.interface';
 import type { HandleType } from '../../../types/handle-type.type';
 import { toolStyles } from './tool-styles';
-import { renderHandle, handleSize, handleHitThreshold } from '../../../utils/render-handle';
+import {
+  renderHandle,
+  handleSize,
+  handleHitThreshold,
+} from '../../../utils/render-handle';
 import { getCanvasCoordinates } from '../../../utils/get-canvas-coordinates';
 import { drawManualDashes } from '../../../utils/draw-manual-dashes';
 
 export class CropTool implements Tool {
-  private cropRect: { x: number; y: number; width: number; height: number } | null = null;
+  private cropRect: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null = null;
   private isDrawing: boolean = false;
   private startPoint: { x: number; y: number } | null = null;
   private readonly color: string = toolStyles.color;
@@ -16,11 +25,20 @@ export class CropTool implements Tool {
   private keydownHandler: ((event: KeyboardEvent) => void) | null = null;
   private draggedHandle: HandleType | null = null;
   private dragStartPoint: { x: number; y: number } | null = null;
-  private originalCropRect: { x: number; y: number; width: number; height: number } | null = null;
+  private originalCropRect: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null = null;
   private isDraggingCrop: boolean = false;
   private canvas: HTMLCanvasElement | null = null;
 
-  constructor(onRedraw: () => void, onToolChange?: (tool: string) => void, onConfirmCrop?: () => void) {
+  constructor(
+    onRedraw: () => void,
+    onToolChange?: (tool: string) => void,
+    onConfirmCrop?: () => void
+  ) {
     this.onRedraw = onRedraw;
     this.onToolChange = onToolChange;
     this.onConfirmCrop = onConfirmCrop;
@@ -69,7 +87,11 @@ export class CropTool implements Tool {
     document.addEventListener('keydown', this.keydownHandler);
   }
 
-  handleMouseMove(event: MouseEvent, canvas: HTMLCanvasElement, _ctx: CanvasRenderingContext2D): void {
+  handleMouseMove(
+    event: MouseEvent,
+    canvas: HTMLCanvasElement,
+    _ctx: CanvasRenderingContext2D
+  ): void {
     const { x, y } = getCanvasCoordinates(event, canvas);
 
     // Handle dragging logic
@@ -118,8 +140,10 @@ export class CropTool implements Tool {
       const dy = Math.abs(currentY - this.startPoint.y);
       const size = Math.min(dx, dy);
 
-      currentX = this.startPoint.x + (currentX > this.startPoint.x ? size : -size);
-      currentY = this.startPoint.y + (currentY > this.startPoint.y ? size : -size);
+      currentX =
+        this.startPoint.x + (currentX > this.startPoint.x ? size : -size);
+      currentY =
+        this.startPoint.y + (currentY > this.startPoint.y ? size : -size);
     }
 
     // Calculate rectangle position and dimensions
@@ -128,7 +152,12 @@ export class CropTool implements Tool {
     const rectWidth = Math.abs(currentX - this.startPoint.x);
     const rectHeight = Math.abs(currentY - this.startPoint.y);
 
-    this.cropRect = { x: rectX, y: rectY, width: rectWidth, height: rectHeight };
+    this.cropRect = {
+      x: rectX,
+      y: rectY,
+      width: rectWidth,
+      height: rectHeight,
+    };
 
     // Redraw will render all tools including this one
     this.onRedraw();
@@ -194,7 +223,12 @@ export class CropTool implements Tool {
       finalY = this.startPoint.y - minHeight;
     }
 
-    this.cropRect = { x: finalX, y: finalY, width: finalWidth, height: finalHeight };
+    this.cropRect = {
+      x: finalX,
+      y: finalY,
+      width: finalWidth,
+      height: finalHeight,
+    };
 
     this.isDrawing = false;
     this.startPoint = null;
@@ -305,10 +339,7 @@ export class CropTool implements Tool {
 
     const { x: cropX, y: cropY, width, height } = this.cropRect;
     return (
-      x >= cropX &&
-      x <= cropX + width &&
-      y >= cropY &&
-      y <= cropY + height
+      x >= cropX && x <= cropX + width && y >= cropY && y <= cropY + height
     );
   }
 
@@ -318,10 +349,10 @@ export class CropTool implements Tool {
       'bottom-right': 'nwse-resize',
       'top-right': 'nesw-resize',
       'bottom-left': 'nesw-resize',
-      'left': 'ew-resize',
-      'right': 'ew-resize',
-      'top': 'ns-resize',
-      'bottom': 'ns-resize',
+      left: 'ew-resize',
+      right: 'ew-resize',
+      top: 'ns-resize',
+      bottom: 'ns-resize',
     };
     return cursorMap[handle];
   }
@@ -409,8 +440,26 @@ export class CropTool implements Tool {
 
     // Draw each edge with manual dashes aligned to canvas grid
     drawManualDashes(ctx, x, y, x + width, y, dashSize, dashSize, true); // Top
-    drawManualDashes(ctx, x + width, y, x + width, y + height, dashSize, dashSize, false); // Right
-    drawManualDashes(ctx, x, y + height, x + width, y + height, dashSize, dashSize, true); // Bottom
+    drawManualDashes(
+      ctx,
+      x + width,
+      y,
+      x + width,
+      y + height,
+      dashSize,
+      dashSize,
+      false
+    ); // Right
+    drawManualDashes(
+      ctx,
+      x,
+      y + height,
+      x + width,
+      y + height,
+      dashSize,
+      dashSize,
+      true
+    ); // Bottom
     drawManualDashes(ctx, x, y, x, y + height, dashSize, dashSize, false); // Left
 
     // Render 8 handles
@@ -429,7 +478,12 @@ export class CropTool implements Tool {
     ctx.restore();
   }
 
-  getCropRect(): { x: number; y: number; width: number; height: number } | null {
+  getCropRect(): {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null {
     return this.cropRect;
   }
 
@@ -441,7 +495,10 @@ export class CropTool implements Tool {
     return this.draggedHandle !== null || this.isDraggingCrop;
   }
 
-  confirmCrop(canvas: HTMLCanvasElement, originalImage: HTMLImageElement): HTMLImageElement | null {
+  confirmCrop(
+    canvas: HTMLCanvasElement,
+    originalImage: HTMLImageElement
+  ): HTMLImageElement | null {
     if (!this.cropRect) return null;
     const croppedCanvas = document.createElement('canvas');
     croppedCanvas.width = this.cropRect.width;

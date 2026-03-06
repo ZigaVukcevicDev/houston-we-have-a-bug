@@ -46,10 +46,12 @@ describe('getDisplayResolution', () => {
   it('should execute inline function to get screen dimensions', async () => {
     // Capture and execute the function
     let capturedFunc: (() => string) | null = null;
-    mockChrome.scripting.executeScript.mockImplementation((config: { func: () => string }) => {
-      capturedFunc = config.func;
-      return Promise.resolve([{ result: '1920 x 1080 px' }]);
-    });
+    mockChrome.scripting.executeScript.mockImplementation(
+      (config: { func: () => string }) => {
+        capturedFunc = config.func;
+        return Promise.resolve([{ result: '1920 x 1080 px' }]);
+      }
+    );
 
     await getDisplayResolution(456);
 
@@ -58,7 +60,7 @@ describe('getDisplayResolution', () => {
     Object.defineProperty(window, 'screen', {
       value: { width: 1920, height: 1080 },
       writable: true,
-      configurable: true
+      configurable: true,
     });
 
     const dimensions = capturedFunc!();

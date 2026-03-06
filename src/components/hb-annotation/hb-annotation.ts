@@ -36,7 +36,9 @@ export class HBAnnotation extends LitElement {
           <p>To annotate a page:</p>
           <ol>
             <li>Navigate to the page you want to capture</li>
-            <li>Click the "Houston, we have a bug" extension icon in your toolbar</li>
+            <li>
+              Click the "Houston, we have a bug" extension icon in your toolbar
+            </li>
             <li>Click "Annotate screenshot"</li>
           </ol>
         </div>
@@ -45,30 +47,44 @@ export class HBAnnotation extends LitElement {
 
     return html`
       <div class="toolbar-container">
-        <hb-toolbar 
+        <hb-toolbar
           .activeTool=${this.activeTool}
           @tool-change=${this.handleToolChange}
         ></hb-toolbar>
       </div>
       <div class="topbar-container">
-        <button
-          class="action-button primary"
-          @click=${this.handleDownload}
-        >
+        <button class="action-button primary" @click=${this.handleDownload}>
           <img src="../images/download-white.svg" alt="download" />
           Download
         </button>
-        <button class="action-button secondary ml-md ${this.showSystemInfo ? 'activated' : ''} js-system-info-button" @click=${(e: Event) => { e.stopPropagation(); this.toggleSystemInfo(); }}>
+        <button
+          class="action-button secondary ml-md ${this.showSystemInfo
+            ? 'activated'
+            : ''} js-system-info-button"
+          @click=${(e: Event) => {
+            e.stopPropagation();
+            this.toggleSystemInfo();
+          }}
+        >
           <img src="../images/info-black.svg" alt="info" class="icon-default" />
-          <img src="../images/info-white.svg" alt="info" class="icon-hover-and-active" />
+          <img
+            src="../images/info-white.svg"
+            alt="info"
+            class="icon-hover-and-active"
+          />
           System info
         </button>
       </div>
-      ${this.showSystemInfo ? html`
-        <div class="system-info-container js-system-info-container" @click=${(e: Event) => e.stopPropagation()}>
-          ${this.renderSystemInfo()}
-          </div>
-      ` : ''} 
+      ${this.showSystemInfo
+        ? html`
+            <div
+              class="system-info-container js-system-info-container"
+              @click=${(e: Event) => e.stopPropagation()}
+            >
+              ${this.renderSystemInfo()}
+            </div>
+          `
+        : ''}
       <div class="canvas-container">
         <hb-canvas
           .dataUrl=${this.dataUrl}
@@ -99,14 +115,19 @@ export class HBAnnotation extends LitElement {
     if (!this.showSystemInfo) return;
 
     const path = event.composedPath();
-    const container = this.shadowRoot?.querySelector('.js-system-info-container');
+    const container = this.shadowRoot?.querySelector(
+      '.js-system-info-container'
+    );
     const button = this.shadowRoot?.querySelector('.js-system-info-button');
 
-    const clickedInside = path.some(el => {
+    const clickedInside = path.some((el) => {
       if (el === container || el === button) return true;
 
       if (el instanceof Node) {
-        return (container && container.contains(el)) || (button && button.contains(el));
+        return (
+          (container && container.contains(el)) ||
+          (button && button.contains(el))
+        );
       }
 
       return false;
@@ -198,7 +219,11 @@ export class HBAnnotation extends LitElement {
 
     return html`
       <img src="../images/copy-black.svg" alt="copy" class="icon-default" />
-      <img src="../images/copy-white.svg" alt="copy" class="icon-hover-and-active" />
+      <img
+        src="../images/copy-white.svg"
+        alt="copy"
+        class="icon-hover-and-active"
+      />
     `;
   }
 
@@ -237,7 +262,9 @@ export class HBAnnotation extends LitElement {
               URL
               <table>
                 <tr>
-                  <td style="width: auto;"><span class="url">${this.systemInfo.url}</span></td>
+                  <td style="width: auto;">
+                    <span class="url">${this.systemInfo.url}</span>
+                  </td>
                 </tr>
               </table>
             </th>

@@ -67,15 +67,24 @@ describe('ArrowTool', () => {
 
   describe('extends LineTool', () => {
     it('should inherit drawing functionality from LineTool', () => {
-      arrowTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      arrowTool.handleMouseUp({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas);
+      arrowTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      arrowTool.handleMouseUp(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas
+      );
 
       expect(arrowAnnotations.length).toBe(2); // Original + newly drawn
       expect(mockToolChange).toHaveBeenCalledWith('select', expect.any(String));
     });
 
     it('should support shift-key constraints', () => {
-      arrowTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      arrowTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
       arrowTool.handleMouseUp(
         { clientX: 200, clientY: 150, shiftKey: true } as MouseEvent,
         mockCanvas
@@ -87,7 +96,10 @@ describe('ArrowTool', () => {
     });
 
     it('should support escape key cancellation', () => {
-      arrowTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      arrowTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
 
       const initialLength = arrowAnnotations.length;
 
@@ -199,8 +211,15 @@ describe('ArrowTool', () => {
 
   describe('preview during drawing', () => {
     it('should render arrowhead on preview while drawing', () => {
-      arrowTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
-      arrowTool.handleMouseMove({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas, mockCtx);
+      arrowTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
+      arrowTool.handleMouseMove(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       // Clear previous calls
       (mockCtx.moveTo as any).mockClear();
@@ -214,20 +233,34 @@ describe('ArrowTool', () => {
     });
 
     it('should update preview arrowhead position on mouse move', () => {
-      arrowTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      arrowTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
 
       // First position
-      arrowTool.handleMouseMove({ clientX: 150, clientY: 150 } as MouseEvent, mockCanvas, mockCtx);
+      arrowTool.handleMouseMove(
+        { clientX: 150, clientY: 150 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
       (mockCtx.moveTo as any).mockClear();
 
       // Second position
-      arrowTool.handleMouseMove({ clientX: 200, clientY: 200 } as MouseEvent, mockCanvas, mockCtx);
+      arrowTool.handleMouseMove(
+        { clientX: 200, clientY: 200 } as MouseEvent,
+        mockCanvas,
+        mockCtx
+      );
 
       expect(mockRedraw).toHaveBeenCalled();
     });
 
     it('should constrain arrowhead preview to horizontal when shift is held', () => {
-      arrowTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      arrowTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
 
       // Move mouse with shift key - more horizontal movement
       arrowTool.handleMouseMove(
@@ -249,7 +282,10 @@ describe('ArrowTool', () => {
     });
 
     it('should constrain arrowhead preview to vertical when shift is held', () => {
-      arrowTool.handleMouseDown({ clientX: 100, clientY: 100 } as MouseEvent, mockCanvas);
+      arrowTool.handleMouseDown(
+        { clientX: 100, clientY: 100 } as MouseEvent,
+        mockCanvas
+      );
 
       // Move mouse with shift key - more vertical movement
       arrowTool.handleMouseMove(

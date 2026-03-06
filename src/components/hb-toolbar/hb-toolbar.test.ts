@@ -74,7 +74,8 @@ describe('HBToolbar', () => {
       document.body.appendChild(toolbar);
       await toolbar.updateComplete;
 
-      const toolButtons = toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
+      const toolButtons =
+        toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
       expect(toolButtons?.length).toBe(6); // select, text, line, arrow, rectangle, crop
     });
 
@@ -91,7 +92,8 @@ describe('HBToolbar', () => {
       await toolbar.updateComplete;
 
       const spy = vi.spyOn(toolbar as any, 'handleToolClick');
-      const toolButtons = toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
+      const toolButtons =
+        toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
       const selectButton = toolButtons?.[0] as HTMLElement;
 
       selectButton?.click();
@@ -105,7 +107,8 @@ describe('HBToolbar', () => {
       await toolbar.updateComplete;
 
       const spy = vi.spyOn(toolbar as any, 'handleToolClick');
-      const toolButtons = toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
+      const toolButtons =
+        toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
       const textButton = toolButtons?.[1] as HTMLElement;
 
       textButton?.click();
@@ -119,7 +122,8 @@ describe('HBToolbar', () => {
       await toolbar.updateComplete;
 
       const spy = vi.spyOn(toolbar as any, 'handleToolClick');
-      const toolButtons = toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
+      const toolButtons =
+        toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
       const lineButton = toolButtons?.[2] as HTMLElement;
 
       lineButton?.click();
@@ -133,7 +137,8 @@ describe('HBToolbar', () => {
       await toolbar.updateComplete;
 
       const spy = vi.spyOn(toolbar as any, 'handleToolClick');
-      const toolButtons = toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
+      const toolButtons =
+        toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
       const arrowButton = toolButtons?.[3] as HTMLElement;
 
       arrowButton?.click();
@@ -147,7 +152,8 @@ describe('HBToolbar', () => {
       await toolbar.updateComplete;
 
       const spy = vi.spyOn(toolbar as any, 'handleToolClick');
-      const toolButtons = toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
+      const toolButtons =
+        toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
       const rectangleButton = toolButtons?.[4] as HTMLElement;
 
       rectangleButton?.click();
@@ -161,7 +167,8 @@ describe('HBToolbar', () => {
       await toolbar.updateComplete;
 
       const spy = vi.spyOn(toolbar as any, 'handleToolClick');
-      const toolButtons = toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
+      const toolButtons =
+        toolbar.shadowRoot?.querySelectorAll('hb-toolbar-tool');
       const cropButton = toolButtons?.[5] as HTMLElement;
 
       cropButton?.click();

@@ -51,10 +51,12 @@ describe('getDevicePixelRatio', () => {
   it('should execute inline function to get device pixel ratio', async () => {
     // Capture and execute the function
     let capturedFunc: (() => string) | null = null;
-    mockChrome.scripting.executeScript.mockImplementation((config: { func: () => string }) => {
-      capturedFunc = config.func;
-      return Promise.resolve([{ result: '2' }]);
-    });
+    mockChrome.scripting.executeScript.mockImplementation(
+      (config: { func: () => string }) => {
+        capturedFunc = config.func;
+        return Promise.resolve([{ result: '2' }]);
+      }
+    );
 
     await getDevicePixelRatio(456);
 
@@ -63,7 +65,7 @@ describe('getDevicePixelRatio', () => {
     Object.defineProperty(window, 'devicePixelRatio', {
       value: 2,
       writable: true,
-      configurable: true
+      configurable: true,
     });
 
     const ratio = capturedFunc!();
