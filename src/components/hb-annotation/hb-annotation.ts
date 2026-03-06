@@ -2,6 +2,7 @@ import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import '../../components/hb-toolbar/hb-toolbar';
 import '../../components/hb-canvas/hb-canvas';
+import '../../components/form/hb-form-input/hb-form-input';
 import type { HBCanvas } from '../../components/hb-canvas/hb-canvas';
 import { getDateTimeForFilename } from '../../utils/get-date-time-for-filename';
 import type { SystemInfo } from '../../interfaces/system-info.interface';
@@ -127,6 +128,26 @@ export class HBAnnotation extends LitElement {
                   Settings
                   <!-- <img src="../images/settings-black.svg" alt="settings" /> -->
                 </button>
+                <hb-form-input
+                  label="Organization URL"
+                  isRequired
+                  .additionalInfo=${'e.g. https://dev.azure.com/my-org'}
+                >
+                  <input type="text" />
+                </hb-form-input>
+                <hb-form-input
+                  label="Personal access token"
+                  isRequired
+                  .additionalInfo=${'Generate a PAT in Azure DevOps under<br />User Settings → Personal Access Tokens'}
+                >
+                  <input type="password" />
+                </hb-form-input>
+                <button
+                  class="action-button primary"
+                  @click=${this.handleVerifyConnection}
+                >
+                  Verify connection
+                </button>
               </div>
             </div>
           `
@@ -233,6 +254,10 @@ export class HBAnnotation extends LitElement {
   private handleReportBug() {
     this.showReportBugDrawer = true;
     this.isClosingReportBugDrawer = false;
+  }
+
+  private handleVerifyConnection() {
+    console.log('verifying connection...');
   }
 
   private handleCloseReportBugDrawer() {

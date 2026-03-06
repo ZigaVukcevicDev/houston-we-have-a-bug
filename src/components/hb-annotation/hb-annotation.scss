@@ -200,6 +200,9 @@
   }
 
   .drawer-body {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-lg;
     padding: 8px 16px;
   }
 }
