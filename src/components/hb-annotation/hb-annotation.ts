@@ -27,6 +27,9 @@ export class HBAnnotation extends LitElement {
   @state()
   private isCopyingDisabled = false;
 
+  @state()
+  private showReportBugDrawer: boolean = false;
+
   render() {
     if (!this.dataUrl) {
       return html`
@@ -36,7 +39,9 @@ export class HBAnnotation extends LitElement {
           <p>To annotate a page:</p>
           <ol>
             <li>Navigate to the page you want to capture</li>
-            <li>Click the "Houston, we have a bug" extension icon in your toolbar</li>
+            <li>
+              Click the "Houston, we have a bug" extension icon in your toolbar
+            </li>
             <li>Click "Annotate screenshot"</li>
           </ol>
         </div>
@@ -45,30 +50,73 @@ export class HBAnnotation extends LitElement {
 
     return html`
       <div class="toolbar-container">
-        <hb-toolbar 
+        <hb-toolbar
           .activeTool=${this.activeTool}
           @tool-change=${this.handleToolChange}
         ></hb-toolbar>
       </div>
       <div class="topbar-container">
-        <button
-          class="action-button primary"
-          @click=${this.handleDownload}
-        >
+        <button class="action-button primary" @click=${this.handleDownload}>
           <img src="../images/download-white.svg" alt="download" />
           Download
         </button>
-        <button class="action-button secondary ml-md ${this.showSystemInfo ? 'activated' : ''} js-system-info-button" @click=${(e: Event) => { e.stopPropagation(); this.toggleSystemInfo(); }}>
+        <button
+          class="action-button primary ml-md"
+          @click=${this.handleReportBug}
+        >
+          <img src="../images/upload-white.svg" alt="download" />
+          Report bug
+        </button>
+        <button
+          class="action-button secondary ml-md ${this.showSystemInfo
+            ? 'activated'
+            : ''} js-system-info-button"
+          @click=${(e: Event) => {
+            e.stopPropagation();
+            this.toggleSystemInfo();
+          }}
+        >
           <img src="../images/info-black.svg" alt="info" class="icon-default" />
-          <img src="../images/info-white.svg" alt="info" class="icon-hover-and-active" />
+          <img
+            src="../images/info-white.svg"
+            alt="info"
+            class="icon-hover-and-active"
+          />
           System info
         </button>
       </div>
-      ${this.showSystemInfo ? html`
-        <div class="system-info-container js-system-info-container" @click=${(e: Event) => e.stopPropagation()}>
-          ${this.renderSystemInfo()}
-          </div>
-      ` : ''} 
+      ${this.showSystemInfo
+        ? html`
+            <div
+              class="system-info-container js-system-info-container"
+              @click=${(e: Event) => e.stopPropagation()}
+            >
+              ${this.renderSystemInfo()}
+            </div>
+          `
+        : ''}
+      ${this.showReportBugDrawer
+        ? html`
+            <div
+              class="drawer-overlay"
+              @click=${this.handleCloseReportBugDrawer}
+            ></div>
+            <div class="report-bug-drawer">
+              <div class="drawer-header">
+                <button
+                  class="drawer-icon-button"
+                  @click=${this.handleCloseReportBugDrawer}
+                  title="Close"
+                >
+                  <img src="../images/close-black.svg" alt="close" />
+                </button>
+                <button class="drawer-icon-button" title="Settings">
+                  <img src="../images/settings-black.svg" alt="settings" />
+                </button>
+              </div>
+            </div>
+          `
+        : ''}
       <div class="canvas-container">
         <hb-canvas
           .dataUrl=${this.dataUrl}
@@ -99,14 +147,19 @@ export class HBAnnotation extends LitElement {
     if (!this.showSystemInfo) return;
 
     const path = event.composedPath();
-    const container = this.shadowRoot?.querySelector('.js-system-info-container');
+    const container = this.shadowRoot?.querySelector(
+      '.js-system-info-container'
+    );
     const button = this.shadowRoot?.querySelector('.js-system-info-button');
 
-    const clickedInside = path.some(el => {
+    const clickedInside = path.some((el) => {
       if (el === container || el === button) return true;
 
       if (el instanceof Node) {
-        return (container && container.contains(el)) || (button && button.contains(el));
+        return (
+          (container && container.contains(el)) ||
+          (button && button.contains(el))
+        );
       }
 
       return false;
@@ -120,6 +173,9 @@ export class HBAnnotation extends LitElement {
   private handleEscapeKey = (event: KeyboardEvent) => {
     if (event.key === 'Escape' && this.showSystemInfo) {
       this.showSystemInfo = false;
+    }
+    if (event.key === 'Escape' && this.showReportBugDrawer) {
+      this.showReportBugDrawer = false;
     }
   };
 
@@ -160,6 +216,14 @@ export class HBAnnotation extends LitElement {
     canvas?.download(`bug ${getDateTimeForFilename()}.png`);
   }
 
+  private handleReportBug() {
+    this.showReportBugDrawer = true;
+  }
+
+  private handleCloseReportBugDrawer() {
+    this.showReportBugDrawer = false;
+  }
+
   private async toggleSystemInfo() {
     this.showSystemInfo = !this.showSystemInfo;
     // System info is already loaded from storage, no need to gather
@@ -198,7 +262,11 @@ export class HBAnnotation extends LitElement {
 
     return html`
       <img src="../images/copy-black.svg" alt="copy" class="icon-default" />
-      <img src="../images/copy-white.svg" alt="copy" class="icon-hover-and-active" />
+      <img
+        src="../images/copy-white.svg"
+        alt="copy"
+        class="icon-hover-and-active"
+      />
     `;
   }
 
@@ -237,7 +305,9 @@ export class HBAnnotation extends LitElement {
               URL
               <table>
                 <tr>
-                  <td style="width: auto;"><span class="url">${this.systemInfo.url}</span></td>
+                  <td style="width: auto;">
+                    <span class="url">${this.systemInfo.url}</span>
+                  </td>
                 </tr>
               </table>
             </th>
