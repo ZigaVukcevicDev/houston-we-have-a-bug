@@ -1,6 +1,6 @@
 import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import '../form/hb-form-input/hb-form-input';
+import '../hb-form-input/hb-form-input';
 import styles from './hb-report-bug-drawer.scss';
 
 @customElement('hb-report-bug-drawer')
@@ -36,7 +36,9 @@ export class HBReportBugDrawer extends LitElement {
   private handleAnimationEnd(e: AnimationEvent) {
     if (e.animationName === 'slide-out-to-right') {
       this.isClosing = false;
-      this.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true }));
+      this.dispatchEvent(
+        new CustomEvent('close', { bubbles: true, composed: true })
+      );
     }
   }
 
@@ -57,11 +59,7 @@ export class HBReportBugDrawer extends LitElement {
         @animationend=${this.handleAnimationEnd}
       >
         <div class="header">
-          <button
-            class="icon-button"
-            @click=${this.handleClose}
-            title="Close"
-          >
+          <button class="icon-button" @click=${this.handleClose} title="Close">
             Close
             <!-- <img src="../images/close-black.svg" alt="close" /> -->
           </button>
@@ -89,7 +87,7 @@ export class HBReportBugDrawer extends LitElement {
             class="action-button primary"
             @click=${this.handleVerifyConnection}
           >
-            Verify connection
+            Verify and save
           </button>
         </div>
       </div>
