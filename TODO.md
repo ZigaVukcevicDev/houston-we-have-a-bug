@@ -103,7 +103,8 @@
 
 ## Report bug to Azure DevOps
 
-- [] Success message: Connection verified and saved
+- Drawer settings
+  - [ ] Success message: Connection verified and saved
 
 ## Details
 

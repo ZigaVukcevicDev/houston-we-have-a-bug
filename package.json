@@ -6,7 +6,7 @@
     "build": "node build.js",
     "prebuild": "rm -rf dist && mkdir -p dist",
     "postbuild": "npm run copy-files",
-    "dev": "npm run build && concurrently \"node build.js --watch\" \"chokidar 'src/**/*.scss' 'src/**/*.html' 'src/**/*.ts' 'manifest.json' 'src/images/**' 'src/fonts/**' -c 'npm run copy-files'\"",
+    "dev": "npm run build && concurrently \"node build.js --watch\" \"chokidar 'src/**/*.scss' 'src/**/*.html' 'src/**/*.ts' 'manifest.json' 'test-page.html' 'src/images/**' 'src/fonts/**' -c 'npm run copy-files'\"",
     "copy-files": "./scripts/copy-files.sh",
     "lint": "eslint \"src/**/*.ts\"",
     "format": "prettier --write \"src/**/*.ts\"",

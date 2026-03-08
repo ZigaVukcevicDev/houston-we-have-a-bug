@@ -21,8 +21,8 @@
     <hb-annotation id="test-annotation"></hb-annotation>
 
     <script type="module">
-      // Load the built extension file
-      import './tab.js';
+      // Load the built extension file (cache-busted on every refresh)
+      await import(`./tab.js?v=${Date.now()}`);
 
       // Add error handling
       window.addEventListener('error', (e) => {
