@@ -2,7 +2,7 @@ import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import '../../components/hb-toolbar/hb-toolbar';
 import '../../components/hb-canvas/hb-canvas';
-import '../../components/form/hb-form-input/hb-form-input';
+import '../../components/hb-report-bug-drawer/hb-report-bug-drawer';
 import type { HBCanvas } from '../../components/hb-canvas/hb-canvas';
 import { getDateTimeForFilename } from '../../utils/get-date-time-for-filename';
 import type { SystemInfo } from '../../interfaces/system-info.interface';
@@ -30,9 +30,6 @@ export class HBAnnotation extends LitElement {
 
   @state()
   private showReportBugDrawer: boolean = false;
-
-  @state()
-  private isClosingReportBugDrawer: boolean = false;
 
   render() {
     if (!this.dataUrl) {
@@ -99,59 +96,10 @@ export class HBAnnotation extends LitElement {
             </div>
           `
         : ''}
-      ${this.showReportBugDrawer
-        ? html`
-            <div
-              class="drawer-overlay ${this.isClosingReportBugDrawer
-                ? 'closing'
-                : ''}"
-              @click=${this.handleCloseReportBugDrawer}
-            ></div>
-            <div
-              class="report-bug-drawer ${this.isClosingReportBugDrawer
-                ? 'closing'
-                : ''}"
-              @animationend=${this.handleDrawerAnimationEnd}
-            >
-              <div class="drawer-header">
-                <button
-                  class="drawer-icon-button"
-                  @click=${this.handleCloseReportBugDrawer}
-                  title="Close"
-                >
-                  Close
-                  <!-- <img src="../images/close-black.svg" alt="close" /> -->
-                </button>
-              </div>
-              <div class="drawer-body">
-                <button class="drawer-icon-button" title="Settings">
-                  Settings
-                  <!-- <img src="../images/settings-black.svg" alt="settings" /> -->
-                </button>
-                <hb-form-input
-                  label="Organization URL"
-                  isRequired
-                  .additionalInfo=${'e.g. https://dev.azure.com/my-org'}
-                >
-                  <input type="text" />
-                </hb-form-input>
-                <hb-form-input
-                  label="Personal access token"
-                  isRequired
-                  .additionalInfo=${'Generate a PAT in Azure DevOps under<br />User Settings → Personal Access Tokens'}
-                >
-                  <input type="password" />
-                </hb-form-input>
-                <button
-                  class="action-button primary"
-                  @click=${this.handleVerifyConnection}
-                >
-                  Verify connection
-                </button>
-              </div>
-            </div>
-          `
-        : ''}
+      <hb-report-bug-drawer
+        .isOpen=${this.showReportBugDrawer}
+        @close=${() => (this.showReportBugDrawer = false)}
+      ></hb-report-bug-drawer>
       <div class="canvas-container">
         <hb-canvas
           .dataUrl=${this.dataUrl}
@@ -209,9 +157,6 @@ export class HBAnnotation extends LitElement {
     if (event.key === 'Escape' && this.showSystemInfo) {
       this.showSystemInfo = false;
     }
-    if (event.key === 'Escape' && this.showReportBugDrawer) {
-      this.showReportBugDrawer = false;
-    }
   };
 
   private async loadScreenshotFromStorage() {
@@ -253,22 +198,6 @@ export class HBAnnotation extends LitElement {
 
   private handleReportBug() {
     this.showReportBugDrawer = true;
-    this.isClosingReportBugDrawer = false;
-  }
-
-  private handleVerifyConnection() {
-    console.log('verifying connection...');
-  }
-
-  private handleCloseReportBugDrawer() {
-    this.isClosingReportBugDrawer = true;
-  }
-
-  private handleDrawerAnimationEnd(e: AnimationEvent) {
-    if (e.animationName === 'slide-out-to-right') {
-      this.showReportBugDrawer = false;
-      this.isClosingReportBugDrawer = false;
-    }
   }
 
   private async toggleSystemInfo() {

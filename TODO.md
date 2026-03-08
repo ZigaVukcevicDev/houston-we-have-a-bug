@@ -101,6 +101,10 @@
 
 - [x] deselect annotations when downloading
 
+## Report bug to Azure DevOps
+
+- [] Success message: Connection verified and saved
+
 ## Details
 
 - [x] merge instructions.md and .clinerules
