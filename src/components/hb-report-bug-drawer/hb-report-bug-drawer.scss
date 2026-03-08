@@ -91,6 +91,12 @@
   color: $color-red-400;
 }
 
+.success {
+  margin: 0;
+  font-size: $font-size-sm;
+  color: #27ae60;
+}
+
 .icon-button {
   display: flex;
   align-items: center;

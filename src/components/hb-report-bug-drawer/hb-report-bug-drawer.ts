@@ -16,7 +16,19 @@ export class HBReportBugDrawer extends LitElement {
   private isClosing: boolean = false;
 
   @state()
+  private orgUrl: string = '';
+
+  @state()
+  private pat: string = '';
+
+  @state()
+  private isOrgUrlValid: boolean = true;
+
+  @state()
   private connectionError: string = '';
+
+  @state()
+  private connectionSuccess: boolean = false;
 
   @state()
   private isVerifying: boolean = false;
@@ -44,26 +56,40 @@ export class HBReportBugDrawer extends LitElement {
   private handleAnimationEnd(e: AnimationEvent) {
     if (e.animationName === 'slide-out-to-right') {
       this.isClosing = false;
+      this.connectionError = '';
+      this.connectionSuccess = false;
+      this.isOrgUrlValid = true;
       this.dispatchEvent(
         new CustomEvent('close', { bubbles: true, composed: true })
       );
     }
   }
 
+  private isValidUrl(url: string): boolean {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   private async handleVerifyConnection() {
     if (this.isVerifying) return;
 
-    const organizationUrl = 'https://dev.azure.com/my-org';
-    const pat = 'my-personal-access-token';
+    this.isOrgUrlValid = this.isValidUrl(this.orgUrl);
+    if (!this.isOrgUrlValid) return;
 
     this.isVerifying = true;
+    this.connectionSuccess = false;
+    this.connectionError = '';
 
     try {
       const response = await fetch(
-        `${organizationUrl}/_apis/projects?api-version=7.1`,
+        `${this.orgUrl}/_apis/projects?api-version=7.1`,
         {
           headers: {
-            Authorization: `Basic ${btoa(`:${pat}`)}`,
+            Authorization: `Basic ${btoa(`:${this.pat}`)}`,
             Accept: 'application/json',
           },
         }
@@ -81,9 +107,11 @@ export class HBReportBugDrawer extends LitElement {
       }
 
       this.connectionError = '';
+      this.connectionSuccess = true;
       const data = await response.json();
       console.warn('Connection verified:', data);
     } catch {
+      this.connectionSuccess = false;
       this.connectionError = connectionErrorMessage;
     } finally {
       this.isVerifying = false;
@@ -116,16 +144,29 @@ export class HBReportBugDrawer extends LitElement {
           <hb-form-input
             label="Organization URL"
             isRequired
+            ?isValid=${this.isOrgUrlValid}
             .additionalInfo=${'e.g. https://dev.azure.com/my-org'}
           >
-            <input type="text" />
+            <input
+              type="text"
+              .value=${this.orgUrl}
+              @input=${(e: InputEvent) => {
+                this.orgUrl = (e.target as HTMLInputElement).value;
+                this.isOrgUrlValid = true;
+              }}
+            />
           </hb-form-input>
           <hb-form-input
             label="Personal access token"
             isRequired
-            .additionalInfo=${'Generate token in Azure DevOps under<br />User settings → Personal access tokens'}
+            .additionalInfo=${'Go to <strong>Azure DevOps</strong> → <strong>User settings</strong> → <strong>Personal access tokens</strong> and create a new token with <strong>any name</strong>.<br />Under <strong>Scopes</strong>, select <strong>Custom defined</strong> and enable:<ul><li>Work Items (Read & write) and</li><li>Project and Team (Read).</li></ul>'}
           >
-            <input type="password" />
+            <input
+              type="password"
+              .value=${this.pat}
+              @input=${(e: InputEvent) =>
+                (this.pat = (e.target as HTMLInputElement).value)}
+            />
           </hb-form-input>
           <button
             class="action-button primary"
@@ -136,6 +177,9 @@ export class HBReportBugDrawer extends LitElement {
           </button>
           ${this.connectionError
             ? html`<p class="error">${this.connectionError}</p>`
+            : ''}
+          ${this.connectionSuccess
+            ? html`<p class="success">Connection verified and saved.</p>`
             : ''}
         </div>
       </div>

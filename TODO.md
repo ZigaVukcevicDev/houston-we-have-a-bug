@@ -105,8 +105,11 @@
 
 - Drawer
   - Settings
-    - [ ] Success message: Connection verified and saved.
+    - [x] Success message: Connection verified and saved.
     - [x] Error: Could not connect. Check your URL and token.
+  - XXXX
+    - [ ] Expired token message
+    - [ ] Can not write, check token with setting read/write
 
 ## Details
 
