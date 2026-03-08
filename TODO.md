@@ -103,8 +103,10 @@
 
 ## Report bug to Azure DevOps
 
-- Drawer settings
-  - [ ] Success message: Connection verified and saved
+- Drawer
+  - Settings
+    - [ ] Success message: Connection verified and saved.
+    - [x] Error: Could not connect. Check your URL and token.
 
 ## Details
 

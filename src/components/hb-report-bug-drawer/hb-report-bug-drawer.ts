@@ -3,6 +3,8 @@ import { customElement, property, state } from 'lit/decorators.js';
 import '../hb-form-input/hb-form-input';
 import styles from './hb-report-bug-drawer.scss';
 
+const connectionErrorMessage = 'Could not connect. Check your URL and token.';
+
 @customElement('hb-report-bug-drawer')
 export class HBReportBugDrawer extends LitElement {
   static styles = unsafeCSS(styles);
@@ -12,6 +14,12 @@ export class HBReportBugDrawer extends LitElement {
 
   @state()
   private isClosing: boolean = false;
+
+  @state()
+  private connectionError: string = '';
+
+  @state()
+  private isVerifying: boolean = false;
 
   connectedCallback() {
     super.connectedCallback();
@@ -42,8 +50,44 @@ export class HBReportBugDrawer extends LitElement {
     }
   }
 
-  private handleVerifyConnection() {
-    console.log('verifying connection...');
+  private async handleVerifyConnection() {
+    if (this.isVerifying) return;
+
+    const organizationUrl = 'https://dev.azure.com/my-org';
+    const pat = 'my-personal-access-token';
+
+    this.isVerifying = true;
+
+    try {
+      const response = await fetch(
+        `${organizationUrl}/_apis/projects?api-version=7.1`,
+        {
+          headers: {
+            Authorization: `Basic ${btoa(`:${pat}`)}`,
+            Accept: 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        this.connectionError = connectionErrorMessage;
+        return;
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType?.includes('application/json')) {
+        this.connectionError = connectionErrorMessage;
+        return;
+      }
+
+      this.connectionError = '';
+      const data = await response.json();
+      console.warn('Connection verified:', data);
+    } catch {
+      this.connectionError = connectionErrorMessage;
+    } finally {
+      this.isVerifying = false;
+    }
   }
 
   render() {
@@ -79,16 +123,20 @@ export class HBReportBugDrawer extends LitElement {
           <hb-form-input
             label="Personal access token"
             isRequired
-            .additionalInfo=${'Generate a PAT in Azure DevOps under<br />User Settings → Personal Access Tokens'}
+            .additionalInfo=${'Generate token in Azure DevOps under<br />User settings → Personal access tokens'}
           >
             <input type="password" />
           </hb-form-input>
           <button
             class="action-button primary"
             @click=${this.handleVerifyConnection}
+            ?disabled=${this.isVerifying}
           >
-            Verify and save
+            Verify and save${this.isVerifying ? ' (loading)' : ''}
           </button>
+          ${this.connectionError
+            ? html`<p class="error">${this.connectionError}</p>`
+            : ''}
         </div>
       </div>
     `;
