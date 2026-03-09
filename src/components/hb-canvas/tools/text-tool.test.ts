@@ -175,7 +175,7 @@ describe('TextTool', () => {
         mockCanvas
       );
 
-      // No textDiv since drag never exceeded minimum 40x60
+      // No textDiv since drag never exceeded minimum 20x30 CSS px
       const textDiv = getTextDiv();
       expect(textDiv).toBeNull();
     });
@@ -185,7 +185,7 @@ describe('TextTool', () => {
         { clientX: 100, clientY: 100 } as MouseEvent,
         mockCanvas
       );
-      // Drag to exceed minimum (40x60)
+      // Drag to exceed minimum (20x30 CSS px)
       textTool.handleMouseMove(
         { clientX: 150, clientY: 170 } as MouseEvent,
         mockCanvas
@@ -970,7 +970,7 @@ describe('TextTool', () => {
         mockCanvas
       );
 
-      // No tool change since drag never exceeded minimum 40x60
+      // No tool change since drag never exceeded minimum 20x30 CSS px
       expect(mockToolChange).not.toHaveBeenCalled();
     });
 

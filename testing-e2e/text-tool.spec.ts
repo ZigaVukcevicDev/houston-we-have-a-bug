@@ -2598,9 +2598,10 @@ test.describe('Text tool', () => {
       { searchStartX: 100, searchStartY: 100 }
     );
 
-    // After exceeding minimum, it should stay at minimum even when dragging smaller
-    expect(drawnDimensions?.width).toBeGreaterThanOrEqual(39); // ~40px minimum
-    expect(drawnDimensions?.height).toBeGreaterThanOrEqual(59); // ~60px minimum
+    // After exceeding minimum, it should stay at minimum even when dragging smaller.
+    // Minimums are 20×30 CSS pixels (DPR-independent), so on a DPR=1 test env expect ~20/30px.
+    expect(drawnDimensions?.width).toBeGreaterThanOrEqual(19); // ~20px minimum
+    expect(drawnDimensions?.height).toBeGreaterThanOrEqual(29); // ~30px minimum
 
     await page.mouse.up();
 

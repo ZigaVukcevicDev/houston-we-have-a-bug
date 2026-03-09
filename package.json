@@ -1,6 +1,6 @@
 {
   "name": "houston-we-have-a-bug",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Capture bugs clearly. Annotate screenshots and gather system info.",
   "scripts": {
     "build": "node build.js",

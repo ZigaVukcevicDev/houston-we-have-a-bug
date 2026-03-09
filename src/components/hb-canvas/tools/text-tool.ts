@@ -73,8 +73,13 @@ export class TextTool implements Tool {
     // Handle drawing new text box
     if (!this.isDrawing || !this.startPoint) return;
 
-    const MIN_WIDTH = 40;
-    const MIN_HEIGHT = 60;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    // Define minimums in CSS pixels so they render at the same size on all screens.
+    // On retina (DPR=2) scaleX=2 produces the same 40/60 canvas px as before.
+    const MIN_WIDTH = 20 * scaleX;
+    const MIN_HEIGHT = 30 * scaleY;
 
     const rawWidth = Math.max(0, x - this.startPoint.x);
     const rawHeight = Math.max(0, y - this.startPoint.y);
