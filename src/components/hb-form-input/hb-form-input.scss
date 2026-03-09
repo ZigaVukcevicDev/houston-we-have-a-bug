@@ -7,34 +7,64 @@
 }
 
 label {
-  font-size: $font-size-sm;
-  font-weight: 600;
+  font-size: 13px;
   color: $color-black;
   cursor: pointer;
-}
-
-.required {
-  color: $color-red-400;
-  margin-left: $spacing-sm;
-}
-
-p {
-  margin: 0;
-  font-size: $font-size-sm;
-  color: $color-black;
-  opacity: 0.6;
+  margin-bottom: 2px;
 }
 
 .error {
+  margin-top: 2px;
+  margin-bottom: 10px;
   color: $color-red-400;
-  opacity: 1;
+  font-size: 13px;
 }
 
-::slotted(input),
-::slotted(textarea),
-::slotted(select) {
+.additional-info {
+  font-size: 13px;
+  margin-top: 2px;
+  margin-bottom: 10px;
+  color: #8a8a8a;
+
+  p {
+    margin-top: 0;
+    margin-bottom: 4px;
+  }
+
+  strong {
+    color: black;
+    font-weight: 400;
+  }
+
+  ul {
+    margin-top: 0;
+    margin-bottom: 10px;
+    padding-left: 20px;
+  }
+}
+
+.input-wrapper {
+  box-shadow: 0 0 0 1px #a6a6a6;
+  border-radius: 4px;
+}
+
+:host(:focus-within) .input-wrapper {
+  box-shadow: 0 0 0 2px $color-yellow-500;
+}
+:host(.error) .input-wrapper {
+  box-shadow: 0 0 0 2px $color-red-400;
+}
+:host(.error) ::slotted(input) {
+  color: $color-red-400;
+}
+
+::slotted(input) {
   display: block;
   width: 100%;
   box-sizing: border-box;
   outline: none;
+  border: none;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 4px;
 }

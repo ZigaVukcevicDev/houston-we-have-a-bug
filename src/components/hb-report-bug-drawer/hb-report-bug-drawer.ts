@@ -172,7 +172,7 @@ export class HBReportBugDrawer extends LitElement {
             label="Personal access token"
             isRequired
             ?invalid=${!this.isPatValid}
-            .additionalInfo=${'Go to <strong>Azure DevOps</strong> → <strong>User settings</strong> → <strong>Personal access tokens</strong> and create a new token with <strong>any name</strong>.<br />Under <strong>Scopes</strong>, select <strong>Custom defined</strong> and enable:<ul><li>Work Items (Read & write) and</li><li>Project and Team (Read).</li></ul>'}
+            .additionalInfo=${'<p>Go to Azure DevOps → User settings → Personal access tokens and create a new token with any name.</p><p>Under Scopes, select Custom defined and enable:</p><ul><li>Work Items (Read & write)</li><li>Project and Team (Read).</li></ul>'}
           >
             <input
               type="password"

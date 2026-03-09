@@ -3,8 +3,6 @@ import { customElement, property } from 'lit/decorators.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import styles from './hb-form-input.scss';
 
-const ERROR_SHADOW = '0 0 0 1.5px #e74c3c';
-
 @customElement('hb-form-input')
 export class HBFormInput extends LitElement {
   static styles = unsafeCSS(styles);
@@ -25,7 +23,6 @@ export class HBFormInput extends LitElement {
   additionalInfo: string = '';
 
   private assignedInput: HTMLInputElement | null = null;
-  private showOutline: boolean = false;
 
   protected firstUpdated() {
     const slot = this.shadowRoot?.querySelector('slot');
@@ -38,29 +35,30 @@ export class HBFormInput extends LitElement {
     if (this.assignedInput) {
       this.assignedInput.removeEventListener('blur', this.onBlur);
     }
-    this.assignedInput = (slot.assignedElements()[0] as HTMLInputElement) ?? null;
+    this.assignedInput =
+      (slot.assignedElements()[0] as HTMLInputElement) ?? null;
     if (this.assignedInput) {
       this.assignedInput.addEventListener('blur', this.onBlur);
-      this.applyOutline();
+      this.applyErrorClass(!!this.error || this.invalid);
     }
   }
 
   private onBlur = () => {
-    this.showOutline =
-      !!this.error || this.invalid || (this.isRequired && !this.assignedInput?.value.trim());
-    this.applyOutline();
+    this.applyErrorClass(
+      !!this.error ||
+        this.invalid ||
+        (this.isRequired && !this.assignedInput?.value.trim())
+    );
   };
 
   updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('error') || changedProperties.has('invalid')) {
-      this.showOutline = !!this.error || this.invalid;
-      this.applyOutline();
+      this.applyErrorClass(!!this.error || this.invalid);
     }
   }
 
-  private applyOutline() {
-    if (!this.assignedInput) return;
-    this.assignedInput.style.boxShadow = this.showOutline ? ERROR_SHADOW : '';
+  private applyErrorClass(hasError: boolean) {
+    this.classList.toggle('error', hasError);
   }
 
   private focusInput() {
@@ -77,11 +75,13 @@ export class HBFormInput extends LitElement {
             </label>
           `
         : ''}
-      <slot></slot>
+      <div class="input-wrapper"><slot></slot></div>
       ${this.error
         ? html`<p class="error">${this.error}</p>`
         : this.additionalInfo
-          ? html`<p>${unsafeHTML(this.additionalInfo)}</p>`
+          ? html`<div class="additional-info">
+              ${unsafeHTML(this.additionalInfo)}
+            </div>`
           : ''}
     `;
   }
