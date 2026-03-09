@@ -25,6 +25,9 @@ export class HBReportBugDrawer extends LitElement {
   private isOrgUrlValid: boolean = true;
 
   @state()
+  private isPatValid: boolean = true;
+
+  @state()
   private connectionError: string = '';
 
   @state()
@@ -59,6 +62,7 @@ export class HBReportBugDrawer extends LitElement {
       this.connectionError = '';
       this.connectionSuccess = false;
       this.isOrgUrlValid = true;
+      this.isPatValid = true;
       this.dispatchEvent(
         new CustomEvent('close', { bubbles: true, composed: true })
       );
@@ -78,7 +82,8 @@ export class HBReportBugDrawer extends LitElement {
     if (this.isVerifying) return;
 
     this.isOrgUrlValid = this.isValidUrl(this.orgUrl);
-    if (!this.isOrgUrlValid) return;
+    this.isPatValid = this.pat.trim().length > 0;
+    if (!this.isOrgUrlValid || !this.isPatValid) return;
 
     this.isVerifying = true;
     this.connectionSuccess = false;
@@ -144,28 +149,37 @@ export class HBReportBugDrawer extends LitElement {
           <hb-form-input
             label="Organization URL"
             isRequired
-            ?isValid=${this.isOrgUrlValid}
-            .additionalInfo=${'e.g. https://dev.azure.com/my-org'}
+            ?invalid=${!this.isOrgUrlValid && !this.orgUrl.trim()}
+            .error=${!this.isOrgUrlValid && this.orgUrl.trim()
+              ? 'Please enter a valid URL'
+              : ''}
+            .additionalInfo=${'Example: https://dev.azure.com/my-org'}
           >
             <input
               type="text"
               .value=${this.orgUrl}
               @input=${(e: InputEvent) => {
                 this.orgUrl = (e.target as HTMLInputElement).value;
-                this.isOrgUrlValid = true;
+              }}
+              @blur=${() => {
+                if (this.orgUrl.trim()) {
+                  this.isOrgUrlValid = this.isValidUrl(this.orgUrl);
+                }
               }}
             />
           </hb-form-input>
           <hb-form-input
             label="Personal access token"
             isRequired
+            ?invalid=${!this.isPatValid}
             .additionalInfo=${'Go to <strong>Azure DevOps</strong> → <strong>User settings</strong> → <strong>Personal access tokens</strong> and create a new token with <strong>any name</strong>.<br />Under <strong>Scopes</strong>, select <strong>Custom defined</strong> and enable:<ul><li>Work Items (Read & write) and</li><li>Project and Team (Read).</li></ul>'}
           >
             <input
               type="password"
               .value=${this.pat}
-              @input=${(e: InputEvent) =>
-                (this.pat = (e.target as HTMLInputElement).value)}
+              @input=${(e: InputEvent) => {
+                this.pat = (e.target as HTMLInputElement).value;
+              }}
             />
           </hb-form-input>
           <button

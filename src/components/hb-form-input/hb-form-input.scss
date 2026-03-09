@@ -25,13 +25,16 @@ p {
   opacity: 0.6;
 }
 
-:host(.invalid) {
-  label {
-    color: $color-red-400;
-  }
+.error {
+  color: $color-red-400;
+  opacity: 1;
+}
 
-  p {
-    color: $color-red-400;
-    opacity: 1;
-  }
+::slotted(input),
+::slotted(textarea),
+::slotted(select) {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
 }

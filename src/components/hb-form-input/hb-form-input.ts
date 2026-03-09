@@ -3,6 +3,8 @@ import { customElement, property } from 'lit/decorators.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import styles from './hb-form-input.scss';
 
+const ERROR_SHADOW = '0 0 0 1.5px #e74c3c';
+
 @customElement('hb-form-input')
 export class HBFormInput extends LitElement {
   static styles = unsafeCSS(styles);
@@ -14,19 +16,55 @@ export class HBFormInput extends LitElement {
   isRequired: boolean = false;
 
   @property({ type: Boolean })
-  isValid: boolean = true;
+  invalid: boolean = false;
+
+  @property({ type: String })
+  error: string = '';
 
   @property({ type: String })
   additionalInfo: string = '';
 
-  updated() {
-    this.classList.toggle('invalid', !this.isValid);
+  private assignedInput: HTMLInputElement | null = null;
+  private showOutline: boolean = false;
+
+  protected firstUpdated() {
+    const slot = this.shadowRoot?.querySelector('slot');
+    if (!slot) return;
+    slot.addEventListener('slotchange', () => this.bindInputListeners(slot));
+    this.bindInputListeners(slot);
+  }
+
+  private bindInputListeners(slot: HTMLSlotElement) {
+    if (this.assignedInput) {
+      this.assignedInput.removeEventListener('blur', this.onBlur);
+    }
+    this.assignedInput = (slot.assignedElements()[0] as HTMLInputElement) ?? null;
+    if (this.assignedInput) {
+      this.assignedInput.addEventListener('blur', this.onBlur);
+      this.applyOutline();
+    }
+  }
+
+  private onBlur = () => {
+    this.showOutline =
+      !!this.error || this.invalid || (this.isRequired && !this.assignedInput?.value.trim());
+    this.applyOutline();
+  };
+
+  updated(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has('error') || changedProperties.has('invalid')) {
+      this.showOutline = !!this.error || this.invalid;
+      this.applyOutline();
+    }
+  }
+
+  private applyOutline() {
+    if (!this.assignedInput) return;
+    this.assignedInput.style.boxShadow = this.showOutline ? ERROR_SHADOW : '';
   }
 
   private focusInput() {
-    const slot = this.shadowRoot?.querySelector('slot');
-    const input = slot?.assignedElements()[0] as HTMLElement | undefined;
-    input?.focus();
+    this.assignedInput?.focus();
   }
 
   render() {
@@ -40,7 +78,11 @@ export class HBFormInput extends LitElement {
           `
         : ''}
       <slot></slot>
-      ${this.additionalInfo ? html`<p>${unsafeHTML(this.additionalInfo)}</p>` : ''}
+      ${this.error
+        ? html`<p class="error">${this.error}</p>`
+        : this.additionalInfo
+          ? html`<p>${unsafeHTML(this.additionalInfo)}</p>`
+          : ''}
     `;
   }
 }
