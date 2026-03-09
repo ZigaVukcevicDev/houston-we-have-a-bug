@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Houston, we have a bug",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Capture bugs clearly. Annotate screenshots and gather system info.",
   "permissions": ["activeTab", "scripting", "storage"],
   "background": {
