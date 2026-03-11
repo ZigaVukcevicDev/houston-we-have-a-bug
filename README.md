@@ -31,10 +31,7 @@ A Chrome extension to capture bugs clearly. Annotate screenshots and gather syst
   </p>
 </details>
 
-> 🚧 **Status: Work in progress — not published**
->
-> This Chrome extension is under active development and has **not been published
-> to the Chrome Web Store yet**. Features, UX, and behavior may change.
+> Extension is published in [Chrome Web Store](https://chromewebstore.google.com/detail/houston-we-have-a-bug/ackhppjilkheijgnohjmcagjcbeligcc), feel free to use it.
 
 ## Key capabilities
 
