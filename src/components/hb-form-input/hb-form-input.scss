@@ -54,9 +54,6 @@ label {
 :host(.error) .input-wrapper {
   box-shadow: 0 0 0 2px $color-red-400;
 }
-:host(.error) ::slotted(input) {
-  color: $color-red-400;
-}
 
 ::slotted(input) {
   display: block;
@@ -67,4 +64,5 @@ label {
   font-size: 13px;
   padding: 6px 10px;
   border-radius: 4px;
+  background-color: #fff !important;
 }
