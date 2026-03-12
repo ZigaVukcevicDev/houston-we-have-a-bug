@@ -234,17 +234,19 @@ export class HBCanvas extends LitElement {
       const displayWidth = img.width / dpr;
       const displayHeight = img.height / dpr;
 
-      // Get available container width (no padding now)
-      const container = this.closest('.canvas-container') as HTMLElement;
-      const containerWidth = container
-        ? container.clientWidth
-        : window.innerWidth;
+      // Use window.innerWidth as the reference so a vertical scrollbar (which
+      // reduces container.clientWidth by ~17px) doesn't trigger a tiny CSS
+      // downscale that blurs the canvas content.
+      const availableWidth = window.innerWidth;
 
-      // Scale down if image is wider than container, but maintain a minimum size
+      // Scale down only if the image is genuinely wider than the viewport.
       const scale =
-        displayWidth > containerWidth ? containerWidth / displayWidth : 1;
-      const finalWidth = displayWidth * scale;
-      const finalHeight = displayHeight * scale;
+        displayWidth > availableWidth ? availableWidth / displayWidth : 1;
+
+      // Round to integer pixels to prevent fractional CSS widths (e.g. 1920.25px)
+      // which cause the browser to interpolate and blur the canvas.
+      const finalWidth = Math.round(displayWidth * scale);
+      const finalHeight = Math.round(displayHeight * scale);
 
       this.canvas.style.width = `${finalWidth}px`;
       this.canvas.style.height = `${finalHeight}px`;
@@ -260,6 +262,8 @@ export class HBCanvas extends LitElement {
     if (!this.originalImage) return;
 
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.imageSmoothingEnabled = true;
+    this.ctx.imageSmoothingQuality = 'high';
     this.ctx.drawImage(this.originalImage, 0, 0);
 
     // Render all tools' annotations
@@ -356,17 +360,11 @@ export class HBCanvas extends LitElement {
         const displayWidth = croppedImage.width / dpr;
         const displayHeight = croppedImage.height / dpr;
 
-        // Get available container width (no padding now)
-        const container = this.closest('.canvas-container') as HTMLElement;
-        const containerWidth = container
-          ? container.clientWidth
-          : window.innerWidth;
-
-        // Scale down if image is wider than container, but maintain a minimum size
+        const availableWidth = window.innerWidth;
         const scale =
-          displayWidth > containerWidth ? containerWidth / displayWidth : 1;
-        const finalWidth = displayWidth * scale;
-        const finalHeight = displayHeight * scale;
+          displayWidth > availableWidth ? availableWidth / displayWidth : 1;
+        const finalWidth = Math.round(displayWidth * scale);
+        const finalHeight = Math.round(displayHeight * scale);
 
         this.canvas.style.width = `${finalWidth}px`;
         this.canvas.style.height = `${finalHeight}px`;
