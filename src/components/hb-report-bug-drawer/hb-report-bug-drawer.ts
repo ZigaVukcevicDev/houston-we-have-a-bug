@@ -16,6 +16,12 @@ export class HBReportBugDrawer extends LitElement {
   private isClosing: boolean = false;
 
   @state()
+  private view: 'report-bug' | 'settings' = 'report-bug';
+
+  @state()
+  private isConfigured: boolean = false;
+
+  @state()
   private orgUrl: string = '';
 
   @state()
@@ -48,7 +54,11 @@ export class HBReportBugDrawer extends LitElement {
 
   private handleEscapeKey = (event: KeyboardEvent) => {
     if (event.key === 'Escape' && this.isOpen) {
-      this.handleClose();
+      if (this.view === 'settings') {
+        this.view = 'report-bug';
+      } else {
+        this.handleClose();
+      }
     }
   };
 
@@ -63,6 +73,7 @@ export class HBReportBugDrawer extends LitElement {
       this.connectionSuccess = false;
       this.isOrgUrlValid = true;
       this.isPatValid = true;
+      this.view = 'report-bug';
       this.dispatchEvent(
         new CustomEvent('close', { bubbles: true, composed: true })
       );
@@ -113,6 +124,7 @@ export class HBReportBugDrawer extends LitElement {
 
       this.connectionError = '';
       this.connectionSuccess = true;
+      this.isConfigured = true;
       const data = await response.json();
       console.warn('Connection verified:', data);
     } catch {
@@ -121,6 +133,125 @@ export class HBReportBugDrawer extends LitElement {
     } finally {
       this.isVerifying = false;
     }
+  }
+
+  private renderSettingsView() {
+    return html`
+      <div class="header settings-header">
+        <div class="header-top">
+          <button
+            class="icon-button back-button"
+            @click=${() => (this.view = 'report-bug')}
+            title="Back"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 3L5 8L10 13" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Back
+          </button>
+          <button
+            class="icon-button"
+            @click=${this.handleClose}
+            title="Close"
+          >
+            <img src="../images/cancel-black.svg" alt="close" />
+          </button>
+        </div>
+        <h2 class="header-title">Settings</h2>
+      </div>
+      <div class="body">
+        <hb-form-input
+          label="Organization URL"
+          isRequired
+          ?invalid=${!this.isOrgUrlValid && !this.orgUrl.trim()}
+          .error=${!this.isOrgUrlValid && this.orgUrl.trim()
+            ? 'Please enter a valid URL'
+            : ''}
+          .additionalInfo=${'Example: https://dev.azure.com/my-org'}
+        >
+          <input
+            type="text"
+            .value=${this.orgUrl}
+            @input=${(e: InputEvent) => {
+              this.orgUrl = (e.target as HTMLInputElement).value;
+            }}
+            @blur=${() => {
+              if (this.orgUrl.trim()) {
+                this.isOrgUrlValid = this.isValidUrl(this.orgUrl);
+              }
+            }}
+          />
+        </hb-form-input>
+        <hb-form-input
+          label="Personal access token"
+          isRequired
+          ?invalid=${!this.isPatValid}
+          .additionalInfo=${'<p>Go to Azure DevOps → User settings → Personal access tokens and create a new token with any name.</p><p>Under Scopes, select Custom defined and enable:</p><ul><li>Work Items (Read & write)</li><li>Project and Team (Read).</li></ul>'}
+        >
+          <input
+            type="password"
+            .value=${this.pat}
+            @input=${(e: InputEvent) => {
+              this.pat = (e.target as HTMLInputElement).value;
+            }}
+          />
+        </hb-form-input>
+        <button
+          class="action-button primary"
+          @click=${this.handleVerifyConnection}
+          ?disabled=${this.isVerifying}
+        >
+          Verify and save${this.isVerifying ? ' (loading)' : ''}
+        </button>
+        ${this.connectionError
+          ? html`<p class="error">${this.connectionError}</p>`
+          : ''}
+        ${this.connectionSuccess
+          ? html`<p class="success">Connection verified and saved.</p>`
+          : ''}
+      </div>
+    `;
+  }
+
+  private renderReportBugView() {
+    return html`
+      <div class="header report-bug-header">
+        <div class="header-top">
+          <button
+            class="icon-button"
+            @click=${this.handleClose}
+            title="Close"
+          >
+            <img src="../images/cancel-black.svg" alt="close" />
+          </button>
+        </div>
+        <div class="header-content">
+          <h2 class="header-title">Report bug</h2>
+          <button
+            class="settings-button"
+            @click=${() => (this.view = 'settings')}
+            title="Settings"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="8" cy="8" r="2.5" stroke="black" stroke-width="1.25"/>
+              <path d="M8 1.5V3M8 13V14.5M1.5 8H3M13 8H14.5M3.4 3.4L4.4 4.4M11.6 11.6L12.6 12.6M12.6 3.4L11.6 4.4M4.4 11.6L3.4 12.6" stroke="black" stroke-width="1.25" stroke-linecap="round"/>
+            </svg>
+            Settings
+          </button>
+        </div>
+      </div>
+      <div class="body">
+        ${!this.isConfigured
+          ? html`
+              <p class="info-text">
+                Before you can report bugs, you'll need to set up your Azure
+                DevOps connection.
+              </p>
+              <p class="info-text">Go to settings to get started.</p>
+            `
+          : html`<!-- bug report form -->` }
+      </div>
+    `;
   }
 
   render() {
@@ -135,67 +266,9 @@ export class HBReportBugDrawer extends LitElement {
         class="panel ${this.isClosing ? 'closing' : ''}"
         @animationend=${this.handleAnimationEnd}
       >
-        <div class="header">
-          <button class="icon-button" @click=${this.handleClose} title="Close">
-            Close
-            <!-- <img src="../images/close-black.svg" alt="close" /> -->
-          </button>
-        </div>
-        <div class="body">
-          <button class="icon-button" title="Settings">
-            Settings
-            <!-- <img src="../images/settings-black.svg" alt="settings" /> -->
-          </button>
-          <hb-form-input
-            label="Organization URL"
-            isRequired
-            ?invalid=${!this.isOrgUrlValid && !this.orgUrl.trim()}
-            .error=${!this.isOrgUrlValid && this.orgUrl.trim()
-              ? 'Please enter a valid URL'
-              : ''}
-            .additionalInfo=${'Example: https://dev.azure.com/my-org'}
-          >
-            <input
-              type="text"
-              .value=${this.orgUrl}
-              @input=${(e: InputEvent) => {
-                this.orgUrl = (e.target as HTMLInputElement).value;
-              }}
-              @blur=${() => {
-                if (this.orgUrl.trim()) {
-                  this.isOrgUrlValid = this.isValidUrl(this.orgUrl);
-                }
-              }}
-            />
-          </hb-form-input>
-          <hb-form-input
-            label="Personal access token"
-            isRequired
-            ?invalid=${!this.isPatValid}
-            .additionalInfo=${'<p>Go to Azure DevOps → User settings → Personal access tokens and create a new token with any name.</p><p>Under Scopes, select Custom defined and enable:</p><ul><li>Work Items (Read & write)</li><li>Project and Team (Read).</li></ul>'}
-          >
-            <input
-              type="password"
-              .value=${this.pat}
-              @input=${(e: InputEvent) => {
-                this.pat = (e.target as HTMLInputElement).value;
-              }}
-            />
-          </hb-form-input>
-          <button
-            class="action-button primary"
-            @click=${this.handleVerifyConnection}
-            ?disabled=${this.isVerifying}
-          >
-            Verify and save${this.isVerifying ? ' (loading)' : ''}
-          </button>
-          ${this.connectionError
-            ? html`<p class="error">${this.connectionError}</p>`
-            : ''}
-          ${this.connectionSuccess
-            ? html`<p class="success">Connection verified and saved.</p>`
-            : ''}
-        </div>
+        ${this.view === 'settings'
+          ? this.renderSettingsView()
+          : this.renderReportBugView()}
       </div>
     `;
   }
