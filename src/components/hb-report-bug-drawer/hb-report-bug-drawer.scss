@@ -6,6 +6,12 @@
   font-family: 'Inter', sans-serif;
 }
 
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @keyframes slide-in-from-right {
   from {
     transform: translateX(100%);
@@ -118,6 +124,27 @@
   flex-direction: column;
   gap: $spacing-lg;
   padding: 22px;
+
+  .action-button.primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    &.loading {
+      padding-top: $spacing-md;
+    }
+  }
+}
+
+.spinner {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: $color-white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
 }
 
 .info-text {
@@ -127,7 +154,7 @@
   background-color: transparent;
 }
 
-.error {
+.error-message {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
@@ -146,7 +173,7 @@
   }
 }
 
-.success {
+.success-message {
   display: flex;
   flex-direction: row;
   align-items: flex-start;

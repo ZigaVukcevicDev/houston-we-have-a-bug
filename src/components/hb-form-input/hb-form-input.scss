@@ -51,7 +51,7 @@ label {
 :host(:focus-within) .input-wrapper {
   box-shadow: 0 0 0 2px $color-yellow-500;
 }
-:host(.error) .input-wrapper {
+:host(.error-validation) .input-wrapper {
   box-shadow: 0 0 0 2px $color-red-400;
 }
 

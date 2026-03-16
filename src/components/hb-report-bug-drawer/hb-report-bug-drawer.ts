@@ -148,11 +148,15 @@ export class HBReportBugDrawer extends LitElement {
               class="icon-default"
               src="../images/back-black.svg"
               alt="back"
+              width="16"
+              height="16"
             />
             <img
               class="icon-hover-and-active"
               src="../images/back-white.svg"
               alt="back"
+              width="16"
+              height="16"
             />
             Back
           </button>
@@ -213,15 +217,16 @@ export class HBReportBugDrawer extends LitElement {
           />
         </hb-form-input>
         <button
-          class="action-button primary"
+          class="action-button primary loading"
           @click=${this.handleVerifyConnection}
           ?disabled=${this.isVerifying}
         >
-          Verify and save${this.isVerifying ? ' (loading)' : ''}
+          ${this.isVerifying ? html`<span class="spinner"></span>` : ''} Verify
+          and save
         </button>
         ${this.connectionError
           ? html`
-              <div class="error">
+              <div class="error-message">
                 <img src="../images/cancel-red.svg" alt="error" />
                 <p>${this.connectionError}</p>
               </div>
@@ -229,7 +234,7 @@ export class HBReportBugDrawer extends LitElement {
           : ''}
         ${this.connectionSuccess
           ? html`
-              <div class="success">
+              <div class="success-message">
                 <img src="../images/check-green.svg" alt="success" />
                 <p>Connection verified and saved.</p>
               </div>

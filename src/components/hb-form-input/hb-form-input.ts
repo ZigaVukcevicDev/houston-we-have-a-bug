@@ -58,7 +58,7 @@ export class HBFormInput extends LitElement {
   }
 
   private applyErrorClass(hasError: boolean) {
-    this.classList.toggle('error', hasError);
+    this.classList.toggle('error-validation', hasError);
   }
 
   private focusInput() {
