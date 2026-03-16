@@ -144,16 +144,10 @@ export class HBReportBugDrawer extends LitElement {
             @click=${() => (this.view = 'report-bug')}
             title="Back"
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M10 3L5 8L10 13" stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <img src="../images/back-black.svg" alt="back" />
             Back
           </button>
-          <button
-            class="icon-button"
-            @click=${this.handleClose}
-            title="Close"
-          >
+          <button class="icon-button" @click=${this.handleClose} title="Close">
             <img src="../images/cancel-black.svg" alt="close" />
           </button>
         </div>
@@ -217,11 +211,7 @@ export class HBReportBugDrawer extends LitElement {
     return html`
       <div class="header report-bug-header">
         <div class="header-top">
-          <button
-            class="icon-button"
-            @click=${this.handleClose}
-            title="Close"
-          >
+          <button class="icon-button" @click=${this.handleClose} title="Close">
             <img src="../images/cancel-black.svg" alt="close" />
           </button>
         </div>
@@ -232,10 +222,7 @@ export class HBReportBugDrawer extends LitElement {
             @click=${() => (this.view = 'settings')}
             title="Settings"
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="8" cy="8" r="2.5" stroke="black" stroke-width="1.25"/>
-              <path d="M8 1.5V3M8 13V14.5M1.5 8H3M13 8H14.5M3.4 3.4L4.4 4.4M11.6 11.6L12.6 12.6M12.6 3.4L11.6 4.4M4.4 11.6L3.4 12.6" stroke="black" stroke-width="1.25" stroke-linecap="round"/>
-            </svg>
+            <img src="../images/settings-black.svg" alt="download" />
             Settings
           </button>
         </div>
@@ -249,7 +236,7 @@ export class HBReportBugDrawer extends LitElement {
               </p>
               <p class="info-text">Go to settings to get started.</p>
             `
-          : html`<!-- bug report form -->` }
+          : html`<!-- bug report form -->`}
       </div>
     `;
   }
