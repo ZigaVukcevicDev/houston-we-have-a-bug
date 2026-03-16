@@ -4,6 +4,7 @@ import '../hb-form-input/hb-form-input';
 import styles from './hb-report-bug-drawer.scss';
 
 const connectionErrorMessage = 'Could not connect. Check your URL and token.';
+const STORAGE_KEY = 'azure_devops_credentials';
 
 @customElement('hb-report-bug-drawer')
 export class HBReportBugDrawer extends LitElement {
@@ -45,6 +46,23 @@ export class HBReportBugDrawer extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     document.addEventListener('keydown', this.handleEscapeKey);
+    this.loadCredentials();
+  }
+
+  private async loadCredentials() {
+    if (!chrome?.storage?.local) return;
+    const result = await chrome.storage.local.get(STORAGE_KEY);
+    const saved = result[STORAGE_KEY];
+    if (saved?.orgUrl && saved?.pat) {
+      this.orgUrl = saved.orgUrl;
+      this.pat = saved.pat;
+      this.isConfigured = true;
+    }
+  }
+
+  private async saveCredentials() {
+    if (!chrome?.storage?.local) return;
+    await chrome.storage.local.set({ [STORAGE_KEY]: { orgUrl: this.orgUrl, pat: this.pat } });
   }
 
   disconnectedCallback() {
@@ -125,6 +143,7 @@ export class HBReportBugDrawer extends LitElement {
       this.connectionError = '';
       this.connectionSuccess = true;
       this.isConfigured = true;
+      await this.saveCredentials();
       const data = await response.json();
       console.warn('Connection verified:', data);
     } catch {
