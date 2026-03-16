@@ -220,10 +220,20 @@ export class HBReportBugDrawer extends LitElement {
           Verify and save${this.isVerifying ? ' (loading)' : ''}
         </button>
         ${this.connectionError
-          ? html`<p class="error">${this.connectionError}</p>`
+          ? html`
+              <div class="error">
+                <img src="../images/cancel-red.svg" alt="error" />
+                <p>${this.connectionError}</p>
+              </div>
+            `
           : ''}
         ${this.connectionSuccess
-          ? html`<p class="success">Connection verified and saved.</p>`
+          ? html`
+              <div class="success">
+                <img src="../images/check-green.svg" alt="success" />
+                <p>Connection verified and saved.</p>
+              </div>
+            `
           : ''}
       </div>
     `;
