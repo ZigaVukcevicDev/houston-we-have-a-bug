@@ -140,15 +140,37 @@ export class HBReportBugDrawer extends LitElement {
       <div class="header settings-header">
         <div class="header-top">
           <button
-            class="icon-button back-button"
+            class="action-button tertiary back"
             @click=${() => (this.view = 'report-bug')}
             title="Back"
           >
-            <img src="../images/back-black.svg" alt="back" />
+            <img
+              class="icon-default"
+              src="../images/back-black.svg"
+              alt="back"
+            />
+            <img
+              class="icon-hover-and-active"
+              src="../images/back-white.svg"
+              alt="back"
+            />
             Back
           </button>
-          <button class="icon-button" @click=${this.handleClose} title="Close">
-            <img src="../images/cancel-black.svg" alt="close" />
+          <button
+            class="action-button tertiary close"
+            @click=${this.handleClose}
+            title="Close"
+          >
+            <img
+              class="icon-default"
+              src="../images/cancel-black.svg"
+              alt="close"
+            />
+            <img
+              class="icon-hover-and-active"
+              src="../images/cancel-white.svg"
+              alt="close"
+            />
           </button>
         </div>
         <h2 class="header-title">Settings</h2>
@@ -211,18 +233,40 @@ export class HBReportBugDrawer extends LitElement {
     return html`
       <div class="header report-bug-header">
         <div class="header-top">
-          <button class="icon-button" @click=${this.handleClose} title="Close">
-            <img src="../images/cancel-black.svg" alt="close" />
+          <button
+            class="action-button tertiary close"
+            @click=${this.handleClose}
+            title="Close"
+          >
+            <img
+              class="icon-default"
+              src="../images/cancel-black.svg"
+              alt="close"
+            />
+            <img
+              class="icon-hover-and-active"
+              src="../images/cancel-white.svg"
+              alt="close"
+            />
           </button>
         </div>
         <div class="header-content">
           <h2 class="header-title">Report bug</h2>
           <button
-            class="settings-button"
+            class="action-button tertiary"
             @click=${() => (this.view = 'settings')}
             title="Settings"
           >
-            <img src="../images/settings-black.svg" alt="download" />
+            <img
+              class="icon-default"
+              src="../images/settings-black.svg"
+              alt="settings"
+            />
+            <img
+              class="icon-hover-and-active"
+              src="../images/settings-white.svg"
+              alt="settings"
+            />
             Settings
           </button>
         </div>

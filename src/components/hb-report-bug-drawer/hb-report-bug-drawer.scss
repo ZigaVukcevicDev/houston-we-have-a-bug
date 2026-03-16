@@ -84,6 +84,15 @@
   justify-content: flex-end;
   align-items: center;
   margin-bottom: 4px;
+
+  .action-button.close {
+    padding-right: 5px;
+    transform: translateX(5px);
+  }
+
+  .action-button.back {
+    transform: translateX(-10px);
+  }
 }
 
 .settings-header .header-top {
@@ -127,48 +136,4 @@
   margin: 0;
   font-size: $font-size-sm;
   color: #27ae60;
-}
-
-.icon-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  cursor: pointer;
-
-  img {
-    width: 16px;
-    height: 16px;
-  }
-}
-
-.back-button {
-  width: auto;
-  padding: 0 8px;
-  gap: 6px;
-  font-size: $font-size-base;
-  font-weight: 500;
-  transform: translateX(-10px);
-}
-
-.settings-button {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 8px;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-
-  svg {
-    flex-shrink: 0;
-  }
 }
