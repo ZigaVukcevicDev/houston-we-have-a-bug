@@ -4,6 +4,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import '../hb-form-input/hb-form-input';
 import '../hb-searchable-dropdown/hb-searchable-dropdown';
 import type { DropdownOption } from '../hb-searchable-dropdown/hb-searchable-dropdown';
+import type { SystemInfo } from '../../interfaces/system-info.interface';
 import styles from './hb-report-bug-drawer.scss';
 
 const connectionErrorMessage = 'Could not connect. Check your URL and token.';
@@ -15,6 +16,9 @@ export class HBReportBugDrawer extends LitElement {
 
   @property({ type: Boolean })
   isOpen: boolean = false;
+
+  @property({ attribute: false })
+  systemInfo: SystemInfo | null = null;
 
   @state()
   private isClosing: boolean = false;
@@ -66,6 +70,30 @@ export class HBReportBugDrawer extends LitElement {
 
   @state()
   private selectedParentId: string = '';
+
+  @state()
+  private bugTitle: string = '';
+
+  @state()
+  private bugReproSteps: string = '';
+
+  @state()
+  private bugSystemInfo: string = '';
+
+  @state()
+  private bugPriority: string = '';
+
+  @state()
+  private bugSeverity: string = '';
+
+  @state()
+  private priorityOptions: DropdownOption[] = [];
+
+  @state()
+  private severityOptions: DropdownOption[] = [];
+
+  @state()
+  private bugFieldsLoading: boolean = false;
 
   private parentSearchDebounce: ReturnType<typeof setTimeout> | null = null;
 
@@ -186,6 +214,52 @@ export class HBReportBugDrawer extends LitElement {
       this.projectsError = 'Could not load projects. Try reconnecting in Settings.';
     } finally {
       this.projectsLoading = false;
+    }
+  }
+
+  updated(changed: Map<string, unknown>) {
+    if (changed.has('systemInfo') && this.systemInfo) {
+      const s = this.systemInfo;
+      this.bugSystemInfo = [
+        `Date and time: ${s.dateAndTime}`,
+        `URL: ${s.url}`,
+        ``,
+        `Display`,
+        `Visible area: ${s.visibleArea}`,
+        `Display resolution: ${s.displayResolution}`,
+        `Device pixel ratio: ${s.devicePixelRatio}`,
+        ``,
+        `System`,
+        `Browser: ${s.browser}`,
+        `Operating system: ${s.os}`,
+      ].join('\n');
+    }
+  }
+
+  private async fetchBugFields() {
+    if (!this.selectedProjectId) return;
+    this.bugFieldsLoading = true;
+    try {
+      const response = await fetch(
+        `${this.orgUrl}/${this.selectedProjectId}/_apis/wit/workitemtypes/Bug/fields?$expand=allowedValues&api-version=7.1`,
+        {
+          headers: {
+            Authorization: `Basic ${btoa(`:${this.pat}`)}`,
+            Accept: 'application/json',
+          },
+        }
+      );
+      if (!response.ok) throw new Error();
+      const data = await response.json();
+      const fields = data.value as { referenceName: string; allowedValues: string[] }[];
+      const priorityField = fields.find(f => f.referenceName === 'Microsoft.VSTS.Common.Priority');
+      const severityField = fields.find(f => f.referenceName === 'Microsoft.VSTS.Common.Severity');
+      this.priorityOptions = (priorityField?.allowedValues ?? []).map(v => ({ id: String(v), name: String(v) }));
+      this.severityOptions = (severityField?.allowedValues ?? []).map(v => ({ id: v, name: v }));
+    } catch {
+      // silently fail — dropdowns stay empty
+    } finally {
+      this.bugFieldsLoading = false;
     }
   }
 
@@ -454,6 +528,13 @@ export class HBReportBugDrawer extends LitElement {
                   this.selectedProjectId = (e.detail as DropdownOption).id;
                   this.selectedParentId = '';
                   this.parentOptions = [];
+                  this.bugTitle = '';
+                  this.bugReproSteps = '';
+                  this.bugPriority = '';
+                  this.bugSeverity = '';
+                  this.priorityOptions = [];
+                  this.severityOptions = [];
+                  this.fetchBugFields();
                 }}
               ></hb-searchable-dropdown>
               ${this.projectsError
@@ -477,6 +558,54 @@ export class HBReportBugDrawer extends LitElement {
                       @search=${this.handleParentSearch}
                       @change=${(e: CustomEvent) => {
                         this.selectedParentId = (e.detail as DropdownOption | null)?.id ?? '';
+                      }}
+                    ></hb-searchable-dropdown>
+                    <hb-form-input label="Title" isRequired>
+                      <input
+                        type="text"
+                        placeholder="Short description of the bug"
+                        .value=${this.bugTitle}
+                        @input=${(e: InputEvent) => {
+                          this.bugTitle = (e.target as HTMLInputElement).value;
+                        }}
+                      />
+                    </hb-form-input>
+                    <hb-form-input label="Repro steps">
+                      <textarea
+                        placeholder="Steps to reproduce…"
+                        .value=${this.bugReproSteps}
+                        @input=${(e: InputEvent) => {
+                          this.bugReproSteps = (e.target as HTMLTextAreaElement).value;
+                        }}
+                      ></textarea>
+                    </hb-form-input>
+                    <hb-form-input label="System info">
+                      <textarea
+                        placeholder="OS, browser, version…"
+                        .value=${this.bugSystemInfo}
+                        @input=${(e: InputEvent) => {
+                          this.bugSystemInfo = (e.target as HTMLTextAreaElement).value;
+                        }}
+                      ></textarea>
+                    </hb-form-input>
+                    <hb-searchable-dropdown
+                      label="Priority"
+                      placeholder="Select priority…"
+                      .options=${this.priorityOptions}
+                      .loading=${this.bugFieldsLoading}
+                      .value=${this.bugPriority}
+                      @change=${(e: CustomEvent) => {
+                        this.bugPriority = (e.detail as DropdownOption | null)?.id ?? '';
+                      }}
+                    ></hb-searchable-dropdown>
+                    <hb-searchable-dropdown
+                      label="Severity"
+                      placeholder="Select severity…"
+                      .options=${this.severityOptions}
+                      .loading=${this.bugFieldsLoading}
+                      .value=${this.bugSeverity}
+                      @change=${(e: CustomEvent) => {
+                        this.bugSeverity = (e.detail as DropdownOption | null)?.id ?? '';
                       }}
                     ></hb-searchable-dropdown>
                   `)

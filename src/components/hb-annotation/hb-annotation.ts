@@ -98,6 +98,7 @@ export class HBAnnotation extends LitElement {
         : ''}
       <hb-report-bug-drawer
         .isOpen=${this.showReportBugDrawer}
+        .systemInfo=${this.systemInfo}
         @close=${() => (this.showReportBugDrawer = false)}
       ></hb-report-bug-drawer>
       <div class="canvas-container">

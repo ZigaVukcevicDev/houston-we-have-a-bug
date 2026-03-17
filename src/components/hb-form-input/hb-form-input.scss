@@ -55,7 +55,8 @@ label {
   box-shadow: 0 0 0 2px $color-red-400;
 }
 
-::slotted(input) {
+::slotted(input),
+::slotted(textarea) {
   display: block;
   width: 100%;
   box-sizing: border-box;
@@ -65,4 +66,11 @@ label {
   padding: 6px 10px;
   border-radius: 4px;
   background-color: #fff !important;
+  font-family: 'Inter', sans-serif;
+}
+
+::slotted(textarea) {
+  field-sizing: content;
+  min-height: 72px;
+  resize: none;
 }
