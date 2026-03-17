@@ -153,15 +153,21 @@ export class HBSearchableDropdown extends LitElement {
               role="option"
               aria-selected=${option.id === this.value}
             >
-              ${option.meta
-                ? html`<span class="option-meta ${option.meta.toLowerCase().replace(/\s+/g, '-')}"
-                    >${option.meta}</span
-                  >`
-                : ''}
-              <span class="option-name">${option.name}</span>
-              ${option.subtitle
-                ? html`<span class="option-subtitle">${option.subtitle}</span>`
-                : ''}
+              <div class="option-content">
+                <span class="option-name">${option.name}</span>
+                ${option.meta || option.subtitle
+                  ? html`<span class="option-tags">
+                      ${option.meta
+                        ? html`<span class="option-meta ${option.meta.toLowerCase().replace(/\s+/g, '-')}"
+                            >${option.meta}</span
+                          >`
+                        : ''}
+                      ${option.subtitle
+                        ? html`<span class="option-subtitle">${option.subtitle}</span>`
+                        : ''}
+                    </span>`
+                  : ''}
+              </div>
             </li>
           `
         )}
