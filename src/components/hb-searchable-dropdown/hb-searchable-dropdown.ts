@@ -5,6 +5,8 @@ import styles from './hb-searchable-dropdown.scss';
 export interface DropdownOption {
   id: string;
   name: string;
+  meta?: string; // e.g., "User Story", "Feature", "Epic"
+  subtitle?: string; // e.g., "#123"
 }
 
 @customElement('hb-searchable-dropdown')
@@ -31,6 +33,13 @@ export class HBSearchableDropdown extends LitElement {
 
   @property({ type: Boolean })
   isRequired: boolean = false;
+
+  @property({ type: String })
+  additionalInfo: string = '';
+
+  /** When true, filtering is skipped and a `search` event is emitted on input change. */
+  @property({ type: Boolean })
+  asyncSearch: boolean = false;
 
   @state()
   private isOpen: boolean = false;
@@ -60,6 +69,7 @@ export class HBSearchableDropdown extends LitElement {
   }
 
   private get filteredOptions(): DropdownOption[] {
+    if (this.asyncSearch) return this.options;
     if (!this.searchQuery.trim()) return this.options;
     const q = this.searchQuery.toLowerCase();
     return this.options.filter(o => o.name.toLowerCase().includes(q));
@@ -70,7 +80,7 @@ export class HBSearchableDropdown extends LitElement {
   }
 
   private handleTriggerClick() {
-    if (this.loading) return;
+    if (this.loading && !this.asyncSearch) return;
     this.isOpen = !this.isOpen;
     if (this.isOpen) {
       this.updateComplete.then(() => {
@@ -90,6 +100,19 @@ export class HBSearchableDropdown extends LitElement {
     }
   }
 
+  private handleSearchInput(e: InputEvent) {
+    this.searchQuery = (e.target as HTMLInputElement).value;
+    if (this.asyncSearch) {
+      this.dispatchEvent(
+        new CustomEvent('search', {
+          detail: this.searchQuery,
+          bubbles: true,
+          composed: true,
+        })
+      );
+    }
+  }
+
   private selectOption(option: DropdownOption) {
     this.value = option.id;
     this.closeDropdown();
@@ -105,8 +128,48 @@ export class HBSearchableDropdown extends LitElement {
     }
   }
 
-  render() {
+  private renderOptionsList() {
     const filtered = this.filteredOptions;
+
+    if (this.asyncSearch && !this.searchQuery.trim()) {
+      return html`<p class="search-hint">Start typing to search…</p>`;
+    }
+
+    if (this.loading) {
+      return html`<div class="dropdown-loading"><span class="spinner-dark"></span></div>`;
+    }
+
+    if (filtered.length === 0) {
+      return html`<p class="no-results">No results found.</p>`;
+    }
+
+    return html`
+      <ul class="options-list">
+        ${filtered.map(
+          option => html`
+            <li
+              class="option ${option.id === this.value ? 'selected' : ''}"
+              @click=${() => this.selectOption(option)}
+              role="option"
+              aria-selected=${option.id === this.value}
+            >
+              ${option.meta
+                ? html`<span class="option-meta ${option.meta.toLowerCase().replace(/\s+/g, '-')}"
+                    >${option.meta}</span
+                  >`
+                : ''}
+              <span class="option-name">${option.name}</span>
+              ${option.subtitle
+                ? html`<span class="option-subtitle">${option.subtitle}</span>`
+                : ''}
+            </li>
+          `
+        )}
+      </ul>
+    `;
+  }
+
+  render() {
     const selected = this.selectedOption;
 
     return html`
@@ -119,19 +182,19 @@ export class HBSearchableDropdown extends LitElement {
         : ''}
       <div class="select-wrapper">
         <div
-          class="trigger ${this.isOpen ? 'open' : ''} ${this.loading
+          class="trigger ${this.isOpen ? 'open' : ''} ${this.loading && !this.asyncSearch
             ? 'is-loading'
             : ''}"
-          tabindex=${this.loading ? '-1' : '0'}
+          tabindex=${this.loading && !this.asyncSearch ? '-1' : '0'}
           @click=${this.handleTriggerClick}
           @keydown=${this.handleTriggerKeydown}
           role="combobox"
           aria-expanded=${this.isOpen}
           aria-haspopup="listbox"
         >
-          ${this.loading
+          ${this.loading && !this.asyncSearch
             ? html`<span class="spinner"></span>
-                <span class="trigger-text placeholder">Loading projects…</span>`
+                <span class="trigger-text placeholder">Loading…</span>`
             : html`<span class="trigger-text ${!selected ? 'placeholder' : ''}">
                   ${selected?.name ?? this.placeholder}
                 </span>
@@ -160,38 +223,20 @@ export class HBSearchableDropdown extends LitElement {
                     type="text"
                     placeholder="Search…"
                     .value=${this.searchQuery}
-                    @input=${(e: InputEvent) => {
-                      this.searchQuery = (e.target as HTMLInputElement).value;
-                    }}
+                    @input=${this.handleSearchInput}
                     @keydown=${(e: KeyboardEvent) => {
                       if (e.key === 'Escape') this.closeDropdown();
                     }}
                   />
                 </div>
-                ${filtered.length > 0
-                  ? html`
-                      <ul class="options-list">
-                        ${filtered.map(
-                          option => html`
-                            <li
-                              class="option ${option.id === this.value
-                                ? 'selected'
-                                : ''}"
-                              @click=${() => this.selectOption(option)}
-                              role="option"
-                              aria-selected=${option.id === this.value}
-                            >
-                              ${option.name}
-                            </li>
-                          `
-                        )}
-                      </ul>
-                    `
-                  : html`<p class="no-results">No projects found.</p>`}
+                ${this.renderOptionsList()}
               </div>
             `
           : ''}
       </div>
+      ${this.additionalInfo
+        ? html`<p class="additional-info">${this.additionalInfo}</p>`
+        : ''}
     `;
   }
 }

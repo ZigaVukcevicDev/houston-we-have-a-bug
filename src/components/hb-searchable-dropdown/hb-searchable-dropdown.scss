@@ -134,6 +134,9 @@ label {
 }
 
 .option {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
   padding: 6px 12px;
   font-size: 13px;
   cursor: pointer;
@@ -148,9 +151,70 @@ label {
   }
 }
 
+.option-meta {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 1px 5px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+
+  &.epic {
+    background: #ede0f7;
+    color: #7b2fa0;
+  }
+
+  &.feature {
+    background: #dceeff;
+    color: #0060c0;
+  }
+
+  &.user-story {
+    background: #d9f0e0;
+    color: #1a7a3c;
+  }
+}
+
+.option-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.option-subtitle {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: #aaa;
+}
+
+.search-hint,
 .no-results {
   padding: 8px 12px;
   font-size: 13px;
   color: #8a8a8a;
   margin: 0;
+}
+
+.dropdown-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+
+.spinner-dark {
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid rgba(0, 0, 0, 0.15);
+  border-top-color: #555;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.additional-info {
+  margin: 0;
+  font-size: 13px;
+  color: #8a8a8a;
 }

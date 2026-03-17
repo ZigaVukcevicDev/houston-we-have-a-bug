@@ -1,4 +1,5 @@
 import { LitElement, html, unsafeCSS } from 'lit';
+import { keyed } from 'lit/directives/keyed.js';
 import { customElement, property, state } from 'lit/decorators.js';
 import '../hb-form-input/hb-form-input';
 import '../hb-searchable-dropdown/hb-searchable-dropdown';
@@ -57,6 +58,17 @@ export class HBReportBugDrawer extends LitElement {
   @state()
   private selectedProjectId: string = '';
 
+  @state()
+  private parentOptions: DropdownOption[] = [];
+
+  @state()
+  private parentLoading: boolean = false;
+
+  @state()
+  private selectedParentId: string = '';
+
+  private parentSearchDebounce: ReturnType<typeof setTimeout> | null = null;
+
   connectedCallback() {
     super.connectedCallback();
     document.addEventListener('keydown', this.handleEscapeKey);
@@ -78,6 +90,76 @@ export class HBReportBugDrawer extends LitElement {
   private async saveCredentials() {
     if (!chrome?.storage?.local) return;
     await chrome.storage.local.set({ [STORAGE_KEY]: { orgUrl: this.orgUrl, pat: this.pat } });
+  }
+
+  private handleParentSearch(e: CustomEvent) {
+    const query = (e.detail as string).trim();
+    if (this.parentSearchDebounce) clearTimeout(this.parentSearchDebounce);
+    if (!query) {
+      this.parentOptions = [];
+      return;
+    }
+    this.parentSearchDebounce = setTimeout(() => this.fetchParentItems(query), 300);
+  }
+
+  private async fetchParentItems(query: string) {
+    if (!this.selectedProjectId) return;
+    const projectIdAtStart = this.selectedProjectId;
+    this.parentLoading = true;
+    try {
+      const escapedQuery = query.replace(/'/g, "''");
+      const numericId = /^\d+$/.test(query.trim()) ? parseInt(query.trim(), 10) : null;
+      const condition = numericId !== null
+        ? `([System.Title] CONTAINS '${escapedQuery}' OR [System.Id] = ${numericId})`
+        : `[System.Title] CONTAINS '${escapedQuery}'`;
+      const wiql = `SELECT [System.Id] FROM WorkItems WHERE [System.TeamProject] = @project AND [System.WorkItemType] IN ('User Story', 'Feature', 'Epic') AND ${condition} ORDER BY [System.ChangedDate] DESC`;
+      const wiqlResponse = await fetch(
+        `${this.orgUrl}/${this.selectedProjectId}/_apis/wit/wiql?$top=20&api-version=7.1`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Basic ${btoa(`:${this.pat}`)}`,
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({ query: wiql }),
+        }
+      );
+      if (!wiqlResponse.ok) throw new Error();
+      const wiqlData = await wiqlResponse.json();
+      const ids: number[] = (wiqlData.workItems as { id: number }[])?.map(w => w.id) ?? [];
+      if (ids.length === 0) {
+        if (this.selectedProjectId === projectIdAtStart) this.parentOptions = [];
+        return;
+      }
+      const detailsResponse = await fetch(
+        `${this.orgUrl}/_apis/wit/workitems?ids=${ids.join(',')}&fields=System.Title,System.WorkItemType&api-version=7.1`,
+        {
+          headers: {
+            Authorization: `Basic ${btoa(`:${this.pat}`)}`,
+            Accept: 'application/json',
+          },
+        }
+      );
+      if (!detailsResponse.ok) throw new Error();
+      const detailsData = await detailsResponse.json();
+      if (this.selectedProjectId !== projectIdAtStart) return;
+      this.parentOptions = (
+        detailsData.value as {
+          id: number;
+          fields: { 'System.Title': string; 'System.WorkItemType': string };
+        }[]
+      ).map(item => ({
+        id: String(item.id),
+        name: item.fields['System.Title'],
+        meta: item.fields['System.WorkItemType'],
+        subtitle: `#${item.id}`,
+      }));
+    } catch {
+      if (this.selectedProjectId === projectIdAtStart) this.parentOptions = [];
+    } finally {
+      if (this.selectedProjectId === projectIdAtStart) this.parentLoading = false;
+    }
   }
 
   private async fetchProjects() {
@@ -370,6 +452,8 @@ export class HBReportBugDrawer extends LitElement {
                 .value=${this.selectedProjectId}
                 @change=${(e: CustomEvent) => {
                   this.selectedProjectId = (e.detail as DropdownOption).id;
+                  this.selectedParentId = '';
+                  this.parentOptions = [];
                 }}
               ></hb-searchable-dropdown>
               ${this.projectsError
@@ -379,6 +463,22 @@ export class HBReportBugDrawer extends LitElement {
                       <p>${this.projectsError}</p>
                     </div>
                   `
+                : ''}
+              ${this.selectedProjectId
+                ? keyed(this.selectedProjectId, html`
+                    <hb-searchable-dropdown
+                      label="Parent work item"
+                      placeholder="Search by title or id..."
+                      ?asyncSearch=${true}
+                      .options=${this.parentOptions}
+                      .loading=${this.parentLoading}
+                      .value=${this.selectedParentId}
+                      @search=${this.handleParentSearch}
+                      @change=${(e: CustomEvent) => {
+                        this.selectedParentId = (e.detail as DropdownOption).id;
+                      }}
+                    ></hb-searchable-dropdown>
+                  `)
                 : ''}
             `}
       </div>
