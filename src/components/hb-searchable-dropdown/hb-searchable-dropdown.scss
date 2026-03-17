@@ -1,0 +1,156 @@
+@use '../../styles/variables' as *;
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+:host,
+:host * {
+  font-family: 'Inter', sans-serif;
+}
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+label {
+  font-size: 13px;
+  color: $color-black;
+  cursor: default;
+  margin-bottom: 2px;
+
+  .required {
+    color: $color-red-400;
+  }
+}
+
+.select-wrapper {
+  position: relative;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px #a6a6a6;
+  cursor: pointer;
+  background: #fff;
+  font-size: 13px;
+  user-select: none;
+  outline: none;
+
+  &:focus,
+  &.open {
+    box-shadow: 0 0 0 2px $color-yellow-500;
+  }
+
+  &.is-loading {
+    cursor: default;
+  }
+}
+
+:host(.error-validation) .trigger {
+  box-shadow: 0 0 0 2px $color-red-400;
+}
+
+.trigger-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &.placeholder {
+    color: #aaa;
+  }
+}
+
+.chevron {
+  flex-shrink: 0;
+  transition: transform 150ms ease;
+
+  .trigger.open & {
+    transform: rotate(180deg);
+  }
+}
+
+.spinner {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid rgba(0, 0, 0, 0.2);
+  border-top-color: $color-black;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.12),
+    0 0 0 1px #a6a6a6;
+  overflow: hidden;
+}
+
+.search-wrapper {
+  padding: 6px 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.search-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  outline: none;
+  font-size: 13px;
+  padding: 4px 6px;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px #a6a6a6;
+  background: #fff;
+
+  &:focus {
+    box-shadow: 0 0 0 2px $color-yellow-500;
+  }
+}
+
+.options-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.option {
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+
+  &:hover {
+    background: #f5f5f5;
+  }
+
+  &.selected {
+    background: #fff8e0;
+    font-weight: 500;
+  }
+}
+
+.no-results {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #8a8a8a;
+  margin: 0;
+}

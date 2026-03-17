@@ -1,6 +1,8 @@
 import { LitElement, html, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import '../hb-form-input/hb-form-input';
+import '../hb-searchable-dropdown/hb-searchable-dropdown';
+import type { DropdownOption } from '../hb-searchable-dropdown/hb-searchable-dropdown';
 import styles from './hb-report-bug-drawer.scss';
 
 const connectionErrorMessage = 'Could not connect. Check your URL and token.';
@@ -43,6 +45,18 @@ export class HBReportBugDrawer extends LitElement {
   @state()
   private isVerifying: boolean = false;
 
+  @state()
+  private projects: DropdownOption[] = [];
+
+  @state()
+  private projectsLoading: boolean = false;
+
+  @state()
+  private projectsError: string = '';
+
+  @state()
+  private selectedProjectId: string = '';
+
   connectedCallback() {
     super.connectedCallback();
     document.addEventListener('keydown', this.handleEscapeKey);
@@ -57,12 +71,40 @@ export class HBReportBugDrawer extends LitElement {
       this.orgUrl = saved.orgUrl;
       this.pat = saved.pat;
       this.isConfigured = true;
+      this.fetchProjects();
     }
   }
 
   private async saveCredentials() {
     if (!chrome?.storage?.local) return;
     await chrome.storage.local.set({ [STORAGE_KEY]: { orgUrl: this.orgUrl, pat: this.pat } });
+  }
+
+  private async fetchProjects() {
+    if (!this.orgUrl || !this.pat) return;
+    this.projectsLoading = true;
+    this.projectsError = '';
+    try {
+      const response = await fetch(
+        `${this.orgUrl}/_apis/projects?api-version=7.1`,
+        {
+          headers: {
+            Authorization: `Basic ${btoa(`:${this.pat}`)}`,
+            Accept: 'application/json',
+          },
+        }
+      );
+      if (!response.ok) throw new Error('Failed to fetch projects');
+      const data = await response.json();
+      this.projects = (data.value as { id: string; name: string }[]).map(p => ({
+        id: p.id,
+        name: p.name,
+      }));
+    } catch {
+      this.projectsError = 'Could not load projects. Try reconnecting in Settings.';
+    } finally {
+      this.projectsLoading = false;
+    }
   }
 
   disconnectedCallback() {
@@ -145,7 +187,11 @@ export class HBReportBugDrawer extends LitElement {
       this.isConfigured = true;
       await this.saveCredentials();
       const data = await response.json();
-      console.warn('Connection verified:', data);
+      this.projects = (data.value as { id: string; name: string }[]).map(p => ({
+        id: p.id,
+        name: p.name,
+      }));
+      this.selectedProjectId = '';
     } catch {
       this.connectionSuccess = false;
       this.connectionError = connectionErrorMessage;
@@ -314,7 +360,27 @@ export class HBReportBugDrawer extends LitElement {
               </p>
               <p class="info-text">Go to settings to get started.</p>
             `
-          : html`<!-- bug report form -->`}
+          : html`
+              <hb-searchable-dropdown
+                label="Project"
+                isRequired
+                placeholder="Select project…"
+                .options=${this.projects}
+                .loading=${this.projectsLoading}
+                .value=${this.selectedProjectId}
+                @change=${(e: CustomEvent) => {
+                  this.selectedProjectId = (e.detail as DropdownOption).id;
+                }}
+              ></hb-searchable-dropdown>
+              ${this.projectsError
+                ? html`
+                    <div class="error-message">
+                      <img src="../images/cancel-red.svg" alt="error" />
+                      <p>${this.projectsError}</p>
+                    </div>
+                  `
+                : ''}
+            `}
       </div>
     `;
   }
