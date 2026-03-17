@@ -41,6 +41,9 @@ export class HBSearchableDropdown extends LitElement {
   @property({ type: Boolean })
   asyncSearch: boolean = false;
 
+  @property({ type: Boolean })
+  clearable: boolean = false;
+
   @state()
   private isOpen: boolean = false;
 
@@ -119,6 +122,14 @@ export class HBSearchableDropdown extends LitElement {
     this.classList.remove('error-validation');
     this.dispatchEvent(
       new CustomEvent('change', { detail: option, bubbles: true, composed: true })
+    );
+  }
+
+  private handleClear(e: MouseEvent) {
+    e.stopPropagation();
+    this.value = '';
+    this.dispatchEvent(
+      new CustomEvent('change', { detail: null, bubbles: true, composed: true })
     );
   }
 
@@ -204,21 +215,27 @@ export class HBSearchableDropdown extends LitElement {
             : html`<span class="trigger-text ${!selected ? 'placeholder' : ''}">
                   ${selected?.name ?? this.placeholder}
                 </span>
-                <svg
-                  class="chevron"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                >
-                  <path
-                    d="M4 6L8 10L12 6"
-                    stroke="black"
-                    stroke-width="1.25"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>`}
+                ${this.clearable && selected
+                  ? html`<button class="clear-btn" @click=${this.handleClear} tabindex="-1" aria-label="Clear">
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <path d="M1 1L9 9M9 1L1 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                      </svg>
+                    </button>`
+                  : html`<svg
+                      class="chevron"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                    >
+                      <path
+                        d="M4 6L8 10L12 6"
+                        stroke="black"
+                        stroke-width="1.25"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>`}`}
         </div>
         ${this.isOpen
           ? html`

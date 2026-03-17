@@ -71,6 +71,25 @@ label {
   }
 }
 
+.clear-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #aaa;
+  cursor: pointer;
+  border-radius: 2px;
+
+  &:hover {
+    color: #333;
+  }
+}
+
 .chevron {
   flex-shrink: 0;
   transition: transform 150ms ease;

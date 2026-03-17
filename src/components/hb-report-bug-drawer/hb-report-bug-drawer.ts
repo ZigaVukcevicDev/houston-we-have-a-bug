@@ -470,12 +470,13 @@ export class HBReportBugDrawer extends LitElement {
                       label="Parent work item"
                       placeholder="Search by title or id..."
                       ?asyncSearch=${true}
+                      ?clearable=${true}
                       .options=${this.parentOptions}
                       .loading=${this.parentLoading}
                       .value=${this.selectedParentId}
                       @search=${this.handleParentSearch}
                       @change=${(e: CustomEvent) => {
-                        this.selectedParentId = (e.detail as DropdownOption).id;
+                        this.selectedParentId = (e.detail as DropdownOption | null)?.id ?? '';
                       }}
                     ></hb-searchable-dropdown>
                   `)
