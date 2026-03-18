@@ -207,10 +207,18 @@
   font-weight: 500;
 }
 
-.success-screen-link {
+.success-screen-link-row {
+  margin-top: 10px;
   display: flex;
   align-items: center;
   gap: 4px;
+
+  img {
+    transform: translateY(-3px);
+  }
+}
+
+.success-screen-link {
   color: $color-black;
   font-size: 12px;
   padding-bottom: 2px;

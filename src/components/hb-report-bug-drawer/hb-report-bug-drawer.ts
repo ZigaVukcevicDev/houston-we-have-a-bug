@@ -276,7 +276,14 @@ export class HBReportBugDrawer extends LitElement {
     this.submitWorkItemId = null;
 
     try {
-      const toHtml = (text: string) => text.trim().replace(/\n/g, '<br>');
+      const toHtml = (text: string) =>
+        text
+          .trim()
+          .replace(/\n/g, '<br>')
+          .replace(
+            /(https?:\/\/[^\s<>"]+)/g,
+            '<a href="$1">$1</a>'
+          );
 
       const patches: { op: string; path: string; value: unknown }[] = [
         {
@@ -710,19 +717,21 @@ export class HBReportBugDrawer extends LitElement {
                             <p class="success-screen-message">
                               Bug successfully submitted.
                             </p>
-                            <a
-                              href=${this.submitWorkItemUrl}
-                              target="_blank"
-                              class="success-screen-link"
-                            >
-                              View in Azure DevOps
+                            <div class="success-screen-link-row">
+                              <a
+                                href=${this.submitWorkItemUrl}
+                                target="_blank"
+                                class="success-screen-link"
+                              >
+                                View in Azure DevOps
+                              </a>
                               <img
                                 src="../images/external-link-black.svg"
                                 alt=""
                                 width="16"
                                 height="16"
                               />
-                            </a>
+                            </div>
                           </div>
                         `
                       : html`
