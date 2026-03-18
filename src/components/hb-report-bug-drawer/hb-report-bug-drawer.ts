@@ -20,6 +20,9 @@ export class HBReportBugDrawer extends LitElement {
   @property({ attribute: false })
   systemInfo: SystemInfo | null = null;
 
+  @property({ attribute: false })
+  annotatedScreenshot: string = '';
+
   @state()
   private isClosing: boolean = false;
 
@@ -285,6 +288,35 @@ export class HBReportBugDrawer extends LitElement {
             '<a href="$1">$1</a>'
           );
 
+      // Upload annotated screenshot as attachment
+      let screenshotUrl = '';
+      if (this.annotatedScreenshot) {
+        try {
+          const base64 = this.annotatedScreenshot.split(',')[1];
+          const binary = atob(base64);
+          const bytes = new Uint8Array(binary.length);
+          for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+          const blob = new Blob([bytes], { type: 'image/png' });
+          const attachResponse = await fetch(
+            `${this.orgUrl}/${this.selectedProjectId}/_apis/wit/attachments?fileName=annotated-screenshot.png&api-version=7.1`,
+            {
+              method: 'POST',
+              headers: {
+                Authorization: `Basic ${btoa(`:${this.pat}`)}`,
+                'Content-Type': 'application/octet-stream',
+              },
+              body: blob,
+            }
+          );
+          if (attachResponse.ok) {
+            const attachData = await attachResponse.json();
+            screenshotUrl = attachData.url as string;
+          }
+        } catch {
+          // silently skip — screenshot upload failure won't block the work item
+        }
+      }
+
       const patches: { op: string; path: string; value: unknown }[] = [
         {
           op: 'add',
@@ -293,13 +325,20 @@ export class HBReportBugDrawer extends LitElement {
         },
       ];
 
-      if (this.bugReproSteps.trim()) {
+      const hasReproText = this.bugReproSteps.trim().length > 0;
+      if (hasReproText || screenshotUrl) {
+        let reproHtml = hasReproText ? toHtml(this.bugReproSteps) : '';
+        if (screenshotUrl) {
+          reproHtml += (reproHtml ? '<br><br>' : '') +
+            `<img src="${screenshotUrl}" alt="Annotated screenshot" />`;
+        }
         patches.push({
           op: 'add',
           path: '/fields/Microsoft.VSTS.TCM.ReproSteps',
-          value: toHtml(this.bugReproSteps),
+          value: reproHtml,
         });
       }
+
       if (this.bugSystemInfo.trim()) {
         patches.push({
           op: 'add',
@@ -767,7 +806,10 @@ export class HBReportBugDrawer extends LitElement {
                               }}
                             />
                           </hb-form-input>
-                          <hb-form-input label="Repro steps">
+                          <hb-form-input
+                            label="Repro steps"
+                            .additionalInfo=${'The annotated screenshot will be appended automatically.'}
+                          >
                             <textarea
                               placeholder="Steps to reproduce…"
                               .value=${this.bugReproSteps}

@@ -31,6 +31,9 @@ export class HBAnnotation extends LitElement {
   @state()
   private showReportBugDrawer: boolean = false;
 
+  @state()
+  private annotatedDataUrl: string = '';
+
   render() {
     if (!this.dataUrl) {
       return html`
@@ -99,6 +102,7 @@ export class HBAnnotation extends LitElement {
       <hb-report-bug-drawer
         .isOpen=${this.showReportBugDrawer}
         .systemInfo=${this.systemInfo}
+        .annotatedScreenshot=${this.annotatedDataUrl}
         @close=${() => (this.showReportBugDrawer = false)}
       ></hb-report-bug-drawer>
       <div class="canvas-container">
@@ -198,6 +202,10 @@ export class HBAnnotation extends LitElement {
   }
 
   private handleReportBug() {
+    const canvas = this.shadowRoot?.querySelector('hb-canvas') as HBCanvas;
+    if (canvas) {
+      this.annotatedDataUrl = canvas.getDataUrl();
+    }
     this.showReportBugDrawer = true;
   }
 

@@ -289,6 +289,14 @@ export class HBCanvas extends LitElement {
     this.currentTool?.handleMouseUp?.(event, this.canvas);
   }
 
+  public getDataUrl(): string {
+    const selectTool = this.tools.get('select') as SelectTool;
+    if (selectTool) {
+      selectTool.deselectAll();
+    }
+    return this.canvas.toDataURL('image/png');
+  }
+
   public download(filename: string = 'screenshot.png') {
     // Deselect all annotations before downloading
     const selectTool = this.tools.get('select') as SelectTool;
