@@ -70,6 +70,8 @@
   box-shadow: -4px 0 16px rgba(0, 0, 0, 0.12);
   z-index: 1002;
   animation: slide-in-from-right 250ms ease-out;
+  display: flex;
+  flex-direction: column;
 
   &.closing {
     animation: slide-out-to-right 250ms ease-in forwards;
@@ -124,6 +126,8 @@
   flex-direction: column;
   gap: $spacing-lg;
   padding: 22px;
+  flex: 1;
+  overflow-y: auto;
 
   .action-button.primary {
     display: flex;

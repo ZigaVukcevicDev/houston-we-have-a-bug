@@ -50,6 +50,9 @@ export class HBSearchableDropdown extends LitElement {
   @state()
   private searchQuery: string = '';
 
+  @state()
+  private dropdownStyle: string = '';
+
   connectedCallback() {
     super.connectedCallback();
     document.addEventListener('click', this.handleDocumentClick);
@@ -69,6 +72,7 @@ export class HBSearchableDropdown extends LitElement {
   private closeDropdown() {
     this.isOpen = false;
     this.searchQuery = '';
+    this.dropdownStyle = '';
   }
 
   private get filteredOptions(): DropdownOption[] {
@@ -86,11 +90,19 @@ export class HBSearchableDropdown extends LitElement {
     if (this.loading && !this.asyncSearch) return;
     this.isOpen = !this.isOpen;
     if (this.isOpen) {
+      const rect = this.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      if (spaceBelow < 220) {
+        this.dropdownStyle = `position:fixed;bottom:${window.innerHeight - rect.top + 4}px;top:auto;left:${rect.left}px;width:${rect.width}px;z-index:1010`;
+      } else {
+        this.dropdownStyle = `position:fixed;top:${rect.bottom + 4}px;left:${rect.left}px;width:${rect.width}px;z-index:1010`;
+      }
       this.updateComplete.then(() => {
         this.shadowRoot?.querySelector<HTMLInputElement>('.search-input')?.focus();
       });
     } else {
       this.searchQuery = '';
+      this.dropdownStyle = '';
     }
   }
 
@@ -239,7 +251,7 @@ export class HBSearchableDropdown extends LitElement {
         </div>
         ${this.isOpen
           ? html`
-              <div class="dropdown" role="listbox">
+              <div class="dropdown" style=${this.dropdownStyle} role="listbox">
                 <div class="search-wrapper">
                   <input
                     class="search-input"
