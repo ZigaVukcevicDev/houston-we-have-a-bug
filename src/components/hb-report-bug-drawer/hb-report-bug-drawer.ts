@@ -477,6 +477,17 @@ export class HBReportBugDrawer extends LitElement {
       this.isOrgUrlValid = true;
       this.isPatValid = true;
       this.view = 'report-bug';
+      if (this.submitWorkItemId !== null) {
+        this.selectedProjectId = '';
+        this.selectedParentId = '';
+        this.parentOptions = [];
+        this.bugTitle = '';
+        this.bugReproSteps = '';
+        this.bugSeverity = '';
+        this.severityOptions = [];
+        this.projectNotSupported = false;
+        this.isTitleValid = true;
+      }
       this.submitWorkItemId = null;
       this.submitWorkItemUrl = '';
       this.submitError = '';
