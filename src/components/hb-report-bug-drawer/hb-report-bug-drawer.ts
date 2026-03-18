@@ -95,6 +95,21 @@ export class HBReportBugDrawer extends LitElement {
   @state()
   private bugFieldsLoading: boolean = false;
 
+  @state()
+  private isTitleValid: boolean = true;
+
+  @state()
+  private isSubmitting: boolean = false;
+
+  @state()
+  private submitError: string = '';
+
+  @state()
+  private submitWorkItemId: number | null = null;
+
+  @state()
+  private submitWorkItemUrl: string = '';
+
   private parentSearchDebounce: ReturnType<typeof setTimeout> | null = null;
 
   connectedCallback() {
@@ -117,7 +132,9 @@ export class HBReportBugDrawer extends LitElement {
 
   private async saveCredentials() {
     if (!chrome?.storage?.local) return;
-    await chrome.storage.local.set({ [STORAGE_KEY]: { orgUrl: this.orgUrl, pat: this.pat } });
+    await chrome.storage.local.set({
+      [STORAGE_KEY]: { orgUrl: this.orgUrl, pat: this.pat },
+    });
   }
 
   private handleParentSearch(e: CustomEvent) {
@@ -127,7 +144,10 @@ export class HBReportBugDrawer extends LitElement {
       this.parentOptions = [];
       return;
     }
-    this.parentSearchDebounce = setTimeout(() => this.fetchParentItems(query), 300);
+    this.parentSearchDebounce = setTimeout(
+      () => this.fetchParentItems(query),
+      300
+    );
   }
 
   private async fetchParentItems(query: string) {
@@ -136,10 +156,13 @@ export class HBReportBugDrawer extends LitElement {
     this.parentLoading = true;
     try {
       const escapedQuery = query.replace(/'/g, "''");
-      const numericId = /^\d+$/.test(query.trim()) ? parseInt(query.trim(), 10) : null;
-      const condition = numericId !== null
-        ? `([System.Title] CONTAINS '${escapedQuery}' OR [System.Id] = ${numericId})`
-        : `[System.Title] CONTAINS '${escapedQuery}'`;
+      const numericId = /^\d+$/.test(query.trim())
+        ? parseInt(query.trim(), 10)
+        : null;
+      const condition =
+        numericId !== null
+          ? `([System.Title] CONTAINS '${escapedQuery}' OR [System.Id] = ${numericId})`
+          : `[System.Title] CONTAINS '${escapedQuery}'`;
       const wiql = `SELECT [System.Id] FROM WorkItems WHERE [System.TeamProject] = @project AND [System.WorkItemType] IN ('User Story', 'Feature', 'Epic') AND ${condition} ORDER BY [System.ChangedDate] DESC`;
       const wiqlResponse = await fetch(
         `${this.orgUrl}/${this.selectedProjectId}/_apis/wit/wiql?$top=20&api-version=7.1`,
@@ -155,9 +178,11 @@ export class HBReportBugDrawer extends LitElement {
       );
       if (!wiqlResponse.ok) throw new Error();
       const wiqlData = await wiqlResponse.json();
-      const ids: number[] = (wiqlData.workItems as { id: number }[])?.map(w => w.id) ?? [];
+      const ids: number[] =
+        (wiqlData.workItems as { id: number }[])?.map((w) => w.id) ?? [];
       if (ids.length === 0) {
-        if (this.selectedProjectId === projectIdAtStart) this.parentOptions = [];
+        if (this.selectedProjectId === projectIdAtStart)
+          this.parentOptions = [];
         return;
       }
       const detailsResponse = await fetch(
@@ -177,7 +202,7 @@ export class HBReportBugDrawer extends LitElement {
           id: number;
           fields: { 'System.Title': string; 'System.WorkItemType': string };
         }[]
-      ).map(item => ({
+      ).map((item) => ({
         id: String(item.id),
         name: item.fields['System.Title'],
         meta: item.fields['System.WorkItemType'],
@@ -186,7 +211,8 @@ export class HBReportBugDrawer extends LitElement {
     } catch {
       if (this.selectedProjectId === projectIdAtStart) this.parentOptions = [];
     } finally {
-      if (this.selectedProjectId === projectIdAtStart) this.parentLoading = false;
+      if (this.selectedProjectId === projectIdAtStart)
+        this.parentLoading = false;
     }
   }
 
@@ -206,12 +232,15 @@ export class HBReportBugDrawer extends LitElement {
       );
       if (!response.ok) throw new Error('Failed to fetch projects');
       const data = await response.json();
-      this.projects = (data.value as { id: string; name: string }[]).map(p => ({
-        id: p.id,
-        name: p.name,
-      }));
+      this.projects = (data.value as { id: string; name: string }[]).map(
+        (p) => ({
+          id: p.id,
+          name: p.name,
+        })
+      );
     } catch {
-      this.projectsError = 'Could not load projects. Try reconnecting in Settings.';
+      this.projectsError =
+        'Could not load projects. Try reconnecting in Settings.';
     } finally {
       this.projectsLoading = false;
     }
@@ -236,6 +265,103 @@ export class HBReportBugDrawer extends LitElement {
     }
   }
 
+  private async handleSubmit() {
+    if (this.isSubmitting) return;
+
+    this.isTitleValid = this.bugTitle.trim().length > 0;
+    if (!this.isTitleValid) return;
+
+    this.isSubmitting = true;
+    this.submitError = '';
+    this.submitWorkItemId = null;
+
+    try {
+      const toHtml = (text: string) => text.trim().replace(/\n/g, '<br>');
+
+      const patches: { op: string; path: string; value: unknown }[] = [
+        {
+          op: 'add',
+          path: '/fields/System.Title',
+          value: this.bugTitle.trim(),
+        },
+      ];
+
+      if (this.bugReproSteps.trim()) {
+        patches.push({
+          op: 'add',
+          path: '/fields/Microsoft.VSTS.TCM.ReproSteps',
+          value: toHtml(this.bugReproSteps),
+        });
+      }
+      if (this.bugSystemInfo.trim()) {
+        patches.push({
+          op: 'add',
+          path: '/fields/Microsoft.VSTS.TCM.SystemInfo',
+          value: toHtml(this.bugSystemInfo),
+        });
+      }
+      if (this.bugPriority) {
+        patches.push({
+          op: 'add',
+          path: '/fields/Microsoft.VSTS.Common.Priority',
+          value: parseInt(this.bugPriority),
+        });
+      }
+      if (this.bugSeverity) {
+        patches.push({
+          op: 'add',
+          path: '/fields/Microsoft.VSTS.Common.Severity',
+          value: this.bugSeverity,
+        });
+      }
+      if (this.selectedParentId) {
+        patches.push({
+          op: 'add',
+          path: '/relations/-',
+          value: {
+            rel: 'System.LinkTypes.Hierarchy-Reverse',
+            url: `${this.orgUrl}/_apis/wit/workitems/${this.selectedParentId}`,
+          },
+        });
+      }
+
+      const response = await fetch(
+        `${this.orgUrl}/${this.selectedProjectId}/_apis/wit/workitems/$Bug?api-version=7.1`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Basic ${btoa(`:${this.pat}`)}`,
+            'Content-Type': 'application/json-patch+json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify(patches),
+        }
+      );
+
+      if (response.status === 401 || response.status === 403) {
+        this.submitError =
+          'Authentication failed. Your token may have expired. Go to Settings to update it.';
+        return;
+      }
+      if (!response.ok) {
+        this.submitError =
+          'Azure DevOps returned an error. Please try again later.';
+        return;
+      }
+
+      const data = await response.json();
+      this.submitWorkItemId = data.id as number;
+      this.submitWorkItemUrl =
+        (data._links?.html?.href as string) ??
+        `${this.orgUrl}/${this.selectedProjectId}/_workitems/edit/${this.submitWorkItemId}`;
+    } catch {
+      this.submitError =
+        'Could not connect. Please check your connection and try again.';
+    } finally {
+      this.isSubmitting = false;
+    }
+  }
+
   private async fetchBugFields() {
     if (!this.selectedProjectId) return;
     this.bugFieldsLoading = true;
@@ -251,11 +377,24 @@ export class HBReportBugDrawer extends LitElement {
       );
       if (!response.ok) throw new Error();
       const data = await response.json();
-      const fields = data.value as { referenceName: string; allowedValues: string[] }[];
-      const priorityField = fields.find(f => f.referenceName === 'Microsoft.VSTS.Common.Priority');
-      const severityField = fields.find(f => f.referenceName === 'Microsoft.VSTS.Common.Severity');
-      this.priorityOptions = (priorityField?.allowedValues ?? []).map(v => ({ id: String(v), name: String(v) }));
-      this.severityOptions = (severityField?.allowedValues ?? []).map(v => ({ id: v, name: v }));
+      const fields = data.value as {
+        referenceName: string;
+        allowedValues: string[];
+      }[];
+      const priorityField = fields.find(
+        (f) => f.referenceName === 'Microsoft.VSTS.Common.Priority'
+      );
+      const severityField = fields.find(
+        (f) => f.referenceName === 'Microsoft.VSTS.Common.Severity'
+      );
+      this.priorityOptions = (priorityField?.allowedValues ?? []).map((v) => ({
+        id: String(v),
+        name: String(v),
+      }));
+      this.severityOptions = (severityField?.allowedValues ?? []).map((v) => ({
+        id: v,
+        name: v,
+      }));
     } catch {
       // silently fail — dropdowns stay empty
     } finally {
@@ -290,6 +429,9 @@ export class HBReportBugDrawer extends LitElement {
       this.isOrgUrlValid = true;
       this.isPatValid = true;
       this.view = 'report-bug';
+      this.submitWorkItemId = null;
+      this.submitWorkItemUrl = '';
+      this.submitError = '';
       this.dispatchEvent(
         new CustomEvent('close', { bubbles: true, composed: true })
       );
@@ -343,10 +485,12 @@ export class HBReportBugDrawer extends LitElement {
       this.isConfigured = true;
       await this.saveCredentials();
       const data = await response.json();
-      this.projects = (data.value as { id: string; name: string }[]).map(p => ({
-        id: p.id,
-        name: p.name,
-      }));
+      this.projects = (data.value as { id: string; name: string }[]).map(
+        (p) => ({
+          id: p.id,
+          name: p.name,
+        })
+      );
       this.selectedProjectId = '';
     } catch {
       this.connectionSuccess = false;
@@ -517,98 +661,181 @@ export class HBReportBugDrawer extends LitElement {
               <p class="info-text">Go to settings to get started.</p>
             `
           : html`
-              <hb-searchable-dropdown
-                label="Project"
-                isRequired
-                placeholder="Select project…"
-                .options=${this.projects}
-                .loading=${this.projectsLoading}
-                .value=${this.selectedProjectId}
-                @change=${(e: CustomEvent) => {
-                  this.selectedProjectId = (e.detail as DropdownOption).id;
-                  this.selectedParentId = '';
-                  this.parentOptions = [];
-                  this.bugTitle = '';
-                  this.bugReproSteps = '';
-                  this.bugPriority = '';
-                  this.bugSeverity = '';
-                  this.priorityOptions = [];
-                  this.severityOptions = [];
-                  this.fetchBugFields();
-                }}
-              ></hb-searchable-dropdown>
-              ${this.projectsError
-                ? html`
-                    <div class="error-message">
-                      <img src="../images/cancel-red.svg" alt="error" />
-                      <p>${this.projectsError}</p>
-                    </div>
-                  `
+              ${!this.submitWorkItemId
+                ? html`<hb-searchable-dropdown
+                      label="Project"
+                      isRequired
+                      placeholder="Select project…"
+                      .options=${this.projects}
+                      .loading=${this.projectsLoading}
+                      .value=${this.selectedProjectId}
+                      @change=${(e: CustomEvent) => {
+                        this.selectedProjectId = (
+                          e.detail as DropdownOption
+                        ).id;
+                        this.selectedParentId = '';
+                        this.parentOptions = [];
+                        this.bugTitle = '';
+                        this.bugReproSteps = '';
+                        this.bugPriority = '';
+                        this.bugSeverity = '';
+                        this.priorityOptions = [];
+                        this.severityOptions = [];
+                        this.isTitleValid = true;
+                        this.submitError = '';
+                        this.submitWorkItemId = null;
+                        this.fetchBugFields();
+                      }}
+                    ></hb-searchable-dropdown>
+                    ${this.projectsError
+                      ? html`
+                          <div class="error-message">
+                            <img src="../images/cancel-red.svg" alt="error" />
+                            <p>${this.projectsError}</p>
+                          </div>
+                        `
+                      : ''} `
                 : ''}
               ${this.selectedProjectId
-                ? keyed(this.selectedProjectId, html`
-                    <hb-searchable-dropdown
-                      label="Parent work item"
-                      placeholder="Search by title or id..."
-                      ?asyncSearch=${true}
-                      ?clearable=${true}
-                      .options=${this.parentOptions}
-                      .loading=${this.parentLoading}
-                      .value=${this.selectedParentId}
-                      @search=${this.handleParentSearch}
-                      @change=${(e: CustomEvent) => {
-                        this.selectedParentId = (e.detail as DropdownOption | null)?.id ?? '';
-                      }}
-                    ></hb-searchable-dropdown>
-                    <hb-form-input label="Title" isRequired>
-                      <input
-                        type="text"
-                        placeholder="Short description of the bug"
-                        .value=${this.bugTitle}
-                        @input=${(e: InputEvent) => {
-                          this.bugTitle = (e.target as HTMLInputElement).value;
-                        }}
-                      />
-                    </hb-form-input>
-                    <hb-form-input label="Repro steps">
-                      <textarea
-                        placeholder="Steps to reproduce…"
-                        .value=${this.bugReproSteps}
-                        @input=${(e: InputEvent) => {
-                          this.bugReproSteps = (e.target as HTMLTextAreaElement).value;
-                        }}
-                      ></textarea>
-                    </hb-form-input>
-                    <hb-form-input label="System info">
-                      <textarea
-                        placeholder="OS, browser, version…"
-                        .value=${this.bugSystemInfo}
-                        @input=${(e: InputEvent) => {
-                          this.bugSystemInfo = (e.target as HTMLTextAreaElement).value;
-                        }}
-                      ></textarea>
-                    </hb-form-input>
-                    <hb-searchable-dropdown
-                      label="Priority"
-                      placeholder="Select priority…"
-                      .options=${this.priorityOptions}
-                      .loading=${this.bugFieldsLoading}
-                      .value=${this.bugPriority}
-                      @change=${(e: CustomEvent) => {
-                        this.bugPriority = (e.detail as DropdownOption | null)?.id ?? '';
-                      }}
-                    ></hb-searchable-dropdown>
-                    <hb-searchable-dropdown
-                      label="Severity"
-                      placeholder="Select severity…"
-                      .options=${this.severityOptions}
-                      .loading=${this.bugFieldsLoading}
-                      .value=${this.bugSeverity}
-                      @change=${(e: CustomEvent) => {
-                        this.bugSeverity = (e.detail as DropdownOption | null)?.id ?? '';
-                      }}
-                    ></hb-searchable-dropdown>
-                  `)
+                ? keyed(
+                    this.selectedProjectId,
+                    this.submitWorkItemId
+                      ? html`
+                          <div class="success-screen">
+                            <img
+                              src="../images/check-green.svg"
+                              alt="success"
+                              class="success-screen-icon"
+                            />
+                            <p class="success-screen-message">
+                              Bug successfully submitted.
+                            </p>
+                            <a
+                              href=${this.submitWorkItemUrl}
+                              target="_blank"
+                              class="success-screen-link"
+                            >
+                              View in Azure DevOps
+                              <img
+                                src="../images/external-link-black.svg"
+                                alt=""
+                                width="16"
+                                height="16"
+                              />
+                            </a>
+                          </div>
+                        `
+                      : html`
+                          <hb-searchable-dropdown
+                            label="Parent work item"
+                            placeholder="Search by title or id..."
+                            ?asyncSearch=${true}
+                            ?clearable=${true}
+                            .options=${this.parentOptions}
+                            .loading=${this.parentLoading}
+                            .value=${this.selectedParentId}
+                            @search=${this.handleParentSearch}
+                            @change=${(e: CustomEvent) => {
+                              this.selectedParentId =
+                                (e.detail as DropdownOption | null)?.id ?? '';
+                            }}
+                          ></hb-searchable-dropdown>
+                          <hb-form-input
+                            label="Title"
+                            isRequired
+                            ?invalid=${!this.isTitleValid}
+                          >
+                            <input
+                              type="text"
+                              placeholder="Short description of the bug"
+                              .value=${this.bugTitle}
+                              @input=${(e: InputEvent) => {
+                                this.bugTitle = (
+                                  e.target as HTMLInputElement
+                                ).value;
+                                if (!this.isTitleValid && this.bugTitle.trim())
+                                  this.isTitleValid = true;
+                              }}
+                            />
+                          </hb-form-input>
+                          <hb-form-input label="Repro steps">
+                            <textarea
+                              placeholder="Steps to reproduce…"
+                              .value=${this.bugReproSteps}
+                              @input=${(e: InputEvent) => {
+                                this.bugReproSteps = (
+                                  e.target as HTMLTextAreaElement
+                                ).value;
+                              }}
+                            ></textarea>
+                          </hb-form-input>
+                          <hb-form-input label="System info">
+                            <textarea
+                              placeholder="OS, browser, version…"
+                              .value=${this.bugSystemInfo}
+                              @input=${(e: InputEvent) => {
+                                this.bugSystemInfo = (
+                                  e.target as HTMLTextAreaElement
+                                ).value;
+                              }}
+                            ></textarea>
+                          </hb-form-input>
+                          <hb-searchable-dropdown
+                            label="Priority"
+                            placeholder="Select priority…"
+                            .options=${this.priorityOptions}
+                            .loading=${this.bugFieldsLoading}
+                            .value=${this.bugPriority}
+                            @change=${(e: CustomEvent) => {
+                              this.bugPriority =
+                                (e.detail as DropdownOption | null)?.id ?? '';
+                            }}
+                          ></hb-searchable-dropdown>
+                          <hb-searchable-dropdown
+                            label="Severity"
+                            placeholder="Select severity…"
+                            .options=${this.severityOptions}
+                            .loading=${this.bugFieldsLoading}
+                            .value=${this.bugSeverity}
+                            @change=${(e: CustomEvent) => {
+                              this.bugSeverity =
+                                (e.detail as DropdownOption | null)?.id ?? '';
+                            }}
+                          ></hb-searchable-dropdown>
+                          <button
+                            class="action-button primary loading"
+                            @click=${this.handleSubmit}
+                            ?disabled=${this.isSubmitting}
+                          >
+                            ${this.isSubmitting
+                              ? html`<span class="spinner"></span>`
+                              : ''}
+                            Submit bug
+                          </button>
+                          ${this.submitError
+                            ? html`
+                                <div class="error-message">
+                                  <img
+                                    src="../images/cancel-red.svg"
+                                    alt="error"
+                                  />
+                                  <p>
+                                    ${this.submitError}
+                                    ${this.submitError.includes('Settings')
+                                      ? html`<button
+                                          class="link-button"
+                                          @click=${() =>
+                                            (this.view = 'settings')}
+                                        >
+                                          Settings
+                                        </button>`
+                                      : ''}
+                                  </p>
+                                </div>
+                              `
+                            : ''}
+                        `
+                  )
                 : ''}
             `}
       </div>
