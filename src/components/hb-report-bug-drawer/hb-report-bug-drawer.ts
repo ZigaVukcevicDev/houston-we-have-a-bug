@@ -84,13 +84,7 @@ export class HBReportBugDrawer extends LitElement {
   private bugSystemInfo: string = '';
 
   @state()
-  private bugPriority: string = '';
-
-  @state()
   private bugSeverity: string = '';
-
-  @state()
-  private priorityOptions: DropdownOption[] = [];
 
   @state()
   private severityOptions: DropdownOption[] = [];
@@ -346,13 +340,6 @@ export class HBReportBugDrawer extends LitElement {
           value: toHtml(this.bugSystemInfo),
         });
       }
-      if (this.bugPriority) {
-        patches.push({
-          op: 'add',
-          path: '/fields/Microsoft.VSTS.Common.Priority',
-          value: parseInt(this.bugPriority),
-        });
-      }
       if (this.bugSeverity) {
         patches.push({
           op: 'add',
@@ -427,16 +414,9 @@ export class HBReportBugDrawer extends LitElement {
         referenceName: string;
         allowedValues: string[];
       }[];
-      const priorityField = fields.find(
-        (f) => f.referenceName === 'Microsoft.VSTS.Common.Priority'
-      );
       const severityField = fields.find(
         (f) => f.referenceName === 'Microsoft.VSTS.Common.Severity'
       );
-      this.priorityOptions = (priorityField?.allowedValues ?? []).map((v) => ({
-        id: String(v),
-        name: String(v),
-      }));
       this.severityOptions = (severityField?.allowedValues ?? []).map((v) => ({
         id: v,
         name: v,
@@ -723,9 +703,7 @@ export class HBReportBugDrawer extends LitElement {
                         this.parentOptions = [];
                         this.bugTitle = '';
                         this.bugReproSteps = '';
-                        this.bugPriority = '';
                         this.bugSeverity = '';
-                        this.priorityOptions = [];
                         this.severityOptions = [];
                         this.isTitleValid = true;
                         this.submitError = '';
@@ -831,17 +809,6 @@ export class HBReportBugDrawer extends LitElement {
                               }}
                             ></textarea>
                           </hb-form-input>
-                          <hb-searchable-dropdown
-                            label="Priority"
-                            placeholder="Select priority…"
-                            .options=${this.priorityOptions}
-                            .loading=${this.bugFieldsLoading}
-                            .value=${this.bugPriority}
-                            @change=${(e: CustomEvent) => {
-                              this.bugPriority =
-                                (e.detail as DropdownOption | null)?.id ?? '';
-                            }}
-                          ></hb-searchable-dropdown>
                           <hb-searchable-dropdown
                             label="Severity"
                             placeholder="Select severity…"
