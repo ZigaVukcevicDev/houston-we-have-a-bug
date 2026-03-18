@@ -151,6 +151,17 @@
   animation: spin 0.7s linear infinite;
 }
 
+.fields-loading {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0;
+
+  .spinner {
+    border-color: rgba(0, 0, 0, 0.15);
+    border-top-color: $color-black;
+  }
+}
+
 .info-text {
   margin: 0;
   font-size: $font-size-base;

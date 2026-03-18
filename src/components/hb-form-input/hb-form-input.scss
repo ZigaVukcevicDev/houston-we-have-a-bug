@@ -11,6 +11,10 @@ label {
   color: $color-black;
   cursor: pointer;
   margin-bottom: 2px;
+
+  .required {
+    color: $color-red-400;
+  }
 }
 
 .error {

@@ -93,6 +93,9 @@ export class HBReportBugDrawer extends LitElement {
   private bugFieldsLoading: boolean = false;
 
   @state()
+  private projectNotSupported: boolean = false;
+
+  @state()
   private isTitleValid: boolean = true;
 
   @state()
@@ -277,10 +280,7 @@ export class HBReportBugDrawer extends LitElement {
         text
           .trim()
           .replace(/\n/g, '<br>')
-          .replace(
-            /(https?:\/\/[^\s<>"]+)/g,
-            '<a href="$1">$1</a>'
-          );
+          .replace(/(https?:\/\/[^\s<>"]+)/g, '<a href="$1">$1</a>');
 
       // Upload annotated screenshot as attachment
       let screenshotUrl = '';
@@ -289,7 +289,8 @@ export class HBReportBugDrawer extends LitElement {
           const base64 = this.annotatedScreenshot.split(',')[1];
           const binary = atob(base64);
           const bytes = new Uint8Array(binary.length);
-          for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+          for (let i = 0; i < binary.length; i++)
+            bytes[i] = binary.charCodeAt(i);
           const blob = new Blob([bytes], { type: 'image/png' });
           const attachResponse = await fetch(
             `${this.orgUrl}/${this.selectedProjectId}/_apis/wit/attachments?fileName=annotated-screenshot.png&api-version=7.1`,
@@ -323,7 +324,8 @@ export class HBReportBugDrawer extends LitElement {
       if (hasReproText || screenshotUrl) {
         let reproHtml = hasReproText ? toHtml(this.bugReproSteps) : '';
         if (screenshotUrl) {
-          reproHtml += (reproHtml ? '<br><br>' : '') +
+          reproHtml +=
+            (reproHtml ? '<br><br>' : '') +
             `<img src="${screenshotUrl}" alt="Annotated screenshot" />`;
         }
         patches.push({
@@ -399,6 +401,27 @@ export class HBReportBugDrawer extends LitElement {
     if (!this.selectedProjectId) return;
     this.bugFieldsLoading = true;
     try {
+      // Detect work item type: prefer "Bug", fall back to "Issue"
+      const typesResponse = await fetch(
+        `${this.orgUrl}/${this.selectedProjectId}/_apis/wit/workitemtypes?api-version=7.1`,
+        {
+          headers: {
+            Authorization: `Basic ${btoa(`:${this.pat}`)}`,
+            Accept: 'application/json',
+          },
+        }
+      );
+      if (typesResponse.ok) {
+        const typesData = await typesResponse.json();
+        const names = (typesData.value as { name: string }[]).map(
+          (t) => t.name
+        );
+        if (!names.includes('Bug')) {
+          this.projectNotSupported = true;
+          return;
+        }
+      }
+
       const response = await fetch(
         `${this.orgUrl}/${this.selectedProjectId}/_apis/wit/workitemtypes/Bug/fields?$expand=allowedValues&api-version=7.1`,
         {
@@ -705,6 +728,7 @@ export class HBReportBugDrawer extends LitElement {
                         this.bugReproSteps = '';
                         this.bugSeverity = '';
                         this.severityOptions = [];
+                        this.projectNotSupported = false;
                         this.isTitleValid = true;
                         this.submitError = '';
                         this.submitWorkItemId = null;
@@ -720,7 +744,23 @@ export class HBReportBugDrawer extends LitElement {
                         `
                       : ''} `
                 : ''}
-              ${this.selectedProjectId
+              ${this.selectedProjectId && this.bugFieldsLoading
+                ? html`<div class="fields-loading">
+                    <span class="spinner"></span>
+                  </div>`
+                : ''}
+              ${this.selectedProjectId && !this.bugFieldsLoading && this.projectNotSupported
+                ? html`
+                    <div class="error-message">
+                      <img src="../images/cancel-red.svg" alt="error" />
+                      <p>
+                        This project uses the Basic process template, which is
+                        not supported.
+                      </p>
+                    </div>
+                  `
+                : ''}
+              ${this.selectedProjectId && !this.bugFieldsLoading && !this.projectNotSupported
                 ? keyed(
                     this.selectedProjectId,
                     this.submitWorkItemId
@@ -773,7 +813,6 @@ export class HBReportBugDrawer extends LitElement {
                           >
                             <input
                               type="text"
-                              placeholder="Short description of the bug"
                               .value=${this.bugTitle}
                               @input=${(e: InputEvent) => {
                                 this.bugTitle = (
@@ -789,7 +828,6 @@ export class HBReportBugDrawer extends LitElement {
                             .additionalInfo=${'The annotated screenshot will be appended automatically.'}
                           >
                             <textarea
-                              placeholder="Steps to reproduce…"
                               .value=${this.bugReproSteps}
                               @input=${(e: InputEvent) => {
                                 this.bugReproSteps = (
@@ -800,7 +838,6 @@ export class HBReportBugDrawer extends LitElement {
                           </hb-form-input>
                           <hb-form-input label="System info">
                             <textarea
-                              placeholder="OS, browser, version…"
                               .value=${this.bugSystemInfo}
                               @input=${(e: InputEvent) => {
                                 this.bugSystemInfo = (
