@@ -401,7 +401,6 @@ export class HBReportBugDrawer extends LitElement {
     if (!this.selectedProjectId) return;
     this.bugFieldsLoading = true;
     try {
-      // Detect work item type: prefer "Bug", fall back to "Issue"
       const typesResponse = await fetch(
         `${this.orgUrl}/${this.selectedProjectId}/_apis/wit/workitemtypes?api-version=7.1`,
         {
@@ -846,17 +845,19 @@ export class HBReportBugDrawer extends LitElement {
                               }}
                             ></textarea>
                           </hb-form-input>
-                          <hb-searchable-dropdown
-                            label="Severity"
-                            placeholder="Select severity…"
-                            .options=${this.severityOptions}
-                            .loading=${this.bugFieldsLoading}
-                            .value=${this.bugSeverity}
-                            @change=${(e: CustomEvent) => {
-                              this.bugSeverity =
-                                (e.detail as DropdownOption | null)?.id ?? '';
-                            }}
-                          ></hb-searchable-dropdown>
+                          ${this.severityOptions.length > 0
+                            ? html`<hb-searchable-dropdown
+                                label="Severity"
+                                placeholder="Select severity…"
+                                .options=${this.severityOptions}
+                                .value=${this.bugSeverity}
+                                @change=${(e: CustomEvent) => {
+                                  this.bugSeverity =
+                                    (e.detail as DropdownOption | null)?.id ??
+                                    '';
+                                }}
+                              ></hb-searchable-dropdown>`
+                            : ''}
                           <button
                             class="action-button primary loading"
                             @click=${this.handleSubmit}
